@@ -9,6 +9,7 @@ val coroutinesVersion = "1.3.3"
 val jacksonVersion = "2.9.7"
 val javaxActivationVersion = "1.1.1"
 val kafkaEmbeddedVersion = "2.3.0"
+val postgresEmbeddedVersion = "0.13.1"
 val kluentVersion = "1.49"
 val ktorVersion = "1.3.0"
 val logbackVersion = "1.2.3"
@@ -111,6 +112,8 @@ dependencies {
     }
 
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
+    testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
+
 }
 
 tasks.jacocoTestReport {

@@ -2,7 +2,7 @@ package no.nav.syfo.application.util
 
 import no.nav.syfo.Environment
 import no.nav.syfo.VaultSecrets
-import no.nav.syfo.application.vedtak.model.Utbetaling
+import no.nav.syfo.application.utbetaling.model.Utbetaling
 import no.nav.syfo.kafka.envOverrides
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toConsumerConfig

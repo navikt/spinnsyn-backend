@@ -1,4 +1,4 @@
-package no.nav.syfo.application.vedtak.model
+package no.nav.syfo.application.utbetaling.model
 
 import java.time.LocalDate
 

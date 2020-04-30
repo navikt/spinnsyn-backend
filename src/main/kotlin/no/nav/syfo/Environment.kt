@@ -1,10 +1,10 @@
 package no.nav.syfo
 
-import no.nav.syfo.kafka.KafkaConfig
-import no.nav.syfo.kafka.KafkaCredentials
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import no.nav.syfo.kafka.KafkaConfig
+import no.nav.syfo.kafka.KafkaCredentials
 
 data class Environment(
     val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
@@ -14,13 +14,13 @@ data class Environment(
     val spinnsynBackendDBURL: String = getEnvVar("SPINNSYN_BACKEND_DB_URL"),
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
     val databaseName: String = getEnvVar("DATABASE_NAME", "spinnsyn-backend"),
-    val utbetalingTopic: String = getEnvVar("UTBETALING_KAFKA_TOPIC", "TBA")
+    val utbetalingTopic: String = getEnvVar("UTBETALING_KAFKA_TOPIC")
 ) : KafkaConfig
 
 data class VaultSecrets(
     val serviceuserUsername: String = getFileAsString("/secrets/serviceuser/username"),
     val serviceuserPassword: String = getFileAsString("/secrets/serviceuser/password"),
-    val clientId: String = getFileAsString("/secrets/azuread/egenmeldt-sykmelding-backend/client_id"),
+    val clientId: String = getFileAsString("/secrets/azuread/spinnsyn-backend/client_id"),
     val oidcWellKnownUri: String = getEnvVar("OIDC_WELLKNOWN_URI"),
     val loginserviceClientId: String = getEnvVar("LOGINSERVICE_CLIENTID")
 ) : KafkaCredentials {

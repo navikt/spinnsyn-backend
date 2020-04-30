@@ -1,6 +1,5 @@
 package no.nav.syfo.application.metrics
 
-import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 
 const val METRICS_NS = ""
