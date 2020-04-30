@@ -10,7 +10,7 @@ fun DatabaseInterface.registrerUtbetaling(utbetaling: Utbetaling) {
                 id, 
                 aktoer_id,
                 pasientfnr) 
-            VALUES (?, ?)
+            VALUES (?, ?, ?)
         """.trimIndent()
 
         var i = 1
