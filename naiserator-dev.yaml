@@ -37,7 +37,7 @@ spec:
     enabled: true
     paths:
       - kvPath: /azuread/data/dev/creds/spinnsyn-backend
-        mountPath: /secrets/azuread/sppinnsyn-backend
+        mountPath: /secrets/azuread/spinnsyn-backend
       - kvPath: serviceuser/data/dev/srvspinnsyn
         mountPath: /secrets/serviceuser
       - kvPath: /kv/preprod/fss/spinnsyn-backend/default
