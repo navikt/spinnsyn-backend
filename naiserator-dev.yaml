@@ -38,7 +38,7 @@ spec:
     paths:
       - kvPath: /azuread/data/prod/creds/spinnsyn-backend
         mountPath: /secrets/azuread/sppinnsyn-backend
-      - kvPath: serviceuser/data/prod/srvspinnsyn
+      - kvPath: serviceuser/data/dev/srvspinnsyn
         mountPath: /secrets/serviceuser
       - kvPath: /kv/preprod/fss/spinnsyn-backend/default
         mountPath: /var/run/secrets/nais.io/vault
