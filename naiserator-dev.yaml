@@ -40,7 +40,7 @@ spec:
         mountPath: /secrets/azuread/sppinnsyn-backend
       - kvPath: serviceuser/data/prod/srvspinnsyn
         mountPath: /secrets/serviceuser
-      - kvPath: /kv/prod/fss/spinnsyn-backend/default
+      - kvPath: /kv/preprod/fss/spinnsyn-backend/default
         mountPath: /var/run/secrets/nais.io/vault
   ingresses:
     - "https://spinnsyn-backend.nais.preprod.local"
