@@ -34,7 +34,14 @@ spec:
       cpu: 400m
       memory: 768Mi
   vault:
-    enabled: false
+    enabled: true
+    paths:
+      - kvPath: /azuread/data/prod/creds/spinnsyn-backend
+        mountPath: /secrets/azuread/sppinnsyn-backend
+      - kvPath: serviceuser/data/prod/srvspinnsyn
+        mountPath: /secrets/serviceuser
+      - kvPath: /kv/prod/fss/spinnsyn-backend/default
+        mountPath: /var/run/secrets/nais.io/vault
   ingresses:
     - "https://spinnsyn-backend.nais.preprod.local"
   webproxy: true
