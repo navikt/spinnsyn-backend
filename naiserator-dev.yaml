@@ -53,4 +53,4 @@ spec:
     - name: MOUNT_PATH_VAULT
       value: /postgresql/preprod-fss
     - name: UTBETALING_KAFKA_TOPIC
-      value: http://localhost/NOT-DEFINED-YET
+      value: NOT-DEFINED-YET
