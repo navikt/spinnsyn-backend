@@ -49,7 +49,7 @@ spec:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: SPINNSYN_BACKEND_DB_URL
-      value: jdbc:postgresql://b27dbvl013.preprod.local:5432/spinnsyn-backend
+      value: jdbc:postgresql://b27dbvl015.preprod.local:5432/spinnsyn-backend
     - name: MOUNT_PATH_VAULT
       value: /postgresql/preprod-fss
     - name: UTBETALING_KAFKA_TOPIC
