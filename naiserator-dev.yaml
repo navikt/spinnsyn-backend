@@ -34,7 +34,23 @@ spec:
       cpu: 400m
       memory: 768Mi
   vault:
-    enabled: false
+    enabled: true
+    paths:
+      - kvPath: /azuread/data/dev/creds/spinnsyn-backend
+        mountPath: /secrets/azuread/spinnsyn-backend
+      - kvPath: serviceuser/data/dev/srvspinnsyn
+        mountPath: /secrets/serviceuser
+      - kvPath: /kv/preprod/fss/spinnsyn-backend/default
+        mountPath: /var/run/secrets/nais.io/vault
   ingresses:
     - "https://spinnsyn-backend.nais.preprod.local"
   webproxy: true
+  env:
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
+    - name: SPINNSYN_BACKEND_DB_URL
+      value: jdbc:postgresql://b27dbvl015.preprod.local:5432/spinnsyn-backend
+    - name: MOUNT_PATH_VAULT
+      value: /postgresql/preprod-fss
+    - name: UTBETALING_KAFKA_TOPIC
+      value: NOT-DEFINED-YET
