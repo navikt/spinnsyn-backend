@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotlin.reflect.KClass
 import org.apache.kafka.common.serialization.Deserializer
+import kotlin.reflect.KClass
 
 class JacksonKafkaDeserializer<T : Any> (private val type: KClass<T>) : Deserializer<T> {
     private val objectMapper: ObjectMapper = jacksonObjectMapper().apply {

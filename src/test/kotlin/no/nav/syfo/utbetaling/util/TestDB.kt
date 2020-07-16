@@ -1,9 +1,9 @@
 package no.nav.syfo.utbetaling.util
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import java.sql.Connection
 import no.nav.syfo.db.DatabaseInterface
 import org.flywaydb.core.Flyway
+import java.sql.Connection
 
 class TestDB : DatabaseInterface {
     private var pg: EmbeddedPostgres? = null

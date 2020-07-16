@@ -65,7 +65,6 @@ repositories {
     }
 }
 
-
 dependencies {
     implementation(kotlin("stdlib"))
 
@@ -113,7 +112,6 @@ dependencies {
 
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
-
 }
 
 tasks.jacocoTestReport {
@@ -122,7 +120,6 @@ tasks.jacocoTestReport {
         html.isEnabled = true
     }
 }
-
 
 tasks {
 
@@ -136,11 +133,10 @@ tasks {
 
     withType<JacocoReport> {
         classDirectories.setFrom(
-                sourceSets.main.get().output.asFileTree.matching {
-                    exclude()
-                }
+            sourceSets.main.get().output.asFileTree.matching {
+                exclude()
+            }
         )
-
     }
     withType<ShadowJar> {
         transform(ServiceFileTransformer::class.java) {
