@@ -5,13 +5,14 @@ import no.nav.syfo.db.DatabaseInterface
 
 fun DatabaseInterface.registrerUtbetaling(utbetaling: Utbetaling) {
     connection.use {
-        val insertQuery = """
+        val insertQuery =
+            """
             INSERT INTO utbetaling (
                 id, 
                 aktoer_id,
                 pasientfnr) 
             VALUES (?, ?, ?)
-        """.trimIndent()
+            """.trimIndent()
 
         var i = 1
         connection.prepareStatement(insertQuery).use {

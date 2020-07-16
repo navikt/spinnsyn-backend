@@ -30,7 +30,7 @@ fun unauthorized(credentials: JWTCredential): Principal? {
     log.warn(
         "Auth: Unexpected audience for jwt {}, {}",
         StructuredArguments.keyValue("issuer", credentials.payload.issuer),
-                StructuredArguments.keyValue("audience", credentials.payload.audience)
+        StructuredArguments.keyValue("audience", credentials.payload.audience)
     )
     return null
 }
