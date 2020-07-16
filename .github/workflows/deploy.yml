@@ -21,8 +21,8 @@ jobs:
           TIME=$(TZ="Europe/Oslo" date +%Y.%m.%d-%H.%m)
           COMMIT=$(git rev-parse --short=8 HEAD)
           VERSION=$TIME-$COMMIT
-          echo '::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION"'
-          echo '::set-env name=VERSION::"$VERSION"'
+          echo "::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION""
+          echo "::set-env name=VERSION::"$VERSION""
           echo $VERSION > VERSION.txt
       - name: Store VERSION for subsequent jobs
         uses: actions/upload-artifact@v2
@@ -77,8 +77,8 @@ jobs:
           path: .
       - name: Set environment variables
         run: |
-          echo '::set-env name=VERSION::"$(cat VERSION.txt)"'
-          echo '::set-env name=IMAGE::docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION'
+          echo "::set-env name=VERSION::"$(cat VERSION.txt)""
+          echo "::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION""
       - name: Deploy to dev-fss
         uses: nais/deploy/actions/deploy@master
         env:
@@ -101,8 +101,8 @@ jobs:
           path: .
       - name: Set environment variables
         run: |
-          echo '::set-env name=VERSION::"$(cat VERSION.txt)"'
-          echo '::set-env name=IMAGE::docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION'
+          echo "::set-env name=VERSION::"$(cat VERSION.txt)""
+          echo "::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION""
       - name: Deploy to dev-fss
         uses: nais/deploy/actions/deploy@master
         env:
@@ -129,7 +129,7 @@ jobs:
           path: .
       - name: Set environment variables
         run: |
-          echo "::set-env name=VERSION::"`cat VERSION.txt`""
+          echo "::set-env name=VERSION::"$(cat VERSION.txt)""
           echo "::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION""
           echo "::set-env name=LATEST::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:latest""
       - name: Tag and push docker image
