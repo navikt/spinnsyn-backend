@@ -13,8 +13,7 @@ data class Environment(
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val spinnsynBackendDBURL: String = getEnvVar("SPINNSYN_BACKEND_DB_URL"),
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
-    val databaseName: String = getEnvVar("DATABASE_NAME", "spinnsyn-backend"),
-    val utbetalingTopic: String = getEnvVar("UTBETALING_KAFKA_TOPIC")
+    val databaseName: String = getEnvVar("DATABASE_NAME", "spinnsyn-backend")
 ) : KafkaConfig
 
 data class VaultSecrets(

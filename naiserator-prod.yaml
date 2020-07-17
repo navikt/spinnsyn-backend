@@ -52,5 +52,3 @@ spec:
       value: jdbc:postgresql://A01DBVL013.adeo.no:5432/spinnsyn-backend
     - name: MOUNT_PATH_VAULT
       value: /postgresql/prod-fss
-    - name: UTBETALING_KAFKA_TOPIC
-      value: NOT-DEFINED-YET
