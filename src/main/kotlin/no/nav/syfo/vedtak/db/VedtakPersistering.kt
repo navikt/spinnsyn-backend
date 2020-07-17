@@ -2,7 +2,6 @@ package no.nav.syfo.vedtak.db
 
 import java.sql.Connection
 import java.sql.Timestamp
-import no.nav.syfo.db.DatabaseInterface
 import org.postgresql.util.PGobject
 import java.time.Instant
 import java.util.*

@@ -6,10 +6,10 @@ import no.nav.syfo.objectMapper
 import java.sql.Connection
 import java.sql.ResultSet
 
-fun Connection.hentVedtak(fnr: String): List<Any> =
+fun Connection.hentVedtak(fnr: String): List<Vedtak> =
     this.prepareStatement(
         """
-            SELECT vedtak
+            SELECT id, vedtak
             FROM  vedtak
             WHERE fnr = ?;
             """
@@ -18,5 +18,8 @@ fun Connection.hentVedtak(fnr: String): List<Any> =
         it.executeQuery().toList { toSykmelding() }
     }
 
-fun ResultSet.toSykmelding(): Any =
-    objectMapper.readValue(getString("vedtak"))
+fun ResultSet.toSykmelding(): Vedtak =
+    Vedtak(id = getString("id"), vedtak = objectMapper.readValue(getString("vedtak")))
+
+
+data class Vedtak(val id: String, val vedtak: Any)
