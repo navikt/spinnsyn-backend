@@ -4,10 +4,12 @@ import com.bettercloud.vault.VaultException
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.coroutines.delay
 import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.log
 import no.nav.syfo.vault.Vault
+import org.slf4j.LoggerFactory
 
-class VaultCredentialService {
+private val log = LoggerFactory.getLogger("no.nav.syfo.db")
+
+class VaultCredentialService() {
     var leaseDuration: Long = 0
     var renewCredentialsTaskData: RenewCredentialsTaskData? = null
 

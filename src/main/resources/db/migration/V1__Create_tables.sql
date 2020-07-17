@@ -1,10 +1,8 @@
-CREATE TABLE utbetaling
+CREATE TABLE vedtak
 (
-    id UUID PRIMARY KEY,
-    aktoer_id VARCHAR,
-    pasientfnr CHAR(11) NOT NULL
-
-    -- TODO: I can't really do much more here until the format is completed
-
+    id CHAR(64) PRIMARY KEY,
+    fnr CHAR(11) NOT NULL,
+    opprettet TIMESTAMP NOT NULL,
+    vedtak JSONB NOT NULL
 );
 

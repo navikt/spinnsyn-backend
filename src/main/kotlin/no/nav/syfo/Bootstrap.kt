@@ -12,6 +12,8 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.getWellKnown
 import no.nav.syfo.application.util.KafkaClients
+import no.nav.syfo.db.Database
+import no.nav.syfo.db.VaultCredentialService
 import no.nav.syfo.vedtak.kafka.VedtakConsumer
 import no.nav.syfo.vedtak.service.VedtakService
 import org.slf4j.Logger
@@ -34,22 +36,30 @@ fun main() {
         .rateLimited(10, 1, TimeUnit.MINUTES)
         .build()
 
+    val vaultCredentialService = VaultCredentialService()
+    val database = Database(env, vaultCredentialService)
+
     val kafkaClients = KafkaClients(env, vaultSecrets)
     val applicationState = ApplicationState()
 
     DefaultExports.initialize()
 
     val vedtakConsumer = VedtakConsumer(kafkaClients.kafkaVedtakConsumer)
-    val vedtakService = VedtakService(applicationState, vedtakConsumer)
+    val vedtakService = VedtakService(
+        database = database,
+        applicationState = applicationState,
+        vedtakConsumer = vedtakConsumer
+    )
 
 
     val applicationEngine = createApplicationEngine(
-        env,
-        applicationState
+        env = env,
+        applicationState = applicationState
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
     applicationState.ready = true
+    RenewVaultService(vaultCredentialService, applicationState).startRenewTasks()
 
     createListener(applicationState) {
         vedtakService.start()
