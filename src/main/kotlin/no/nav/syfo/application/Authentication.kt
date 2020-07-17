@@ -5,6 +5,8 @@ import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.auth.Authentication
 import io.ktor.auth.Principal
+import io.ktor.auth.UserIdPrincipal
+import io.ktor.auth.basic
 import io.ktor.auth.jwt.JWTCredential
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
@@ -12,9 +14,13 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.VaultSecrets
 import no.nav.syfo.log
 
-fun Application.setupAuth(vaultSecrets: VaultSecrets, jwkProvider: JwkProvider, issuer: String) {
+fun Application.setupAuth(
+    vaultSecrets: VaultSecrets,
+    jwkProvider: JwkProvider,
+    issuer: String
+) {
     install(Authentication) {
-        jwt {
+        jwt(name = "jwt") {
             verifier(jwkProvider, issuer)
             validate { credentials ->
                 when {
@@ -38,3 +44,4 @@ fun unauthorized(credentials: JWTCredential): Principal? {
 fun hasLoginserviceClientIdAudience(credentials: JWTCredential, vaultSecrets: VaultSecrets): Boolean {
     return credentials.payload.audience.contains(vaultSecrets.loginserviceClientId)
 }
+

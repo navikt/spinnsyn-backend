@@ -6,6 +6,7 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.log
+import no.nav.syfo.vedtak.db.hentVedtak
 import no.nav.syfo.vedtak.db.opprettVedtak
 import no.nav.syfo.vedtak.kafka.VedtakConsumer
 
@@ -35,6 +36,10 @@ class VedtakService(
         val id = database.connection.opprettVedtak(fnr = fnr, vedtak = vedtak)
         MOTTATT_VEDTAK.inc()
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
+    }
+
+    fun hentVedtak(fnr: String): List<Any> {
+        return database.connection.hentVedtak(fnr)
     }
 }
 

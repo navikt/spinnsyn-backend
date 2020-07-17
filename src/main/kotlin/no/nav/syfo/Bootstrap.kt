@@ -1,6 +1,11 @@
 package no.nav.syfo
 
 import com.auth0.jwk.JwkProviderBuilder
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +27,14 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.spinnsyn-backend")
+
+val objectMapper: ObjectMapper = ObjectMapper().apply {
+    registerKotlinModule()
+    registerModule(JavaTimeModule())
+    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+}
+
 
 @KtorExperimentalAPI
 fun main() {
@@ -54,7 +67,11 @@ fun main() {
 
     val applicationEngine = createApplicationEngine(
         env = env,
-        applicationState = applicationState
+        vedtakService = vedtakService,
+        jwkProvider = jwkProvider,
+        applicationState = applicationState,
+        issuer = wellKnown.issuer,
+        vaultSecrets = vaultSecrets
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
