@@ -36,7 +36,7 @@ fun createApplicationEngine(
     vedtakService: VedtakService,
     jwkProvider: JwkProvider,
     issuer: String,
-    vaultSecrets: VaultSecrets,
+    loginserviceClientId: String,
     applicationState: ApplicationState
 ): ApplicationEngine =
     embeddedServer(Netty, env.applicationPort) {
@@ -48,7 +48,7 @@ fun createApplicationEngine(
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             }
         }
-        setupAuth(vaultSecrets = vaultSecrets,
+        setupAuth(loginserviceClientId = loginserviceClientId,
             jwkProvider = jwkProvider,
             issuer = issuer)
         install(CallId) {
