@@ -42,4 +42,3 @@ class VedtakService(
         return database.connection.finnVedtak(fnr)
     }
 }
-

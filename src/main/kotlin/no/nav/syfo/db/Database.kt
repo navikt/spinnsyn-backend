@@ -56,7 +56,7 @@ class Database(private val env: Environment, private val vaultCredentialService:
             role = Role.ADMIN
         )
         dataSource(env.spinnsynBackendDBURL, credentials.username, credentials.password)
-        if (env.cluster != "flex") { //TODO lag en bedre løsning for dette
+        if (env.cluster != "flex") { // TODO lag en bedre løsning for dette
             initSql("SET ROLE \"${env.databaseName}-${Role.ADMIN}\"") // required for assigning proper owners for the tables
         }
         load().migrate()

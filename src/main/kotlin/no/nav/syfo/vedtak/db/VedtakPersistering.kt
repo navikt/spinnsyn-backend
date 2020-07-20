@@ -2,12 +2,12 @@ package no.nav.syfo.vedtak.db
 
 import java.sql.Connection
 import java.sql.Timestamp
-import org.postgresql.util.PGobject
 import java.time.Instant
-import java.util.*
+import java.util.UUID
+import org.postgresql.util.PGobject
 
 fun Connection.opprettVedtak(vedtak: String, fnr: String): String {
-    val id = UUID.randomUUID().toString();
+    val id = UUID.randomUUID().toString()
     use { connection ->
         connection.prepareStatement(
             """

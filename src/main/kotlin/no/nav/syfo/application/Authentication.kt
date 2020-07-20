@@ -9,7 +9,6 @@ import io.ktor.auth.jwt.JWTCredential
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.syfo.VaultSecrets
 import no.nav.syfo.log
 
 fun Application.setupAuth(
@@ -42,4 +41,3 @@ fun unauthorized(credentials: JWTCredential): Principal? {
 fun hasLoginserviceClientIdAudience(credentials: JWTCredential, loginserviceClientId: String): Boolean {
     return credentials.payload.audience.contains(loginserviceClientId)
 }
-

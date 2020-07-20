@@ -8,6 +8,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
+import java.net.URL
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -23,8 +25,6 @@ import no.nav.syfo.vedtak.kafka.VedtakConsumer
 import no.nav.syfo.vedtak.service.VedtakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.spinnsyn-backend")
 
@@ -34,7 +34,6 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
     configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 }
-
 
 @KtorExperimentalAPI
 fun main() {
@@ -63,7 +62,6 @@ fun main() {
         applicationState = applicationState,
         vedtakConsumer = vedtakConsumer
     )
-
 
     val applicationEngine = createApplicationEngine(
         env = env,

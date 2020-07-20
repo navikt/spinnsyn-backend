@@ -23,7 +23,6 @@ class TestDB : DatabaseInterface {
     }
 }
 
-
 fun getRandomPort() = ServerSocket(0).use {
     it.localPort
 }

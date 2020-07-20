@@ -10,7 +10,6 @@ import io.ktor.routing.route
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.vedtak.service.VedtakService
 
-
 @KtorExperimentalAPI
 fun Route.registerVedtakApi(vedtakService: VedtakService) {
     route("/api/v1") {

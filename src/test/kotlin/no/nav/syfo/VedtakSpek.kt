@@ -16,6 +16,8 @@ import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
 import io.ktor.util.KtorExperimentalAPI
 import io.mockk.spyk
+import java.nio.file.Paths
+import java.util.Properties
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.setupAuth
@@ -41,8 +43,6 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
-import java.nio.file.Paths
-import java.util.*
 
 @KtorExperimentalAPI
 object VedtakSpek : Spek({
@@ -76,7 +76,6 @@ object VedtakSpek : Spek({
 
             val vedtakKafkaConsumer = spyk(KafkaConsumer<String, String>(consumerProperties))
             vedtakKafkaConsumer.subscribe(listOf("aapen-helse-sporbar"))
-
 
             val applicationState = ApplicationState()
             applicationState.ready = true
@@ -134,7 +133,6 @@ object VedtakSpek : Spek({
                 val vedtakEtter = testDb.connection.finnVedtak(fnr)
                 vedtakEtter.size `should be equal to` 1
             }
-
 
             it("Vedtaket kan hentes i REST APIet") {
                 val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
