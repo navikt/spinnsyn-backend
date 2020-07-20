@@ -6,7 +6,7 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.log
-import no.nav.syfo.vedtak.db.hentVedtak
+import no.nav.syfo.vedtak.db.finnVedtak
 import no.nav.syfo.vedtak.db.opprettVedtak
 import no.nav.syfo.vedtak.kafka.VedtakConsumer
 
@@ -39,7 +39,7 @@ class VedtakService(
     }
 
     fun hentVedtak(fnr: String): List<Any> {
-        return database.connection.hentVedtak(fnr)
+        return database.connection.finnVedtak(fnr)
     }
 }
 

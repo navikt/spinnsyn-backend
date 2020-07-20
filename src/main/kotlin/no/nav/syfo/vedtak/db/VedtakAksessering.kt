@@ -6,7 +6,7 @@ import no.nav.syfo.objectMapper
 import java.sql.Connection
 import java.sql.ResultSet
 
-fun Connection.hentVedtak(fnr: String): List<Vedtak> =
+fun Connection.finnVedtak(fnr: String): List<Vedtak> =
     this.prepareStatement(
         """
             SELECT id, vedtak

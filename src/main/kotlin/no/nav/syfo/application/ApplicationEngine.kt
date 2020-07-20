@@ -36,7 +36,6 @@ fun createApplicationEngine(
     vedtakService: VedtakService,
     jwkProvider: JwkProvider,
     issuer: String,
-
     vaultSecrets: VaultSecrets,
     applicationState: ApplicationState
 ): ApplicationEngine =
