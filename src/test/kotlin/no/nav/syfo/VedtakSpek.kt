@@ -149,6 +149,18 @@ object VedtakSpek : Spek({
                     response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"vedtak\":{\"vedtak\":123}}]"
                 }
             }
+
+            it("Dersom bruker ikke har lagret vedtak får vi et tomt array") {
+                with(handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
+                    addHeader(
+                        HttpHeaders.Authorization,
+                        "Bearer ${generateJWT(audience = audience, issuer = issuer, subject = "12345610102")}"
+                    )
+                }) {
+                    response.status() shouldEqual HttpStatusCode.OK
+                    response.content shouldEqual "[]"
+                }
+            }
         }
     }
 })
