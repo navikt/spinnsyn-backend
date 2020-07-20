@@ -71,7 +71,7 @@ fun main() {
         jwkProvider = jwkProvider,
         applicationState = applicationState,
         issuer = wellKnown.issuer,
-        vaultSecrets = vaultSecrets
+        loginserviceClientId = vaultSecrets.loginserviceClientId
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
