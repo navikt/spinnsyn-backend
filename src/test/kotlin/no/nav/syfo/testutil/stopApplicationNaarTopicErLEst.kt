@@ -1,9 +1,9 @@
 package no.nav.syfo.testutil
 
 import io.mockk.every
-import java.time.Duration
 import no.nav.syfo.application.ApplicationState
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import java.time.Duration
 
 fun stopApplicationNårTopicErLest(
     kafkaConsumer: KafkaConsumer<String, String>,
