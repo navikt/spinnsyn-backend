@@ -13,11 +13,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
 import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.server.testing.TestApplicationRequest
 import io.ktor.server.testing.handleRequest
 import io.ktor.util.KtorExperimentalAPI
 import io.mockk.spyk
-import java.nio.file.Paths
-import java.util.Properties
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.setupAuth
@@ -43,6 +42,8 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
+import java.nio.file.Paths
+import java.util.Properties
 
 @KtorExperimentalAPI
 object VedtakSpek : Spek({
@@ -109,6 +110,13 @@ object VedtakSpek : Spek({
                 }
             }
 
+            fun TestApplicationRequest.medFnr(subject: String) {
+                addHeader(
+                    HttpHeaders.Authorization,
+                    "Bearer ${generateJWT(audience = audience, issuer = issuer, subject = subject)}"
+                )
+            }
+
             it("Vedtak mottas fra kafka topic og lagres i db") {
 
                 val vedtak = testDb.connection.finnVedtak(fnr)
@@ -137,26 +145,89 @@ object VedtakSpek : Spek({
             it("Vedtaket kan hentes i REST APIet") {
                 val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
 
-                with(handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
-                    addHeader(
-                        HttpHeaders.Authorization,
-                        "Bearer ${generateJWT(audience = audience, issuer = issuer, subject = fnr)}"
-                    )
-                }) {
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
+                        medFnr(fnr)
+                    }
+                ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"vedtak\":{\"vedtak\":123}}]"
+                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123}}]"
                 }
             }
 
             it("Dersom bruker ikke har lagret vedtak får vi et tomt array") {
-                with(handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
-                    addHeader(
-                        HttpHeaders.Authorization,
-                        "Bearer ${generateJWT(audience = audience, issuer = issuer, subject = "12345610102")}"
-                    )
-                }) {
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
+                        medFnr("12345610102")
+                    }
+                ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content shouldEqual "[]"
+                }
+            }
+
+            it("Vedtaket kan hentes med vedtaksid i REST APIet") {
+                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
+                        medFnr(fnr)
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.OK
+                    response.content shouldEqual "{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123}}"
+                }
+            }
+
+            it("Vedtaket skal returnere 404 for en uautorisert person") {
+                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
+                        medFnr("12345610102")
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.NotFound
+                    response.content shouldEqual "{\"melding\":\"Finner ikke vedtak $generertVedtakId\"}"
+                }
+            }
+
+            it("Vedtaket kan markeres som lest av autorisert person") {
+                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+
+                with(
+                    handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
+                        medFnr(fnr)
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.OK
+                    response.content shouldEqual "{\"melding\":\"Leste vedtak $generertVedtakId\"}"
+                }
+            }
+
+            it("Et allerede lest vedtak skal ikke leses igjen") {
+                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+
+                with(
+                    handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
+                        medFnr(fnr)
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.OK
+                    response.content shouldEqual "{\"melding\":\"Vedtak $generertVedtakId er allerede lest\"}"
+                }
+            }
+
+            it("Et forsøkt lest vedtak av uautorisert person skal returnere 404") {
+                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+
+                with(
+                    handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
+                        medFnr("12345610102")
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.NotFound
+                    response.content shouldEqual "{\"melding\":\"Finner ikke vedtak $generertVedtakId\"}"
                 }
             }
         }

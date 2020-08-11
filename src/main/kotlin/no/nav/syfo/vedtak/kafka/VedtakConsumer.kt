@@ -1,8 +1,8 @@
 package no.nav.syfo.vedtak.kafka
 
-import java.time.Duration
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import java.time.Duration
 
 class VedtakConsumer(
     private val kafkaVedtakConsumer: KafkaConsumer<String, String>

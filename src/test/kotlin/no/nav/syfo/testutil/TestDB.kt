@@ -1,10 +1,10 @@
 package no.nav.syfo.testutil
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import java.net.ServerSocket
-import java.sql.Connection
 import no.nav.syfo.db.DatabaseInterface
 import org.flywaydb.core.Flyway
+import java.net.ServerSocket
+import java.sql.Connection
 
 class TestDB : DatabaseInterface {
     private var pg: EmbeddedPostgres? = null

@@ -21,13 +21,13 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
-import java.util.UUID
 import no.nav.syfo.Environment
 import no.nav.syfo.application.api.registerNaisApi
 import no.nav.syfo.application.metrics.monitorHttpRequests
 import no.nav.syfo.log
 import no.nav.syfo.vedtak.api.registerVedtakApi
 import no.nav.syfo.vedtak.service.VedtakService
+import java.util.UUID
 
 @KtorExperimentalAPI
 fun createApplicationEngine(
@@ -47,9 +47,11 @@ fun createApplicationEngine(
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             }
         }
-        setupAuth(loginserviceClientId = loginserviceClientId,
+        setupAuth(
+            loginserviceClientId = loginserviceClientId,
             jwkProvider = jwkProvider,
-            issuer = issuer)
+            issuer = issuer
+        )
         install(CallId) {
             generate { UUID.randomUUID().toString() }
             verify { callId: String -> callId.isNotEmpty() }
