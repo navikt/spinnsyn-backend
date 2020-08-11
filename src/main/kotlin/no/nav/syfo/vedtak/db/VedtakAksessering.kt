@@ -52,7 +52,7 @@ fun Connection.eierVedtak(fnr: String, vedtaksId: String): Boolean =
     }
 
 fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
-    return this.prepareStatement(
+    val retur = this.prepareStatement(
         """
            UPDATE vedtak
            SET lest = true
@@ -66,6 +66,8 @@ fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
         it.executeUpdate()
         it.updateCount > 0
     }
+    this.commit()
+    return retur
 }
 
 fun ResultSet.toVedtak(): Vedtak =
