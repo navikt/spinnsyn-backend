@@ -5,6 +5,8 @@ import no.nav.syfo.db.toList
 import no.nav.syfo.objectMapper
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.Timestamp
+import java.time.LocalDateTime
 
 fun Connection.finnVedtak(fnr: String): List<Vedtak> =
     this.prepareStatement(
@@ -55,14 +57,15 @@ fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
     val retur = this.prepareStatement(
         """
            UPDATE vedtak
-           SET lest = true
+           SET lest = ?
            WHERE fnr = ?
            AND id = ?
-           AND lest = false
+           AND lest is null
         """
     ).use {
-        it.setString(1, fnr)
-        it.setString(2, vedtaksId)
+        it.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()))
+        it.setString(2, fnr)
+        it.setString(3, vedtaksId)
         it.executeUpdate()
         it.updateCount > 0
     }
@@ -73,7 +76,7 @@ fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
 fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
-        lest = getBoolean("lest"),
+        lest = getObject("lest", Timestamp::class.java) != null,
         vedtak = objectMapper.readValue(getString("vedtak"))
     )
 
