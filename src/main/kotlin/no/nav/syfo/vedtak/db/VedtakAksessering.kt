@@ -1,6 +1,7 @@
 package no.nav.syfo.vedtak.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.db.toList
 import no.nav.syfo.objectMapper
 import java.sql.Connection
@@ -8,7 +9,27 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
-fun Connection.finnVedtak(fnr: String): List<Vedtak> =
+fun DatabaseInterface.finnVedtak(fnr: String): List<Vedtak> =
+    connection.use {
+        return it.finnVedtak(fnr)
+    }
+
+fun DatabaseInterface.finnVedtak(fnr: String, vedtaksId: String): Vedtak? =
+    connection.use {
+        return it.finnVedtak(fnr, vedtaksId)
+    }
+
+fun DatabaseInterface.eierVedtak(fnr: String, vedtaksId: String): Boolean =
+    connection.use {
+        return it.eierVedtak(fnr, vedtaksId)
+    }
+
+fun DatabaseInterface.lesVedtak(fnr: String, vedtaksId: String): Boolean =
+    connection.use {
+        return it.lesVedtak(fnr, vedtaksId)
+    }
+
+private fun Connection.finnVedtak(fnr: String): List<Vedtak> =
     this.prepareStatement(
         """
             SELECT id, vedtak, lest
@@ -20,7 +41,7 @@ fun Connection.finnVedtak(fnr: String): List<Vedtak> =
         it.executeQuery().toList { toVedtak() }
     }
 
-fun Connection.finnVedtak(fnr: String, vedtaksId: String): Vedtak? {
+private fun Connection.finnVedtak(fnr: String, vedtaksId: String): Vedtak? {
     return this.prepareStatement(
         """
             SELECT id, vedtak, lest
@@ -37,7 +58,7 @@ fun Connection.finnVedtak(fnr: String, vedtaksId: String): Vedtak? {
     }
 }
 
-fun Connection.eierVedtak(fnr: String, vedtaksId: String): Boolean =
+private fun Connection.eierVedtak(fnr: String, vedtaksId: String): Boolean =
     this.prepareStatement(
         """
             SELECT id
@@ -53,7 +74,7 @@ fun Connection.eierVedtak(fnr: String, vedtaksId: String): Boolean =
         }.size > 0
     }
 
-fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
+private fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
     val retur = this.prepareStatement(
         """
            UPDATE vedtak
@@ -73,7 +94,7 @@ fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
     return retur
 }
 
-fun ResultSet.toVedtak(): Vedtak =
+private fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
         lest = getObject("lest", Timestamp::class.java) != null,

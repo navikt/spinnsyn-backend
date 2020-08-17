@@ -35,20 +35,20 @@ class VedtakService(
     }
 
     fun håndterVedtak(fnr: String, vedtak: String) {
-        val id = database.connection.opprettVedtak(fnr = fnr, vedtak = vedtak)
+        val id = database.opprettVedtak(fnr = fnr, vedtak = vedtak)
         MOTTATT_VEDTAK.inc()
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
     }
 
     fun hentVedtak(fnr: String) =
-        database.connection.finnVedtak(fnr)
+        database.finnVedtak(fnr)
 
     fun hentVedtak(fnr: String, vedtaksId: String) =
-        database.connection.finnVedtak(fnr, vedtaksId)
+        database.finnVedtak(fnr, vedtaksId)
 
     fun eierVedtak(fnr: String, vedtaksId: String) =
-        database.connection.eierVedtak(fnr, vedtaksId)
+        database.eierVedtak(fnr, vedtaksId)
 
     fun lesVedtak(fnr: String, vedtaksId: String) =
-        database.connection.lesVedtak(fnr, vedtaksId)
+        database.lesVedtak(fnr, vedtaksId)
 }
