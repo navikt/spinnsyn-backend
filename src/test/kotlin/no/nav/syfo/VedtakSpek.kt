@@ -119,7 +119,7 @@ object VedtakSpek : Spek({
 
             it("Vedtak mottas fra kafka topic og lagres i db") {
 
-                val vedtak = testDb.connection.finnVedtak(fnr)
+                val vedtak = testDb.finnVedtak(fnr)
                 vedtak.size `should be equal to` 0
 
                 vedtakKafkaProducer.send(
@@ -138,12 +138,12 @@ object VedtakSpek : Spek({
                     vedtakService.start()
                 }
 
-                val vedtakEtter = testDb.connection.finnVedtak(fnr)
+                val vedtakEtter = testDb.finnVedtak(fnr)
                 vedtakEtter.size `should be equal to` 1
             }
 
             it("Vedtaket kan hentes i REST APIet") {
-                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+                val generertVedtakId = testDb.finnVedtak(fnr)[0].id
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
@@ -167,7 +167,7 @@ object VedtakSpek : Spek({
             }
 
             it("Vedtaket kan hentes med vedtaksid i REST APIet") {
-                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+                val generertVedtakId = testDb.finnVedtak(fnr)[0].id
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
@@ -180,7 +180,7 @@ object VedtakSpek : Spek({
             }
 
             it("Vedtaket skal returnere 404 for en uautorisert person") {
-                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+                val generertVedtakId = testDb.finnVedtak(fnr)[0].id
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
@@ -193,7 +193,7 @@ object VedtakSpek : Spek({
             }
 
             it("Vedtaket kan markeres som lest av autorisert person") {
-                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+                val generertVedtakId = testDb.finnVedtak(fnr)[0].id
 
                 with(
                     handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
@@ -206,7 +206,7 @@ object VedtakSpek : Spek({
             }
 
             it("Et allerede lest vedtak skal ikke leses igjen") {
-                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+                val generertVedtakId = testDb.finnVedtak(fnr)[0].id
 
                 with(
                     handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
@@ -219,7 +219,7 @@ object VedtakSpek : Spek({
             }
 
             it("Et forsøkt lest vedtak av uautorisert person skal returnere 404") {
-                val generertVedtakId = testDb.connection.finnVedtak(fnr)[0].id
+                val generertVedtakId = testDb.finnVedtak(fnr)[0].id
 
                 with(
                     handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
