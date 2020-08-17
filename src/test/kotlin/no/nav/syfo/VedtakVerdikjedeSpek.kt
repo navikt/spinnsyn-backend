@@ -46,7 +46,7 @@ import java.nio.file.Paths
 import java.util.Properties
 
 @KtorExperimentalAPI
-object VedtakSpek : Spek({
+object VedtakVerdikjedeSpek : Spek({
 
     val issuer = "TestIssuer"
     val audience = "AUD"
@@ -132,6 +132,15 @@ object VedtakSpek : Spek({
                     )
                 )
 
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar",
+                        null,
+                        fnr,
+                        "{ \"Behandlingstilstand-på-samme-topic-som-ikke-skal-lages\": 123}",
+                        listOf(RecordHeader("type", "Behandlingstilstand".toByteArray()))
+                    )
+                )
                 stopApplicationNårTopicErLest(vedtakKafkaConsumer, applicationState)
 
                 runBlocking {
