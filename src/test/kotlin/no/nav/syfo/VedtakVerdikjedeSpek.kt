@@ -16,19 +16,23 @@ import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.TestApplicationRequest
 import io.ktor.server.testing.handleRequest
 import io.ktor.util.KtorExperimentalAPI
-import io.mockk.spyk
+import io.mockk.* // ktlint-disable no-wildcard-imports
 import kotlinx.coroutines.runBlocking
+import no.nav.brukernotifikasjon.schemas.Done
+import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.setupAuth
+import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toProducerConfig
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.generateJWT
-import no.nav.syfo.testutil.stopApplicationNårTopicErLest
+import no.nav.syfo.testutil.stopApplicationNårKafkaTopicErLest
 import no.nav.syfo.vedtak.api.registerVedtakApi
 import no.nav.syfo.vedtak.db.finnVedtak
 import no.nav.syfo.vedtak.kafka.VedtakConsumer
 import no.nav.syfo.vedtak.service.VedtakService
+import no.nav.syfo.vedtak.service.tilRSVedtak
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldEqual
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -43,13 +47,23 @@ import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
 import java.nio.file.Paths
-import java.util.Properties
+import java.util.* // ktlint-disable no-wildcard-imports
 
 @KtorExperimentalAPI
 object VedtakVerdikjedeSpek : Spek({
 
     val issuer = "TestIssuer"
     val audience = "AUD"
+
+    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
+    val env = mockk<Environment>()
+
+    beforeEachTest {
+        clearAllMocks()
+        every { env.spvedtakFrontendUrl } returns "http://låkælhøst:8101"
+        every { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) } just Runs
+        every { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) } just Runs
+    }
 
     describe("Test hele verdikjeden") {
         with(TestApplicationEngine()) {
@@ -86,7 +100,10 @@ object VedtakVerdikjedeSpek : Spek({
             val vedtakService = VedtakService(
                 database = testDb,
                 applicationState = applicationState,
-                vedtakConsumer = vedtakConsumer
+                vedtakConsumer = vedtakConsumer,
+                brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+                servicebruker = "srvvedtakspk",
+                environment = env
             )
 
             val fnr = "13068700000"
@@ -141,7 +158,7 @@ object VedtakVerdikjedeSpek : Spek({
                         listOf(RecordHeader("type", "Behandlingstilstand".toByteArray()))
                     )
                 )
-                stopApplicationNårTopicErLest(vedtakKafkaConsumer, applicationState)
+                stopApplicationNårKafkaTopicErLest(vedtakKafkaConsumer, applicationState)
 
                 runBlocking {
                     vedtakService.start()
@@ -149,10 +166,22 @@ object VedtakVerdikjedeSpek : Spek({
 
                 val vedtakEtter = testDb.finnVedtak(fnr)
                 vedtakEtter.size `should be equal to` 1
+
+                val oppgaveSlot = slot<Oppgave>()
+                val vedtaksId = vedtakEtter[0].id
+
+                verify(exactly = 1) { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), capture(oppgaveSlot)) }
+                oppgaveSlot.captured.getFodselsnummer() shouldEqual fnr
+                oppgaveSlot.captured.getGrupperingsId() shouldEqual vedtaksId
+                oppgaveSlot.captured.getSikkerhetsnivaa() shouldEqual 4
+                oppgaveSlot.captured.getTekst() shouldEqual "NAV har behandlet søknad om sykepenger"
+                oppgaveSlot.captured.getLink() shouldEqual "http://låkælhøst:8101/vedtak/$vedtaksId"
+
+                verify(exactly = 0) { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) }
             }
 
             it("Vedtaket kan hentes i REST APIet") {
-                val vedtak = testDb.finnVedtak(fnr)[0]
+                val vedtak = testDb.finnVedtak(fnr)[0].tilRSVedtak()
                 val generertVedtakId = vedtak.id
                 val opprettet = vedtak.opprettet
 
@@ -178,7 +207,7 @@ object VedtakVerdikjedeSpek : Spek({
             }
 
             it("Vedtaket kan hentes med vedtaksid i REST APIet") {
-                val vedtak = testDb.finnVedtak(fnr)[0]
+                val vedtak = testDb.finnVedtak(fnr)[0].tilRSVedtak()
                 val generertVedtakId = vedtak.id
                 val opprettet = vedtak.opprettet
 
@@ -216,6 +245,11 @@ object VedtakVerdikjedeSpek : Spek({
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content shouldEqual "{\"melding\":\"Leste vedtak $generertVedtakId\"}"
                 }
+                val doneSlot = slot<Done>()
+
+                verify(exactly = 1) { brukernotifikasjonKafkaProducer.sendDonemelding(any(), capture(doneSlot)) }
+                doneSlot.captured.getFodselsnummer() shouldEqual fnr
+                doneSlot.captured.getGrupperingsId() shouldEqual generertVedtakId
             }
 
             it("Et allerede lest vedtak skal ikke leses igjen") {
@@ -229,6 +263,7 @@ object VedtakVerdikjedeSpek : Spek({
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content shouldEqual "{\"melding\":\"Vedtak $generertVedtakId er allerede lest\"}"
                 }
+                verify(exactly = 0) { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) }
             }
 
             it("Et forsøkt lest vedtak av uautorisert person skal returnere 404") {

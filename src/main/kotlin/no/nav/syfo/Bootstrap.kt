@@ -17,8 +17,11 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.getWellKnown
 import no.nav.syfo.application.util.KafkaClients
+import no.nav.syfo.application.util.KafkaFactory.Companion.getBrukernotifikasjonKafkaProducer
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.VaultCredentialService
+import no.nav.syfo.kafka.envOverrides
+import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.vedtak.kafka.VedtakConsumer
 import no.nav.syfo.vedtak.service.VedtakService
 import org.slf4j.Logger
@@ -56,11 +59,18 @@ fun main() {
 
     DefaultExports.initialize()
 
+    val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
+
+    val brukernotifikasjonKafkaProducer = getBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
+
     val vedtakConsumer = VedtakConsumer(kafkaClients.kafkaVedtakConsumer)
     val vedtakService = VedtakService(
         database = database,
         applicationState = applicationState,
-        vedtakConsumer = vedtakConsumer
+        vedtakConsumer = vedtakConsumer,
+        brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+        servicebruker = vaultSecrets.serviceuserUsername,
+        environment = env
     )
 
     val applicationEngine = createApplicationEngine(

@@ -52,3 +52,5 @@ spec:
       value: jdbc:postgresql://b27dbvl015.preprod.local:5432/spinnsyn-backend
     - name: MOUNT_PATH_VAULT
       value: /postgresql/preprod-fss
+    - name: SPVEDTAK_FRONTEND_URL
+      value: "https://fix-meg-når-q1-satt-opp"
