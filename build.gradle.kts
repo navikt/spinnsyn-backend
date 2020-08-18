@@ -1,30 +1,33 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 group = "no.nav.syfo"
 version = "1.0.0"
 
 val coroutinesVersion = "1.3.3"
-val jacksonVersion = "2.9.7"
+val jacksonVersion = "2.11.2"
 val javaxActivationVersion = "1.1.1"
-val kafkaEmbeddedVersion = "2.3.0"
-val postgresEmbeddedVersion = "0.13.1"
+val kafkaEmbeddedVersion = "2.4.0"
+val postgresEmbeddedVersion = "0.13.3"
 val kluentVersion = "1.49"
-val ktorVersion = "1.3.0"
+val ktorVersion = "1.3.2"
 val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "5.1"
-val mockkVersion = "1.9.3"
+val mockkVersion = "1.10.0"
 val nimbusdsVersion = "7.5.1"
 val prometheusVersion = "0.6.0"
 val smCommonVersion = "1.7cb158e"
 val spekVersion = "2.0.9"
 val testContainerKafkaVersion = "1.12.5"
+val confluentVersion = "5.5.1"
 
-val postgresVersion = "42.2.5"
-val flywayVersion = "5.2.4"
-val hikariVersion = "3.3.0"
+val postgresVersion = "42.2.15"
+val flywayVersion = "6.5.4"
+val hikariVersion = "3.4.5"
 val vaultJavaDriveVersion = "3.1.0"
+val brukernotifikasjonAvroVersion = "1.2020.08.13-13.50-3b6ca1881161"
 
 val ktlint by configurations.creating
 
@@ -40,6 +43,7 @@ plugins {
     kotlin("jvm") version "1.3.70"
     id("com.diffplug.gradle.spotless") version "3.23.1"
     id("com.github.johnrengelman.shadow") version "4.0.4"
+    id("com.github.ben-manes.versions") version "0.29.0"
     jacoco
 }
 
@@ -61,6 +65,7 @@ repositories {
     maven(url = "https://dl.bintray.com/spekframework/spek-dev")
     maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://kotlin.bintray.com/kotlinx")
+    maven(url = "https://jitpack.io" )
     maven {
         url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
         credentials {
@@ -87,7 +92,10 @@ dependencies {
     implementation("io.ktor:ktor-auth:$ktorVersion")
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
 
+    implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
+
     implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
+    implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonAvroVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
@@ -148,6 +156,7 @@ tasks.jacocoTestReport {
     }
 }
 
+
 tasks {
 
     create("printVersion") {
@@ -182,4 +191,12 @@ tasks {
     "check" {
         dependsOn("formatKotlin")
     }
+}
+
+tasks.named("dependencyUpdates", DependencyUpdatesTask::class.java).configure {
+    // optional parameters
+    checkForGradleUpdate = true
+    outputFormatter = "json"
+    outputDir = "build/dependencyUpdates"
+    reportfileName = "report"
 }

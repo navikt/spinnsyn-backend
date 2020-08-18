@@ -13,6 +13,7 @@ data class Environment(
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val spinnsynBackendDBURL: String = getEnvVar("SPINNSYN_BACKEND_DB_URL"),
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
+    val spvedtakFrontendUrl: String = getEnvVar("SPVEDTAK_FRONTEND_URL"),
     val databaseName: String = getEnvVar("DATABASE_NAME", "spinnsyn-backend")
 ) : KafkaConfig
 

@@ -5,7 +5,7 @@ import no.nav.syfo.application.ApplicationState
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.time.Duration
 
-fun stopApplicationNårTopicErLest(
+fun stopApplicationNårKafkaTopicErLest(
     kafkaConsumer: KafkaConsumer<String, String>,
     applicationState: ApplicationState
 ) {
