@@ -7,6 +7,7 @@ import no.nav.syfo.objectMapper
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 fun DatabaseInterface.finnVedtak(fnr: String): List<Vedtak> =
@@ -32,7 +33,7 @@ fun DatabaseInterface.lesVedtak(fnr: String, vedtaksId: String): Boolean =
 private fun Connection.finnVedtak(fnr: String): List<Vedtak> =
     this.prepareStatement(
         """
-            SELECT id, vedtak, lest
+            SELECT id, vedtak, lest, opprettet
             FROM vedtak
             WHERE fnr = ?;
             """
@@ -44,7 +45,7 @@ private fun Connection.finnVedtak(fnr: String): List<Vedtak> =
 private fun Connection.finnVedtak(fnr: String, vedtaksId: String): Vedtak? {
     return this.prepareStatement(
         """
-            SELECT id, vedtak, lest
+            SELECT id, vedtak, lest, opprettet
             FROM vedtak
             WHERE fnr = ?
             AND id = ?;
@@ -98,11 +99,13 @@ private fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
         lest = getObject("lest", Timestamp::class.java) != null,
-        vedtak = objectMapper.readValue(getString("vedtak"))
+        vedtak = objectMapper.readValue(getString("vedtak")),
+        opprettet = getObject("opprettet", Timestamp::class.java).toLocalDateTime().toLocalDate()
     )
 
 data class Vedtak(
     val id: String,
     val lest: Boolean,
-    val vedtak: Any
+    val vedtak: Any,
+    val opprettet: LocalDate
 )
