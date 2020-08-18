@@ -152,7 +152,9 @@ object VedtakVerdikjedeSpek : Spek({
             }
 
             it("Vedtaket kan hentes i REST APIet") {
-                val generertVedtakId = testDb.finnVedtak(fnr)[0].id
+                val vedtak = testDb.finnVedtak(fnr)[0]
+                val generertVedtakId = vedtak.id
+                val opprettet = vedtak.opprettet
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
@@ -160,7 +162,7 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123}}]"
+                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123},\"opprettet\":\"$opprettet\"}]"
                 }
             }
 
@@ -176,7 +178,9 @@ object VedtakVerdikjedeSpek : Spek({
             }
 
             it("Vedtaket kan hentes med vedtaksid i REST APIet") {
-                val generertVedtakId = testDb.finnVedtak(fnr)[0].id
+                val vedtak = testDb.finnVedtak(fnr)[0]
+                val generertVedtakId = vedtak.id
+                val opprettet = vedtak.opprettet
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
@@ -184,7 +188,7 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123}}"
+                    response.content shouldEqual "{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123},\"opprettet\":\"$opprettet\"}"
                 }
             }
 
