@@ -4,7 +4,6 @@ env:
   APP: spinnsyn-backend
 jobs:
   build:
-    if: github.ref == 'refs/heads/midlertidig-skip'
     name: Checkout code and create docker tag
     runs-on: ubuntu-latest
     steps:
@@ -70,18 +69,17 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev-gcp
     runs-on: ubuntu-latest
-#    needs: build
+    needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@master
-#      - name: Download VERSION-artifact
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: VERSION.txt
-#          path: .
-#      - run: echo "::set-env name=VERSION::"`cat VERSION.txt`""
-#      - run: echo "::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION""
-      - run: echo "::set-env name=IMAGE::"docker.pkg.github.com/navikt/spinnsyn-backend/spinnsyn-backend:2020.08.19-14.08-102880a1""
+      - name: Download VERSION-artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: VERSION.txt
+          path: .
+      - run: echo "::set-env name=VERSION::"`cat VERSION.txt`""
+      - run: echo "::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION""
       - name: Deploy to dev-gcp
         uses: nais/deploy/actions/deploy@master
         env:
