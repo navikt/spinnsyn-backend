@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: spinnsynbackend
-  namespace: default
+  namespace: flex
   labels:
     team: flex
 spec:
@@ -38,6 +38,7 @@ spec:
       - type: POSTGRES_11
         databases:
           - name: spinnsyndb
+            diskAutoresize: true
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
