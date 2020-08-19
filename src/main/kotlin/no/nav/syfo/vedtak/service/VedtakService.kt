@@ -24,7 +24,6 @@ class VedtakService(
     private val applicationState: ApplicationState,
     private val vedtakConsumer: VedtakConsumer,
     private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
-    private val servicebruker: String,
     private val environment: Environment
 ) {
     suspend fun start() {
@@ -53,7 +52,7 @@ class VedtakService(
         MOTTATT_VEDTAK.inc()
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
         brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
-            Nokkel(servicebruker, id.toString()),
+            Nokkel(environment.serviceuserUsername, id.toString()),
             Oppgave(
                 vedtaket.opprettet.toEpochMilli(),
                 fnr,
@@ -78,7 +77,7 @@ class VedtakService(
         val bleLest = database.lesVedtak(fnr, vedtaksId)
         if (bleLest) {
             brukernotifikasjonKafkaProducer.sendDonemelding(
-                Nokkel(servicebruker, vedtaksId),
+                Nokkel(environment.serviceuserUsername, vedtaksId),
                 Done(Instant.now().toEpochMilli(), fnr, vedtaksId)
             )
         }

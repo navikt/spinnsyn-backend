@@ -26,7 +26,6 @@ val confluentVersion = "5.5.1"
 val postgresVersion = "42.2.15"
 val flywayVersion = "6.5.4"
 val hikariVersion = "3.4.5"
-val vaultJavaDriveVersion = "3.1.0"
 val brukernotifikasjonAvroVersion = "1.2020.08.13-13.50-3b6ca1881161"
 
 val ktlint by configurations.creating
@@ -103,7 +102,6 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
-    implementation("com.bettercloud:vault-java-driver:$vaultJavaDriveVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
