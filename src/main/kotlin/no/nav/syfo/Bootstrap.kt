@@ -19,7 +19,6 @@ import no.nav.syfo.application.getWellKnown
 import no.nav.syfo.application.util.KafkaClients
 import no.nav.syfo.application.util.KafkaFactory.Companion.getBrukernotifikasjonKafkaProducer
 import no.nav.syfo.db.Database
-import no.nav.syfo.db.VaultCredentialService
 import no.nav.syfo.kafka.envOverrides
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.vedtak.kafka.VedtakConsumer
@@ -42,24 +41,21 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
 fun main() {
     val env = Environment()
 
-    val vaultSecrets = VaultSecrets()
-
-    val wellKnown = getWellKnown(vaultSecrets.oidcWellKnownUri)
+    val wellKnown = getWellKnown(env.oidcWellKnownUri)
 
     val jwkProvider = JwkProviderBuilder(URL(wellKnown.jwks_uri))
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
         .build()
 
-    val vaultCredentialService = VaultCredentialService()
-    val database = Database(env, vaultCredentialService)
+    val database = Database(env)
 
-    val kafkaClients = KafkaClients(env, vaultSecrets)
+    val kafkaClients = KafkaClients(env)
     val applicationState = ApplicationState()
 
     DefaultExports.initialize()
 
-    val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
+    val kafkaBaseConfig = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
 
     val brukernotifikasjonKafkaProducer = getBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
 
@@ -69,7 +65,6 @@ fun main() {
         applicationState = applicationState,
         vedtakConsumer = vedtakConsumer,
         brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
-        servicebruker = vaultSecrets.serviceuserUsername,
         environment = env
     )
 
@@ -79,12 +74,11 @@ fun main() {
         jwkProvider = jwkProvider,
         applicationState = applicationState,
         issuer = wellKnown.issuer,
-        loginserviceClientId = vaultSecrets.loginserviceClientId
+        loginserviceClientId = env.loginserviceClientId
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
     applicationState.ready = true
-    RenewVaultService(vaultCredentialService, applicationState).startRenewTasks()
 
     createListener(applicationState) {
         vedtakService.start()

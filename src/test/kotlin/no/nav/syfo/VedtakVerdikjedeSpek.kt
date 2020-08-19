@@ -61,6 +61,7 @@ object VedtakVerdikjedeSpek : Spek({
     beforeEachTest {
         clearAllMocks()
         every { env.spvedtakFrontendUrl } returns "http://låkælhøst:8101"
+        every { env.serviceuserUsername } returns "srvspvedtak"
         every { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) } just Runs
         every { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) } just Runs
     }
@@ -102,7 +103,6 @@ object VedtakVerdikjedeSpek : Spek({
                 applicationState = applicationState,
                 vedtakConsumer = vedtakConsumer,
                 brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
-                servicebruker = "srvvedtakspk",
                 environment = env
             )
 
