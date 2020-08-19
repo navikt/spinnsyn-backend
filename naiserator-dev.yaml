@@ -39,6 +39,8 @@ spec:
         databases:
           - name: spinnsyndb
             diskAutoresize: true
+  envFrom:
+    - secret: spinnsynbackend-serviceuser
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
