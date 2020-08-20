@@ -79,7 +79,7 @@ fun main() {
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
     applicationState.ready = true
-
+    log.info("Application server stated")
     createListener(applicationState) {
         vedtakService.start()
     }

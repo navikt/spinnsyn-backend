@@ -27,6 +27,8 @@ class VedtakService(
     private val environment: Environment
 ) {
     suspend fun start() {
+        log.info("VedtakService stated")
+
         while (applicationState.ready) {
             val consumerRecords = vedtakConsumer.poll()
             consumerRecords.forEach {

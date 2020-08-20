@@ -67,8 +67,7 @@ jobs:
           docker push ${IMAGE}
 
   deploy-to-dev:
-    if: github.ref == 'refs/heads/ikke-deploy-før-db-og-kafka-stemmer'
-    name: Deploy to dev-fss
+    name: Deploy to dev-gcp
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -81,41 +80,12 @@ jobs:
           path: .
       - run: echo "::set-env name=VERSION::"`cat VERSION.txt`""
       - run: echo "::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION""
-      - name: Deploy to dev-fss
+      - name: Deploy to dev-gcp
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           RESOURCE: naiserator-dev.yaml
-
-  deploy-to-prod:
-    if: github.ref == 'refs/heads/master-ikke-deploy-før-db-og-kafka-stemmer'
-    name: Deploy to prod-fss
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@master
-      - name: Download VERSION-artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: VERSION.txt
-          path: .
-      - run: echo "::set-env name=VERSION::"`cat VERSION.txt`""
-      - run: echo "::set-env name=IMAGE::"docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION""
-      - name: Deploy to dev-fss
-        uses: nais/deploy/actions/deploy@master
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: naiserator-prod.yaml
-      - name: Create release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.VERSION }}
-          release_name: ${{ env.VERSION }}
 
   tag-image-as-latest:
     if: github.ref == 'refs/heads/master'
