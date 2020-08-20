@@ -39,6 +39,13 @@ spec:
         databases:
           - name: spinnsyndb
             diskAutoresize: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: login.microsoftonline.com
+        - host: b27apvl00045.preprod.local
+        - host: b27apvl00046.preprod.local
+        - host: b27apvl00047.preprod.local
   envFrom:
     - secret: spinnsynbackend-serviceuser
   env:
