@@ -58,6 +58,10 @@ spec:
             - port: 8443
               name: kafka
               protocol: TLS
+    inbound:
+      rules:
+        - application: spinnsynbackend-proxy
+
   envFrom:
     - secret: spinnsynbackend-serviceuser
   env:
