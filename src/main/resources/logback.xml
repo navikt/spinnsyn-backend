@@ -7,7 +7,7 @@
     </appender>
 
     <logger name="no.nav" level="INFO"/>
-    <logger name="org.apache.kafka" level="WARN" />
+    <logger name="org.apache.kafka" level="DEBUG" />
     <logger name="com.zaxxer.hikari.pool" level="INFO" />
     <logger name="io.ktor.auth" level="TRACE" />
 
