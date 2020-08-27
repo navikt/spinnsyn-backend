@@ -39,7 +39,12 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
 
 @KtorExperimentalAPI
 fun main() {
+
+
     val env = Environment()
+
+    // Sov litt slik at sidecars er klare
+    Thread.sleep(env.sidecarInitialDelay)
 
     val wellKnown = getWellKnown(env.oidcWellKnownUri)
 
