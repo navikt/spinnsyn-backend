@@ -40,7 +40,6 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
 @KtorExperimentalAPI
 fun main() {
 
-
     val env = Environment()
 
     // Sov litt slik at sidecars er klare
