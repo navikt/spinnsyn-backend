@@ -40,10 +40,12 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
 @KtorExperimentalAPI
 fun main() {
 
+    log.info("Starter spinnsyn-backend")
     val env = Environment()
 
     // Sov litt slik at sidecars er klare
     Thread.sleep(env.sidecarInitialDelay)
+    log.info("Sov i ${env.sidecarInitialDelay} ms i håp om at sidecars er klare")
 
     val wellKnown = getWellKnown(env.oidcWellKnownUri)
 
