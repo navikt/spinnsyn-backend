@@ -59,4 +59,4 @@ spec:
     - name: LOGINSERVICE_CLIENTID
       value: "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5"
     - name: KAFKA_SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais-q.adeo.no
+      value: https://kafka-schema-registry.nais.preprod.local
