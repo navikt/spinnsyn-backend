@@ -8,6 +8,6 @@ class VedtakConsumer(
     private val kafkaVedtakConsumer: KafkaConsumer<String, String>
 ) {
     fun poll(): ConsumerRecords<String, String> {
-        return kafkaVedtakConsumer.poll(Duration.ofMillis(0))
+        return kafkaVedtakConsumer.poll(Duration.ofMillis(1000))
     }
 }
