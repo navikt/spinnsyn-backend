@@ -50,6 +50,10 @@ class VedtakService(
     }
 
     fun håndterVedtak(id: UUID, fnr: String, vedtak: String) {
+        if(environment.isProd()){
+            log.info("Mottok vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke i produksjon ennå")
+            return
+        }
         val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id)
         MOTTATT_VEDTAK.inc()
         log.info("Opprettet vedtak med spinnsyn databaseid $id")

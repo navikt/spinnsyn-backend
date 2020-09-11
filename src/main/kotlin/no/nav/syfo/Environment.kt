@@ -33,6 +33,10 @@ data class Environment(
     fun jdbcUrl(): String {
         return "jdbc:postgresql://$spinnsynBackendDbHost:$spinnsynBackendDbPort/$spinnsynBackendDbName"
     }
+
+    fun isProd(): Boolean {
+        return cluster == "prod-gcp"
+    }
 }
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
