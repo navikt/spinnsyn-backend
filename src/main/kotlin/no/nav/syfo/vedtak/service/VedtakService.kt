@@ -60,7 +60,7 @@ class VedtakService(
                 fnr,
                 id.toString(),
                 "NAV har behandlet søknad om sykepenger",
-                "${environment.spvedtakFrontendUrl}/vedtak/$id",
+                "${environment.spinnsynFrontendUrl}/vedtak/$id",
                 4
             )
         )

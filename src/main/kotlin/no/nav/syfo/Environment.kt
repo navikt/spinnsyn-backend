@@ -8,16 +8,16 @@ data class Environment(
     val applicationName: String = getEnvVar("NAIS_APP_NAME"),
     val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-    val spinnsynBackendDbHost: String = getEnvVar("NAIS_DATABASE_SPINNSYNBACKEND_SPINNSYNDB_HOST"),
-    val spinnsynBackendDbPort: String = getEnvVar("NAIS_DATABASE_SPINNSYNBACKEND_SPINNSYNDB_PORT"),
-    val spinnsynBackendDbName: String = getEnvVar("NAIS_DATABASE_SPINNSYNBACKEND_SPINNSYNDB_DATABASE"),
-    val spinnsynBackendDbUsername: String = getEnvVar("NAIS_DATABASE_SPINNSYNBACKEND_SPINNSYNDB_USERNAME"),
-    val spinnsynBackendDbPassword: String = getEnvVar("NAIS_DATABASE_SPINNSYNBACKEND_SPINNSYNDB_PASSWORD"),
-    val spvedtakFrontendUrl: String = getEnvVar("SPVEDTAK_FRONTEND_URL"),
+    val spinnsynBackendDbHost: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_HOST"),
+    val spinnsynBackendDbPort: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PORT"),
+    val spinnsynBackendDbName: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_DATABASE"),
+    val spinnsynBackendDbUsername: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_USERNAME"),
+    val spinnsynBackendDbPassword: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PASSWORD"),
+    val spinnsynFrontendUrl: String = getEnvVar("SPINNSYN_FRONTEND_URL"),
     val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
     val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
     val oidcWellKnownUri: String = getEnvVar("OIDC_WELLKNOWN_URI"),
-    val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "15000").toLong(),
+    val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "30000").toLong(),
     val loginserviceClientId: String = getEnvVar("LOGINSERVICE_CLIENTID")
 ) : KafkaConfig {
 

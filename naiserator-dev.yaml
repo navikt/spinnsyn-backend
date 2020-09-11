@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: spinnsynbackend
+  name: spinnsyn-backend
   namespace: flex
   labels:
     team: flex
@@ -37,7 +37,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_11
         databases:
-          - name: spinnsyndb
+          - name: spinnsyn-db
             diskAutoresize: true
   accessPolicy:
     outbound:
@@ -45,15 +45,15 @@ spec:
         - host: login.microsoftonline.com
     inbound:
       rules:
-        - application: spinnsynbackend-proxy
+        - application: spinnsyn-backend-proxy
 
   envFrom:
-    - secret: spinnsynbackend-serviceuser
+    - secret: spinnsyn-backend-serviceuser
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
-    - name: SPVEDTAK_FRONTEND_URL
-      value: "https://fix-meg-når-q1-satt-opp"
+    - name: SPINNSYN_FRONTEND_URL
+      value: "https://sykepenger.dev.nav.no"
     - name: OIDC_WELLKNOWN_URI
       value: "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1"
     - name: LOGINSERVICE_CLIENTID
