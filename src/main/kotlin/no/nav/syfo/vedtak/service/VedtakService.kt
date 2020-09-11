@@ -50,7 +50,7 @@ class VedtakService(
     }
 
     fun håndterVedtak(id: UUID, fnr: String, vedtak: String) {
-        if(environment.isProd()){
+        if (environment.isProd()) {
             log.info("Mottok vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke i produksjon ennå")
             return
         }

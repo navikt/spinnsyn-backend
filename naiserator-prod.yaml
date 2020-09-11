@@ -1,0 +1,62 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: spinnsyn-backend
+  namespace: flex
+  labels:
+    team: flex
+spec:
+  image: {{ image }}
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 90
+  port: 8080
+  liveness:
+    path: /is_alive
+    initialDelay: 10
+    timeout: 5
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /is_ready
+    initialDelay: 30
+    periodSeconds: 5
+    timeout: 5
+  prometheus:
+    enabled: true
+    path: /prometheus
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 400m
+      memory: 768Mi
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_11
+        databases:
+          - name: spinnsyn-db
+            diskAutoresize: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: login.microsoftonline.com
+    inbound:
+      rules:
+        - application: spinnsyn-backend-proxy
+
+  envFrom:
+    - secret: spinnsyn-backend-serviceuser
+  env:
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
+    - name: SPINNSYN_FRONTEND_URL
+      value: "https://sykepenger.nav.no"
+    - name: OIDC_WELLKNOWN_URI
+      value: "https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten"
+    - name: LOGINSERVICE_CLIENTID
+      value: "45104d6a-f5bc-4e8c-b352-4bbfc9381f25"
+    - name: KAFKA_SCHEMA_REGISTRY_URL
+      value: https://kafka-schema-registry.nais.adeo.no
