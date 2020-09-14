@@ -15,6 +15,7 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.syfo.application.metrics.VEDTAK_LEST
 import no.nav.syfo.vedtak.service.VedtakService
 
 @KtorExperimentalAPI
@@ -42,6 +43,7 @@ fun Route.registerVedtakApi(vedtakService: VedtakService) {
                 call.respond(Melding("Finner ikke vedtak $vedtaksId").tilRespons(HttpStatusCode.NotFound))
             } else {
                 if (vedtakService.lesVedtak(fnr, vedtaksId)) {
+                    VEDTAK_LEST.inc()
                     call.respond(Melding("Leste vedtak $vedtaksId").tilRespons(HttpStatusCode.OK))
                 } else {
                     call.respond(Melding("Vedtak $vedtaksId er allerede lest").tilRespons(HttpStatusCode.OK))
