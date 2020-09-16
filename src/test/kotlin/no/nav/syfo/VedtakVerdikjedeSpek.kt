@@ -60,7 +60,7 @@ object VedtakVerdikjedeSpek : Spek({
 
     beforeEachTest {
         clearAllMocks()
-        every { env.spinnsynFrontendUrl } returns "http://låkælhøst:8101"
+        every { env.spinnsynFrontendUrl } returns "https://www.nav.no/syk/sykepenger"
         every { env.serviceuserUsername } returns "srvspvedtak"
         every { env.isProd() } returns false
         every { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) } just Runs
@@ -176,7 +176,7 @@ object VedtakVerdikjedeSpek : Spek({
                 oppgaveSlot.captured.getGrupperingsId() shouldEqual vedtaksId
                 oppgaveSlot.captured.getSikkerhetsnivaa() shouldEqual 4
                 oppgaveSlot.captured.getTekst() shouldEqual "NAV har behandlet søknad om sykepenger"
-                oppgaveSlot.captured.getLink() shouldEqual "http://låkælhøst:8101/vedtak/$vedtaksId"
+                oppgaveSlot.captured.getLink() shouldEqual "https://www.nav.no/syk/sykepenger/vedtak/$vedtaksId"
 
                 verify(exactly = 0) { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) }
             }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
+import no.nav.syfo.application.cronjob.setUpCronJob
 import no.nav.syfo.application.getWellKnown
 import no.nav.syfo.application.util.KafkaClients
 import no.nav.syfo.application.util.KafkaFactory.Companion.getBrukernotifikasjonKafkaProducer
@@ -89,6 +90,7 @@ fun main() {
     createListener(applicationState) {
         vedtakService.start()
     }
+    setUpCronJob(env = env)
 }
 
 fun createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =

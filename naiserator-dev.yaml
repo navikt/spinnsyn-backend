@@ -23,6 +23,7 @@ spec:
     initialDelay: 30
     periodSeconds: 5
     timeout: 5
+  leaderElection: true
   prometheus:
     enabled: true
     path: /prometheus
@@ -53,7 +54,7 @@ spec:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: SPINNSYN_FRONTEND_URL
-      value: "https://sykepenger.dev.nav.no"
+      value: "https://www-q1.dev.nav.no/syk/sykepenger"
     - name: OIDC_WELLKNOWN_URI
       value: "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1"
     - name: LOGINSERVICE_CLIENTID
