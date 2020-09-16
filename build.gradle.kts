@@ -1,7 +1,7 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 group = "no.nav.syfo"
 version = "1.0.0"
@@ -64,7 +64,7 @@ repositories {
     maven(url = "https://dl.bintray.com/spekframework/spek-dev")
     maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://kotlin.bintray.com/kotlinx")
-    maven(url = "https://jitpack.io" )
+    maven(url = "https://jitpack.io")
     maven {
         url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
         credentials {
@@ -153,7 +153,6 @@ tasks.jacocoTestReport {
         html.isEnabled = true
     }
 }
-
 
 tasks {
 
