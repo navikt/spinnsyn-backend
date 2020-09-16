@@ -42,13 +42,35 @@ fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String): Vedt
         )
     }
 
+fun DatabaseInterface.hentVedtakForVarsling(): List<InternVedtak> =
+    connection.use {
+        return it.hentVedtakForVarsling()
+    }
+
+fun DatabaseInterface.hentVedtakForRevarsling(dagerBakITid: Long = 7): List<InternVedtak> =
+    connection.use {
+        return it.hentVedtakForRevarsling(dagerBakITid)
+    }
+
+fun DatabaseInterface.settVedtakVarslet(vedtaksId: String) {
+    connection.use {
+        return it.settVedtakVarslet(vedtaksId)
+    }
+}
+
+fun DatabaseInterface.settVedtakRevarslet(vedtaksId: String) {
+    connection.use {
+        return it.settVedtakRevarslet(vedtaksId)
+    }
+}
+
 private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String): Vedtak {
 
     val now = Instant.now()
     this.prepareStatement(
         """
-                    INSERT INTO VEDTAK(id, fnr, vedtak, opprettet) VALUES (?, ?, ?, ?)
-                """
+            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet) VALUES (?, ?, ?, ?) 
+        """
     ).use {
         it.setString(1, id.toString())
         it.setString(2, fnr)
@@ -127,6 +149,71 @@ private fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
     return retur
 }
 
+private fun Connection.hentVedtakForVarsling(): List<InternVedtak> =
+    this.prepareStatement(
+        """
+            SELECT id, fnr, lest, opprettet, varslet, revarslet
+            FROM vedtak
+            WHERE lest IS NULL
+            AND varslet IS NULL
+            AND revarslet IS NULL
+        """
+    ).use {
+        it.executeQuery().toList {
+            toInternVedtak()
+        }
+    }
+
+private fun Connection.hentVedtakForRevarsling(dagerBakITid: Long): List<InternVedtak> =
+    this.prepareStatement(
+        """
+            SELECT id, fnr, lest, opprettet, varslet, revarslet
+            FROM vedtak
+            WHERE lest IS NULL
+            AND revarslet IS NULL
+            AND varslet IS NOT NULL
+            AND varslet < ?
+        """
+    ).use {
+        it.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now().minusDays(dagerBakITid)))
+        it.executeQuery().toList {
+            toInternVedtak()
+        }
+    }
+
+private fun Connection.settVedtakVarslet(vedtaksId: String) {
+    this.prepareStatement(
+        """
+        UPDATE vedtak
+        SET varslet = ?
+        WHERE id = ?
+        AND varslet IS NULL
+        """
+    ).use {
+        it.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()))
+        it.setString(2, vedtaksId)
+        it.executeUpdate()
+    }
+    this.commit()
+}
+
+private fun Connection.settVedtakRevarslet(vedtaksId: String) {
+    this.prepareStatement(
+        """
+        UPDATE vedtak
+        SET revarslet = ?
+        WHERE id = ?
+        AND varslet IS NOT NULL
+        AND revarslet IS NULL
+        """
+    ).use {
+        it.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()))
+        it.setString(2, vedtaksId)
+        it.executeUpdate()
+    }
+    this.commit()
+}
+
 private fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
@@ -135,9 +222,28 @@ private fun ResultSet.toVedtak(): Vedtak =
         opprettet = getObject("opprettet", Timestamp::class.java).toInstant()
     )
 
+private fun ResultSet.toInternVedtak(): InternVedtak =
+    InternVedtak(
+        id = getString("id"),
+        fnr = getString("fnr"),
+        lest = getObject("lest", Timestamp::class.java)?.toInstant(),
+        opprettet = getObject("opprettet", Timestamp::class.java).toInstant(),
+        varslet = getObject("varslet", Timestamp::class.java)?.toInstant(),
+        revarslet = getObject("revarslet", Timestamp::class.java)?.toInstant()
+    )
+
 data class Vedtak(
     val id: String,
     val lest: Boolean,
     val vedtak: Any,
     val opprettet: Instant
+)
+
+data class InternVedtak(
+    val id: String,
+    val fnr: String,
+    val lest: Instant?,
+    val opprettet: Instant,
+    val varslet: Instant?,
+    val revarslet: Instant?
 )
