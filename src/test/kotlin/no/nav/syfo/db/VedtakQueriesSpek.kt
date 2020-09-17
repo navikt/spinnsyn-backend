@@ -1,6 +1,9 @@
 package no.nav.syfo.db
 
 import io.ktor.util.KtorExperimentalAPI
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.vedtak.db.hentVedtakForRevarsling
 import no.nav.syfo.vedtak.db.hentVedtakForVarsling
@@ -11,18 +14,20 @@ import no.nav.syfo.vedtak.db.settVedtakVarslet
 import org.amshove.kluent.`should be equal to`
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDateTime
 import java.util.UUID
 
 @KtorExperimentalAPI
 object VedtakVerdikjedeSpek : Spek({
 
     val testDb = TestDB()
+    val now = LocalDateTime.now()
 
     beforeEachTest {
         testDb.hentVedtakForVarsling().forEach {
             testDb.lesVedtak(it.fnr, it.id)
         }
-        testDb.hentVedtakForRevarsling(0).forEach() {
+        testDb.hentVedtakForRevarsling().forEach() {
             testDb.lesVedtak(it.fnr, it.id)
         }
     }
@@ -53,6 +58,7 @@ object VedtakVerdikjedeSpek : Spek({
         }
 
         it("Et uvarslet (og ulest) vedtak kan ikke revarsles før det er varslet") {
+
             repeat((0..4).count()) {
                 testDb.nyttVedtak()
             }
@@ -61,18 +67,27 @@ object VedtakVerdikjedeSpek : Spek({
                 testDb.settVedtakRevarslet(it.id)
             }
             testDb.hentVedtakForVarsling().size `should be equal to` 5
-            testDb.hentVedtakForRevarsling(0).size `should be equal to` 0
+            testDb.hentVedtakForRevarsling().size `should be equal to` 0
 
             vedtakForVarsling.forEach {
                 testDb.settVedtakVarslet(it.id)
             }
-            testDb.hentVedtakForVarsling().size `should be equal to` 0
-            testDb.hentVedtakForRevarsling(0).size `should be equal to` 5
+            mockkStatic(LocalDateTime::class)
 
-            testDb.hentVedtakForRevarsling(0).random().also {
+            every {
+                LocalDateTime.now()
+            } returns now.plusDays(8)
+
+            testDb.hentVedtakForVarsling().size `should be equal to` 0
+            testDb.hentVedtakForRevarsling().size `should be equal to` 6
+
+            testDb.hentVedtakForRevarsling().random().also {
                 testDb.settVedtakRevarslet(it.id)
             }
-            testDb.hentVedtakForRevarsling(0).size `should be equal to` 4
+            testDb.hentVedtakForRevarsling().size `should be equal to` 5
+
+            unmockkStatic(LocalDateTime::class)
+
         }
     }
 })

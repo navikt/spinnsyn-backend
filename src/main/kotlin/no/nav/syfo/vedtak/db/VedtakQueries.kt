@@ -52,9 +52,9 @@ fun DatabaseInterface.hentVedtakForVarsling(): List<InternVedtak> =
         return it.hentVedtakForVarsling()
     }
 
-fun DatabaseInterface.hentVedtakForRevarsling(dagerBakITid: Long = 7): List<InternVedtak> =
+fun DatabaseInterface.hentVedtakForRevarsling(): List<InternVedtak> =
     connection.use {
-        return it.hentVedtakForRevarsling(dagerBakITid)
+        return it.hentVedtakForRevarsling()
     }
 
 fun DatabaseInterface.settVedtakVarslet(vedtaksId: String) {
@@ -186,8 +186,9 @@ private fun Connection.hentVedtakForVarsling(): List<InternVedtak> =
         }
     }
 
-private fun Connection.hentVedtakForRevarsling(dagerBakITid: Long): List<InternVedtak> =
-    this.prepareStatement(
+private fun Connection.hentVedtakForRevarsling(): List<InternVedtak> {
+    val syvDagerSiden = Timestamp.valueOf(LocalDateTime.now().minusDays(7))
+    return this.prepareStatement(
         """
             SELECT id, fnr, lest, opprettet, varslet, revarslet
             FROM vedtak
@@ -197,11 +198,12 @@ private fun Connection.hentVedtakForRevarsling(dagerBakITid: Long): List<InternV
             AND varslet < ?
         """
     ).use {
-        it.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now().minusDays(dagerBakITid)))
+        it.setTimestamp(1, syvDagerSiden)
         it.executeQuery().toList {
             toInternVedtak()
         }
     }
+}
 
 private fun Connection.settVedtakVarslet(vedtaksId: String) {
     this.prepareStatement(
