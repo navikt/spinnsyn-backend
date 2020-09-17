@@ -28,18 +28,15 @@ jobs:
           path: VERSION.txt
       - name: Gradle wrapper validation
         uses: gradle/wrapper-validation-action@v1
-      - uses: actions/cache@v1
+      - name: Setup gradle dependency cache
+        uses: actions/cache@v2
         with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('build.gradle.kts') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-cache-
-      - uses: actions/cache@v1
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-wrapper-
+            ${{ runner.os }}-gradle-
       - name: Lint koden
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
