@@ -1,6 +1,9 @@
 package no.nav.syfo.db
 
 import io.ktor.util.KtorExperimentalAPI
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.vedtak.db.hentVedtakForRevarsling
 import no.nav.syfo.vedtak.db.hentVedtakForVarsling
@@ -11,24 +14,33 @@ import no.nav.syfo.vedtak.db.settVedtakVarslet
 import org.amshove.kluent.`should be equal to`
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 @KtorExperimentalAPI
 object VedtakVerdikjedeSpek : Spek({
 
     val testDb = TestDB()
+    val now = OffsetDateTime.of(2020, 3, 12, 9, 12, 0, 0, ZoneOffset.UTC)
 
     beforeEachTest {
         testDb.hentVedtakForVarsling().forEach {
             testDb.lesVedtak(it.fnr, it.id)
         }
-        testDb.hentVedtakForRevarsling(0).forEach() {
+        testDb.hentVedtakForRevarsling().forEach() {
             testDb.lesVedtak(it.fnr, it.id)
         }
     }
 
     describe("Test databasefunksjoner") {
         it("Uleste vedtak skal varsles om") {
+            mockkStatic(Instant::class)
+            every {
+                Instant.now()
+            } returns now.toInstant()
+
             repeat((0..4).count()) {
                 testDb.nyttVedtak()
             }
@@ -53,6 +65,7 @@ object VedtakVerdikjedeSpek : Spek({
         }
 
         it("Et uvarslet (og ulest) vedtak kan ikke revarsles før det er varslet") {
+
             repeat((0..4).count()) {
                 testDb.nyttVedtak()
             }
@@ -61,18 +74,25 @@ object VedtakVerdikjedeSpek : Spek({
                 testDb.settVedtakRevarslet(it.id)
             }
             testDb.hentVedtakForVarsling().size `should be equal to` 5
-            testDb.hentVedtakForRevarsling(0).size `should be equal to` 0
+            testDb.hentVedtakForRevarsling().size `should be equal to` 0
 
             vedtakForVarsling.forEach {
                 testDb.settVedtakVarslet(it.id)
             }
-            testDb.hentVedtakForVarsling().size `should be equal to` 0
-            testDb.hentVedtakForRevarsling(0).size `should be equal to` 5
 
-            testDb.hentVedtakForRevarsling(0).random().also {
+            every {
+                Instant.now()
+            } returns now.plusDays(8).toInstant()
+
+            testDb.hentVedtakForVarsling().size `should be equal to` 0
+            testDb.hentVedtakForRevarsling().size `should be equal to` 6
+
+            testDb.hentVedtakForRevarsling().random().also {
                 testDb.settVedtakRevarslet(it.id)
             }
-            testDb.hentVedtakForRevarsling(0).size `should be equal to` 4
+            testDb.hentVedtakForRevarsling().size `should be equal to` 5
+
+            unmockkStatic(Instant::class)
         }
     }
 })

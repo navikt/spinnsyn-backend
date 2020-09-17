@@ -1,4 +1,4 @@
-package no.nav.syfo.application.util
+package no.nav.syfo.util
 
 import no.nav.syfo.Environment
 import no.nav.syfo.kafka.envOverrides

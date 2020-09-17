@@ -1,11 +1,14 @@
 package no.nav.syfo.brukernotifkasjon
 
+import io.confluent.kafka.serializers.KafkaAvroSerializer
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
+import no.nav.syfo.kafka.toProducerConfig
 import no.nav.syfo.log
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.util.* // ktlint-disable no-wildcard-imports
 
 class BrukernotifikasjonKafkaProducer(
     private val kafkaproducerOppgave: KafkaProducer<Nokkel, Oppgave>,
@@ -28,4 +31,17 @@ class BrukernotifikasjonKafkaProducer(
             throw e
         }
     }
+}
+
+fun skapBrukernotifikasjonKafkaProducer(kafkaBaseConfig: Properties): BrukernotifikasjonKafkaProducer {
+    val kafkaBrukernotifikasjonProducerConfig = kafkaBaseConfig.toProducerConfig(
+        "spinnsyn", valueSerializer = KafkaAvroSerializer::class, keySerializer = KafkaAvroSerializer::class
+    )
+
+    val kafkaproducerOppgave = KafkaProducer<Nokkel, Oppgave>(kafkaBrukernotifikasjonProducerConfig)
+    val kafkaproducerDone = KafkaProducer<Nokkel, Done>(kafkaBrukernotifikasjonProducerConfig)
+    return BrukernotifikasjonKafkaProducer(
+        kafkaproducerOppgave = kafkaproducerOppgave,
+        kafkaproducerDone = kafkaproducerDone
+    )
 }
