@@ -9,7 +9,8 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 import java.util.* // ktlint-disable no-wildcard-imports
 
 fun DatabaseInterface.finnVedtak(fnr: String): List<Vedtak> =
@@ -161,7 +162,7 @@ private fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
            AND lest is null
         """
     ).use {
-        it.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()))
+        it.setTimestamp(1, Timestamp.from(Instant.now()))
         it.setString(2, fnr)
         it.setString(3, vedtaksId)
         it.executeUpdate()
@@ -187,7 +188,6 @@ private fun Connection.hentVedtakForVarsling(): List<InternVedtak> =
     }
 
 private fun Connection.hentVedtakForRevarsling(): List<InternVedtak> {
-    val syvDagerSiden = Timestamp.valueOf(LocalDateTime.now().minusDays(7))
     return this.prepareStatement(
         """
             SELECT id, fnr, lest, opprettet, varslet, revarslet
@@ -198,7 +198,7 @@ private fun Connection.hentVedtakForRevarsling(): List<InternVedtak> {
             AND varslet < ?
         """
     ).use {
-        it.setTimestamp(1, syvDagerSiden)
+        it.setTimestamp(1, Timestamp.from(Instant.now().minus(7, ChronoUnit.DAYS)))
         it.executeQuery().toList {
             toInternVedtak()
         }
@@ -214,7 +214,7 @@ private fun Connection.settVedtakVarslet(vedtaksId: String) {
         AND varslet IS NULL
         """
     ).use {
-        it.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()))
+        it.setTimestamp(1, Timestamp.from(Instant.now()))
         it.setString(2, vedtaksId)
         it.executeUpdate()
     }
@@ -231,7 +231,7 @@ private fun Connection.settVedtakRevarslet(vedtaksId: String) {
         AND revarslet IS NULL
         """
     ).use {
-        it.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()))
+        it.setTimestamp(1, Timestamp.from(Instant.now()))
         it.setString(2, vedtaksId)
         it.executeUpdate()
     }
@@ -241,19 +241,19 @@ private fun Connection.settVedtakRevarslet(vedtaksId: String) {
 private fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
-        lest = getObject("lest", Timestamp::class.java) != null,
+        lest = getObject("lest", OffsetDateTime::class.java) != null,
         vedtak = objectMapper.readValue(getString("vedtak")),
-        opprettet = getObject("opprettet", Timestamp::class.java).toInstant()
+        opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant()
     )
 
 private fun ResultSet.toInternVedtak(): InternVedtak =
     InternVedtak(
         id = getString("id"),
         fnr = getString("fnr"),
-        lest = getObject("lest", Timestamp::class.java)?.toInstant(),
-        opprettet = getObject("opprettet", Timestamp::class.java).toInstant(),
-        varslet = getObject("varslet", Timestamp::class.java)?.toInstant(),
-        revarslet = getObject("revarslet", Timestamp::class.java)?.toInstant()
+        lest = getObject("lest", OffsetDateTime::class.java)?.toInstant(),
+        opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant(),
+        varslet = getObject("varslet", OffsetDateTime::class.java)?.toInstant(),
+        revarslet = getObject("revarslet", OffsetDateTime::class.java)?.toInstant()
     )
 
 data class Vedtak(
