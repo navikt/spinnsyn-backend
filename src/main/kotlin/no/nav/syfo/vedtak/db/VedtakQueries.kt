@@ -22,6 +22,11 @@ fun DatabaseInterface.finnVedtak(fnr: String, vedtaksId: String): Vedtak? =
         return it.finnVedtak(fnr, vedtaksId)
     }
 
+fun DatabaseInterface.finnInternVedtak(fnr: String, vedtaksId: String): InternVedtak? =
+    connection.use {
+        return it.finnInternVedtak(fnr, vedtaksId)
+    }
+
 fun DatabaseInterface.eierVedtak(fnr: String, vedtaksId: String): Boolean =
     connection.use {
         return it.eierVedtak(fnr, vedtaksId)
@@ -109,6 +114,23 @@ private fun Connection.finnVedtak(fnr: String, vedtaksId: String): Vedtak? {
         it.setString(2, vedtaksId)
         it.executeQuery()
             .toList { toVedtak() }
+            .firstOrNull()
+    }
+}
+
+private fun Connection.finnInternVedtak(fnr: String, vedtaksId: String): InternVedtak? {
+    return this.prepareStatement(
+        """
+            SELECT id, fnr, lest, opprettet, varslet, revarslet
+            FROM vedtak
+            WHERE fnr = ?
+            AND id = ?;
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.setString(2, vedtaksId)
+        it.executeQuery()
+            .toList { toInternVedtak() }
             .firstOrNull()
     }
 }

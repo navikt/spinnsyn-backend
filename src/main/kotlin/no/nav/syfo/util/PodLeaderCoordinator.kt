@@ -1,4 +1,4 @@
-package no.nav.syfo.application.cronjob
+package no.nav.syfo.util
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -35,24 +35,24 @@ class PodLeaderCoordinator(
         val url = env.electorPath
         return when (url == dont_look_for_leader) {
             true -> {
-                log.info("Opting not to look for leader, returning true, elector url was:$url")
+                log.debug("Opting not to look for leader, returning true, elector url was:$url")
                 true
             }
             else ->
                 try {
                     val httpPath = getHttpPath(url)
-                    log.info("Looking for leader at url:$httpPath")
+                    log.debug("Looking for leader at url:$httpPath")
                     runBlocking {
                         val response = client.get<String>(urlString = httpPath)
                         val leader: Leader = objectMapper.readValue(response)
                         val hostname: String = InetAddress.getLocalHost().hostName
                         when (hostname == leader.name) {
                             true -> {
-                                log.info("Pod with $hostname is the leader")
+                                log.debug("Pod with $hostname is the leader")
                                 true
                             }
                             else -> {
-                                log.info("Pod with $hostname is not leader, leader is:${leader.name}")
+                                log.debug("Pod with $hostname is not leader, leader is:${leader.name}")
                                 false
                             }
                         }

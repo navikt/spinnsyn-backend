@@ -15,13 +15,15 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
-import no.nav.syfo.application.cronjob.setUpCronJob
 import no.nav.syfo.application.getWellKnown
-import no.nav.syfo.application.util.KafkaClients
-import no.nav.syfo.application.util.KafkaFactory.Companion.getBrukernotifikasjonKafkaProducer
+import no.nav.syfo.brukernotifkasjon.skapBrukernotifikasjonKafkaProducer
 import no.nav.syfo.db.Database
 import no.nav.syfo.kafka.envOverrides
 import no.nav.syfo.kafka.loadBaseConfig
+import no.nav.syfo.util.KafkaClients
+import no.nav.syfo.util.PodLeaderCoordinator
+import no.nav.syfo.varsling.cronjob.settOppVarslingCronjob
+import no.nav.syfo.varsling.kafka.skapEnkeltvarselKafkaProducer
 import no.nav.syfo.vedtak.kafka.VedtakConsumer
 import no.nav.syfo.vedtak.service.VedtakService
 import org.slf4j.Logger
@@ -64,7 +66,8 @@ fun main() {
 
     val kafkaBaseConfig = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
 
-    val brukernotifikasjonKafkaProducer = getBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
+    val brukernotifikasjonKafkaProducer = skapBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
+    val enkeltvarselKafkaProducer = skapEnkeltvarselKafkaProducer(kafkaBaseConfig)
 
     val vedtakConsumer = VedtakConsumer(kafkaClients.kafkaVedtakConsumer)
     val vedtakService = VedtakService(
@@ -87,10 +90,17 @@ fun main() {
     applicationServer.start()
     applicationState.ready = true
     log.info("Application server stated")
+
     createListener(applicationState) {
         vedtakService.start()
     }
-    setUpCronJob(env = env)
+
+    val podLeaderCoordinator = PodLeaderCoordinator(env = env)
+    settOppVarslingCronjob(
+        database = database,
+        podLeaderCoordinator = podLeaderCoordinator,
+        enkeltvarselKafkaProducer = enkeltvarselKafkaProducer
+    )
 }
 
 fun createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
