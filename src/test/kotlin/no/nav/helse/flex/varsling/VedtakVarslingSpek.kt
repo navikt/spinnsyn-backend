@@ -1,7 +1,14 @@
 package no.nav.helse.flex.varsling
 
 import io.ktor.util.KtorExperimentalAPI
-import io.mockk.* // ktlint-disable no-wildcard-imports
+import io.mockk.Runs
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.varsling.cronjob.varslingCronjob
@@ -12,8 +19,10 @@ import no.nav.helse.flex.vedtak.db.opprettVedtak
 import org.amshove.kluent.`should be equal to`
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.* // ktlint-disable no-wildcard-imports
-import java.util.* // ktlint-disable no-wildcard-imports
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.util.UUID
 
 @KtorExperimentalAPI
 object VedtakVarslingSpek : Spek({

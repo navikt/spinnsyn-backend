@@ -11,12 +11,16 @@ import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
-import no.nav.helse.flex.vedtak.db.* // ktlint-disable no-wildcard-imports
+import no.nav.helse.flex.vedtak.db.Vedtak
+import no.nav.helse.flex.vedtak.db.eierVedtak
+import no.nav.helse.flex.vedtak.db.finnVedtak
+import no.nav.helse.flex.vedtak.db.lesVedtak
+import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.* // ktlint-disable no-wildcard-imports
+import java.util.UUID
 
 @KtorExperimentalAPI
 class VedtakService(

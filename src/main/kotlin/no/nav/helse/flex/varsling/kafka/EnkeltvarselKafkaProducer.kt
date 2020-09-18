@@ -6,7 +6,7 @@ import no.nav.helse.flex.varsling.domene.EnkeltVarsel
 import no.nav.syfo.kafka.toProducerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.* // ktlint-disable no-wildcard-imports
+import java.util.Properties
 
 class EnkeltvarselKafkaProducer(
     private val kafkaproducer: KafkaProducer<String, EnkeltVarsel>

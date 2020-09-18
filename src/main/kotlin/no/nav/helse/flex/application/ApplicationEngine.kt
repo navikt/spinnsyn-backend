@@ -5,16 +5,19 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.application.* // ktlint-disable no-wildcard-imports
-import io.ktor.auth.* // ktlint-disable no-wildcard-imports
+import io.ktor.application.ApplicationCallPipeline
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.application.log
+import io.ktor.auth.authenticate
 import io.ktor.features.CallId
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.* // ktlint-disable no-wildcard-imports
-import io.ktor.response.* // ktlint-disable no-wildcard-imports
-import io.ktor.routing.* // ktlint-disable no-wildcard-imports
+import io.ktor.jackson.jackson
+import io.ktor.response.respond
+import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -23,6 +26,7 @@ import no.nav.helse.flex.Environment
 import no.nav.helse.flex.application.api.registerNaisApi
 import no.nav.helse.flex.application.metrics.monitorHttpRequests
 import no.nav.helse.flex.vedtak.api.registerVedtakApi
+import no.nav.helse.flex.vedtak.api.registerVedtakMockApi
 import no.nav.helse.flex.vedtak.service.VedtakService
 import java.util.UUID
 
@@ -65,6 +69,9 @@ fun createApplicationEngine(
             registerNaisApi(applicationState)
             authenticate("jwt") {
                 registerVedtakApi(vedtakService)
+            }
+            if (!env.isProd()) {
+                registerVedtakMockApi(vedtakService = vedtakService, env = env)
             }
         }
         intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests())
