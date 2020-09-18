@@ -11,7 +11,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
-import java.util.* // ktlint-disable no-wildcard-imports
+import java.util.UUID
 
 fun DatabaseInterface.finnVedtak(fnr: String): List<Vedtak> =
     connection.use {

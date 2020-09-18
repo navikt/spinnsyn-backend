@@ -16,7 +16,14 @@ import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.TestApplicationRequest
 import io.ktor.server.testing.handleRequest
 import io.ktor.util.KtorExperimentalAPI
-import io.mockk.* // ktlint-disable no-wildcard-imports
+import io.mockk.Runs
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Oppgave
@@ -47,7 +54,7 @@ import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
 import java.nio.file.Paths
-import java.util.* // ktlint-disable no-wildcard-imports
+import java.util.Properties
 
 @KtorExperimentalAPI
 object VedtakVerdikjedeSpek : Spek({

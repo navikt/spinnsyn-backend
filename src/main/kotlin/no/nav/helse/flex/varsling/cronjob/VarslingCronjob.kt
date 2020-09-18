@@ -1,14 +1,22 @@
 package no.nav.helse.flex.varsling.cronjob
 
-import io.ktor.util.* // ktlint-disable no-wildcard-imports
+import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
 import no.nav.helse.flex.util.PodLeaderCoordinator
 import no.nav.helse.flex.varsling.domene.EnkeltVarsel
 import no.nav.helse.flex.varsling.kafka.EnkeltvarselKafkaProducer
-import no.nav.helse.flex.vedtak.db.* // ktlint-disable no-wildcard-imports
-import java.time.* // ktlint-disable no-wildcard-imports
-import java.util.* // ktlint-disable no-wildcard-imports
+import no.nav.helse.flex.vedtak.db.InternVedtak
+import no.nav.helse.flex.vedtak.db.finnInternVedtak
+import no.nav.helse.flex.vedtak.db.hentVedtakForRevarsling
+import no.nav.helse.flex.vedtak.db.hentVedtakForVarsling
+import no.nav.helse.flex.vedtak.db.settVedtakRevarslet
+import no.nav.helse.flex.vedtak.db.settVedtakVarslet
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.util.UUID
 import kotlin.concurrent.timer
 
 fun varslingCronjob(

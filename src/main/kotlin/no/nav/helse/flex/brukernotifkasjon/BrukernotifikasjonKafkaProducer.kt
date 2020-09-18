@@ -8,7 +8,7 @@ import no.nav.helse.flex.log
 import no.nav.syfo.kafka.toProducerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.* // ktlint-disable no-wildcard-imports
+import java.util.Properties
 
 class BrukernotifikasjonKafkaProducer(
     private val kafkaproducerOppgave: KafkaProducer<Nokkel, Oppgave>,
