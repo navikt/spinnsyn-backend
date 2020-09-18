@@ -175,7 +175,7 @@ object VedtakVerdikjedeSpek : Spek({
                 oppgaveSlot.captured.getFodselsnummer() shouldEqual fnr
                 oppgaveSlot.captured.getGrupperingsId() shouldEqual vedtaksId
                 oppgaveSlot.captured.getSikkerhetsnivaa() shouldEqual 4
-                oppgaveSlot.captured.getTekst() shouldEqual "NAV har behandlet søknad om sykepenger"
+                oppgaveSlot.captured.getTekst() shouldEqual "Sykepengene dine er beregnet - se resultatet"
                 oppgaveSlot.captured.getLink() shouldEqual "https://www.nav.no/syk/sykepenger/vedtak/$vedtaksId"
 
                 verify(exactly = 0) { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) }
