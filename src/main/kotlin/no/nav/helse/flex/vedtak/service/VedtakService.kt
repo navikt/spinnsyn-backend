@@ -63,7 +63,7 @@ class VedtakService(
                 vedtaket.opprettet.toEpochMilli(),
                 fnr,
                 id.toString(),
-                "NAV har behandlet søknad om sykepenger",
+                "Sykepengene dine er beregnet - se resultatet",
                 "${environment.spinnsynFrontendUrl}/vedtak/$id",
                 4
             )
