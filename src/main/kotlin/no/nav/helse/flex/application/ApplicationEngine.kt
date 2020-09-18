@@ -1,0 +1,71 @@
+package no.nav.helse.flex.application
+
+import com.auth0.jwk.JwkProvider
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.application.* // ktlint-disable no-wildcard-imports
+import io.ktor.auth.* // ktlint-disable no-wildcard-imports
+import io.ktor.features.CallId
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.StatusPages
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.jackson.* // ktlint-disable no-wildcard-imports
+import io.ktor.response.* // ktlint-disable no-wildcard-imports
+import io.ktor.routing.* // ktlint-disable no-wildcard-imports
+import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.flex.Environment
+import no.nav.helse.flex.application.api.registerNaisApi
+import no.nav.helse.flex.application.metrics.monitorHttpRequests
+import no.nav.helse.flex.vedtak.api.registerVedtakApi
+import no.nav.helse.flex.vedtak.service.VedtakService
+import java.util.UUID
+
+@KtorExperimentalAPI
+fun createApplicationEngine(
+    env: Environment,
+    vedtakService: VedtakService,
+    jwkProvider: JwkProvider,
+    issuer: String,
+    loginserviceClientId: String,
+    applicationState: ApplicationState
+): ApplicationEngine =
+    embeddedServer(Netty, env.applicationPort) {
+        install(ContentNegotiation) {
+            jackson {
+                registerKotlinModule()
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            }
+        }
+        setupAuth(
+            loginserviceClientId = loginserviceClientId,
+            jwkProvider = jwkProvider,
+            issuer = issuer
+        )
+        install(CallId) {
+            generate { UUID.randomUUID().toString() }
+            verify { callId: String -> callId.isNotEmpty() }
+            header(HttpHeaders.XCorrelationId)
+        }
+        install(StatusPages) {
+            exception<Throwable> { cause ->
+                log.error("Caught exception ${cause.message}", cause)
+                call.respond(HttpStatusCode.InternalServerError, cause.message ?: "Unknown error")
+            }
+        }
+
+        routing {
+            registerNaisApi(applicationState)
+            authenticate("jwt") {
+                registerVedtakApi(vedtakService)
+            }
+        }
+        intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests())
+    }
