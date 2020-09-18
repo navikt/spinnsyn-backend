@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "no.nav.syfo"
+group = "no.nav.helse.flex"
 version = "1.0.0"
 
 val coroutinesVersion = "1.3.3"
@@ -34,7 +34,7 @@ val outputDir = "${project.buildDir}/reports/ktlint/"
 val inputFiles = project.fileTree(mapOf("dir" to "src", "include" to "**/*.kt"))
 
 tasks.withType<Jar> {
-    manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
+    manifest.attributes["Main-Class"] = "no.nav.helse.flex.BootstrapKt"
 }
 
 plugins {
