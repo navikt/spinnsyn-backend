@@ -23,6 +23,7 @@ import no.nav.helse.flex.util.PodLeaderCoordinator
 import no.nav.helse.flex.varsling.cronjob.settOppVarslingCronjob
 import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProducer
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
+import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.syfo.kafka.envOverrides
 import no.nav.syfo.kafka.loadBaseConfig
@@ -78,9 +79,16 @@ fun main() {
         environment = env
     )
 
+    val vedtakNullstillService = VedtakNullstillService(
+        database = database,
+        brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+        environment = env
+    )
+
     val applicationEngine = createApplicationEngine(
         env = env,
         vedtakService = vedtakService,
+        vedtakNullstillService = vedtakNullstillService,
         jwkProvider = jwkProvider,
         applicationState = applicationState,
         issuer = wellKnown.issuer,

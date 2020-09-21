@@ -27,6 +27,7 @@ import no.nav.helse.flex.application.api.registerNaisApi
 import no.nav.helse.flex.application.metrics.monitorHttpRequests
 import no.nav.helse.flex.vedtak.api.registerVedtakApi
 import no.nav.helse.flex.vedtak.api.registerVedtakMockApi
+import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import java.util.UUID
 
@@ -34,6 +35,7 @@ import java.util.UUID
 fun createApplicationEngine(
     env: Environment,
     vedtakService: VedtakService,
+    vedtakNullstillService: VedtakNullstillService,
     jwkProvider: JwkProvider,
     issuer: String,
     loginserviceClientId: String,
@@ -71,7 +73,7 @@ fun createApplicationEngine(
                 registerVedtakApi(vedtakService)
             }
             if (!env.isProd()) {
-                registerVedtakMockApi(vedtakService = vedtakService, env = env)
+                registerVedtakMockApi(vedtakService = vedtakService, vedtakNullstillService = vedtakNullstillService, env = env)
             }
         }
         intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests())
