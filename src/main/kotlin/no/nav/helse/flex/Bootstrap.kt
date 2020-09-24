@@ -14,6 +14,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import no.nav.helse.flex.application.ApplicationServer
 import no.nav.helse.flex.application.ApplicationState
+import no.nav.helse.flex.application.IssuerInternalId
+import no.nav.helse.flex.application.JwtIssuer
 import no.nav.helse.flex.application.createApplicationEngine
 import no.nav.helse.flex.application.getWellKnown
 import no.nav.helse.flex.brukernotifkasjon.skapBrukernotifikasjonKafkaProducer
@@ -51,12 +53,7 @@ fun main() {
     Thread.sleep(env.sidecarInitialDelay)
     log.info("Sov i ${env.sidecarInitialDelay} ms i håp om at sidecars er klare")
 
-    val wellKnown = getWellKnown(env.oidcWellKnownUri)
-
-    val jwkProvider = JwkProviderBuilder(URL(wellKnown.jwks_uri))
-        .cached(10, 24, TimeUnit.HOURS)
-        .rateLimited(10, 1, TimeUnit.MINUTES)
-        .build()
+    val selvbetjeningIssuer = hentSelvbetjeningJwtIssuer(env)
 
     val database = Database(env)
 
@@ -89,10 +86,8 @@ fun main() {
         env = env,
         vedtakService = vedtakService,
         vedtakNullstillService = vedtakNullstillService,
-        jwkProvider = jwkProvider,
-        applicationState = applicationState,
-        issuer = wellKnown.issuer,
-        loginserviceClientId = env.loginserviceClientId
+        selvbetjeningIssuer = selvbetjeningIssuer,
+        applicationState = applicationState
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
@@ -108,6 +103,22 @@ fun main() {
         database = database,
         podLeaderCoordinator = podLeaderCoordinator,
         enkeltvarselKafkaProducer = enkeltvarselKafkaProducer
+    )
+}
+
+private fun hentSelvbetjeningJwtIssuer(env: Environment): JwtIssuer {
+    val selvbetjeningWellKnown = getWellKnown(env.selvbetjeningWellKnownUri)
+
+    val selvbetjeningJwkProvider = JwkProviderBuilder(URL(selvbetjeningWellKnown.jwks_uri))
+        .cached(10, 24, TimeUnit.HOURS)
+        .rateLimited(10, 1, TimeUnit.MINUTES)
+        .build()
+
+    return JwtIssuer(
+        issuerInternalId = IssuerInternalId.selvbetjening,
+        wellKnown = selvbetjeningWellKnown,
+        expectedAudience = listOf(env.selvbetjeningExpectedAudience),
+        jwkProvider = selvbetjeningJwkProvider
     )
 }
 

@@ -1,6 +1,5 @@
 package no.nav.helse.flex.application
 
-import com.auth0.jwk.JwkProvider
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.auth.Authentication
@@ -12,16 +11,17 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.flex.log
 
 fun Application.setupAuth(
-    loginserviceClientId: String,
-    jwkProvider: JwkProvider,
-    issuer: String
+    selvbetjeningIssuer: JwtIssuer
 ) {
     install(Authentication) {
-        jwt(name = "jwt") {
-            verifier(jwkProvider, issuer)
+        jwt(name = selvbetjeningIssuer.issuerInternalId.name) {
+            verifier(jwkProvider = selvbetjeningIssuer.jwkProvider, issuer = selvbetjeningIssuer.wellKnown.issuer)
             validate { credentials ->
                 when {
-                    hasLoginserviceClientIdAudience(credentials, loginserviceClientId) -> JWTPrincipal(credentials.payload)
+                    hasExpectedAudience(
+                        credentials,
+                        selvbetjeningIssuer.expectedAudience
+                    ) -> JWTPrincipal(credentials.payload)
                     else -> unauthorized(credentials)
                 }
             }
@@ -38,6 +38,6 @@ fun unauthorized(credentials: JWTCredential): Principal? {
     return null
 }
 
-fun hasLoginserviceClientIdAudience(credentials: JWTCredential, loginserviceClientId: String): Boolean {
-    return credentials.payload.audience.contains(loginserviceClientId)
+fun hasExpectedAudience(credentials: JWTCredential, expectedAudience: List<String>): Boolean {
+    return expectedAudience.any { credentials.payload.audience.contains(it) }
 }

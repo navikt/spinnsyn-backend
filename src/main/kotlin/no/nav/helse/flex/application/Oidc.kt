@@ -1,5 +1,6 @@
 package no.nav.helse.flex.application
 
+import com.auth0.jwk.JwkProvider
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -41,4 +42,15 @@ data class WellKnown(
     val token_endpoint: String,
     val jwks_uri: String,
     val issuer: String
+)
+
+enum class IssuerInternalId {
+    selvbetjening
+}
+
+class JwtIssuer(
+    val issuerInternalId: IssuerInternalId,
+    val jwkProvider: JwkProvider,
+    val wellKnown: WellKnown,
+    val expectedAudience: List<String>
 )
