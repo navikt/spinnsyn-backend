@@ -1,17 +1,9 @@
 package no.nav.helse.flex
 
 import com.auth0.jwk.JwkProviderBuilder
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.ktor.application.install
-import io.ktor.auth.authenticate
-import io.ktor.features.ContentNegotiation
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
-import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.TestApplicationRequest
 import io.ktor.server.testing.handleRequest
@@ -28,14 +20,17 @@ import kotlinx.coroutines.runBlocking
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.application.ApplicationState
-import no.nav.helse.flex.application.setupAuth
+import no.nav.helse.flex.application.IssuerInternalId
+import no.nav.helse.flex.application.JwtIssuer
+import no.nav.helse.flex.application.WellKnown
+import no.nav.helse.flex.application.configureApplication
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.testutil.generateJWT
 import no.nav.helse.flex.testutil.stopApplicationNårKafkaTopicErLest
-import no.nav.helse.flex.vedtak.api.registerVedtakApi
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
+import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.helse.flex.vedtak.service.tilRSVedtak
 import no.nav.syfo.kafka.toConsumerConfig
@@ -65,13 +60,19 @@ object VedtakVerdikjedeSpek : Spek({
     val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
     val env = mockk<Environment>()
 
-    beforeEachTest {
+    fun setupEnvMock() {
         clearAllMocks()
         every { env.spinnsynFrontendUrl } returns "https://www.nav.no/syk/sykepenger"
         every { env.serviceuserUsername } returns "srvspvedtak"
         every { env.isProd() } returns false
         every { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) } just Runs
         every { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) } just Runs
+    }
+
+    setupEnvMock()
+
+    beforeEachTest {
+        setupEnvMock()
     }
 
     describe("Test hele verdikjeden") {
@@ -113,6 +114,11 @@ object VedtakVerdikjedeSpek : Spek({
                 brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
                 environment = env
             )
+            val vedtakNullstillService = VedtakNullstillService(
+                database = testDb,
+                brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+                environment = env
+            )
 
             val fnr = "13068700000"
 
@@ -120,20 +126,26 @@ object VedtakVerdikjedeSpek : Spek({
             val uri = Paths.get(path).toUri().toURL()
             val jwkProvider = JwkProviderBuilder(uri).build()
 
+            val selvbetjeningIssuer = JwtIssuer(
+                issuerInternalId = IssuerInternalId.selvbetjening,
+                wellKnown = WellKnown(
+                    authorization_endpoint = "hatever",
+                    token_endpoint = "whatever",
+                    jwks_uri = uri.toString(),
+                    issuer = issuer
+                ),
+                expectedAudience = listOf(audience),
+                jwkProvider = jwkProvider
+            )
+
             start()
-            application.setupAuth(jwkProvider = jwkProvider, loginserviceClientId = audience, issuer = issuer)
-            application.routing {
-                authenticate("jwt") {
-                    registerVedtakApi(vedtakService)
-                }
-            }
-            application.install(ContentNegotiation) {
-                jackson {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                }
-            }
+            application.configureApplication(
+                selvbetjeningIssuer = selvbetjeningIssuer,
+                applicationState = applicationState,
+                vedtakService = vedtakService,
+                env = env,
+                vedtakNullstillService = vedtakNullstillService
+            )
 
             fun TestApplicationRequest.medFnr(subject: String) {
                 addHeader(
@@ -178,7 +190,12 @@ object VedtakVerdikjedeSpek : Spek({
                 val oppgaveSlot = slot<Oppgave>()
                 val vedtaksId = vedtakEtter[0].id
 
-                verify(exactly = 1) { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), capture(oppgaveSlot)) }
+                verify(exactly = 1) {
+                    brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
+                        any(),
+                        capture(oppgaveSlot)
+                    )
+                }
                 oppgaveSlot.captured.getFodselsnummer() shouldEqual fnr
                 oppgaveSlot.captured.getGrupperingsId() shouldEqual vedtaksId
                 oppgaveSlot.captured.getSikkerhetsnivaa() shouldEqual 4

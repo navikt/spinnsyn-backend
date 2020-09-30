@@ -16,10 +16,10 @@ data class Environment(
     val spinnsynFrontendUrl: String = getEnvVar("SPINNSYN_FRONTEND_URL"),
     val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
     val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
-    val oidcWellKnownUri: String = getEnvVar("OIDC_WELLKNOWN_URI"),
+    val selvbetjeningWellKnownUri: String = getEnvVar("SELVBETJENING_WELLKNOWN_URI"),
     val electorPath: String = getEnvVar("ELECTOR_PATH"),
     val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "30000").toLong(),
-    val loginserviceClientId: String = getEnvVar("LOGINSERVICE_CLIENTID")
+    val selvbetjeningExpectedAudience: String = getEnvVar("SELVBETJENING_EXPECTED_AUDIENCE")
 ) : KafkaConfig {
 
     fun hentKafkaCredentials(): KafkaCredentials {

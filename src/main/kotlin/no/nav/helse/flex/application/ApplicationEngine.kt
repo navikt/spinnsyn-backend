@@ -1,10 +1,10 @@
 package no.nav.helse.flex.application
 
-import com.auth0.jwk.JwkProvider
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.application.Application
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
 import io.ktor.application.install
@@ -36,45 +36,62 @@ fun createApplicationEngine(
     env: Environment,
     vedtakService: VedtakService,
     vedtakNullstillService: VedtakNullstillService,
-    jwkProvider: JwkProvider,
-    issuer: String,
-    loginserviceClientId: String,
+    selvbetjeningIssuer: JwtIssuer,
     applicationState: ApplicationState
 ): ApplicationEngine =
     embeddedServer(Netty, env.applicationPort) {
-        install(ContentNegotiation) {
-            jackson {
-                registerKotlinModule()
-                registerModule(JavaTimeModule())
-                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            }
-        }
-        setupAuth(
-            loginserviceClientId = loginserviceClientId,
-            jwkProvider = jwkProvider,
-            issuer = issuer
+        configureApplication(
+            selvbetjeningIssuer = selvbetjeningIssuer,
+            applicationState = applicationState,
+            vedtakService = vedtakService,
+            env = env,
+            vedtakNullstillService = vedtakNullstillService
         )
-        install(CallId) {
-            generate { UUID.randomUUID().toString() }
-            verify { callId: String -> callId.isNotEmpty() }
-            header(HttpHeaders.XCorrelationId)
-        }
-        install(StatusPages) {
-            exception<Throwable> { cause ->
-                log.error("Caught exception ${cause.message}", cause)
-                call.respond(HttpStatusCode.InternalServerError, cause.message ?: "Unknown error")
-            }
-        }
-
-        routing {
-            registerNaisApi(applicationState)
-            authenticate("jwt") {
-                registerVedtakApi(vedtakService)
-            }
-            if (!env.isProd()) {
-                registerVedtakMockApi(vedtakService = vedtakService, vedtakNullstillService = vedtakNullstillService, env = env)
-            }
-        }
-        intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests())
     }
+
+@KtorExperimentalAPI
+fun Application.configureApplication(
+    selvbetjeningIssuer: JwtIssuer,
+    applicationState: ApplicationState,
+    vedtakService: VedtakService,
+    env: Environment,
+    vedtakNullstillService: VedtakNullstillService
+) {
+    install(ContentNegotiation) {
+        jackson {
+            registerKotlinModule()
+            registerModule(JavaTimeModule())
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        }
+    }
+    setupAuth(
+        selvbetjeningIssuer = selvbetjeningIssuer
+    )
+    install(CallId) {
+        generate { UUID.randomUUID().toString() }
+        verify { callId: String -> callId.isNotEmpty() }
+        header(HttpHeaders.XCorrelationId)
+    }
+    install(StatusPages) {
+        exception<Throwable> { cause ->
+            log.error("Caught exception ${cause.message}", cause)
+            call.respond(HttpStatusCode.InternalServerError, cause.message ?: "Unknown error")
+        }
+    }
+
+    routing {
+        registerNaisApi(applicationState)
+        authenticate(IssuerInternalId.selvbetjening.name) {
+            registerVedtakApi(vedtakService)
+        }
+        if (!env.isProd()) {
+            registerVedtakMockApi(
+                vedtakService = vedtakService,
+                vedtakNullstillService = vedtakNullstillService,
+                env = env
+            )
+        }
+    }
+    intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests())
+}

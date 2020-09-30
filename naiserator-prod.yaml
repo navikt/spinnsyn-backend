@@ -55,9 +55,9 @@ spec:
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
     - name: SPINNSYN_FRONTEND_URL
       value: "https://www.nav.no/syk/sykepenger"
-    - name: OIDC_WELLKNOWN_URI
+    - name: SELVBETJENING_WELLKNOWN_URI
       value: "https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten"
-    - name: LOGINSERVICE_CLIENTID
+    - name: SELVBETJENING_EXPECTED_AUDIENCE
       value: "45104d6a-f5bc-4e8c-b352-4bbfc9381f25"
     - name: KAFKA_SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.adeo.no
