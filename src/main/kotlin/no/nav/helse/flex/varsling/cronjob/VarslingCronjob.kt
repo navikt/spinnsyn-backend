@@ -42,7 +42,7 @@ fun varslingCronjob(
                     EnkeltVarsel(
                         fodselsnummer = vedtak.fnr,
                         varselBestillingId = varselBestillingId,
-                        varselTypeId = "NySykmeldingUtenLenke" // TODO bytt til vårt eget varsel
+                        varselTypeId = "NyttSykepengevedtak"
                     )
                 )
                 database.settVedtakVarslet(it.id)
@@ -65,7 +65,7 @@ fun varslingCronjob(
                     EnkeltVarsel(
                         fodselsnummer = vedtak.fnr,
                         varselBestillingId = varselBestillingId,
-                        varselTypeId = "NySykmeldingUtenLenke" // TODO bytt til vårt eget varsel
+                        varselTypeId = "NyttSykepengevedtak"
                     )
                 )
                 database.settVedtakRevarslet(it.id)

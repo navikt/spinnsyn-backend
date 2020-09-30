@@ -82,11 +82,11 @@ object VedtakVarslingSpek : Spek({
 
             enkeltVarsler[0].fodselsnummer `should be equal to` fnrSomSkalVarslesOgRevarsles
             enkeltVarsler[0].varselBestillingId `should be equal to` "8f073468-752f-3c9d-b21f-de0946c07718"
-            enkeltVarsler[0].varselTypeId `should be equal to` "NySykmeldingUtenLenke"
+            enkeltVarsler[0].varselTypeId `should be equal to` "NyttSykepengevedtak"
 
             enkeltVarsler[1].fodselsnummer `should be equal to` fnrSomLeserEtterEttVarsel
             enkeltVarsler[1].varselBestillingId `should be equal to` "aa52cdb4-8e61-3655-a0c5-4bef2a544529"
-            enkeltVarsler[1].varselTypeId `should be equal to` "NySykmeldingUtenLenke"
+            enkeltVarsler[1].varselTypeId `should be equal to` "NyttSykepengevedtak"
             clearMocks(enkeltvarselKafkaProducer, answers = false)
         }
 
@@ -113,7 +113,7 @@ object VedtakVarslingSpek : Spek({
 
             enkeltVarsler[0].fodselsnummer `should be equal to` fnrSomSkalVarslesOgRevarsles
             enkeltVarsler[0].varselBestillingId `should be equal to` "183109de-ebf7-320a-bfd7-4fb7d022f14f"
-            enkeltVarsler[0].varselTypeId `should be equal to` "NySykmeldingUtenLenke"
+            enkeltVarsler[0].varselTypeId `should be equal to` "NyttSykepengevedtak"
         }
 
         it("Vi kjører cronjobben igjen og ingenting skjer") {
