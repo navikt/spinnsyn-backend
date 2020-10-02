@@ -19,7 +19,7 @@ data class Environment(
     val selvbetjeningWellKnownUri: String = getEnvVar("SELVBETJENING_WELLKNOWN_URI"),
     val selvbetjeningExpectedAudience: List<String> = getEnvVar("SELVBETJENING_EXPECTED_AUDIENCE").split(","),
     val veilederWellKnownUri: String = getEnvVar("VEILEDER_WELLKNOWN_URI"),
-    val veilederExpectedAudience: List<String> = getEnvVar("VEILEDERG_EXPECTED_AUDIENCE").split(","),
+    val veilederExpectedAudience: List<String> = getEnvVar("VEILEDER_EXPECTED_AUDIENCE").split(","),
     val electorPath: String = getEnvVar("ELECTOR_PATH"),
     val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "30000").toLong()
 ) : KafkaConfig {
