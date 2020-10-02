@@ -27,6 +27,7 @@ import no.nav.helse.flex.application.api.registerNaisApi
 import no.nav.helse.flex.application.metrics.monitorHttpRequests
 import no.nav.helse.flex.vedtak.api.registerVedtakApi
 import no.nav.helse.flex.vedtak.api.registerVedtakMockApi
+import no.nav.helse.flex.vedtak.api.registerVeilederVedtakApi
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import java.util.UUID
@@ -37,11 +38,13 @@ fun createApplicationEngine(
     vedtakService: VedtakService,
     vedtakNullstillService: VedtakNullstillService,
     selvbetjeningIssuer: JwtIssuer,
+    veilederIssuer: JwtIssuer,
     applicationState: ApplicationState
 ): ApplicationEngine =
     embeddedServer(Netty, env.applicationPort) {
         configureApplication(
             selvbetjeningIssuer = selvbetjeningIssuer,
+            veilederIssuer = veilederIssuer,
             applicationState = applicationState,
             vedtakService = vedtakService,
             env = env,
@@ -52,6 +55,7 @@ fun createApplicationEngine(
 @KtorExperimentalAPI
 fun Application.configureApplication(
     selvbetjeningIssuer: JwtIssuer,
+    veilederIssuer: JwtIssuer,
     applicationState: ApplicationState,
     vedtakService: VedtakService,
     env: Environment,
@@ -66,7 +70,8 @@ fun Application.configureApplication(
         }
     }
     setupAuth(
-        selvbetjeningIssuer = selvbetjeningIssuer
+        selvbetjeningIssuer = selvbetjeningIssuer,
+        veilederIssuer = veilederIssuer
     )
     install(CallId) {
         generate { UUID.randomUUID().toString() }
@@ -84,6 +89,9 @@ fun Application.configureApplication(
         registerNaisApi(applicationState)
         authenticate(IssuerInternalId.selvbetjening.name) {
             registerVedtakApi(vedtakService)
+        }
+        authenticate(IssuerInternalId.veileder.name) {
+            registerVeilederVedtakApi(vedtakService)
         }
         if (!env.isProd()) {
             registerVedtakMockApi(

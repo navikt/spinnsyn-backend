@@ -11,19 +11,25 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.flex.log
 
 fun Application.setupAuth(
-    selvbetjeningIssuer: JwtIssuer
+    selvbetjeningIssuer: JwtIssuer,
+    veilederIssuer: JwtIssuer
 ) {
     install(Authentication) {
-        jwt(name = selvbetjeningIssuer.issuerInternalId.name) {
-            verifier(jwkProvider = selvbetjeningIssuer.jwkProvider, issuer = selvbetjeningIssuer.wellKnown.issuer)
-            validate { credentials ->
-                when {
-                    hasExpectedAudience(
-                        credentials,
-                        selvbetjeningIssuer.expectedAudience
-                    ) -> JWTPrincipal(credentials.payload)
-                    else -> unauthorized(credentials)
-                }
+        configureJwtValidation(selvbetjeningIssuer)
+        configureJwtValidation(veilederIssuer)
+    }
+}
+
+private fun Authentication.Configuration.configureJwtValidation(issuer: JwtIssuer) {
+    jwt(name = issuer.issuerInternalId.name) {
+        verifier(jwkProvider = issuer.jwkProvider, issuer = issuer.wellKnown.issuer)
+        validate { credentials ->
+            when {
+                hasExpectedAudience(
+                    credentials,
+                    issuer.expectedAudience
+                ) -> JWTPrincipal(credentials.payload)
+                else -> unauthorized(credentials)
             }
         }
     }
