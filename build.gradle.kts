@@ -20,7 +20,7 @@ val nimbusdsVersion = "7.5.1"
 val prometheusVersion = "0.6.0"
 val smCommonVersion = "1.7cb158e"
 val spekVersion = "2.0.9"
-val testContainerKafkaVersion = "1.12.5"
+val testContainerKafkaVersion = "1.15.0-rc2"
 val confluentVersion = "5.5.1"
 
 val postgresVersion = "42.2.15"
