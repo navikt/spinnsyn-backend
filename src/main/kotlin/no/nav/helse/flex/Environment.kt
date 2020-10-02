@@ -17,9 +17,11 @@ data class Environment(
     val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
     val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
     val selvbetjeningWellKnownUri: String = getEnvVar("SELVBETJENING_WELLKNOWN_URI"),
+    val selvbetjeningExpectedAudience: List<String> = getEnvVar("SELVBETJENING_EXPECTED_AUDIENCE").split(","),
+    val veilederWellKnownUri: String = getEnvVar("VEILEDER_WELLKNOWN_URI"),
+    val veilederExpectedAudience: List<String> = getEnvVar("VEILEDER_EXPECTED_AUDIENCE").split(","),
     val electorPath: String = getEnvVar("ELECTOR_PATH"),
-    val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "30000").toLong(),
-    val selvbetjeningExpectedAudience: String = getEnvVar("SELVBETJENING_EXPECTED_AUDIENCE")
+    val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "30000").toLong()
 ) : KafkaConfig {
 
     fun hentKafkaCredentials(): KafkaCredentials {

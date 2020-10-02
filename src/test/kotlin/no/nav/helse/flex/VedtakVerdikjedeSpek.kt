@@ -54,8 +54,10 @@ import java.util.Properties
 @KtorExperimentalAPI
 object VedtakVerdikjedeSpek : Spek({
 
-    val issuer = "TestIssuer"
-    val audience = "AUD"
+    val selvbetjeningissuer = "TestIssuer"
+    val selvbetjeningaudience = "AUD"
+    val veilederissuer = "VeilederIssuer"
+    val veilederaudience = "veileder"
 
     val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
     val env = mockk<Environment>()
@@ -132,25 +134,45 @@ object VedtakVerdikjedeSpek : Spek({
                     authorization_endpoint = "hatever",
                     token_endpoint = "whatever",
                     jwks_uri = uri.toString(),
-                    issuer = issuer
+                    issuer = selvbetjeningissuer
                 ),
-                expectedAudience = listOf(audience),
+                expectedAudience = listOf(selvbetjeningaudience),
+                jwkProvider = jwkProvider
+            )
+
+            val veilederIssuer = JwtIssuer(
+                issuerInternalId = IssuerInternalId.veileder,
+                wellKnown = WellKnown(
+                    authorization_endpoint = "hatever",
+                    token_endpoint = "whatever",
+                    jwks_uri = uri.toString(),
+                    issuer = veilederissuer
+                ),
+                expectedAudience = listOf(veilederaudience),
                 jwkProvider = jwkProvider
             )
 
             start()
             application.configureApplication(
                 selvbetjeningIssuer = selvbetjeningIssuer,
+                veilederIssuer = veilederIssuer,
                 applicationState = applicationState,
                 vedtakService = vedtakService,
                 env = env,
                 vedtakNullstillService = vedtakNullstillService
             )
 
-            fun TestApplicationRequest.medFnr(subject: String) {
+            fun TestApplicationRequest.medSelvbetjeningToken(subject: String) {
                 addHeader(
                     HttpHeaders.Authorization,
-                    "Bearer ${generateJWT(audience = audience, issuer = issuer, subject = subject)}"
+                    "Bearer ${generateJWT(audience = selvbetjeningaudience, issuer = selvbetjeningissuer, subject = subject)}"
+                )
+            }
+
+            fun TestApplicationRequest.medVeilederToken(subject: String) {
+                addHeader(
+                    HttpHeaders.Authorization,
+                    "Bearer ${generateJWT(audience = veilederaudience, issuer = veilederissuer, subject = subject)}"
                 )
             }
 
@@ -212,7 +234,7 @@ object VedtakVerdikjedeSpek : Spek({
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
-                        medFnr(fnr)
+                        medSelvbetjeningToken(fnr)
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
@@ -220,10 +242,44 @@ object VedtakVerdikjedeSpek : Spek({
                 }
             }
 
+            it("Vedtaket kan hentes i REST APIet av en veileder") {
+                val vedtak = testDb.finnVedtak(fnr)[0].tilRSVedtak()
+                val generertVedtakId = vedtak.id
+                val opprettet = vedtak.opprettet
+
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/veileder/vedtak?fnr=$fnr") {
+                        medVeilederToken("whatver-subject")
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.OK
+                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123},\"opprettet\":\"$opprettet\"}]"
+                }
+            }
+
+            it("Veileder APIet krever query param") {
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/veileder/vedtak") {
+                        medVeilederToken("whatver-subject")
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.BadRequest
+                    response.content shouldEqual "{\"melding\":\"Mangler fnr query param\"}"
+                }
+            }
+
+            it("Veileder APIet krever token") {
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/veileder/vedtak")
+                ) {
+                    response.status() shouldEqual HttpStatusCode.Unauthorized
+                }
+            }
+
             it("Dersom bruker ikke har lagret vedtak får vi et tomt array") {
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
-                        medFnr("12345610102")
+                        medSelvbetjeningToken("12345610102")
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
@@ -238,7 +294,7 @@ object VedtakVerdikjedeSpek : Spek({
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
-                        medFnr(fnr)
+                        medSelvbetjeningToken(fnr)
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
@@ -251,7 +307,7 @@ object VedtakVerdikjedeSpek : Spek({
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
-                        medFnr("12345610102")
+                        medSelvbetjeningToken("12345610102")
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.NotFound
@@ -264,7 +320,7 @@ object VedtakVerdikjedeSpek : Spek({
 
                 with(
                     handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
-                        medFnr(fnr)
+                        medSelvbetjeningToken(fnr)
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
@@ -282,7 +338,7 @@ object VedtakVerdikjedeSpek : Spek({
 
                 with(
                     handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
-                        medFnr(fnr)
+                        medSelvbetjeningToken(fnr)
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
@@ -296,7 +352,7 @@ object VedtakVerdikjedeSpek : Spek({
 
                 with(
                     handleRequest(HttpMethod.Post, "/api/v1/vedtak/$generertVedtakId/les") {
-                        medFnr("12345610102")
+                        medSelvbetjeningToken("12345610102")
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.NotFound

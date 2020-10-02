@@ -54,6 +54,7 @@ fun main() {
     log.info("Sov i ${env.sidecarInitialDelay} ms i håp om at sidecars er klare")
 
     val selvbetjeningIssuer = hentSelvbetjeningJwtIssuer(env)
+    val veilederIssuer = hentVeilederJwtIssuer(env)
 
     val database = Database(env)
 
@@ -87,6 +88,7 @@ fun main() {
         vedtakService = vedtakService,
         vedtakNullstillService = vedtakNullstillService,
         selvbetjeningIssuer = selvbetjeningIssuer,
+        veilederIssuer = veilederIssuer,
         applicationState = applicationState
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
@@ -106,19 +108,33 @@ fun main() {
     )
 }
 
-private fun hentSelvbetjeningJwtIssuer(env: Environment): JwtIssuer {
-    val selvbetjeningWellKnown = getWellKnown(env.selvbetjeningWellKnownUri)
+private fun hentSelvbetjeningJwtIssuer(env: Environment): JwtIssuer =
+    hentJwtIssuer(
+        env.selvbetjeningWellKnownUri,
+        expectedAudience = env.selvbetjeningExpectedAudience,
+        issuerInternalId = IssuerInternalId.selvbetjening
+    )
 
-    val selvbetjeningJwkProvider = JwkProviderBuilder(URL(selvbetjeningWellKnown.jwks_uri))
+private fun hentVeilederJwtIssuer(env: Environment): JwtIssuer =
+    hentJwtIssuer(
+        env.veilederWellKnownUri,
+        expectedAudience = env.veilederExpectedAudience,
+        issuerInternalId = IssuerInternalId.veileder
+    )
+
+private fun hentJwtIssuer(wllKnownUri: String, expectedAudience: List<String>, issuerInternalId: IssuerInternalId): JwtIssuer {
+    val wellKnown = getWellKnown(wllKnownUri)
+
+    val jwkProvider = JwkProviderBuilder(URL(wellKnown.jwks_uri))
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
         .build()
 
     return JwtIssuer(
-        issuerInternalId = IssuerInternalId.selvbetjening,
-        wellKnown = selvbetjeningWellKnown,
-        expectedAudience = listOf(env.selvbetjeningExpectedAudience),
-        jwkProvider = selvbetjeningJwkProvider
+        issuerInternalId = issuerInternalId,
+        wellKnown = wellKnown,
+        expectedAudience = expectedAudience,
+        jwkProvider = jwkProvider
     )
 }
 

@@ -45,7 +45,8 @@ data class WellKnown(
 )
 
 enum class IssuerInternalId {
-    selvbetjening
+    selvbetjening,
+    veileder
 }
 
 class JwtIssuer(

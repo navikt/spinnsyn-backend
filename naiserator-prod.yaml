@@ -47,6 +47,7 @@ spec:
     inbound:
       rules:
         - application: spinnsyn-backend-proxy
+        - application: spinnsyn-backend-veileder-proxy
 
   envFrom:
     - secret: spinnsyn-backend-serviceuser
@@ -59,5 +60,9 @@ spec:
       value: "https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten"
     - name: SELVBETJENING_EXPECTED_AUDIENCE
       value: "45104d6a-f5bc-4e8c-b352-4bbfc9381f25"
+    - name: VEILEDER_WELLKNOWN_URI
+      value: "https://login.microsoftonline.com/navno.onmicrosoft.com/.well-known/openid-configuration"
+    - name: VEILEDER_EXPECTED_AUDIENCE
+      value: "9b4e07a3-4f4c-4bab-b866-87f62dff480d,ffca591d-dfc9-4ecf-9ac2-050d75b39fc0"
     - name: KAFKA_SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.adeo.no
