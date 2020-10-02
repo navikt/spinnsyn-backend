@@ -47,6 +47,7 @@ spec:
     inbound:
       rules:
         - application: spinnsyn-backend-proxy
+        - application: spinnsyn-backend-veileder-proxy
 
   envFrom:
     - secret: spinnsyn-backend-serviceuser

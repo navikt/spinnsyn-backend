@@ -47,6 +47,7 @@ spec:
     inbound:
       rules:
         - application: spinnsyn-backend-proxy
+        - application: spinnsyn-backend-veileder-proxy
         - application: spinnsyn-backend-mock-proxy # Kun i dev-gcp
 
   envFrom:
