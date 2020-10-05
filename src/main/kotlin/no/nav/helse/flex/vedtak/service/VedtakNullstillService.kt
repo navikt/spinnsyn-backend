@@ -6,8 +6,8 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.helse.flex.Environment
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.db.DatabaseInterface
-import no.nav.helse.flex.log
 import no.nav.helse.flex.vedtak.db.finnVedtak
+import no.nav.helse.flex.vedtak.db.slettVedtak
 import java.lang.IllegalStateException
 import java.time.Instant
 
@@ -35,25 +35,5 @@ class VedtakNullstillService(
         }
 
         return vedtak.size
-    }
-}
-
-private fun DatabaseInterface.slettVedtak(vedtakId: String, fnr: String) {
-    connection.use { connection ->
-        log.info("Sletter vedtak id $vedtakId")
-        connection.prepareStatement(
-            """
-                DELETE FROM vedtak
-                WHERE id = ?
-                AND fnr = ?;
-            """
-        ).use {
-            it.setString(1, vedtakId)
-            it.setString(2, fnr)
-            it.execute()
-        }
-        connection.commit()
-
-        log.info("Utført: slettet vedtak id $vedtakId")
     }
 }

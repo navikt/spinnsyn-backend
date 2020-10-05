@@ -24,6 +24,7 @@ import no.nav.helse.flex.util.KafkaClients
 import no.nav.helse.flex.util.PodLeaderCoordinator
 import no.nav.helse.flex.varsling.cronjob.settOppVarslingCronjob
 import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProducer
+import no.nav.helse.flex.vedtak.cronjob.settOppVedtakCronjob
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
@@ -50,8 +51,8 @@ fun main() {
     val env = Environment()
 
     // Sov litt slik at sidecars er klare
+    log.info("Sover i ${env.sidecarInitialDelay} ms i håp om at sidecars er klare")
     Thread.sleep(env.sidecarInitialDelay)
-    log.info("Sov i ${env.sidecarInitialDelay} ms i håp om at sidecars er klare")
 
     val selvbetjeningIssuer = hentSelvbetjeningJwtIssuer(env)
     val veilederIssuer = hentVeilederJwtIssuer(env)
@@ -94,7 +95,7 @@ fun main() {
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
     applicationState.ready = true
-    log.info("Application server stated")
+    log.info("Application server started")
 
     createListener(applicationState) {
         vedtakService.start()
@@ -105,6 +106,12 @@ fun main() {
         database = database,
         podLeaderCoordinator = podLeaderCoordinator,
         enkeltvarselKafkaProducer = enkeltvarselKafkaProducer
+    )
+    settOppVedtakCronjob(
+        database = database,
+        podLeaderCoordinator = podLeaderCoordinator,
+        env = env,
+        brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer
     )
 }
 
