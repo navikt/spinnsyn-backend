@@ -20,7 +20,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 @KtorExperimentalAPI
-object VedtakVerdikjedeSpek : Spek({
+object VedtakQueriesSpek : Spek({
 
     val testDb = TestDB()
     val now = OffsetDateTime.of(2020, 3, 12, 9, 12, 0, 0, ZoneOffset.UTC)
