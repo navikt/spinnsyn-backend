@@ -27,7 +27,7 @@ import no.nav.helse.flex.application.configureApplication
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.testutil.generateJWT
-import no.nav.helse.flex.testutil.stopApplicationNårKafkaTopicErLest
+import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
@@ -186,7 +186,17 @@ object VedtakVerdikjedeSpek : Spek({
                         "aapen-helse-sporbar",
                         null,
                         fnr,
-                        "{ \"vedtak\": 123}",
+                        """{ "vedtak": 123, "automatiskBehandling": true}""",
+                        listOf(RecordHeader("type", "Vedtak".toByteArray()))
+                    )
+                )
+
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar",
+                        null,
+                        fnr,
+                        """{ "manuelt-vedtak-som-ikke-lagres": 123, "automatiskBehandling": false}""",
                         listOf(RecordHeader("type", "Vedtak".toByteArray()))
                     )
                 )
@@ -200,7 +210,7 @@ object VedtakVerdikjedeSpek : Spek({
                         listOf(RecordHeader("type", "Behandlingstilstand".toByteArray()))
                     )
                 )
-                stopApplicationNårKafkaTopicErLest(vedtakKafkaConsumer, applicationState)
+                stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 3)
 
                 runBlocking {
                     vedtakService.start()
@@ -238,7 +248,7 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123},\"opprettet\":\"$opprettet\"}]"
+                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123,\"automatiskBehandling\":true},\"opprettet\":\"$opprettet\"}]"
                 }
             }
 
@@ -253,7 +263,7 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123},\"opprettet\":\"$opprettet\"}]"
+                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123,\"automatiskBehandling\":true},\"opprettet\":\"$opprettet\"}]"
                 }
             }
 
@@ -298,7 +308,7 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123},\"opprettet\":\"$opprettet\"}"
+                    response.content shouldEqual "{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123,\"automatiskBehandling\":true},\"opprettet\":\"$opprettet\"}"
                 }
             }
 

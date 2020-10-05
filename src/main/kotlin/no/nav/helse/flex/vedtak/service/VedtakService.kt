@@ -11,6 +11,7 @@ import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
+import no.nav.helse.flex.util.erManueltBehandlet
 import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.eierVedtak
 import no.nav.helse.flex.vedtak.db.finnVedtak
@@ -39,7 +40,6 @@ class VedtakService(
                 val erVedtak = it.headers().any { header ->
                     header.key() == "type" && String(header.value()) == "Vedtak"
                 }
-                it.offset()
                 if (erVedtak) {
                     val id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray())
                     håndterVedtak(
@@ -54,10 +54,16 @@ class VedtakService(
     }
 
     fun håndterVedtak(id: UUID, fnr: String, vedtak: String) {
+        if (vedtak.erManueltBehandlet()) {
+            log.info("Mottok manuelt vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke manuelle vedtak")
+            return
+        }
+
         if (environment.isProd()) {
             log.info("Mottok vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke i produksjon ennå")
             return
         }
+
         val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id)
         MOTTATT_VEDTAK.inc()
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
