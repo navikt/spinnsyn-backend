@@ -13,7 +13,11 @@ import no.nav.helse.flex.vedtak.db.hentVedtakEldreEnnTolvMnd
 import no.nav.helse.flex.vedtak.db.slettVedtak
 import java.time.Duration
 import java.time.Instant
-import kotlin.concurrent.timer
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.util.Date
+import kotlin.concurrent.fixedRateTimer
 
 fun vedtakCronjob(
     database: DatabaseInterface,
@@ -61,11 +65,11 @@ fun settOppVedtakCronjob(
     brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer
 ) {
 
-    val periodeMellomJobber = Duration.ofMinutes(1).toMillis()
+    val (klokkeslett, period) = hentKlokekslettOgPeriode(env)
 
-    timer(
-        initialDelay = periodeMellomJobber,
-        period = periodeMellomJobber
+    fixedRateTimer(
+        startAt = klokkeslett,
+        period = period
     ) {
         if (podLeaderCoordinator.isLeader()) {
             vedtakCronjob(
@@ -76,5 +80,31 @@ fun settOppVedtakCronjob(
         } else {
             log.debug("Jeg er ikke leder")
         }
+    }
+}
+
+private fun hentKlokekslettOgPeriode(env: Environment): Pair<Date, Long> {
+    val osloTz = ZoneId.of("Europe/Oslo")
+    val now = ZonedDateTime.now(osloTz)
+    if (env.cluster == "dev-gcp" || env.cluster == "flex") {
+        val omEtMinutt = now.plusSeconds(60)
+        val femMinutter = Duration.ofMinutes(5)
+        return Pair(Date.from(omEtMinutt.toInstant()), femMinutter.toMillis())
+    }
+    if (env.cluster == "prod-gcp") {
+        val enDag = Duration.ofDays(1).toMillis()
+        val nesteNatt = now.next(LocalTime.of(2, 0, 0))
+        return Pair(nesteNatt, enDag)
+    }
+    throw IllegalStateException("Ukjent cluster name for cronjob ${env.cluster}")
+}
+
+private fun ZonedDateTime.next(atTime: LocalTime): Date {
+    return if (this.toLocalTime().isAfter(atTime)) {
+        Date.from(
+            this.plusDays(1).withHour(atTime.hour).withMinute(atTime.minute).withSecond(atTime.second).toInstant()
+        )
+    } else {
+        Date.from(this.withHour(atTime.hour).withMinute(atTime.minute).withSecond(atTime.second).toInstant())
     }
 }
