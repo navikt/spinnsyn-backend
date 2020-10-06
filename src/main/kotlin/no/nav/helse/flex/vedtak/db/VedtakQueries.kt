@@ -70,6 +70,17 @@ fun DatabaseInterface.settVedtakRevarslet(vedtaksId: String) {
     }
 }
 
+fun DatabaseInterface.hentVedtakEldreEnnTolvMnd(): List<InternVedtak> =
+    connection.use {
+        return it.hentVedtakEldreEnnTolvMnd()
+    }
+
+fun DatabaseInterface.slettVedtak(vedtakId: String, fnr: String) {
+    connection.use {
+        return it.slettVedtak(vedtakId, fnr)
+    }
+}
+
 private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String): Vedtak {
 
     val now = Instant.now()
@@ -234,6 +245,35 @@ private fun Connection.settVedtakRevarslet(vedtaksId: String) {
         it.setTimestamp(1, Timestamp.from(Instant.now()))
         it.setString(2, vedtaksId)
         it.executeUpdate()
+    }
+    this.commit()
+}
+
+private fun Connection.hentVedtakEldreEnnTolvMnd(): List<InternVedtak> =
+    this.prepareStatement(
+        """
+            SELECT id, fnr, lest, opprettet, varslet, revarslet
+            FROM vedtak
+            WHERE opprettet < ?
+        """
+    ).use {
+        it.setTimestamp(1, Timestamp.from(Instant.now().minus(365, ChronoUnit.DAYS)))
+        it.executeQuery().toList {
+            toInternVedtak()
+        }
+    }
+
+private fun Connection.slettVedtak(vedtakId: String, fnr: String) {
+    this.prepareStatement(
+        """
+                DELETE FROM vedtak
+                WHERE id = ?
+                AND fnr = ?;
+            """
+    ).use {
+        it.setString(1, vedtakId)
+        it.setString(2, fnr)
+        it.execute()
     }
     this.commit()
 }
