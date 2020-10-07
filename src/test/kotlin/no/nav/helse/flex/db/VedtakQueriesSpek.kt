@@ -104,6 +104,7 @@ private fun DatabaseInterface.nyttVedtak(fnr: String = (0..10).joinToString("") 
     opprettVedtak(
         id = UUID.randomUUID(),
         fnr = fnr,
+        lest = false,
         vedtak = VedtakDto(
             fom = LocalDate.now(),
             tom = LocalDate.now(),

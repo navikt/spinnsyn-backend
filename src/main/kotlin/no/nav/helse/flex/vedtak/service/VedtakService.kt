@@ -11,7 +11,7 @@ import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
-import no.nav.helse.flex.util.erManueltBehandlet
+import no.nav.helse.flex.util.erAutomatiskBehandlet
 import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.eierVedtak
 import no.nav.helse.flex.vedtak.db.finnVedtak
@@ -55,34 +55,36 @@ class VedtakService(
     }
 
     fun håndterVedtak(id: UUID, fnr: String, vedtak: String) {
-        if (vedtak.erManueltBehandlet()) {
-            log.info("Mottok manuelt vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke manuelle vedtak")
-            return
-        }
-
         if (environment.isProd()) {
             log.info("Mottok vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke i produksjon ennå")
             return
         }
 
-        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id)
+        val varsles = vedtak.erAutomatiskBehandlet()
+
+        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = !varsles)
+
         MOTTATT_VEDTAK.inc()
+
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
-        brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
-            Nokkel(environment.serviceuserUsername, id.toString()),
-            Oppgave(
-                vedtaket.opprettet.toEpochMilli(),
-                fnr,
-                id.toString(),
-                "Sykepengene dine er beregnet - se resultatet",
-                "${environment.spinnsynFrontendUrl}/vedtak/$id",
-                4
+
+        if (varsles) {
+            brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
+                Nokkel(environment.serviceuserUsername, id.toString()),
+                Oppgave(
+                    vedtaket.opprettet.toEpochMilli(),
+                    fnr,
+                    id.toString(),
+                    "Sykepengene dine er beregnet - se resultatet",
+                    "${environment.spinnsynFrontendUrl}/vedtak/$id",
+                    4
+                )
             )
-        )
+        }
     }
 
     fun hentVedtak(fnr: String) =
-        database.finnVedtak(fnr).map { it.tilRSVedtak() }
+        database.finnVedtak(fnr).map { it.tilRSVedtak() }.filter { it.vedtak.automatiskBehandling }
 
     fun hentVedtak(fnr: String, vedtaksId: String) =
         database.finnVedtak(fnr, vedtaksId)?.tilRSVedtak()
