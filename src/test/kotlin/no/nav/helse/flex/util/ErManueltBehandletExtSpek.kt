@@ -13,7 +13,13 @@ object ErManueltBehandletExtSpek : Spek({
             val vedtak =
                 """
             {
-                "automatiskBehandling": true
+                "automatiskBehandling": true,
+                "fom":"2020-09-23",
+                "tom":"2020-09-23",
+                "forbrukteSykedager":9,
+                "gjenståendeSykedager":9,
+                "utbetalinger":[],
+                "dokumenter":[]
             } 
             """.trimMargin()
 
@@ -25,7 +31,13 @@ object ErManueltBehandletExtSpek : Spek({
             val vedtak =
                 """
             {
-                "automatiskBehandling": false
+                "automatiskBehandling": false,
+                "fom":"2020-09-23",
+                "tom":"2020-09-23",
+                "forbrukteSykedager":9,
+                "gjenståendeSykedager":9,
+                "utbetalinger":[],
+                "dokumenter":[]
             } 
             """.trimMargin()
 
@@ -37,7 +49,12 @@ object ErManueltBehandletExtSpek : Spek({
             val vedtak =
                 """
             {
-                "kebab": false
+                "fom":"2020-09-23",
+                "tom":"2020-09-23",
+                "forbrukteSykedager":9,
+                "gjenståendeSykedager":9,
+                "utbetalinger":[],
+                "dokumenter":[]
             } 
             """.trimMargin()
 

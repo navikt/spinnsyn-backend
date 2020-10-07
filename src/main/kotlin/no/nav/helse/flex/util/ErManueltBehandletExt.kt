@@ -1,12 +1,9 @@
 package no.nav.helse.flex.util
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 
 fun String.erManueltBehandlet(): Boolean = !this.erAutomatiskBehandlet()
 
 fun String.erAutomatiskBehandlet(): Boolean {
-    val get = ObjectMapper()
-        .readTree(this)
-        .get("automatiskBehandling") ?: return false
-    return get.asBoolean(false)
+    return this.tilVedtakDto().automatiskBehandling
 }

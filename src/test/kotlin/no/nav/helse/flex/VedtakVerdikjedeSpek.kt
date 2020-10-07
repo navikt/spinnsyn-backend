@@ -1,6 +1,7 @@
 package no.nav.helse.flex
 
 import com.auth0.jwk.JwkProviderBuilder
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -29,7 +30,10 @@ import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.testutil.generateJWT
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import no.nav.helse.flex.vedtak.db.finnVedtak
+import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.vedtak.domene.serialisertTilString
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
+import no.nav.helse.flex.vedtak.service.RSVedtak
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.helse.flex.vedtak.service.tilRSVedtak
@@ -49,6 +53,7 @@ import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
 import java.nio.file.Paths
+import java.time.LocalDate
 import java.util.Properties
 
 @KtorExperimentalAPI
@@ -58,6 +63,17 @@ object VedtakVerdikjedeSpek : Spek({
     val selvbetjeningaudience = "AUD"
     val veilederissuer = "VeilederIssuer"
     val veilederaudience = "veileder"
+
+    val automatiskBehandletVedtak = VedtakDto(
+        fom = LocalDate.now(),
+        tom = LocalDate.now(),
+        forbrukteSykedager = 1,
+        gjenståendeSykedager = 2,
+        utbetalinger = emptyList(),
+        dokumenter = emptyList(),
+        automatiskBehandling = true
+    )
+    val manueltVedtak = automatiskBehandletVedtak.copy(automatiskBehandling = false)
 
     val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
     val env = mockk<Environment>()
@@ -178,15 +194,15 @@ object VedtakVerdikjedeSpek : Spek({
 
             it("Vedtak mottas fra kafka topic og lagres i db") {
 
-                val vedtak = testDb.finnVedtak(fnr)
-                vedtak.size `should be equal to` 0
+                val vedtakFraDb = testDb.finnVedtak(fnr)
+                vedtakFraDb.size `should be equal to` 0
 
                 vedtakKafkaProducer.send(
                     ProducerRecord(
                         "aapen-helse-sporbar",
                         null,
                         fnr,
-                        """{ "vedtak": 123, "automatiskBehandling": true}""",
+                        automatiskBehandletVedtak.serialisertTilString(),
                         listOf(RecordHeader("type", "Vedtak".toByteArray()))
                     )
                 )
@@ -196,7 +212,7 @@ object VedtakVerdikjedeSpek : Spek({
                         "aapen-helse-sporbar",
                         null,
                         fnr,
-                        """{ "manuelt-vedtak-som-ikke-lagres": 123, "automatiskBehandling": false}""",
+                        manueltVedtak.serialisertTilString(),
                         listOf(RecordHeader("type", "Vedtak".toByteArray()))
                     )
                 )
@@ -248,7 +264,7 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123,\"automatiskBehandling\":true},\"opprettet\":\"$opprettet\"}]"
+                    response.content!!.tilRSVedtakListe() shouldEqual listOf(RSVedtak(id = generertVedtakId, lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet))
                 }
             }
 
@@ -263,7 +279,7 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "[{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123,\"automatiskBehandling\":true},\"opprettet\":\"$opprettet\"}]"
+                    response.content!!.tilRSVedtakListe() shouldEqual listOf(RSVedtak(id = generertVedtakId, lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet))
                 }
             }
 
@@ -308,7 +324,7 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "{\"id\":\"$generertVedtakId\",\"lest\":false,\"vedtak\":{\"vedtak\":123,\"automatiskBehandling\":true},\"opprettet\":\"$opprettet\"}"
+                    response.content!!.tilRSVedtak() shouldEqual RSVedtak(id = generertVedtakId, lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet)
                 }
             }
 
@@ -372,3 +388,6 @@ object VedtakVerdikjedeSpek : Spek({
         }
     }
 })
+
+fun String.tilRSVedtakListe(): List<RSVedtak> = objectMapper.readValue(this)
+fun String.tilRSVedtak(): RSVedtak = objectMapper.readValue(this)
