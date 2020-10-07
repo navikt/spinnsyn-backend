@@ -38,13 +38,14 @@ fun DatabaseInterface.lesVedtak(fnr: String, vedtaksId: String): Boolean =
         return it.lesVedtak(fnr, vedtaksId)
     }
 
-fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String): Vedtak =
+fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean): Vedtak =
     connection.use {
         it.finnVedtak(fnr = fnr, vedtaksId = id.toString())?.let { return it }
         return it.opprettVedtak(
             id = id,
             vedtak = vedtak,
-            fnr = fnr
+            fnr = fnr,
+            lest = lest
         )
     }
 
@@ -81,24 +82,29 @@ fun DatabaseInterface.slettVedtak(vedtakId: String, fnr: String) {
     }
 }
 
-private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String): Vedtak {
+private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean): Vedtak {
 
     val now = Instant.now()
     this.prepareStatement(
         """
-            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet) VALUES (?, ?, ?, ?) 
+            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, lest) VALUES (?, ?, ?, ?, ?) 
         """
     ).use {
         it.setString(1, id.toString())
         it.setString(2, fnr)
         it.setObject(3, PGobject().also { it.type = "json"; it.value = vedtak })
         it.setTimestamp(4, Timestamp.from(now))
+        if (lest) {
+            it.setTimestamp(5, Timestamp.from(now))
+        } else {
+            it.setTimestamp(5, null)
+        }
 
         it.executeUpdate()
     }
 
     this.commit()
-    return Vedtak(id = id.toString(), vedtak = vedtak.tilVedtakDto(), lest = false, opprettet = now)
+    return Vedtak(id = id.toString(), vedtak = vedtak.tilVedtakDto(), lest = lest, opprettet = now)
 }
 
 private fun Connection.finnVedtak(fnr: String): List<Vedtak> =

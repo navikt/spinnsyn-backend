@@ -233,7 +233,13 @@ object VedtakVerdikjedeSpek : Spek({
                 }
 
                 val vedtakEtter = testDb.finnVedtak(fnr)
-                vedtakEtter.size `should be equal to` 1
+                vedtakEtter.size `should be equal to` 2 // Vi lagrer både manuelle og automatiske
+
+                val automatiskVedtakFraDb = vedtakEtter.find { it.vedtak.automatiskBehandling }!!
+                automatiskVedtakFraDb.lest shouldEqual false
+
+                val manueltVedtakFraDb = vedtakEtter.find { !it.vedtak.automatiskBehandling }!!
+                manueltVedtakFraDb.lest shouldEqual true
 
                 val oppgaveSlot = slot<Oppgave>()
                 val vedtaksId = vedtakEtter[0].id
