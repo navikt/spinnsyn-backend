@@ -17,6 +17,7 @@ import no.nav.helse.flex.vedtak.db.eierVedtak
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettVedtak
+import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import java.time.Instant
 import java.time.LocalDate
@@ -104,7 +105,7 @@ class VedtakService(
 data class RSVedtak(
     val id: String,
     val lest: Boolean,
-    val vedtak: Any,
+    val vedtak: VedtakDto,
     val opprettet: LocalDate
 )
 

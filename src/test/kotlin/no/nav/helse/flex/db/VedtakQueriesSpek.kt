@@ -11,10 +11,13 @@ import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.db.settVedtakRevarslet
 import no.nav.helse.flex.vedtak.db.settVedtakVarslet
+import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.vedtak.domene.serialisertTilString
 import org.amshove.kluent.`should be equal to`
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.Instant
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
@@ -101,5 +104,13 @@ private fun DatabaseInterface.nyttVedtak(fnr: String = (0..10).joinToString("") 
     opprettVedtak(
         id = UUID.randomUUID(),
         fnr = fnr,
-        vedtak = "{\"vedtak\":123}"
+        vedtak = VedtakDto(
+            fom = LocalDate.now(),
+            tom = LocalDate.now(),
+            forbrukteSykedager = 1,
+            gjenståendeSykedager = 2,
+            utbetalinger = emptyList(),
+            dokumenter = emptyList(),
+            automatiskBehandling = true
+        ).serialisertTilString()
     )

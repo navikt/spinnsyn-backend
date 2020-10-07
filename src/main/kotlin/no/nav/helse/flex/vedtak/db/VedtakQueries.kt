@@ -1,9 +1,9 @@
 package no.nav.helse.flex.vedtak.db
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.db.toList
-import no.nav.helse.flex.objectMapper
+import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import org.postgresql.util.PGobject
 import java.sql.Connection
 import java.sql.ResultSet
@@ -98,7 +98,7 @@ private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String): Ved
     }
 
     this.commit()
-    return Vedtak(id = id.toString(), vedtak = vedtak, lest = false, opprettet = now)
+    return Vedtak(id = id.toString(), vedtak = vedtak.tilVedtakDto(), lest = false, opprettet = now)
 }
 
 private fun Connection.finnVedtak(fnr: String): List<Vedtak> =
@@ -282,7 +282,7 @@ private fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
         lest = getObject("lest", OffsetDateTime::class.java) != null,
-        vedtak = objectMapper.readValue(getString("vedtak")),
+        vedtak = getString("vedtak").tilVedtakDto(),
         opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant()
     )
 
@@ -299,7 +299,7 @@ private fun ResultSet.toInternVedtak(): InternVedtak =
 data class Vedtak(
     val id: String,
     val lest: Boolean,
-    val vedtak: Any,
+    val vedtak: VedtakDto,
     val opprettet: Instant
 )
 
