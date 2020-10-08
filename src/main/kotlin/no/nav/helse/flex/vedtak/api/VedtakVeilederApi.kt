@@ -16,8 +16,8 @@ fun Route.registerVeilederVedtakApi(vedtakService: VedtakService, environment: E
     route("/api/v1/veileder") {
         get("/vedtak") {
             if (environment.isProd()) {
-                log.error("Veileder api avsltt i produksjon frem til tilgangskontroll er på plass")
-                call.respond(Melding("APIet er ikke skurdd på i produksjon").tilRespons(HttpStatusCode.BadRequest))
+                log.error("Veileder api avslått i produksjon frem til tilgangskontroll er på plass")
+                call.respond(Melding("APIet er ikke skrudd på i produksjon").tilRespons(HttpStatusCode.BadRequest))
                 return@get
             }
             val fnr = call.request.queryParameters["fnr"]
