@@ -18,11 +18,6 @@ fun DatabaseInterface.finnVedtak(fnr: String): List<Vedtak> =
         return it.finnVedtak(fnr)
     }
 
-fun DatabaseInterface.finnVedtak(fnr: String, vedtaksId: String): Vedtak? =
-    connection.use {
-        return it.finnVedtak(fnr, vedtaksId)
-    }
-
 fun DatabaseInterface.finnInternVedtak(fnr: String, vedtaksId: String): InternVedtak? =
     connection.use {
         return it.finnInternVedtak(fnr, vedtaksId)
