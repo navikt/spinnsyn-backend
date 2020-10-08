@@ -91,7 +91,7 @@ fun Application.configureApplication(
             registerVedtakApi(vedtakService)
         }
         authenticate(IssuerInternalId.veileder.name) {
-            registerVeilederVedtakApi(vedtakService)
+            registerVeilederVedtakApi(vedtakService, env)
         }
         if (!env.isProd()) {
             registerVedtakMockApi(

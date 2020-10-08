@@ -1,6 +1,8 @@
 package no.nav.helse.flex.varsling.cronjob
 
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.flex.application.metrics.FØRSTEGANGSVARSEL
+import no.nav.helse.flex.application.metrics.REVARSEL
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
 import no.nav.helse.flex.util.PodLeaderCoordinator
@@ -47,6 +49,8 @@ fun varslingCronjob(
                 )
                 database.settVedtakVarslet(it.id)
                 resultat.varsler++
+                FØRSTEGANGSVARSEL.inc()
+
                 log.info("Sendte varsel for vedtak ${it.id} med varselBestillingId $varselBestillingId")
             }
         } catch (e: Exception) {
@@ -70,6 +74,8 @@ fun varslingCronjob(
                 )
                 database.settVedtakRevarslet(it.id)
                 resultat.revarsler++
+                REVARSEL.inc()
+
                 log.info("Sendte revarsel for vedtak ${it.id} med varselBestillingId $varselBestillingId")
             }
         } catch (e: Exception) {

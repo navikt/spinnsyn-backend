@@ -7,19 +7,22 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.Environment
 import no.nav.helse.flex.application.ApplicationState
+import no.nav.helse.flex.application.metrics.MOTTATT_AUTOMATISK_VEDTAK
+import no.nav.helse.flex.application.metrics.MOTTATT_MANUELT_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
-import no.nav.helse.flex.util.erAutomatiskBehandlet
 import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.eierVedtak
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import no.nav.helse.flex.vedtak.hentInntektsmeldingFraFørsteVedtak
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
+import java.lang.Exception
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -44,7 +47,7 @@ class VedtakService(
                 }
                 if (erVedtak) {
                     val id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray())
-                    håndterVedtak(
+                    mottaVedtak(
                         id = id,
                         fnr = it.key(),
                         vedtak = it.value()
@@ -55,17 +58,30 @@ class VedtakService(
         }
     }
 
-    fun håndterVedtak(id: UUID, fnr: String, vedtak: String) {
+    fun mottaVedtak(id: UUID, fnr: String, vedtak: String) {
         if (environment.isProd()) {
             log.info("Mottok vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke i produksjon ennå")
             return
         }
 
-        val varsles = vedtak.erAutomatiskBehandlet()
+        val vedtakSerialisert = try {
+            vedtak.tilVedtakDto()
+        } catch (e: Exception) {
+            log.error("Kunne ikke deserialisere vedtak", e)
+            throw e
+        }
+
+        val varsles = vedtakSerialisert.automatiskBehandling
 
         val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = !varsles)
 
         MOTTATT_VEDTAK.inc()
+
+        if (vedtakSerialisert.automatiskBehandling) {
+            MOTTATT_AUTOMATISK_VEDTAK.inc()
+        } else {
+            MOTTATT_MANUELT_VEDTAK.inc()
+        }
 
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
 
