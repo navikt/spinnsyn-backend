@@ -10,15 +10,15 @@ data class VedtakDto(
     val tom: LocalDate,
     val forbrukteSykedager: Int,
     val gjenståendeSykedager: Int,
-    val automatiskBehandling: Boolean,
-    val utbetalinger: List<UtbetalingDto>,
-    val dokumenter: List<Dokument>
+    val automatiskBehandling: Boolean = false,
+    val utbetalinger: List<UtbetalingDto> = emptyList(),
+    val dokumenter: List<Dokument> = emptyList()
 ) {
     data class UtbetalingDto(
         val mottaker: String,
         val fagområde: String,
         val totalbeløp: Int,
-        val utbetalingslinjer: List<UtbetalingslinjeDto>
+        val utbetalingslinjer: List<UtbetalingslinjeDto> = emptyList()
     ) {
         data class UtbetalingslinjeDto(
             val fom: LocalDate,
@@ -31,7 +31,7 @@ data class VedtakDto(
     }
 }
 
-class Dokument(val dokumentId: UUID, val type: Type) {
+data class Dokument(val dokumentId: UUID, val type: Type) {
     enum class Type {
         Sykmelding, Søknad, Inntektsmelding
     }

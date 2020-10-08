@@ -20,6 +20,7 @@ import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
+import no.nav.helse.flex.vedtak.hentInntektsmeldingFraFørsteVedtak
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import java.lang.Exception
 import java.time.Instant
@@ -100,10 +101,16 @@ class VedtakService(
     }
 
     fun hentVedtak(fnr: String) =
-        database.finnVedtak(fnr).map { it.tilRSVedtak() }.filter { it.vedtak.automatiskBehandling }
+        database.finnVedtak(fnr)
+            .hentInntektsmeldingFraFørsteVedtak()
+            .map { it.tilRSVedtak() }
+            .filter { it.vedtak.automatiskBehandling }
 
     fun hentVedtak(fnr: String, vedtaksId: String) =
-        database.finnVedtak(fnr, vedtaksId)?.tilRSVedtak()
+        database.finnVedtak(fnr)
+            .hentInntektsmeldingFraFørsteVedtak()
+            .find { it.id == vedtaksId }
+            ?.tilRSVedtak()
 
     fun eierVedtak(fnr: String, vedtaksId: String) =
         database.eierVedtak(fnr, vedtaksId)
