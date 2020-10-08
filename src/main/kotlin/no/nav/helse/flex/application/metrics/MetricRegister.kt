@@ -17,6 +17,18 @@ val MOTTATT_VEDTAK: Counter = Counter.build()
     .help("Antall mottatte vedtak")
     .register()
 
+val MOTTATT_MANUELT_VEDTAK: Counter = Counter.build()
+    .namespace(METRICS_NS)
+    .name("mottatt_manuelt_vedtak_counter")
+    .help("Antall mottatte manuelle vedtak")
+    .register()
+
+val MOTTATT_AUTOMATISK_VEDTAK: Counter = Counter.build()
+    .namespace(METRICS_NS)
+    .name("mottatt_automatisk_vedtak_counter")
+    .help("Antall mottatte automatiske vedtak")
+    .register()
+
 val VEDTAK_LEST: Counter = Counter.build()
     .namespace(METRICS_NS)
     .name("vedtak_lest_counter")

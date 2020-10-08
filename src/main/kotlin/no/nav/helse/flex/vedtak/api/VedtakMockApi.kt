@@ -29,7 +29,7 @@ fun Route.registerVedtakMockApi(vedtakService: VedtakService, env: Environment, 
             val fnr = call.parameters["fnr"]!!
             val vedtak = call.receiveTextWithCorrectEncoding()
             val vedtakId = UUID.randomUUID()
-            vedtakService.håndterVedtak(
+            vedtakService.mottaVedtak(
                 id = vedtakId,
                 fnr = fnr,
                 vedtak = vedtak
