@@ -22,6 +22,8 @@ import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import no.nav.helse.flex.vedtak.hentInntektsmeldingFraFørsteVedtak
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import java.lang.Exception
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -34,21 +36,31 @@ class VedtakService(
     private val applicationState: ApplicationState,
     private val vedtakConsumer: VedtakConsumer,
     private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
-    private val environment: Environment
+    private val environment: Environment,
+    private val delayStart: Long = 10_000L
 ) {
     suspend fun start() {
-        log.info("VedtakService stated")
+        while (applicationState.alive) {
+            try {
+                run()
+            } catch (ex: Exception) {
+                log.error("Feil ved konsumering fra kafka, restarter om $delayStart ms", ex)
+                vedtakConsumer.unsubscribe()
+            }
+            delay(delayStart)
+        }
+    }
+
+    private fun run() {
+        log.info("VedtakService started")
+        vedtakConsumer.subscribe()
 
         while (applicationState.ready) {
-            val consumerRecords = vedtakConsumer.poll()
-            consumerRecords.forEach {
-                val erVedtak = it.headers().any { header ->
-                    header.key() == "type" && String(header.value()) == "Vedtak"
-                }
-                if (erVedtak) {
-                    val id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray())
+            val cr = vedtakConsumer.poll()
+            cr.forEach {
+                if (it.erVedtak()) {
                     mottaVedtak(
-                        id = id,
+                        id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray()),
                         fnr = it.key(),
                         vedtak = it.value(),
                         opprettet = Instant.ofEpochMilli(it.timestamp())
@@ -62,7 +74,9 @@ class VedtakService(
                     }
                 }
             }
-            delay(1)
+            if (!cr.isEmpty) {
+                vedtakConsumer.commitSync()
+            }
         }
     }
 
@@ -145,4 +159,10 @@ fun Vedtak.tilRSVedtak(): RSVedtak {
         vedtak = this.vedtak,
         opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo"))
     )
+}
+
+private fun ConsumerRecord<String, String>.erVedtak(): Boolean {
+    return headers().any { header ->
+        header.key() == "type" && String(header.value()) == "Vedtak"
+    }
 }

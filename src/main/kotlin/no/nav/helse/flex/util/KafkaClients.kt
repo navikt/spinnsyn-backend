@@ -20,9 +20,6 @@ class KafkaClients(env: Environment) {
         val properties = config.toConsumerConfig("spinnsyn-backend-consumer-v3", StringDeserializer::class)
         properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
 
-        val consumer = KafkaConsumer<String, String>(properties)
-        consumer.subscribe(listOf("aapen-helse-sporbar"))
-
-        return consumer
+        return KafkaConsumer(properties)
     }
 }

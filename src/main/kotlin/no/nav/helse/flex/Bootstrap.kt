@@ -69,7 +69,10 @@ fun main() {
     val brukernotifikasjonKafkaProducer = skapBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
     val enkeltvarselKafkaProducer = skapEnkeltvarselKafkaProducer(kafkaBaseConfig)
 
-    val vedtakConsumer = VedtakConsumer(kafkaClients.kafkaVedtakConsumer)
+    val vedtakConsumer = VedtakConsumer(
+        kafkaClients.kafkaVedtakConsumer,
+        listOf("aapen-helse-sporbar")
+    )
     val vedtakService = VedtakService(
         database = database,
         applicationState = applicationState,
@@ -151,7 +154,7 @@ fun createListener(applicationState: ApplicationState, action: suspend Coroutine
         try {
             action()
         } catch (ex: Exception) {
-            log.error("Noe gikk galt: {}", ex.message)
+            log.error("Noe gikk veldig galt, avslutter applikasjon: {}", ex.message)
         } finally {
             applicationState.alive = false
             applicationState.ready = false

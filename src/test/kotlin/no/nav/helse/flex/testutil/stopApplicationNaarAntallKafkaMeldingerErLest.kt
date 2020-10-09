@@ -16,6 +16,24 @@ fun stopApplicationNårAntallKafkaMeldingerErLest(
         i -= cr.count()
         if (i <= 0) {
             applicationState.ready = false
+            applicationState.alive = false
+        }
+        cr
+    }
+}
+
+fun stopApplicationNårAntallKafkaPollErGjort(
+    kafkaConsumer: KafkaConsumer<String, String>,
+    applicationState: ApplicationState,
+    antallKafkaPoll: Int
+) {
+    var i = antallKafkaPoll
+    every { kafkaConsumer.poll(any<Duration>()) } answers {
+        val cr = callOriginal()
+        i -= 1
+        if (i <= 0) {
+            applicationState.ready = false
+            applicationState.alive = false
         }
         cr
     }
