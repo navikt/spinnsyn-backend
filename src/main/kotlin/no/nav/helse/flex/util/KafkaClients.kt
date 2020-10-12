@@ -17,7 +17,7 @@ class KafkaClients(env: Environment) {
         val config = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
         config["auto.offset.reset"] = "earliest"
 
-        val properties = config.toConsumerConfig("spinnsyn-backend-consumer-2", StringDeserializer::class)
+        val properties = config.toConsumerConfig("spinnsyn-backend-consumer-v2", StringDeserializer::class)
         properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
 
         val consumer = KafkaConsumer<String, String>(properties)

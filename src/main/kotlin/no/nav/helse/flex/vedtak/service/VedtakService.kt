@@ -50,7 +50,8 @@ class VedtakService(
                     mottaVedtak(
                         id = id,
                         fnr = it.key(),
-                        vedtak = it.value()
+                        vedtak = it.value(),
+                        opprettet = Instant.ofEpochMilli(it.timestamp())
                     )
                 }
             }
@@ -58,7 +59,7 @@ class VedtakService(
         }
     }
 
-    fun mottaVedtak(id: UUID, fnr: String, vedtak: String) {
+    fun mottaVedtak(id: UUID, fnr: String, vedtak: String, opprettet: Instant) {
         if (environment.isProd()) {
             log.info("Mottok vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke i produksjon ennå")
             return
@@ -73,7 +74,7 @@ class VedtakService(
 
         val varsles = vedtakSerialisert.automatiskBehandling
 
-        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = !varsles)
+        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = !varsles, opprettet = opprettet)
 
         MOTTATT_VEDTAK.inc()
 
