@@ -66,7 +66,17 @@ object VedtakVarslingSpek : Spek({
         }
 
         it("Vi kjører cronjobben, men klokka er midt på natta") {
-            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer)
+            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer, false)
+            varsler `should be equal to` 0
+            revarsler `should be equal to` 0
+        }
+
+        it("Vi kjører cronjobben på morgenen i prod og varsler ikke 2 stk") {
+            every {
+                Instant.now()
+            } returns grunntid.plusHours(6).toInstant()
+
+            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer, true)
             varsler `should be equal to` 0
             revarsler `should be equal to` 0
         }
@@ -76,7 +86,7 @@ object VedtakVarslingSpek : Spek({
                 Instant.now()
             } returns grunntid.plusHours(6).toInstant()
 
-            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer)
+            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer, false)
             varsler `should be equal to` 2
             revarsler `should be equal to` 0
 
@@ -94,7 +104,7 @@ object VedtakVarslingSpek : Spek({
         }
 
         it("Vi kjører cronjobben igjen, men alle varsler er sendt") {
-            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer)
+            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer, false)
             varsler `should be equal to` 0
             revarsler `should be equal to` 0
         }
@@ -107,7 +117,7 @@ object VedtakVarslingSpek : Spek({
             every {
                 Instant.now()
             } returns grunntid.plusDays(7).plusHours(6).plusMinutes(1).toInstant()
-            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer)
+            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer, false)
             varsler `should be equal to` 0
             revarsler `should be equal to` 1
 
@@ -120,7 +130,7 @@ object VedtakVarslingSpek : Spek({
         }
 
         it("Vi kjører cronjobben igjen og ingenting skjer") {
-            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer)
+            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer, false)
             varsler `should be equal to` 0
             revarsler `should be equal to` 0
         }
