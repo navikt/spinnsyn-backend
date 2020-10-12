@@ -68,7 +68,7 @@ class VedtakService(
             vedtak.tilVedtakDto()
         } catch (e: Exception) {
             log.error("Kunne ikke deserialisere vedtak", e)
-            throw e
+            return
         }
 
         val varsles = vedtakSerialisert.automatiskBehandling
