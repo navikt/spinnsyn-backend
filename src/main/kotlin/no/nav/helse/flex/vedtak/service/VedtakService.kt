@@ -60,10 +60,6 @@ class VedtakService(
     }
 
     fun mottaVedtak(id: UUID, fnr: String, vedtak: String, opprettet: Instant) {
-        if (environment.isProd()) {
-            log.info("Mottok vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke i produksjon ennå")
-            return
-        }
 
         val vedtakSerialisert = try {
             vedtak.tilVedtakDto()
