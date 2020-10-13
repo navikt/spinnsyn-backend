@@ -17,6 +17,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Oppgave
@@ -30,6 +31,7 @@ import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.testutil.generateJWT
 import no.nav.helse.flex.testutil.somKunRefusjon
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
+import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaPollErGjort
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.domene.Dokument
 import no.nav.helse.flex.vedtak.domene.VedtakDto
@@ -55,6 +57,7 @@ import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
 import java.nio.file.Paths
+import java.time.Duration
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
@@ -81,6 +84,8 @@ object VedtakVerdikjedeSpek : Spek({
     val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
     val env = mockk<Environment>()
 
+    val applicationState = ApplicationState()
+
     fun setupEnvMock() {
         clearAllMocks()
         every { env.spinnsynFrontendUrl } returns "https://www.nav.no/syk/sykepenger"
@@ -94,6 +99,8 @@ object VedtakVerdikjedeSpek : Spek({
 
     beforeEachTest {
         setupEnvMock()
+        applicationState.alive = true
+        applicationState.ready = true
     }
 
     describe("Test hele verdikjeden") {
@@ -121,19 +128,18 @@ object VedtakVerdikjedeSpek : Spek({
             val vedtakKafkaProducer = KafkaProducer<String, String>(producerProperties)
 
             val vedtakKafkaConsumer = spyk(KafkaConsumer<String, String>(consumerProperties))
-            vedtakKafkaConsumer.subscribe(listOf("aapen-helse-sporbar"))
 
-            val applicationState = ApplicationState()
-            applicationState.ready = true
-            applicationState.alive = true
-
-            val vedtakConsumer = VedtakConsumer(vedtakKafkaConsumer)
+            val vedtakConsumer = VedtakConsumer(
+                vedtakKafkaConsumer,
+                listOf("aapen-helse-sporbar")
+            )
             val vedtakService = VedtakService(
                 database = testDb,
                 applicationState = applicationState,
                 vedtakConsumer = vedtakConsumer,
                 brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
-                environment = env
+                environment = env,
+                delayStart = 100L
             )
             val vedtakNullstillService = VedtakNullstillService(
                 database = testDb,
@@ -437,7 +443,6 @@ object VedtakVerdikjedeSpek : Spek({
                     )
                 )
 
-                applicationState.ready = true
                 stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 2)
 
                 runBlocking {
@@ -457,6 +462,88 @@ object VedtakVerdikjedeSpek : Spek({
                     forlengelseVedtak.vedtak.copy(dokumenter = emptyList()) shouldEqual nesteVedtak.copy(dokumenter = emptyList())
                     // Har både inntektsmelding og søknad
                     forlengelseVedtak.vedtak.dokumenter.sortedBy { it.dokumentId } shouldEqual listOf(inntektsmelding, søknad).sortedBy { it.dokumentId }
+                }
+            }
+
+            it("Feil med kafka har ikke påvirkninger på andre deler av appen") {
+                val fnrForNyttVedtak = "83291023017"
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar",
+                        null,
+                        fnrForNyttVedtak,
+                        automatiskBehandletVedtak.serialisertTilString(),
+                        listOf(RecordHeader("type", "Vedtak".toByteArray()))
+                    )
+                )
+
+                every { vedtakKafkaConsumer.poll(any<Duration>()) } throws Exception("Denne skal feile")
+                val co = launch {
+                    vedtakService.start()
+                }
+                Thread.sleep(100)
+                verify(exactly = 0) { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) }
+                testDb.finnVedtak(fnrForNyttVedtak).size `should be equal to` 0
+
+                val vedtak = testDb.finnVedtak(fnr)[0].tilRSVedtak()
+                val generertVedtakId = vedtak.id
+                val opprettet = vedtak.opprettet
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
+                        medSelvbetjeningToken(fnr)
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.OK
+                    response.content!!.tilRSVedtak() shouldEqual RSVedtak(id = generertVedtakId, lest = true, vedtak = automatiskBehandletVedtak, opprettet = opprettet)
+                }
+
+                runBlocking {
+                    stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 1)
+                    co.join()
+                    verify(exactly = 1) { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) }
+                    testDb.finnVedtak(fnrForNyttVedtak).size `should be equal to` 1
+                }
+            }
+
+            it("Feil ved prossesering av vedtak starter konsument på nytt") {
+                val fnrForNyttVedtak = "12291023017"
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar",
+                        null,
+                        fnrForNyttVedtak,
+                        automatiskBehandletVedtak.serialisertTilString(),
+                        listOf(RecordHeader("type", "Vedtak".toByteArray()))
+                    )
+                )
+
+                every {
+                    brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any())
+                } throws Exception("Denne skal feile")
+                val co = launch {
+                    vedtakService.start()
+                }
+                Thread.sleep(100)
+                verify(exactly = 0) { vedtakKafkaConsumer.commitSync() }
+
+                runBlocking {
+                    setupEnvMock()
+                    stopApplicationNårAntallKafkaPollErGjort(vedtakKafkaConsumer, applicationState, antallKafkaPoll = 1)
+                    co.join()
+                    verify(exactly = 1) { vedtakKafkaConsumer.commitSync() }
+                    testDb.finnVedtak(fnrForNyttVedtak).size `should be equal to` 1
+                }
+            }
+
+            it("Consumer poll kan returnere tom liste") {
+                stopApplicationNårAntallKafkaPollErGjort(vedtakKafkaConsumer, applicationState, antallKafkaPoll = 2)
+                val co = launch {
+                    vedtakService.start()
+                }
+                runBlocking {
+                    co.join()
+                    verify(exactly = 2) { vedtakKafkaConsumer.poll(any<Duration>()) }
+                    verify(exactly = 0) { vedtakKafkaConsumer.commitSync() }
                 }
             }
         }
