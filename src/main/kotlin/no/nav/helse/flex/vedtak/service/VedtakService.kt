@@ -53,6 +53,8 @@ class VedtakService(
                         vedtak = it.value(),
                         opprettet = Instant.ofEpochMilli(it.timestamp())
                     )
+                } else {
+                    log.info("Mottok noe som ikke var vedtak på offset ${it.offset()}")
                 }
             }
             delay(1)
