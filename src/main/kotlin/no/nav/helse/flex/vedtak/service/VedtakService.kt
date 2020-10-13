@@ -93,14 +93,6 @@ class VedtakService(
 
         val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = !varsles, opprettet = opprettet)
 
-        MOTTATT_VEDTAK.inc()
-
-        if (vedtakSerialisert.automatiskBehandling) {
-            MOTTATT_AUTOMATISK_VEDTAK.inc()
-        } else {
-            MOTTATT_MANUELT_VEDTAK.inc()
-        }
-
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
 
         if (varsles) {
@@ -115,6 +107,14 @@ class VedtakService(
                     4
                 )
             )
+        }
+
+        MOTTATT_VEDTAK.inc()
+
+        if (vedtakSerialisert.automatiskBehandling) {
+            MOTTATT_AUTOMATISK_VEDTAK.inc()
+        } else {
+            MOTTATT_MANUELT_VEDTAK.inc()
         }
     }
 
