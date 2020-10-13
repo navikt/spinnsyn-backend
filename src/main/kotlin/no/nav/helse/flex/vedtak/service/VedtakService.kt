@@ -22,9 +22,9 @@ import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import no.nav.helse.flex.vedtak.hentInntektsmeldingFraFørsteVedtak
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
-import java.lang.Exception
 import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.UUID
 
@@ -54,7 +54,12 @@ class VedtakService(
                         opprettet = Instant.ofEpochMilli(it.timestamp())
                     )
                 } else {
-                    log.info("Mottok noe som ikke var vedtak på offset ${it.offset()}")
+
+                    val offset = it.offset()
+                    val isDivisibleBy100 = offset % 100 == 0L
+                    if (isDivisibleBy100) {
+                        log.info("Mottok noe som ikke var vedtak på offset $offset. ${OffsetDateTime.ofInstant(Instant.ofEpochMilli(it.timestamp()), ZoneId.systemDefault())}")
+                    }
                 }
             }
             delay(1)
