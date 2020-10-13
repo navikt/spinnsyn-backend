@@ -17,6 +17,7 @@ import no.nav.helse.flex.Environment
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import java.nio.charset.Charset
+import java.time.Instant
 import java.util.UUID
 
 @KtorExperimentalAPI
@@ -32,7 +33,8 @@ fun Route.registerVedtakMockApi(vedtakService: VedtakService, env: Environment, 
             vedtakService.mottaVedtak(
                 id = vedtakId,
                 fnr = fnr,
-                vedtak = vedtak
+                vedtak = vedtak,
+                opprettet = Instant.now()
             )
             call.respond(Melding("Vedtak med $vedtakId opprettet").tilRespons(HttpStatusCode.Created))
         }

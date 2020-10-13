@@ -149,6 +149,7 @@ private fun DatabaseInterface.nyttVedtak(
         id = UUID.fromString(id),
         fnr = fnr,
         lest = false,
+        opprettet = Instant.now(),
         vedtak = VedtakDto(
             fom = LocalDate.now(),
             tom = LocalDate.now(),

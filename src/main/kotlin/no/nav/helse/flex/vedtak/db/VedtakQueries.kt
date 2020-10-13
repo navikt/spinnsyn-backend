@@ -33,14 +33,15 @@ fun DatabaseInterface.lesVedtak(fnr: String, vedtaksId: String): Boolean =
         return it.lesVedtak(fnr, vedtaksId)
     }
 
-fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean): Vedtak =
+fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant): Vedtak =
     connection.use {
         it.finnVedtak(fnr = fnr, vedtaksId = id.toString())?.let { return it }
         return it.opprettVedtak(
             id = id,
             vedtak = vedtak,
             fnr = fnr,
-            lest = lest
+            lest = lest,
+            opprettet = opprettet
         )
     }
 
@@ -77,9 +78,8 @@ fun DatabaseInterface.slettVedtak(vedtakId: String, fnr: String) {
     }
 }
 
-private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean): Vedtak {
+private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant): Vedtak {
 
-    val now = Instant.now()
     this.prepareStatement(
         """
             INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, lest) VALUES (?, ?, ?, ?, ?) 
@@ -88,9 +88,9 @@ private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest
         it.setString(1, id.toString())
         it.setString(2, fnr)
         it.setObject(3, PGobject().also { it.type = "json"; it.value = vedtak })
-        it.setTimestamp(4, Timestamp.from(now))
+        it.setTimestamp(4, Timestamp.from(opprettet))
         if (lest) {
-            it.setTimestamp(5, Timestamp.from(now))
+            it.setTimestamp(5, Timestamp.from(opprettet))
         } else {
             it.setTimestamp(5, null)
         }
@@ -99,7 +99,7 @@ private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest
     }
 
     this.commit()
-    return Vedtak(id = id.toString(), vedtak = vedtak.tilVedtakDto(), lest = lest, opprettet = now)
+    return Vedtak(id = id.toString(), vedtak = vedtak.tilVedtakDto(), lest = lest, opprettet = opprettet)
 }
 
 private fun Connection.finnVedtak(fnr: String): List<Vedtak> =

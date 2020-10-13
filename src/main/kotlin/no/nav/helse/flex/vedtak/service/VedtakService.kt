@@ -50,7 +50,8 @@ class VedtakService(
                     mottaVedtak(
                         id = id,
                         fnr = it.key(),
-                        vedtak = it.value()
+                        vedtak = it.value(),
+                        opprettet = Instant.ofEpochMilli(it.timestamp())
                     )
                 }
             }
@@ -58,22 +59,18 @@ class VedtakService(
         }
     }
 
-    fun mottaVedtak(id: UUID, fnr: String, vedtak: String) {
-        if (environment.isProd()) {
-            log.info("Mottok vedtak som ville fått spinnsyn databaseid $id, men lagrer ikke i produksjon ennå")
-            return
-        }
+    fun mottaVedtak(id: UUID, fnr: String, vedtak: String, opprettet: Instant) {
 
         val vedtakSerialisert = try {
             vedtak.tilVedtakDto()
         } catch (e: Exception) {
             log.error("Kunne ikke deserialisere vedtak", e)
-            throw e
+            return
         }
 
         val varsles = vedtakSerialisert.automatiskBehandling
 
-        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = !varsles)
+        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = !varsles, opprettet = opprettet)
 
         MOTTATT_VEDTAK.inc()
 
