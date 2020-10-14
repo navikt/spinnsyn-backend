@@ -15,7 +15,7 @@ class KafkaClients(env: Environment) {
     private fun getVedtakKafkaConsumer(env: Environment): KafkaConsumer<String, String> {
 
         val config = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
-        config["auto.offset.reset"] = "earliest"
+        config["auto.offset.reset"] = "latest"
 
         val properties = config.toConsumerConfig("spinnsyn-backend-consumer-v3", StringDeserializer::class)
         properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
