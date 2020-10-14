@@ -125,7 +125,7 @@ fun settOppVarslingCronjob(
 
 fun ZonedDateTime.erUtenforFornuftigTidForVarsling(): Boolean {
     return when (this.hour) {
-        in 8..16 -> false
+        in 9..16 -> false
         else -> true
     }
 }

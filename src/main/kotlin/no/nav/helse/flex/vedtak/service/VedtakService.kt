@@ -26,7 +26,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.lang.Exception
 import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.UUID
 
@@ -63,15 +62,8 @@ class VedtakService(
                         id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray()),
                         fnr = it.key(),
                         vedtak = it.value(),
-                        opprettet = Instant.ofEpochMilli(it.timestamp())
+                        opprettet = Instant.now()
                     )
-                } else {
-
-                    val offset = it.offset()
-                    val isDivisibleBy1000 = offset % 1000 == 0L
-                    if (isDivisibleBy1000) {
-                        log.info("Mottok noe som ikke var vedtak på offset $offset. ${OffsetDateTime.ofInstant(Instant.ofEpochMilli(it.timestamp()), ZoneId.systemDefault())}")
-                    }
                 }
             }
             if (!cr.isEmpty) {
