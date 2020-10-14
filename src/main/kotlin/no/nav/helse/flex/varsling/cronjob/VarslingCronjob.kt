@@ -23,8 +23,7 @@ import kotlin.concurrent.timer
 
 fun varslingCronjob(
     database: DatabaseInterface,
-    enkeltvarselKafkaProducer: EnkeltvarselKafkaProducer,
-    produksjon: Boolean
+    enkeltvarselKafkaProducer: EnkeltvarselKafkaProducer
 ): VarslingCronjobResultat {
     val resultat = VarslingCronjobResultat()
     if (Instant.now().atZone(ZoneId.of("Europe/Oslo")).erUtenforFornuftigTidForVarsling()) {
@@ -36,59 +35,53 @@ fun varslingCronjob(
 
     val vedtakForVarsling = database.hentVedtakForVarsling()
     vedtakForVarsling.forEach {
-        if (produksjon) {
-            log.info("Ville sendt førstegangsvarsel for vedtak ${it.id}")
-        } else {
-            try {
-                // Hent og sjekk at det fortsatt ikke er lest
-                val vedtak = database.finnInternVedtak(fnr = it.fnr, vedtaksId = it.id)!!
-                if (vedtak.lest == null) {
-                    val varselBestillingId = vedtak.varselBestillingId()
-                    enkeltvarselKafkaProducer.opprettEnkeltVarsel(
-                        EnkeltVarsel(
-                            fodselsnummer = vedtak.fnr,
-                            varselBestillingId = varselBestillingId,
-                            varselTypeId = "NyttSykepengevedtak"
-                        )
-                    )
-                    database.settVedtakVarslet(it.id)
-                    resultat.varsler++
-                    FØRSTEGANGSVARSEL.inc()
 
-                    log.info("Sendte varsel for vedtak ${it.id} med varselBestillingId $varselBestillingId")
-                }
-            } catch (e: Exception) {
-                log.error("Feil ved varling av vedtak ${it.id}", e)
+        try {
+            // Hent og sjekk at det fortsatt ikke er lest
+            val vedtak = database.finnInternVedtak(fnr = it.fnr, vedtaksId = it.id)!!
+            if (vedtak.lest == null) {
+                val varselBestillingId = vedtak.varselBestillingId()
+                enkeltvarselKafkaProducer.opprettEnkeltVarsel(
+                    EnkeltVarsel(
+                        fodselsnummer = vedtak.fnr,
+                        varselBestillingId = varselBestillingId,
+                        varselTypeId = "NyttSykepengevedtak"
+                    )
+                )
+                database.settVedtakVarslet(it.id)
+                resultat.varsler++
+                FØRSTEGANGSVARSEL.inc()
+
+                log.info("Sendte varsel for vedtak ${it.id} med varselBestillingId $varselBestillingId")
             }
+        } catch (e: Exception) {
+            log.error("Feil ved varling av vedtak ${it.id}", e)
         }
     }
 
     val vedtakForReVarsling = database.hentVedtakForRevarsling()
     vedtakForReVarsling.forEach {
-        if (produksjon) {
-            log.info("Ville sendt revarsel for vedtak ${it.id}")
-        } else {
-            try {
-                // Hent og sjekk at det fortsatt ikke er lest
-                val vedtak = database.finnInternVedtak(fnr = it.fnr, vedtaksId = it.id)!!
-                if (vedtak.lest == null) {
-                    val varselBestillingId = vedtak.revarselBestillingId()
-                    enkeltvarselKafkaProducer.opprettEnkeltVarsel(
-                        EnkeltVarsel(
-                            fodselsnummer = vedtak.fnr,
-                            varselBestillingId = varselBestillingId,
-                            varselTypeId = "NyttSykepengevedtak"
-                        )
-                    )
-                    database.settVedtakRevarslet(it.id)
-                    resultat.revarsler++
-                    REVARSEL.inc()
 
-                    log.info("Sendte revarsel for vedtak ${it.id} med varselBestillingId $varselBestillingId")
-                }
-            } catch (e: Exception) {
-                log.error("Feil ved varling av vedtak ${it.id}", e)
+        try {
+            // Hent og sjekk at det fortsatt ikke er lest
+            val vedtak = database.finnInternVedtak(fnr = it.fnr, vedtaksId = it.id)!!
+            if (vedtak.lest == null) {
+                val varselBestillingId = vedtak.revarselBestillingId()
+                enkeltvarselKafkaProducer.opprettEnkeltVarsel(
+                    EnkeltVarsel(
+                        fodselsnummer = vedtak.fnr,
+                        varselBestillingId = varselBestillingId,
+                        varselTypeId = "NyttSykepengevedtak"
+                    )
+                )
+                database.settVedtakRevarslet(it.id)
+                resultat.revarsler++
+                REVARSEL.inc()
+
+                log.info("Sendte revarsel for vedtak ${it.id} med varselBestillingId $varselBestillingId")
             }
+        } catch (e: Exception) {
+            log.error("Feil ved varling av vedtak ${it.id}", e)
         }
     }
 
@@ -113,8 +106,7 @@ private fun InternVedtak.revarselBestillingId(): String {
 fun settOppVarslingCronjob(
     podLeaderCoordinator: PodLeaderCoordinator,
     database: DatabaseInterface,
-    enkeltvarselKafkaProducer: EnkeltvarselKafkaProducer,
-    produksjon: Boolean
+    enkeltvarselKafkaProducer: EnkeltvarselKafkaProducer
 ) {
 
     val periodeMellomJobber = Duration.ofMinutes(1).toMillis()
@@ -124,7 +116,7 @@ fun settOppVarslingCronjob(
         period = periodeMellomJobber
     ) {
         if (podLeaderCoordinator.isLeader()) {
-            varslingCronjob(database = database, enkeltvarselKafkaProducer = enkeltvarselKafkaProducer, produksjon = produksjon)
+            varslingCronjob(database = database, enkeltvarselKafkaProducer = enkeltvarselKafkaProducer)
         } else {
             log.debug("Jeg er ikke leder")
         }

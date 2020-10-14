@@ -108,8 +108,7 @@ fun main() {
     settOppVarslingCronjob(
         database = database,
         podLeaderCoordinator = podLeaderCoordinator,
-        enkeltvarselKafkaProducer = enkeltvarselKafkaProducer,
-        produksjon = env.isProd()
+        enkeltvarselKafkaProducer = enkeltvarselKafkaProducer
     )
     settOppVedtakCronjob(
         database = database,
