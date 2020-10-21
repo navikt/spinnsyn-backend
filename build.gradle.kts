@@ -37,6 +37,11 @@ tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.helse.flex.BootstrapKt"
 }
 
+tasks.test {
+    useJUnitPlatform()
+    jvmArgs("--enable-preview")
+}
+
 plugins {
     id("org.jmailen.kotlinter") version "2.1.1"
     kotlin("jvm") version "1.3.70"

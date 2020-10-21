@@ -28,6 +28,7 @@ import no.nav.helse.flex.application.metrics.monitorHttpRequests
 import no.nav.helse.flex.vedtak.api.registerVedtakApi
 import no.nav.helse.flex.vedtak.api.registerVedtakMockApi
 import no.nav.helse.flex.vedtak.api.registerVeilederVedtakApi
+import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import java.util.UUID
@@ -37,6 +38,7 @@ fun createApplicationEngine(
     env: Environment,
     vedtakService: VedtakService,
     vedtakNullstillService: VedtakNullstillService,
+    syfoTilgangskontrollService: SyfoTilgangskontrollService,
     selvbetjeningIssuer: JwtIssuer,
     veilederIssuer: JwtIssuer,
     applicationState: ApplicationState
@@ -47,6 +49,7 @@ fun createApplicationEngine(
             veilederIssuer = veilederIssuer,
             applicationState = applicationState,
             vedtakService = vedtakService,
+            syfoTilgangskontrollService = syfoTilgangskontrollService,
             env = env,
             vedtakNullstillService = vedtakNullstillService
         )
@@ -58,6 +61,7 @@ fun Application.configureApplication(
     veilederIssuer: JwtIssuer,
     applicationState: ApplicationState,
     vedtakService: VedtakService,
+    syfoTilgangskontrollService: SyfoTilgangskontrollService,
     env: Environment,
     vedtakNullstillService: VedtakNullstillService
 ) {
@@ -91,7 +95,7 @@ fun Application.configureApplication(
             registerVedtakApi(vedtakService)
         }
         authenticate(IssuerInternalId.veileder.name) {
-            registerVeilederVedtakApi(vedtakService, env)
+            registerVeilederVedtakApi(vedtakService, syfoTilgangskontrollService, env)
         }
         if (!env.isProd()) {
             registerVedtakMockApi(

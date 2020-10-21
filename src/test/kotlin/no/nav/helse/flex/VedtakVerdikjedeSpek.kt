@@ -32,6 +32,7 @@ import no.nav.helse.flex.testutil.generateJWT
 import no.nav.helse.flex.testutil.somKunRefusjon
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaPollErGjort
+import no.nav.helse.flex.testutil.mockSyfotilgangskontrollServer
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.domene.Dokument
 import no.nav.helse.flex.vedtak.domene.VedtakDto
@@ -41,6 +42,7 @@ import no.nav.helse.flex.vedtak.service.RSVedtak
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.helse.flex.vedtak.service.tilRSVedtak
+import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toProducerConfig
 import org.amshove.kluent.`should be equal to`
@@ -177,12 +179,20 @@ object VedtakVerdikjedeSpek : Spek({
                 jwkProvider = jwkProvider
             )
 
+            val mockServerPort = 9090
+            val mockHttpServerUrl = "http://localhost:$mockServerPort"
+
+            val tilgangskontrollServer = mockSyfotilgangskontrollServer(mockServerPort, fnr).start(wait = false)
+
+            afterGroup { tilgangskontrollServer.stop(1L, 10L) }
+
             start()
             application.configureApplication(
                 selvbetjeningIssuer = selvbetjeningIssuer,
                 veilederIssuer = veilederIssuer,
                 applicationState = applicationState,
                 vedtakService = vedtakService,
+                syfoTilgangskontrollService = SyfoTilgangskontrollService("$mockHttpServerUrl/syfo-tilgangskontroll"),
                 env = env,
                 vedtakNullstillService = vedtakNullstillService
             )
@@ -194,10 +204,10 @@ object VedtakVerdikjedeSpek : Spek({
                 )
             }
 
-            fun TestApplicationRequest.medVeilederToken(subject: String) {
+            fun TestApplicationRequest.medVeilederToken() {
                 addHeader(
                     HttpHeaders.Authorization,
-                    "Bearer ${generateJWT(audience = veilederaudience, issuer = veilederissuer, subject = subject)}"
+                    "Bearer ${generateJWT(audience = veilederaudience, issuer = veilederissuer)}"
                 )
             }
 
@@ -290,7 +300,7 @@ object VedtakVerdikjedeSpek : Spek({
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/veileder/vedtak?fnr=$fnr") {
-                        medVeilederToken("whatver-subject")
+                        medVeilederToken()
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
@@ -298,10 +308,22 @@ object VedtakVerdikjedeSpek : Spek({
                 }
             }
 
+            it("veileder får 403 ved henting av vedtak som ikke er registrert for hen") {
+
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/veileder/vedtak?fnr=123") {
+                        medVeilederToken()
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.Forbidden
+                    response.content shouldEqual "{\"melding\":\"Veileder har ikke tilgang til dennne personen\"}"
+                }
+            }
+
             it("Veileder APIet krever query param") {
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/veileder/vedtak") {
-                        medVeilederToken("whatver-subject")
+                        medVeilederToken()
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.BadRequest
