@@ -29,20 +29,20 @@ import no.nav.helse.flex.application.configureApplication
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.testutil.generateJWT
+import no.nav.helse.flex.testutil.mockSyfotilgangskontrollServer
 import no.nav.helse.flex.testutil.somKunRefusjon
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaPollErGjort
-import no.nav.helse.flex.testutil.mockSyfotilgangskontrollServer
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.domene.Dokument
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.serialisertTilString
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import no.nav.helse.flex.vedtak.service.RSVedtak
+import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.helse.flex.vedtak.service.tilRSVedtak
-import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toProducerConfig
 import org.amshove.kluent.`should be equal to`

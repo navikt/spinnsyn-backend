@@ -1,7 +1,7 @@
 package no.nav.helse.flex.vedtak.api
 
-import io.ktor.application.call
 import io.ktor.application.ApplicationCall
+import io.ktor.application.call
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
@@ -46,7 +46,7 @@ fun Route.registerVeilederVedtakApi(
                 }
                 else -> {
                     val tilgang = syfoTilgangskontrollService.harTilgangTilBruker(fnr, call.tokenSomString())
-                    when(tilgang.harTilgang) {
+                    when (tilgang.harTilgang) {
                         false -> {
                             call.respond(
                                 Melding("Veileder har ikke tilgang til dennne personen")
@@ -61,8 +61,6 @@ fun Route.registerVeilederVedtakApi(
                 }
             }
         }
-
-
     }
 }
 

@@ -4,12 +4,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.accept
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpHeaders
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
 import org.slf4j.Logger
@@ -29,7 +29,7 @@ class SyfoTilgangskontrollService(
             }
         }
 
-        val response: HttpResponse = httpClient.get("$url/api/tilgang/bruker?fnr=${fnr}") {
+        val response: HttpResponse = httpClient.get("$url/api/tilgang/bruker?fnr=$fnr") {
             header(HttpHeaders.Authorization, "Bearer $token")
             accept(ContentType.Application.Json)
         }
@@ -37,7 +37,7 @@ class SyfoTilgangskontrollService(
         log.info("response cought by service: ${response.status}")
         return when (response.status) {
             HttpStatusCode.OK -> {
-               return response.receive()
+                return response.receive()
             }
             else -> {
                 log.info("Ingen tilgang, Tilgangskontrollstatus er : {}", response.status)
@@ -47,6 +47,6 @@ class SyfoTilgangskontrollService(
     }
 }
 data class Tilgang(
-        val harTilgang: Boolean,
-        val begrunnelse: String?
+    val harTilgang: Boolean,
+    val begrunnelse: String?
 )
