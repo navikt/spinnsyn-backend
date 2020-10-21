@@ -26,6 +26,7 @@ import no.nav.helse.flex.varsling.cronjob.settOppVarslingCronjob
 import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProducer
 import no.nav.helse.flex.vedtak.cronjob.settOppVedtakCronjob
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
+import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.syfo.kafka.envOverrides
@@ -87,10 +88,13 @@ fun main() {
         environment = env
     )
 
+    val syfoTilgangskontrollService = SyfoTilgangskontrollService()
+
     val applicationEngine = createApplicationEngine(
         env = env,
         vedtakService = vedtakService,
         vedtakNullstillService = vedtakNullstillService,
+        syfoTilgangskontrollService = syfoTilgangskontrollService,
         selvbetjeningIssuer = selvbetjeningIssuer,
         veilederIssuer = veilederIssuer,
         applicationState = applicationState
