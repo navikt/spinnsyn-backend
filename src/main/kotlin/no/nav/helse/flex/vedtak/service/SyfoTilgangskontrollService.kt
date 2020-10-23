@@ -12,12 +12,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.flex.Environment
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
 class SyfoTilgangskontrollService(
-    private val url: String = "http://syfo-tilgangskontroll/syfo-tilgangskontroll"
+    private val environment: Environment
 ) {
     val log: Logger = LoggerFactory.getLogger("no.nav.syfo.spinnsyn-backend")
 
@@ -29,8 +30,9 @@ class SyfoTilgangskontrollService(
             }
         }
 
-        val response: HttpResponse = httpClient.get("$url/api/tilgang/bruker?fnr=$fnr") {
+        val response: HttpResponse = httpClient.get("${environment.apiGatewayUrl}/syfo-tilgangskontroll/syfo-tilgangskontroll/api/tilgang/bruker?fnr=$fnr") {
             header(HttpHeaders.Authorization, "Bearer $token")
+            header("x-nav-apiKey", environment.syfotilgangskontrollApiGwKey)
             accept(ContentType.Application.Json)
         }
 

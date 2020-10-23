@@ -7,6 +7,8 @@ data class Environment(
     val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
     val applicationName: String = getEnvVar("NAIS_APP_NAME"),
     val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
+    val apiGatewayUrl: String = getEnvVar("API_GATEWAY_URL"),
+    val syfotilgangskontrollApiGwKey: String = getEnvVar("SYFO_TILGANGSKONTROLL_SPINNSYN_BACKEND_API_GW_KEY"),
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val spinnsynBackendDbHost: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_HOST"),
     val spinnsynBackendDbPort: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PORT"),
@@ -39,6 +41,10 @@ data class Environment(
 
     fun isProd(): Boolean {
         return cluster == "prod-gcp"
+    }
+
+    fun isDev(): Boolean {
+        return cluster == "dev-gcp"
     }
 }
 
