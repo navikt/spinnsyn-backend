@@ -88,7 +88,7 @@ fun main() {
         environment = env
     )
 
-    val syfoTilgangskontrollService = SyfoTilgangskontrollService()
+    val syfoTilgangskontrollService = SyfoTilgangskontrollService(environment = env)
 
     val applicationEngine = createApplicationEngine(
         env = env,

@@ -88,11 +88,17 @@ object VedtakVerdikjedeSpek : Spek({
 
     val applicationState = ApplicationState()
 
+    val mockServerPort = 9090
+    val mockHttpServerUrl = "http://localhost:$mockServerPort"
+
     fun setupEnvMock() {
         clearAllMocks()
         every { env.spinnsynFrontendUrl } returns "https://www.nav.no/syk/sykepenger"
         every { env.serviceuserUsername } returns "srvspvedtak"
+        every { env.syfotilgangskontrollApiGwKey } returns "whateverkey"
         every { env.isProd() } returns false
+        every { env.apiGatewayUrl } returns mockHttpServerUrl
+        every { env.isDev() } returns false
         every { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) } just Runs
         every { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) } just Runs
     }
@@ -179,9 +185,6 @@ object VedtakVerdikjedeSpek : Spek({
                 jwkProvider = jwkProvider
             )
 
-            val mockServerPort = 9090
-            val mockHttpServerUrl = "http://localhost:$mockServerPort"
-
             val tilgangskontrollServer = mockSyfotilgangskontrollServer(mockServerPort, fnr).start(wait = false)
 
             afterGroup { tilgangskontrollServer.stop(1L, 10L) }
@@ -192,7 +195,7 @@ object VedtakVerdikjedeSpek : Spek({
                 veilederIssuer = veilederIssuer,
                 applicationState = applicationState,
                 vedtakService = vedtakService,
-                syfoTilgangskontrollService = SyfoTilgangskontrollService("$mockHttpServerUrl/syfo-tilgangskontroll"),
+                syfoTilgangskontrollService = SyfoTilgangskontrollService(environment = env),
                 env = env,
                 vedtakNullstillService = vedtakNullstillService
             )

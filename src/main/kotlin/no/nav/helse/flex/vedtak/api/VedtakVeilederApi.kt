@@ -1,16 +1,12 @@
 package no.nav.helse.flex.vedtak.api
 
-import io.ktor.application.ApplicationCall
 import io.ktor.application.call
-import io.ktor.auth.jwt.JWTPrincipal
-import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.route
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.flex.Environment
 import no.nav.helse.flex.log
 import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakService
@@ -18,19 +14,13 @@ import no.nav.helse.flex.vedtak.service.VedtakService
 @KtorExperimentalAPI
 fun Route.registerVeilederVedtakApi(
     vedtakService: VedtakService,
-    syfoTilgangskontrollService: SyfoTilgangskontrollService,
-    environment: Environment
+    syfoTilgangskontrollService: SyfoTilgangskontrollService
 ) {
     route("/api/v1/veileder") {
         get("/vedtak") {
-            if (environment.isProd()) {
-                log.error("Veileder api avslått i produksjon frem til tilgangskontroll er på plass")
-                call.respond(Melding("APIet er ikke skrudd på i produksjon").tilRespons(HttpStatusCode.BadRequest))
-                return@get
-            }
 
             val fnr = call.request.queryParameters["fnr"]
-            val token = call.request.headers["Authorization"]?.removePrefix("Bearer")
+            val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
             when {
                 token == null -> {
                     call.respond(
@@ -45,7 +35,8 @@ fun Route.registerVeilederVedtakApi(
                     )
                 }
                 else -> {
-                    val tilgang = syfoTilgangskontrollService.harTilgangTilBruker(fnr, call.tokenSomString())
+                    val tilgang = syfoTilgangskontrollService.harTilgangTilBruker(fnr, token)
+
                     when (tilgang.harTilgang) {
                         false -> {
                             call.respond(
@@ -62,9 +53,4 @@ fun Route.registerVeilederVedtakApi(
             }
         }
     }
-}
-
-fun ApplicationCall.tokenSomString(): String {
-    val principal = principal<JWTPrincipal>()
-    return principal.toString()
 }

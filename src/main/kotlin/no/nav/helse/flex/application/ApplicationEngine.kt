@@ -95,7 +95,7 @@ fun Application.configureApplication(
             registerVedtakApi(vedtakService)
         }
         authenticate(IssuerInternalId.veileder.name) {
-            registerVeilederVedtakApi(vedtakService, syfoTilgangskontrollService, env)
+            registerVeilederVedtakApi(vedtakService, syfoTilgangskontrollService)
         }
         if (!env.isProd()) {
             registerVedtakMockApi(

@@ -8,8 +8,8 @@ metadata:
 spec:
   image: {{ image }}
   replicas:
-    min: 3
-    max: 3
+    min: 2
+    max: 2
     cpuThresholdPercentage: 90
   port: 8080
   liveness:
@@ -45,6 +45,7 @@ spec:
       external:
         - host: login.microsoftonline.com
         - host: kafka-schema-registry.nais.adeo.no
+        - host: api-gw.oera.no
     inbound:
       rules:
         - application: spinnsyn-backend-proxy
@@ -52,6 +53,7 @@ spec:
 
   envFrom:
     - secret: spinnsyn-backend-serviceuser
+    - secret: syfo-tilgangskontroll-spinnsyn-backend-api-gw-key
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
@@ -67,3 +69,5 @@ spec:
       value: "9b4e07a3-4f4c-4bab-b866-87f62dff480d,ffca591d-dfc9-4ecf-9ac2-050d75b39fc0"
     - name: KAFKA_SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.adeo.no
+    - name: API_GATEWAY_URL
+      value: https://api-gw.oera.no
