@@ -46,6 +46,7 @@ spec:
         - host: login.microsoftonline.com
         - host: kafka-schema-registry.nais-q.adeo.no
         - host: api-gw-q1.oera.no
+        - host: navtestb2c.b2clogin.com
     inbound:
       rules:
         - application: spinnsyn-backend-proxy
@@ -55,15 +56,12 @@ spec:
   envFrom:
     - secret: spinnsyn-backend-serviceuser
     - secret: syfo-tilgangskontroll-spinnsyn-backend-api-gw-key
+    - configmap: loginservice-idporten
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: SPINNSYN_FRONTEND_URL
       value: "https://www-gcp.dev.nav.no/syk/sykepenger"
-    - name: SELVBETJENING_WELLKNOWN_URI
-      value: "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1"
-    - name: SELVBETJENING_EXPECTED_AUDIENCE
-      value: "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5"
     - name: VEILEDER_WELLKNOWN_URI
       value: "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration"
     - name: VEILEDER_EXPECTED_AUDIENCE

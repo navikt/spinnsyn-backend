@@ -124,8 +124,8 @@ fun main() {
 
 private fun hentSelvbetjeningJwtIssuer(env: Environment): JwtIssuer =
     hentJwtIssuer(
-        env.selvbetjeningWellKnownUri,
-        expectedAudience = env.selvbetjeningExpectedAudience,
+        env.loginserviceIdportenDiscoveryUrl,
+        expectedAudience = env.loginserviceIdportenAudience,
         issuerInternalId = IssuerInternalId.selvbetjening
     )
 
