@@ -81,25 +81,21 @@ class VedtakService(
             return
         }
 
-        val varsles = vedtakSerialisert.automatiskBehandling
-
-        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = !varsles, opprettet = opprettet)
+        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = false, opprettet = opprettet)
 
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
 
-        if (varsles) {
-            brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
-                Nokkel(environment.serviceuserUsername, id.toString()),
-                Oppgave(
-                    vedtaket.opprettet.toEpochMilli(),
-                    fnr,
-                    id.toString(),
-                    "Sykepengene dine er beregnet - se resultatet",
-                    "${environment.spinnsynFrontendUrl}/vedtak/$id",
-                    4
-                )
+        brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
+            Nokkel(environment.serviceuserUsername, id.toString()),
+            Oppgave(
+                vedtaket.opprettet.toEpochMilli(),
+                fnr,
+                id.toString(),
+                "Sykepengene dine er beregnet - se resultatet",
+                "${environment.spinnsynFrontendUrl}/vedtak/$id",
+                4
             )
-        }
+        )
 
         MOTTATT_VEDTAK.inc()
 

@@ -261,12 +261,12 @@ object VedtakVerdikjedeSpek : Spek({
                 automatiskVedtakFraDb.lest shouldEqual false
 
                 val manueltVedtakFraDb = vedtakEtter.find { !it.vedtak.automatiskBehandling }!!
-                manueltVedtakFraDb.lest shouldEqual true
+                manueltVedtakFraDb.lest shouldEqual false
 
                 val oppgaveSlot = slot<Oppgave>()
-                val vedtaksId = vedtakEtter[0].id
+                val vedtaksId = vedtakEtter[1].id
 
-                verify(exactly = 1) {
+                verify(exactly = 2) {
                     brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
                         any(),
                         capture(oppgaveSlot)
@@ -294,7 +294,7 @@ object VedtakVerdikjedeSpek : Spek({
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
                         RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0]),
-                        RSVedtak(id = generertVedtakId[1], lest = true, vedtak = manueltVedtak, opprettet = opprettet[1])
+                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = manueltVedtak, opprettet = opprettet[1])
                     )
                 }
             }
@@ -312,7 +312,7 @@ object VedtakVerdikjedeSpek : Spek({
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
                         RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0]),
-                        RSVedtak(id = generertVedtakId[1], lest = true, vedtak = manueltVedtak, opprettet = opprettet[1])
+                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = manueltVedtak, opprettet = opprettet[1])
                     )
                 }
             }
