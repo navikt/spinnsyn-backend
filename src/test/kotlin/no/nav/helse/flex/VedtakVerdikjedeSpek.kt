@@ -282,9 +282,9 @@ object VedtakVerdikjedeSpek : Spek({
             }
 
             it("Vedtaket kan hentes i REST APIet") {
-                val vedtak = testDb.finnVedtak(fnr)[0].tilRSVedtak()
-                val generertVedtakId = vedtak.id
-                val opprettet = vedtak.opprettet
+                val vedtak = testDb.finnVedtak(fnr).map { it.tilRSVedtak() }
+                val generertVedtakId = vedtak.map { it.id }
+                val opprettet = vedtak.map { it.opprettet }
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
@@ -292,14 +292,17 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content!!.tilRSVedtakListe() shouldEqual listOf(RSVedtak(id = generertVedtakId, lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet))
+                    response.content!!.tilRSVedtakListe() shouldEqual listOf(
+                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0]),
+                        RSVedtak(id = generertVedtakId[1], lest = true, vedtak = manueltVedtak, opprettet = opprettet[1])
+                    )
                 }
             }
 
             it("Vedtaket kan hentes i REST APIet av en veileder") {
-                val vedtak = testDb.finnVedtak(fnr)[0].tilRSVedtak()
-                val generertVedtakId = vedtak.id
-                val opprettet = vedtak.opprettet
+                val vedtak = testDb.finnVedtak(fnr).map { it.tilRSVedtak() }
+                val generertVedtakId = vedtak.map { it.id }
+                val opprettet = vedtak.map { it.opprettet }
 
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/veileder/vedtak?fnr=$fnr") {
@@ -307,7 +310,10 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content!!.tilRSVedtakListe() shouldEqual listOf(RSVedtak(id = generertVedtakId, lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet))
+                    response.content!!.tilRSVedtakListe() shouldEqual listOf(
+                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0]),
+                        RSVedtak(id = generertVedtakId[1], lest = true, vedtak = manueltVedtak, opprettet = opprettet[1])
+                    )
                 }
             }
 
@@ -481,8 +487,8 @@ object VedtakVerdikjedeSpek : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     val tilRSVedtakListe = response.content!!.tilRSVedtakListe()
-                    tilRSVedtakListe.size shouldEqual 1
-                    val forlengelseVedtak = tilRSVedtakListe[0]
+                    tilRSVedtakListe.size shouldEqual 2
+                    val forlengelseVedtak = tilRSVedtakListe[1]
                     // Samme innhold i vedtaket ekskludert dokumentid
                     forlengelseVedtak.vedtak.copy(dokumenter = emptyList()) shouldEqual nesteVedtak.copy(dokumenter = emptyList())
                     // Har både inntektsmelding og søknad

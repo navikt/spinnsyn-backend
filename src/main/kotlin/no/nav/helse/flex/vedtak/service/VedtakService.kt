@@ -114,7 +114,6 @@ class VedtakService(
         database.finnVedtak(fnr)
             .hentInntektsmeldingFraFørsteVedtak()
             .map { it.tilRSVedtak() }
-            .filter { it.vedtak.automatiskBehandling }
 
     fun hentVedtak(fnr: String, vedtaksId: String) =
         database.finnVedtak(fnr)
