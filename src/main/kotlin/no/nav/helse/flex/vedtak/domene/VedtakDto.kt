@@ -11,6 +11,8 @@ data class VedtakDto(
     val forbrukteSykedager: Int,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean = false,
+    val sykepengegrunnlag: Double? = null,
+    val månedsinntekt: Double? = null,
     val utbetalinger: List<UtbetalingDto> = emptyList(),
     val dokumenter: List<Dokument> = emptyList()
 ) {

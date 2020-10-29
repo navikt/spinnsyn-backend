@@ -20,7 +20,6 @@ import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
-import no.nav.helse.flex.vedtak.hentInntektsmeldingFraFørsteVedtak
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.lang.Exception
@@ -108,12 +107,10 @@ class VedtakService(
 
     fun hentVedtak(fnr: String) =
         database.finnVedtak(fnr)
-            .hentInntektsmeldingFraFørsteVedtak()
             .map { it.tilRSVedtak() }
 
     fun hentVedtak(fnr: String, vedtaksId: String) =
         database.finnVedtak(fnr)
-            .hentInntektsmeldingFraFørsteVedtak()
             .find { it.id == vedtaksId }
             ?.tilRSVedtak()
 
