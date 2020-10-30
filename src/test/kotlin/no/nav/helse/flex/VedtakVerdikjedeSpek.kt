@@ -30,11 +30,9 @@ import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.testutil.generateJWT
 import no.nav.helse.flex.testutil.mockSyfotilgangskontrollServer
-import no.nav.helse.flex.testutil.somKunRefusjon
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaPollErGjort
 import no.nav.helse.flex.vedtak.db.finnVedtak
-import no.nav.helse.flex.vedtak.domene.Dokument
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.serialisertTilString
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
@@ -62,7 +60,6 @@ import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDate
 import java.util.Properties
-import java.util.UUID
 
 @KtorExperimentalAPI
 object VedtakVerdikjedeSpek : Spek({
@@ -429,70 +426,6 @@ object VedtakVerdikjedeSpek : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.NotFound
                     response.content shouldEqual "{\"melding\":\"Finner ikke vedtak $generertVedtakId\"}"
-                }
-            }
-
-            it("En forlengelse får inntektsmelding id fra det første vedtaket") {
-
-                val fnrForlengelse = "12345121324"
-
-                val inntektsmelding = Dokument(dokumentId = UUID.randomUUID(), type = Dokument.Type.Inntektsmelding)
-                val forsteVedtak = VedtakDto(
-                    fom = LocalDate.now().minusDays(20),
-                    tom = LocalDate.now(),
-                    automatiskBehandling = false,
-                    gjenståendeSykedager = 200,
-                    forbrukteSykedager = 23,
-                    dokumenter = listOf(inntektsmelding)
-                ).somKunRefusjon(fnr = fnrForlengelse)
-
-                val søknad = Dokument(dokumentId = UUID.randomUUID(), type = Dokument.Type.Søknad)
-                val nesteVedtak = forsteVedtak.copy(
-                    automatiskBehandling = true,
-                    fom = forsteVedtak.tom.plusDays(1),
-                    tom = forsteVedtak.tom.plusDays(20),
-                    dokumenter = listOf(søknad)
-                )
-
-                vedtakKafkaProducer.send(
-                    ProducerRecord(
-                        "aapen-helse-sporbar",
-                        null,
-                        fnrForlengelse,
-                        forsteVedtak.serialisertTilString(),
-                        listOf(RecordHeader("type", "Vedtak".toByteArray()))
-                    )
-                )
-
-                vedtakKafkaProducer.send(
-                    ProducerRecord(
-                        "aapen-helse-sporbar",
-                        null,
-                        fnrForlengelse,
-                        nesteVedtak.serialisertTilString(),
-                        listOf(RecordHeader("type", "Vedtak".toByteArray()))
-                    )
-                )
-
-                stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 2)
-
-                runBlocking {
-                    vedtakService.start()
-                }
-
-                with(
-                    handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
-                        medSelvbetjeningToken(fnrForlengelse)
-                    }
-                ) {
-                    response.status() shouldEqual HttpStatusCode.OK
-                    val tilRSVedtakListe = response.content!!.tilRSVedtakListe()
-                    tilRSVedtakListe.size shouldEqual 2
-                    val forlengelseVedtak = tilRSVedtakListe[1]
-                    // Samme innhold i vedtaket ekskludert dokumentid
-                    forlengelseVedtak.vedtak.copy(dokumenter = emptyList()) shouldEqual nesteVedtak.copy(dokumenter = emptyList())
-                    // Har både inntektsmelding og søknad
-                    forlengelseVedtak.vedtak.dokumenter.sortedBy { it.dokumentId } shouldEqual listOf(inntektsmelding, søknad).sortedBy { it.dokumentId }
                 }
             }
 
