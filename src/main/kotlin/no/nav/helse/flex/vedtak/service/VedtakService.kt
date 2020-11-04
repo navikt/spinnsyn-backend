@@ -17,6 +17,7 @@ import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.eierVedtak
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.db.lesVedtak
+import no.nav.helse.flex.vedtak.db.opprettAnnullering
 import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
@@ -132,9 +133,14 @@ class VedtakService(
             return
         }
 
-        log.info("Opprettet annullering med spinnsyn databaseid $id")
+        database.opprettAnnullering(
+            id = id,
+            fnr = fnr,
+            annullering = annullering,
+            opprettet = opprettet
+        )
 
-        // TODO: Lagre i egen db table
+        log.info("Opprettet annullering med spinnsyn databaseid $id")
     }
 
     fun hentVedtak(fnr: String) =

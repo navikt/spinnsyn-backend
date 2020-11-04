@@ -14,3 +14,5 @@ data class AnnulleringDto(
 )
 
 fun String.tilAnnulleringDto(): AnnulleringDto = objectMapper.readValue(this)
+
+fun AnnulleringDto.serialisertTilString(): String = objectMapper.writeValueAsString(this)
