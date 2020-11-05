@@ -80,6 +80,17 @@ class VedtakService(
             return
         }
 
+        database.finnVedtak(fnr)
+            .firstOrNull { it.vedtak == vedtakSerialisert }
+            ?.let {
+                if (it.id == id.toString()) {
+                    log.info("Vedtak $id er allerede mottat, går videre")
+                } else {
+                    log.warn("Oppretter ikke duplikate vedtak ny id: $id, eksisterende id: ${it.id}")
+                }
+                return
+            }
+
         val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = false, opprettet = opprettet)
 
         log.info("Opprettet vedtak med spinnsyn databaseid $id")

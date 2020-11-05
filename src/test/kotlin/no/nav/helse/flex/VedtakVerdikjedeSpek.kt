@@ -510,6 +510,43 @@ object VedtakVerdikjedeSpek : Spek({
                     verify(exactly = 0) { vedtakKafkaConsumer.commitSync() }
                 }
             }
+
+            it("Lagrer ikke duplikate vedtak") {
+                val nyttFnr = "duplikat"
+                val vedtakFraDb = testDb.finnVedtak(nyttFnr)
+                vedtakFraDb.size `should be equal to` 0
+
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar", null,
+                        nyttFnr,
+                        automatiskBehandletVedtak.serialisertTilString(),
+                        listOf(RecordHeader("type", "Vedtak".toByteArray()))
+                    )
+                )
+
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar", null,
+                        nyttFnr,
+                        automatiskBehandletVedtak.serialisertTilString(),
+                        listOf(RecordHeader("type", "Vedtak".toByteArray()))
+                    )
+                )
+
+                stopApplicationNårAntallKafkaMeldingerErLest(
+                    vedtakKafkaConsumer,
+                    applicationState,
+                    antallKafkaMeldinger = 2
+                )
+
+                runBlocking {
+                    vedtakService.start()
+                }
+
+                val vedtakEtter = testDb.finnVedtak(nyttFnr)
+                vedtakEtter.size `should be equal to` 1
+            }
         }
     }
 })
