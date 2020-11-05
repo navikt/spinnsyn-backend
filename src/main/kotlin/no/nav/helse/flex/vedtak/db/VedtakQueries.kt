@@ -35,7 +35,6 @@ fun DatabaseInterface.lesVedtak(fnr: String, vedtaksId: String): Boolean =
 
 fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant): Vedtak =
     connection.use {
-        it.finnVedtak(fnr = fnr, vedtaksId = id.toString())?.let { return it }
         return it.opprettVedtak(
             id = id,
             vedtak = vedtak,
