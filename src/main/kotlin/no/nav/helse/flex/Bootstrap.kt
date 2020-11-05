@@ -21,7 +21,10 @@ import no.nav.helse.flex.application.getWellKnown
 import no.nav.helse.flex.brukernotifkasjon.skapBrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.db.Database
 import no.nav.helse.flex.util.KafkaClients
+import no.nav.helse.flex.util.PodLeaderCoordinator
+import no.nav.helse.flex.varsling.cronjob.settOppVarslingCronjob
 import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProducer
+import no.nav.helse.flex.vedtak.cronjob.settOppVedtakCronjob
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
@@ -101,12 +104,9 @@ fun main() {
     applicationState.ready = true
     log.info("Application server started")
 
-    /*
     createListener(applicationState) {
         vedtakService.start()
     }
-
-
 
     val podLeaderCoordinator = PodLeaderCoordinator(env = env)
     settOppVarslingCronjob(
@@ -120,8 +120,6 @@ fun main() {
         env = env,
         brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer
     )
-
-     */
 }
 
 private fun hentSelvbetjeningJwtIssuer(env: Environment): JwtIssuer =
