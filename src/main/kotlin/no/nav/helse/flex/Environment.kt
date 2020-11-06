@@ -23,7 +23,8 @@ data class Environment(
     val veilederWellKnownUri: String = getEnvVar("VEILEDER_WELLKNOWN_URI"),
     val veilederExpectedAudience: List<String> = getEnvVar("VEILEDER_EXPECTED_AUDIENCE").split(","),
     val electorPath: String = getEnvVar("ELECTOR_PATH"),
-    val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "30000").toLong()
+    val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "30000").toLong(),
+    val kafkaAutoOffsetReset: String = getEnvVar("KAFKA_AUTO_OFFSET_RESET", "none")
 ) : KafkaConfig {
 
     fun hentKafkaCredentials(): KafkaCredentials {
