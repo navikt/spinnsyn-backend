@@ -108,7 +108,7 @@ class SpoleService(
                     }
                 }
             }
-            consumer.commitAsync()
+            consumer.commitSync()
             poll = consumer.poll(Duration.ofMillis(1000))
         }
     }
