@@ -32,7 +32,9 @@ import no.nav.helse.flex.testutil.generateJWT
 import no.nav.helse.flex.testutil.mockSyfotilgangskontrollServer
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaPollErGjort
+import no.nav.helse.flex.vedtak.db.finnAnnullering
 import no.nav.helse.flex.vedtak.db.finnVedtak
+import no.nav.helse.flex.vedtak.domene.AnnulleringDto
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.serialisertTilString
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
@@ -59,6 +61,7 @@ import org.testcontainers.containers.Network
 import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Properties
 
 @KtorExperimentalAPI
@@ -546,6 +549,40 @@ object VedtakVerdikjedeSpek : Spek({
 
                 val vedtakEtter = testDb.finnVedtak(nyttFnr)
                 vedtakEtter.size `should be equal to` 1
+            }
+
+            it("Annullering mottas fra kafka topic og lagres i db") {
+                val annulleringFraDb = testDb.finnAnnullering(fnr)
+                annulleringFraDb.size `should be equal to` 0
+
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar",
+                        null,
+                        fnr,
+                        AnnulleringDto(
+                            fødselsnummer = fnr,
+                            orgnummer = "123",
+                            fom = LocalDate.now().minusDays(10),
+                            tom = LocalDate.now(),
+                            tidsstempel = LocalDateTime.now()
+                        ).serialisertTilString(),
+                        listOf(RecordHeader("type", "Annullering".toByteArray()))
+                    )
+                )
+
+                stopApplicationNårAntallKafkaMeldingerErLest(
+                    vedtakKafkaConsumer,
+                    applicationState,
+                    antallKafkaMeldinger = 1
+                )
+
+                runBlocking {
+                    vedtakService.start()
+                }
+
+                val annulleringEtter = testDb.finnAnnullering(fnr)
+                annulleringEtter.size shouldEqual 1
             }
         }
     }

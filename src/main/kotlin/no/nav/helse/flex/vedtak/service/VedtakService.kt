@@ -7,6 +7,7 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.Environment
 import no.nav.helse.flex.application.ApplicationState
+import no.nav.helse.flex.application.metrics.MOTTATT_ANNULLERING_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_AUTOMATISK_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_MANUELT_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
@@ -17,8 +18,10 @@ import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.eierVedtak
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.db.lesVedtak
+import no.nav.helse.flex.vedtak.db.opprettAnnullering
 import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -61,6 +64,13 @@ class VedtakService(
                         id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray()),
                         fnr = it.key(),
                         vedtak = it.value(),
+                        opprettet = Instant.now()
+                    )
+                } else if (it.erAnnullering()) {
+                    mottaAnnullering(
+                        id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray()),
+                        fnr = it.key(),
+                        annullering = it.value(),
                         opprettet = Instant.now()
                     )
                 }
@@ -116,6 +126,26 @@ class VedtakService(
         }
     }
 
+    fun mottaAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant) {
+        val annulleringSerialisert = try {
+            annullering.tilAnnulleringDto()
+        } catch (e: Exception) {
+            log.error("Kunne ikke deserialisere annullering", e)
+            return
+        }
+
+        database.opprettAnnullering(
+            id = id,
+            fnr = fnr,
+            annullering = annullering,
+            opprettet = opprettet
+        )
+
+        MOTTATT_ANNULLERING_VEDTAK.inc()
+
+        log.info("Opprettet annullering med spinnsyn databaseid $id")
+    }
+
     fun hentVedtak(fnr: String) =
         database.finnVedtak(fnr)
             .map { it.tilRSVedtak() }
@@ -159,5 +189,11 @@ fun Vedtak.tilRSVedtak(): RSVedtak {
 private fun ConsumerRecord<String, String>.erVedtak(): Boolean {
     return headers().any { header ->
         header.key() == "type" && String(header.value()) == "Vedtak"
+    }
+}
+
+private fun ConsumerRecord<String, String>.erAnnullering(): Boolean {
+    return headers().any { header ->
+        header.key() == "type" && String(header.value()) == "Annullering"
     }
 }
