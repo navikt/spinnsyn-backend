@@ -106,9 +106,10 @@ class SpoleService(
                                 log.info("SpoleService finner ikke vedtak id: $id, partition: ${cr.partition()}, offset: ${cr.offset()}")
                             }
                     }
+                    consumer.commitSync()
                 }
             }
-            consumer.commitSync()
+
             poll = consumer.poll(Duration.ofMillis(1000))
         }
     }
