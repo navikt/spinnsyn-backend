@@ -7,6 +7,7 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.Environment
 import no.nav.helse.flex.application.ApplicationState
+import no.nav.helse.flex.application.metrics.MOTTATT_ANNULLERING_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_AUTOMATISK_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_MANUELT_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
@@ -139,6 +140,8 @@ class VedtakService(
             annullering = annullering,
             opprettet = opprettet
         )
+
+        MOTTATT_ANNULLERING_VEDTAK.inc()
 
         log.info("Opprettet annullering med spinnsyn databaseid $id")
     }
