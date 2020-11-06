@@ -6,6 +6,8 @@ import no.nav.helse.flex.application.ApplicationState
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
 import no.nav.helse.flex.util.PodLeaderCoordinator
+import no.nav.helse.flex.vedtak.db.finnVedtak
+import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import no.nav.syfo.kafka.envOverrides
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toConsumerConfig
@@ -16,6 +18,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.UUID
 
 class SpoleService(
     private val podLeaderCoordinator: PodLeaderCoordinator,
@@ -59,7 +62,7 @@ class SpoleService(
     private fun seek(consumer: KafkaConsumer<String, String>) {
         // TargetTime in ms
         val targetTime = ZonedDateTime.of(
-            2020, 11, 5, 2, 0, 0, 0,
+            2020, 11, 2, 0, 0, 0, 0,
             ZoneId.of("Europe/Oslo")
         ).toInstant().toEpochMilli().also { log.info("SpoleService targetTime = $it") }
         // Get the list of partitions
@@ -84,8 +87,29 @@ class SpoleService(
     }
 
     private fun job(consumer: KafkaConsumer<String, String>) {
-        consumer.poll(Duration.ofMillis(1000)).forEach { cr ->
-            log.info("SpoleService hentet timestamp: ${cr.timestamp()}, topic: ${cr.topic()}, partition: ${cr.partition()}")
+        var poll = consumer.poll(Duration.ofMillis(1000))
+        log.info("SpoleService starter fra timestamp: ${poll.first().timestamp()}, topic: ${poll.first().topic()}, partition: ${poll.first().partition()}")
+
+        while (applicationState.ready) {
+            poll.forEach { cr ->
+                if (cr.headers().any { it.key() == "type" && String(it.value()) == "Vedtak" }) {
+                    cr.value().runCatching {
+                        tilVedtakDto()
+                    }.onFailure { e ->
+                        log.info("SpoleService kunne ikke deserialisere vedtak, fortsetter", e)
+                    }.onSuccess { vedtakDto ->
+                        database
+                            .finnVedtak(fnr = cr.key())
+                            .firstOrNull { it.vedtak == vedtakDto }
+                            ?: run {
+                                val id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray())
+                                log.info("SpoleService finner ikke vedtak id: $id, partition: ${cr.partition()}, offset: ${cr.offset()}")
+                            }
+                    }
+                }
+            }
+            consumer.commitAsync()
+            poll = consumer.poll(Duration.ofMillis(1000))
         }
     }
 }
