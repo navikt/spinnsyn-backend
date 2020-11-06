@@ -26,6 +26,7 @@ import no.nav.helse.flex.varsling.cronjob.settOppVarslingCronjob
 import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProducer
 import no.nav.helse.flex.vedtak.cronjob.settOppVedtakCronjob
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
+import no.nav.helse.flex.vedtak.service.SpoleService
 import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
@@ -120,6 +121,16 @@ fun main() {
         env = env,
         brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer
     )
+
+    val spoleService = SpoleService(
+        podLeaderCoordinator = podLeaderCoordinator,
+        database = database,
+        applicationState = applicationState,
+        env = env
+    )
+    GlobalScope.launch {
+        spoleService.start()
+    }
 }
 
 private fun hentSelvbetjeningJwtIssuer(env: Environment): JwtIssuer =
