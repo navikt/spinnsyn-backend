@@ -87,10 +87,11 @@ class SpoleService(
     }
 
     private fun job(consumer: KafkaConsumer<String, String>) {
+        var loop = true
         var poll = consumer.poll(Duration.ofMillis(1000))
         log.info("SpoleService starter fra timestamp: ${poll.first().timestamp()}, topic: ${poll.first().topic()}, partition: ${poll.first().partition()}")
 
-        while (applicationState.ready) {
+        while (applicationState.ready && loop) {
             poll.forEach { cr ->
                 if (cr.headers().any { it.key() == "type" && String(it.value()) == "Vedtak" }) {
                     cr.value().runCatching {
@@ -111,6 +112,10 @@ class SpoleService(
             }
 
             poll = consumer.poll(Duration.ofMillis(1000))
+            if (poll.isEmpty) {
+                loop = false
+                consumer.commitSync()
+            }
         }
     }
 }
