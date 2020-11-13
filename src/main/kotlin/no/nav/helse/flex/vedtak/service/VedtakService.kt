@@ -16,6 +16,7 @@ import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
 import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.eierVedtak
+import no.nav.helse.flex.vedtak.db.finnAnnullering
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettAnnullering
@@ -133,6 +134,17 @@ class VedtakService(
             log.error("Kunne ikke deserialisere annullering", e)
             return
         }
+
+        database.finnAnnullering(fnr)
+            .firstOrNull { it.annullering == annulleringSerialisert }
+            ?.let {
+                if (it.id == id.toString()) {
+                    log.info("Annullering $id er allerede mottat, går videre")
+                } else {
+                    log.warn("Oppretter ikke duplikate annulleringer ny id: $id, eksisterende id: ${it.id}")
+                }
+                return
+            }
 
         database.opprettAnnullering(
             id = id,

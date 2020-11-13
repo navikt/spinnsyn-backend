@@ -58,6 +58,7 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
+import org.testcontainers.utility.DockerImageName
 import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDate
@@ -72,6 +73,7 @@ object VedtakVerdikjedeSpek : Spek({
     val veilederissuer = "VeilederIssuer"
     val veilederaudience = "veileder"
 
+    val fnr = "13068700000"
     val automatiskBehandletVedtak = VedtakDto(
         fom = LocalDate.now(),
         tom = LocalDate.now(),
@@ -82,6 +84,13 @@ object VedtakVerdikjedeSpek : Spek({
         automatiskBehandling = true
     )
     val manueltVedtak = automatiskBehandletVedtak.copy(automatiskBehandling = false)
+    val annulleringDto = AnnulleringDto(
+        fødselsnummer = fnr,
+        orgnummer = "123",
+        tidsstempel = LocalDateTime.now(),
+        fom = LocalDate.now().minusDays(10),
+        tom = LocalDate.now()
+    )
 
     val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
     val env = mockk<Environment>()
@@ -115,12 +124,13 @@ object VedtakVerdikjedeSpek : Spek({
         with(TestApplicationEngine()) {
 
             val testDb = TestDB()
-            val kafka = KafkaContainer().withNetwork(Network.newNetwork())
+            val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.4.3"))
+                .withNetwork(Network.newNetwork())
             kafka.start()
 
             val kafkaConfig = Properties()
             kafkaConfig.let {
-                it["bootstrap.servers"] = kafka.bootstrapServers
+                it[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = kafka.bootstrapServers
                 it[ConsumerConfig.GROUP_ID_CONFIG] = "groupId"
                 it[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
                 it[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
@@ -154,8 +164,6 @@ object VedtakVerdikjedeSpek : Spek({
                 brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
                 environment = env
             )
-
-            val fnr = "13068700000"
 
             val path = "src/test/resources/jwkset.json"
             val uri = Paths.get(path).toUri().toURL()
@@ -560,13 +568,7 @@ object VedtakVerdikjedeSpek : Spek({
                         "aapen-helse-sporbar",
                         null,
                         fnr,
-                        AnnulleringDto(
-                            fødselsnummer = fnr,
-                            orgnummer = "123",
-                            fom = LocalDate.now().minusDays(10),
-                            tom = LocalDate.now(),
-                            tidsstempel = LocalDateTime.now()
-                        ).serialisertTilString(),
+                        annulleringDto.serialisertTilString(),
                         listOf(RecordHeader("type", "Annullering".toByteArray()))
                     )
                 )
@@ -583,6 +585,44 @@ object VedtakVerdikjedeSpek : Spek({
 
                 val annulleringEtter = testDb.finnAnnullering(fnr)
                 annulleringEtter.size shouldEqual 1
+            }
+
+            it("Lagrer ikke duplikate annulleringer") {
+                val nyttFnr = "duplikat"
+                val annulleringFraDb = testDb.finnAnnullering(nyttFnr)
+                annulleringFraDb.size `should be equal to` 0
+
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar",
+                        null,
+                        nyttFnr,
+                        annulleringDto.serialisertTilString(),
+                        listOf(RecordHeader("type", "Annullering".toByteArray()))
+                    )
+                )
+                vedtakKafkaProducer.send(
+                    ProducerRecord(
+                        "aapen-helse-sporbar",
+                        null,
+                        nyttFnr,
+                        annulleringDto.serialisertTilString(),
+                        listOf(RecordHeader("type", "Annullering".toByteArray()))
+                    )
+                )
+
+                stopApplicationNårAntallKafkaMeldingerErLest(
+                    vedtakKafkaConsumer,
+                    applicationState,
+                    antallKafkaMeldinger = 2
+                )
+
+                runBlocking {
+                    vedtakService.start()
+                }
+
+                val vedtakEtter = testDb.finnVedtak(nyttFnr)
+                vedtakEtter.size `should be equal to` 1
             }
         }
     }
