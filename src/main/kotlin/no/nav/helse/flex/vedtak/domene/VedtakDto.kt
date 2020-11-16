@@ -13,6 +13,7 @@ data class VedtakDto(
     val automatiskBehandling: Boolean = false,
     val sykepengegrunnlag: Double? = null,
     val månedsinntekt: Double? = null,
+    val orgnummer: String? = null,
     val utbetalinger: List<UtbetalingDto> = emptyList(),
     val dokumenter: List<Dokument> = emptyList()
 ) {
