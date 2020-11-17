@@ -76,7 +76,7 @@ object Annullering : Spek({
         tom = tom,
         forbrukteSykedager = 1,
         gjenståendeSykedager = 2,
-        orgnummer = "123",
+        organisasjonsnummer = "123",
         utbetalinger = emptyList(),
         dokumenter = emptyList(),
         automatiskBehandling = true
@@ -326,7 +326,7 @@ object Annullering : Spek({
                 val vedtakFraDb = testDb.finnVedtak(fnr)
                 vedtakFraDb.size `should be equal to` 1
 
-                vedtakKafkaProducer.send(fnr, automatiskBehandletVedtak.copy(orgnummer = "456"), "Vedtak")
+                vedtakKafkaProducer.send(fnr, automatiskBehandletVedtak.copy(organisasjonsnummer = "456"), "Vedtak")
                 stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 1)
 
                 runBlocking {
@@ -349,7 +349,7 @@ object Annullering : Spek({
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
                         RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0], annullert = true),
-                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = automatiskBehandletVedtak.copy(orgnummer = "456"), opprettet = opprettet[1], annullert = true)
+                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = automatiskBehandletVedtak.copy(organisasjonsnummer = "456"), opprettet = opprettet[1], annullert = true)
                     )
                 }
             }
