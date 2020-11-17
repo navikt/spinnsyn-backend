@@ -206,23 +206,15 @@ fun Vedtak.tilRSVedtak(annullering: Boolean = false): RSVedtak {
 }
 
 fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
-    this.map {
+    this.any {
         vedtak.matcherAnnullering(it)
-    }.isNotEmpty()
+    }
 
 fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
-    return when {
-        this.vedtak.fom != annullering.annullering.fom -> {
-            false
-        }
-        this.vedtak.tom != annullering.annullering.tom -> {
-            false
-        }
-        this.vedtak.utbetalinger.none { it.mottaker == annullering.annullering.orgnummer } || this.vedtak.organisasjonsnummer != annullering.annullering.orgnummer -> {
-            false
-        }
-        else -> true
-    }
+    return this.vedtak.fom == annullering.annullering.fom
+        && this.vedtak.tom == annullering.annullering.tom
+        && (this.vedtak.organisasjonsnummer == annullering.annullering.orgnummer
+            || this.vedtak.utbetalinger.any{ it.mottaker == annullering.annullering.orgnummer })
 }
 
 private fun ConsumerRecord<String, String>.erVedtak(): Boolean {
