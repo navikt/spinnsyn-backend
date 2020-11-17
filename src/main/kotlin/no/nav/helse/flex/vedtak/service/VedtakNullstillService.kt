@@ -7,6 +7,7 @@ import no.nav.helse.flex.Environment
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.vedtak.db.finnVedtak
+import no.nav.helse.flex.vedtak.db.slettAnnulleringer
 import no.nav.helse.flex.vedtak.db.slettVedtak
 import java.lang.IllegalStateException
 import java.time.Instant
@@ -33,7 +34,7 @@ class VedtakNullstillService(
             }
             database.slettVedtak(vedtakId = it.id, fnr = fnr)
         }
-
+        database.slettAnnulleringer(fnr)
         return vedtak.size
     }
 }
