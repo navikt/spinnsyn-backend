@@ -22,7 +22,6 @@ import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettAnnullering
 import no.nav.helse.flex.vedtak.db.opprettVedtak
-import no.nav.helse.flex.vedtak.domene.AnnulleringDto
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
@@ -193,23 +192,23 @@ data class RSVedtak(
     val lest: Boolean,
     val vedtak: VedtakDto,
     val opprettet: LocalDate,
-    val annullering: Annullering? = null
+    val annullert: Boolean = false
 )
 
-fun Vedtak.tilRSVedtak(annullering: Annullering? = null): RSVedtak {
+fun Vedtak.tilRSVedtak(annullering: Boolean = false): RSVedtak {
     return RSVedtak(
         id = this.id,
         lest = this.lest,
         vedtak = this.vedtak,
         opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
-        annullering = annullering
+        annullert = annullering
     )
 }
 
-fun List<Annullering>.forVedtak(vedtak: Vedtak): Annullering? =
-    this.firstOrNull {
+fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
+    this.map {
         vedtak.matcherAnnullering(it)
-    }
+    }.isNotEmpty()
 
 fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
     return when {

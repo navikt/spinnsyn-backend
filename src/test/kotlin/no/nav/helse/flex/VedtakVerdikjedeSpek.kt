@@ -36,7 +36,6 @@ import no.nav.helse.flex.vedtak.db.finnAnnullering
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.domene.AnnulleringDto
 import no.nav.helse.flex.vedtak.domene.VedtakDto
-import no.nav.helse.flex.vedtak.domene.serialisertTilString
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import no.nav.helse.flex.vedtak.service.RSVedtak
 import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
@@ -292,8 +291,9 @@ object VedtakVerdikjedeSpek : Spek({
 
             it("Vedtaket kan hentes i REST APIet") {
                 val annulleringer = testDb.finnAnnullering(fnr)
-                val vedtak = testDb.finnVedtak(fnr).map {vedtak ->
-                    vedtak.tilRSVedtak(annulleringer.forVedtak(vedtak)) }
+                val vedtak = testDb.finnVedtak(fnr).map { vedtak ->
+                    vedtak.tilRSVedtak(annulleringer.forVedtak(vedtak))
+                }
                 val generertVedtakId = vedtak.map { it.id }
                 val opprettet = vedtak.map { it.opprettet }
 
@@ -373,7 +373,7 @@ object VedtakVerdikjedeSpek : Spek({
             it("Vedtaket kan hentes med vedtaksid i REST APIet") {
                 val annulleringer = testDb.finnAnnullering(fnr)
                 val dbVedtak = testDb.finnVedtak(fnr)[0]
-                val vedtak = dbVedtak.tilRSVedtak(annulleringer.firstOrNull { it.id == dbVedtak.id })
+                val vedtak = dbVedtak.tilRSVedtak()
                 val generertVedtakId = vedtak.id
                 val opprettet = vedtak.opprettet
 
@@ -590,20 +590,6 @@ object VedtakVerdikjedeSpek : Spek({
 
                 val annulleringEtter = testDb.finnAnnullering(fnr)
                 annulleringEtter.size shouldEqual 1
-            }
-
-            it("Annullering skal ses i vedtaksobjektet om det fins") {
-                with(
-                    handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
-                        medSelvbetjeningToken(fnr)
-                    }
-                ) {
-                    response.status() shouldEqual HttpStatusCode.OK
-                    response.content!!.tilRSVedtakListe() shouldEqual listOf(
-                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0]),
-                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = manueltVedtak, opprettet = opprettet[1])
-                    )
-                }
             }
 
             it("Lagrer ikke duplikate annulleringer") {
