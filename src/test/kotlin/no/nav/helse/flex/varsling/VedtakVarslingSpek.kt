@@ -17,7 +17,6 @@ import no.nav.helse.flex.varsling.kafka.EnkeltvarselKafkaProducer
 import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.domene.VedtakDto
-import no.nav.helse.flex.vedtak.domene.serialisertTilString
 import org.amshove.kluent.`should be equal to`
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe

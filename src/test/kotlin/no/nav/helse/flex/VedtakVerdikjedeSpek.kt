@@ -36,12 +36,12 @@ import no.nav.helse.flex.vedtak.db.finnAnnullering
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.domene.AnnulleringDto
 import no.nav.helse.flex.vedtak.domene.VedtakDto
-import no.nav.helse.flex.vedtak.domene.serialisertTilString
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import no.nav.helse.flex.vedtak.service.RSVedtak
 import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
+import no.nav.helse.flex.vedtak.service.forVedtak
 import no.nav.helse.flex.vedtak.service.tilRSVedtak
 import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toProducerConfig
@@ -290,7 +290,10 @@ object VedtakVerdikjedeSpek : Spek({
             }
 
             it("Vedtaket kan hentes i REST APIet") {
-                val vedtak = testDb.finnVedtak(fnr).map { it.tilRSVedtak() }
+                val annulleringer = testDb.finnAnnullering(fnr)
+                val vedtak = testDb.finnVedtak(fnr).map { vedtak ->
+                    vedtak.tilRSVedtak(annulleringer.forVedtak(vedtak))
+                }
                 val generertVedtakId = vedtak.map { it.id }
                 val opprettet = vedtak.map { it.opprettet }
 
@@ -368,7 +371,9 @@ object VedtakVerdikjedeSpek : Spek({
             }
 
             it("Vedtaket kan hentes med vedtaksid i REST APIet") {
-                val vedtak = testDb.finnVedtak(fnr)[0].tilRSVedtak()
+                val annulleringer = testDb.finnAnnullering(fnr)
+                val dbVedtak = testDb.finnVedtak(fnr)[0]
+                val vedtak = dbVedtak.tilRSVedtak()
                 val generertVedtakId = vedtak.id
                 val opprettet = vedtak.opprettet
 

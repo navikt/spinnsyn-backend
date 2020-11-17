@@ -14,6 +14,7 @@ import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
+import no.nav.helse.flex.vedtak.db.Annullering
 import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.eierVedtak
 import no.nav.helse.flex.vedtak.db.finnAnnullering
@@ -158,14 +159,18 @@ class VedtakService(
         log.info("Opprettet annullering med spinnsyn databaseid $id")
     }
 
-    fun hentVedtak(fnr: String) =
-        database.finnVedtak(fnr)
-            .map { it.tilRSVedtak() }
+    fun hentVedtak(fnr: String): List<RSVedtak> {
+        val annulleringer = database.finnAnnullering(fnr)
+        return database.finnVedtak(fnr)
+            .map { it.tilRSVedtak(annulleringer.forVedtak(it)) }
+    }
 
-    fun hentVedtak(fnr: String, vedtaksId: String) =
-        database.finnVedtak(fnr)
+    fun hentVedtak(fnr: String, vedtaksId: String): RSVedtak? {
+        val annulleringer = database.finnAnnullering(fnr)
+        val vedtak = database.finnVedtak(fnr)
             .find { it.id == vedtaksId }
-            ?.tilRSVedtak()
+        return vedtak?.tilRSVedtak(annulleringer.forVedtak(vedtak))
+    }
 
     fun eierVedtak(fnr: String, vedtaksId: String) =
         database.eierVedtak(fnr, vedtaksId)
@@ -186,16 +191,38 @@ data class RSVedtak(
     val id: String,
     val lest: Boolean,
     val vedtak: VedtakDto,
-    val opprettet: LocalDate
+    val opprettet: LocalDate,
+    val annullert: Boolean = false
 )
 
-fun Vedtak.tilRSVedtak(): RSVedtak {
+fun Vedtak.tilRSVedtak(annullering: Boolean = false): RSVedtak {
     return RSVedtak(
         id = this.id,
         lest = this.lest,
         vedtak = this.vedtak,
-        opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo"))
+        opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
+        annullert = annullering
     )
+}
+
+fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
+    this.map {
+        vedtak.matcherAnnullering(it)
+    }.isNotEmpty()
+
+fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
+    return when {
+        this.vedtak.fom != annullering.annullering.fom -> {
+            false
+        }
+        this.vedtak.tom != annullering.annullering.tom -> {
+            false
+        }
+        this.vedtak.utbetalinger.none { it.mottaker == annullering.annullering.orgnummer } || this.vedtak.orgnummer != annullering.annullering.orgnummer -> {
+            false
+        }
+        else -> true
+    }
 }
 
 private fun ConsumerRecord<String, String>.erVedtak(): Boolean {

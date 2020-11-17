@@ -13,9 +13,13 @@ data class VedtakDto(
     val automatiskBehandling: Boolean = false,
     val sykepengegrunnlag: Double? = null,
     val månedsinntekt: Double? = null,
+    val orgnummer: String? = null,
     val utbetalinger: List<UtbetalingDto> = emptyList(),
     val dokumenter: List<Dokument> = emptyList()
-) {
+) : Dto {
+    override fun serialisertTilString(): String =
+        objectMapper.writeValueAsString(this)
+
     data class UtbetalingDto(
         val mottaker: String,
         val fagområde: String,
@@ -40,5 +44,3 @@ data class Dokument(val dokumentId: UUID, val type: Type) {
 }
 
 fun String.tilVedtakDto(): VedtakDto = objectMapper.readValue(this)
-
-fun VedtakDto.serialisertTilString(): String = objectMapper.writeValueAsString(this)

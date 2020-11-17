@@ -11,8 +11,9 @@ data class AnnulleringDto(
     val fødselsnummer: String,
     val fom: LocalDate?,
     val tom: LocalDate?
-)
+) : Dto {
+    override fun serialisertTilString(): String =
+        objectMapper.writeValueAsString(this)
+}
 
 fun String.tilAnnulleringDto(): AnnulleringDto = objectMapper.readValue(this)
-
-fun AnnulleringDto.serialisertTilString(): String = objectMapper.writeValueAsString(this)
