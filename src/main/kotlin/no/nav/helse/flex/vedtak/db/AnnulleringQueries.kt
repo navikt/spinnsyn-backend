@@ -64,6 +64,21 @@ fun DatabaseInterface.opprettAnnullering(id: UUID, fnr: String, annullering: Str
     }
 }
 
+fun DatabaseInterface.slettAnnulleringer(fnr: String) {
+    connection.use { connection ->
+        connection.prepareStatement(
+            """
+                DELETE FROM ANNULLERING
+                WHERE fnr = ?;
+            """
+        ).use {
+            it.setString(1, fnr)
+            it.execute()
+        }
+        connection.commit()
+    }
+}
+
 data class Annullering(
     val id: String,
     val fnr: String,

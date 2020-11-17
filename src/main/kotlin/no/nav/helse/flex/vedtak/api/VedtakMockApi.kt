@@ -39,6 +39,22 @@ fun Route.registerVedtakMockApi(vedtakService: VedtakService, env: Environment, 
             call.respond(Melding("Vedtak med $vedtakId opprettet").tilRespons(HttpStatusCode.Created))
         }
 
+        post("/annullering/{fnr}") {
+            if (env.isProd()) {
+                throw IllegalStateException("Dette apiet er ikke på i produksjon")
+            }
+            val fnr = call.parameters["fnr"]!!
+            val annullering = call.receiveTextWithCorrectEncoding()
+            val annulleringId = UUID.randomUUID()
+            vedtakService.mottaAnnullering(
+                id = annulleringId,
+                fnr = fnr,
+                annullering = annullering,
+                opprettet = Instant.now()
+            )
+            call.respond(Melding("Annullering med $annulleringId opprettet").tilRespons(HttpStatusCode.Created))
+        }
+
         delete("/vedtak/{fnr}") {
             if (env.isProd()) {
                 throw IllegalStateException("Dette apiet er ikke på i produksjon")
