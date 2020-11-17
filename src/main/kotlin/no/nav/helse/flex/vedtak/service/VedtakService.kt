@@ -218,7 +218,7 @@ fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
         this.vedtak.tom != annullering.annullering.tom -> {
             false
         }
-        this.vedtak.utbetalinger.none { it.mottaker == annullering.annullering.orgnummer } || this.vedtak.orgnummer != annullering.annullering.orgnummer -> {
+        this.vedtak.utbetalinger.none { it.mottaker == annullering.annullering.orgnummer } || this.vedtak.organisasjonsnummer != annullering.annullering.orgnummer -> {
             false
         }
         else -> true
