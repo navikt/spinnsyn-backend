@@ -211,10 +211,12 @@ fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
     }
 
 fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
-    return this.vedtak.fom == annullering.annullering.fom
-        && this.vedtak.tom == annullering.annullering.tom
-        && (this.vedtak.organisasjonsnummer == annullering.annullering.orgnummer
-            || this.vedtak.utbetalinger.any{ it.mottaker == annullering.annullering.orgnummer })
+    return this.vedtak.fom == annullering.annullering.fom &&
+        this.vedtak.tom == annullering.annullering.tom &&
+        (
+            this.vedtak.organisasjonsnummer == annullering.annullering.orgnummer ||
+                this.vedtak.utbetalinger.any { it.mottaker == annullering.annullering.orgnummer }
+            )
 }
 
 private fun ConsumerRecord<String, String>.erVedtak(): Boolean {
