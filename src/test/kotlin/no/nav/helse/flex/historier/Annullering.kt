@@ -353,6 +353,39 @@ object Annullering : Spek({
                     )
                 }
             }
+
+            it("Enda et vedtak mottatt fra kafka blir lagret i db") {
+                val vedtakFraDb = testDb.finnVedtak(fnr)
+                vedtakFraDb.size `should be equal to` 2
+
+                vedtakKafkaProducer.send(fnr, automatiskBehandletVedtak.copy(fom = LocalDate.now().minusDays(14), tom = LocalDate.now().minusDays(7)), "Vedtak")
+                stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 1)
+
+                runBlocking {
+                    vedtakService.start()
+                }
+
+                val vedtakEtter = testDb.finnVedtak(fnr)
+                vedtakEtter.size `should be equal to` 3
+            }
+
+            it("Man finner et vedtak samt to annullerte vedtak i REST APIet") {
+                val vedtak = testDb.finnVedtak(fnr).map { vedtak -> vedtak.tilRSVedtak() }
+                val generertVedtakId = vedtak.map { it.id }
+                val opprettet = vedtak.map { it.opprettet }
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
+                        medSelvbetjeningToken(fnr)
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.OK
+                    response.content!!.tilRSVedtakListe() shouldEqual listOf(
+                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0], annullert = true),
+                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = automatiskBehandletVedtak.copy(organisasjonsnummer = "456"), opprettet = opprettet[1], annullert = true),
+                        RSVedtak(id = generertVedtakId[2], lest = false, vedtak = automatiskBehandletVedtak.copy(fom = LocalDate.now().minusDays(14), tom = LocalDate.now().minusDays(7)), opprettet = opprettet[2], annullert = false)
+                    )
+                }
+            }
         }
     }
 })
