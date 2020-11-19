@@ -22,6 +22,7 @@ import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettAnnullering
 import no.nav.helse.flex.vedtak.db.opprettVedtak
+import no.nav.helse.flex.vedtak.domene.Periode
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
@@ -211,8 +212,9 @@ fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
     }
 
 fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
-    return this.vedtak.fom == annullering.annullering.fom &&
-        this.vedtak.tom == annullering.annullering.tom &&
+    val vedtaksperiode = Periode(this.vedtak.fom, this.vedtak.tom)
+    val annulleringsperiode = Periode(annullering.annullering.fom ?: return false, annullering.annullering.tom ?: return false)
+    return vedtaksperiode.overlapper(annulleringsperiode) &&
         (
             this.vedtak.organisasjonsnummer == annullering.annullering.orgnummer ||
                 this.vedtak.utbetalinger.any { it.mottaker == annullering.annullering.orgnummer }
