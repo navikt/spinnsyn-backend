@@ -77,7 +77,23 @@ object Annullering : Spek({
         forbrukteSykedager = 1,
         gjenståendeSykedager = 2,
         organisasjonsnummer = "123",
-        utbetalinger = emptyList(),
+        utbetalinger = listOf(
+            VedtakDto.UtbetalingDto(
+                mottaker = "123",
+                fagområde = "idk",
+                totalbeløp = 1400,
+                utbetalingslinjer = listOf(
+                    VedtakDto.UtbetalingDto.UtbetalingslinjeDto(
+                        fom = fom,
+                        tom = tom,
+                        dagsats = 14,
+                        beløp = 1400,
+                        grad = 100.0,
+                        sykedager = 100
+                    )
+                )
+            )
+        ),
         dokumenter = emptyList(),
         automatiskBehandling = true
     )
@@ -358,7 +374,7 @@ object Annullering : Spek({
                 val vedtakFraDb = testDb.finnVedtak(fnr)
                 vedtakFraDb.size `should be equal to` 2
 
-                vedtakKafkaProducer.send(fnr, automatiskBehandletVedtak.copy(fom = LocalDate.now().minusDays(14), tom = LocalDate.now().minusDays(7)), "Vedtak")
+                vedtakKafkaProducer.send(fnr, automatiskBehandletVedtak.copy(fom = LocalDate.now().minusDays(16), tom = LocalDate.now().minusDays(8)), "Vedtak")
                 stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 1)
 
                 runBlocking {
@@ -382,7 +398,7 @@ object Annullering : Spek({
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
                         RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0], annullert = true),
                         RSVedtak(id = generertVedtakId[1], lest = false, vedtak = automatiskBehandletVedtak.copy(organisasjonsnummer = "456"), opprettet = opprettet[1], annullert = true),
-                        RSVedtak(id = generertVedtakId[2], lest = false, vedtak = automatiskBehandletVedtak.copy(fom = LocalDate.now().minusDays(14), tom = LocalDate.now().minusDays(7)), opprettet = opprettet[2], annullert = false)
+                        RSVedtak(id = generertVedtakId[2], lest = false, vedtak = automatiskBehandletVedtak.copy(fom = LocalDate.now().minusDays(16), tom = LocalDate.now().minusDays(8)), opprettet = opprettet[2], annullert = false)
                     )
                 }
             }
