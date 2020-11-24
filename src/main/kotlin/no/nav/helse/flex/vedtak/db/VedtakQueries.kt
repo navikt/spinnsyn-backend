@@ -98,7 +98,12 @@ private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest
     }
 
     this.commit()
-    return Vedtak(id = id.toString(), vedtak = vedtak.tilVedtakDto(), lest = lest, opprettet = opprettet)
+    val lestDato = if (lest) {
+        OffsetDateTime.now()
+    } else {
+        null
+    }
+    return Vedtak(id = id.toString(), vedtak = vedtak.tilVedtakDto(), lest = lest, lestDato = lestDato, opprettet = opprettet)
 }
 
 private fun Connection.finnVedtak(fnr: String): List<Vedtak> =
@@ -282,6 +287,7 @@ private fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
         lest = getObject("lest", OffsetDateTime::class.java) != null,
+        lestDato = getObject("lest", OffsetDateTime::class.java),
         vedtak = getString("vedtak").tilVedtakDto(),
         opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant()
     )
@@ -299,6 +305,7 @@ private fun ResultSet.toInternVedtak(): InternVedtak =
 data class Vedtak(
     val id: String,
     val lest: Boolean,
+    val lestDato: OffsetDateTime?,
     val vedtak: VedtakDto,
     val opprettet: Instant
 )

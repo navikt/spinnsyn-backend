@@ -31,6 +31,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.lang.Exception
 import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.UUID
 
@@ -191,6 +192,7 @@ class VedtakService(
 data class RSVedtak(
     val id: String,
     val lest: Boolean,
+    val lestDato: OffsetDateTime? = null,
     val vedtak: VedtakDto,
     val opprettet: LocalDate,
     val annullert: Boolean = false
@@ -200,6 +202,7 @@ fun Vedtak.tilRSVedtak(annullering: Boolean = false): RSVedtak {
     return RSVedtak(
         id = this.id,
         lest = this.lest,
+        lestDato = this.lestDato,
         vedtak = this.vedtak,
         opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
         annullert = annullering
@@ -213,7 +216,11 @@ fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
 
 fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
     val vedtaksperiode = Periode(this.vedtak.fom, this.vedtak.tom)
-    val annulleringsperiode = Periode(annullering.annullering.fom ?: return false, annullering.annullering.tom ?: return false)
+    val annulleringsperiode = Periode(
+        annullering.annullering.fom ?: return false,
+        annullering.annullering.tom
+            ?: return false
+    )
     return vedtaksperiode.overlapper(annulleringsperiode) &&
         (
             this.vedtak.organisasjonsnummer == annullering.annullering.orgnummer ||
