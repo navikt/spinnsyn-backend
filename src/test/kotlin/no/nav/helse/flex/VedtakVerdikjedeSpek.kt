@@ -468,13 +468,14 @@ object VedtakVerdikjedeSpek : Spek({
                 val vedtak = testDb.finnVedtak(fnr)[0].tilRSVedtak()
                 val generertVedtakId = vedtak.id
                 val opprettet = vedtak.opprettet
+                val lestDato = vedtak.lestDato
                 with(
                     handleRequest(HttpMethod.Get, "/api/v1/vedtak/$generertVedtakId") {
                         medSelvbetjeningToken(fnr)
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content!!.tilRSVedtak() shouldEqual RSVedtak(id = generertVedtakId, lest = true, vedtak = automatiskBehandletVedtak, opprettet = opprettet)
+                    response.content!!.tilRSVedtak() shouldEqual RSVedtak(id = generertVedtakId, lest = true, lestDato = lestDato, vedtak = automatiskBehandletVedtak, opprettet = opprettet)
                 }
 
                 runBlocking {
