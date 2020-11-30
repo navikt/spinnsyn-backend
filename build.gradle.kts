@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.helse.flex"
 version = "1.0.0"
 
-val coroutinesVersion = "1.3.3"
+val coroutinesVersion = "1.4.2"
 val jacksonVersion = "2.11.2"
 val javaxActivationVersion = "1.1.1"
 val kafkaEmbeddedVersion = "2.4.0"
