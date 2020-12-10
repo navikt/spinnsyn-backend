@@ -6,8 +6,8 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.helse.flex.Environment
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.DatabaseInterface
+import no.nav.helse.flex.leaderelection.PodLeaderCoordinator
 import no.nav.helse.flex.log
-import no.nav.helse.flex.util.PodLeaderCoordinator
 import no.nav.helse.flex.vedtak.db.finnInternVedtak
 import no.nav.helse.flex.vedtak.db.hentVedtakEldreEnnTolvMnd
 import no.nav.helse.flex.vedtak.db.slettVedtak

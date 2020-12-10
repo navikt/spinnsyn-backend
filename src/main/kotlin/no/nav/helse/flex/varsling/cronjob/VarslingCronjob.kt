@@ -4,8 +4,8 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.flex.application.metrics.FØRSTEGANGSVARSEL
 import no.nav.helse.flex.application.metrics.REVARSEL
 import no.nav.helse.flex.db.DatabaseInterface
+import no.nav.helse.flex.leaderelection.PodLeaderCoordinator
 import no.nav.helse.flex.log
-import no.nav.helse.flex.util.PodLeaderCoordinator
 import no.nav.helse.flex.varsling.domene.EnkeltVarsel
 import no.nav.helse.flex.varsling.kafka.EnkeltvarselKafkaProdusent
 import no.nav.helse.flex.vedtak.db.InternVedtak

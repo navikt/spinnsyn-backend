@@ -20,7 +20,7 @@ import no.nav.helse.flex.application.createApplicationEngine
 import no.nav.helse.flex.application.getWellKnown
 import no.nav.helse.flex.brukernotifkasjon.skapBrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.Database
-import no.nav.helse.flex.util.PodLeaderCoordinator
+import no.nav.helse.flex.leaderelection.PodLeaderCoordinator
 import no.nav.helse.flex.util.skapVedtakKafkaConsumer
 import no.nav.helse.flex.varsling.cronjob.settOppVarslingCronjob
 import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProdusent

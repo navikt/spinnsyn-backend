@@ -1,4 +1,4 @@
-package no.nav.helse.flex.util
+package no.nav.helse.flex.kafka
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

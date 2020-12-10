@@ -3,6 +3,7 @@ package no.nav.helse.flex.util
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import no.nav.helse.flex.Environment
+import no.nav.helse.flex.kafka.JacksonKafkaSerializer
 import no.nav.helse.flex.varsling.domene.EnkeltVarsel
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
