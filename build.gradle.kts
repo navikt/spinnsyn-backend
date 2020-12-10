@@ -8,8 +8,6 @@ version = "1.0.0"
 
 val coroutinesVersion = "1.4.2"
 val jacksonVersion = "2.11.2"
-val javaxActivationVersion = "1.1.1"
-val kafkaEmbeddedVersion = "2.4.0"
 val postgresEmbeddedVersion = "0.13.3"
 val kluentVersion = "1.49"
 val ktorVersion = "1.3.2"
@@ -126,7 +124,6 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
 
-    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
 }
 
