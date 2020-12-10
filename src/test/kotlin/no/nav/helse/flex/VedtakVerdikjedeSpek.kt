@@ -26,12 +26,13 @@ import no.nav.helse.flex.application.IssuerInternalId
 import no.nav.helse.flex.application.JwtIssuer
 import no.nav.helse.flex.application.WellKnown
 import no.nav.helse.flex.application.configureApplication
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
+import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.testutil.generateJWT
 import no.nav.helse.flex.testutil.mockSyfotilgangskontrollServer
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaPollErGjort
+import no.nav.helse.flex.util.skapVedtakKafkaConsumer
 import no.nav.helse.flex.vedtak.db.finnAnnullering
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.domene.AnnulleringDto
@@ -43,16 +44,12 @@ import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.helse.flex.vedtak.service.forVedtak
 import no.nav.helse.flex.vedtak.service.tilRSVedtak
-import no.nav.syfo.kafka.toConsumerConfig
-import no.nav.syfo.kafka.toProducerConfig
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldEqual
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -63,7 +60,6 @@ import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Properties
 
 @KtorExperimentalAPI
 object VedtakVerdikjedeSpek : Spek({
@@ -92,7 +88,7 @@ object VedtakVerdikjedeSpek : Spek({
         tom = LocalDate.now()
     )
 
-    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
+    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProdusent>()
     val env = mockk<Environment>()
 
     val applicationState = ApplicationState()
@@ -105,6 +101,9 @@ object VedtakVerdikjedeSpek : Spek({
         every { env.spinnsynFrontendUrl } returns "https://www.nav.no/syk/sykepenger"
         every { env.serviceuserUsername } returns "srvspvedtak"
         every { env.syfotilgangskontrollApiGwKey } returns "whateverkey"
+        every { env.kafkaSecurityProtocol } returns "PLAINTEXT"
+        every { env.serviceuserUsername } returns "user"
+        every { env.serviceuserPassword } returns "pwd"
         every { env.isProd() } returns false
         every { env.apiGatewayUrl } returns mockHttpServerUrl
         every { env.isDev() } returns false
@@ -128,24 +127,18 @@ object VedtakVerdikjedeSpek : Spek({
                 .withNetwork(Network.newNetwork())
             kafka.start()
 
-            val kafkaConfig = Properties()
-            kafkaConfig.let {
-                it[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = kafka.bootstrapServers
-                it[ConsumerConfig.GROUP_ID_CONFIG] = "groupId"
-                it[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-                it[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
-            }
-            val consumerProperties = kafkaConfig.toConsumerConfig(
-                "consumer", valueDeserializer = StringDeserializer::class
-            )
-            val producerProperties = kafkaConfig.toProducerConfig(
-                "producer", valueSerializer = StringSerializer::class
+            every { env.kafkaAutoOffsetReset } returns "earliest"
+            every { env.kafkaBootstrapServers } returns kafka.bootstrapServers
+
+            val vedtakKafkaProducer = KafkaProducer<String, String>(
+                mapOf(
+                    ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafka.bootstrapServers,
+                    ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                    ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java
+                )
             )
 
-            val vedtakKafkaProducer = KafkaProducer<String, String>(producerProperties)
-
-            val vedtakKafkaConsumer = spyk(KafkaConsumer<String, String>(consumerProperties))
+            val vedtakKafkaConsumer = spyk(skapVedtakKafkaConsumer(env))
 
             val vedtakConsumer = VedtakConsumer(
                 vedtakKafkaConsumer,
@@ -155,13 +148,13 @@ object VedtakVerdikjedeSpek : Spek({
                 database = testDb,
                 applicationState = applicationState,
                 vedtakConsumer = vedtakConsumer,
-                brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+                brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer,
                 environment = env,
                 delayStart = 100L
             )
             val vedtakNullstillService = VedtakNullstillService(
                 database = testDb,
-                brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+                brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer,
                 environment = env
             )
 

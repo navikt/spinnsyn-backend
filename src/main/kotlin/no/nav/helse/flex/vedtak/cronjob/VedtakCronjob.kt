@@ -4,7 +4,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.helse.flex.Environment
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
+import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
 import no.nav.helse.flex.util.PodLeaderCoordinator
@@ -22,7 +22,7 @@ import kotlin.concurrent.fixedRateTimer
 fun vedtakCronjob(
     database: DatabaseInterface,
     env: Environment,
-    brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer
+    brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent
 ): VedtakCronjobResultat {
     val resultat = VedtakCronjobResultat()
 
@@ -34,7 +34,7 @@ fun vedtakCronjob(
             val vedtak = database.finnInternVedtak(fnr = it.fnr, vedtaksId = it.id)!!
             if (vedtak.lest == null) {
                 // Fjern brukernotifikasjon
-                brukernotifikasjonKafkaProducer.sendDonemelding(
+                brukernotifikasjonKafkaProdusent.sendDonemelding(
                     Nokkel(env.serviceuserUsername, vedtak.id),
                     Done(Instant.now().toEpochMilli(), vedtak.fnr, vedtak.id)
                 )
@@ -62,7 +62,7 @@ fun settOppVedtakCronjob(
     podLeaderCoordinator: PodLeaderCoordinator,
     database: DatabaseInterface,
     env: Environment,
-    brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer
+    brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent
 ) {
 
     val (klokkeslett, period) = hentKlokekslettOgPeriode(env)
@@ -75,7 +75,7 @@ fun settOppVedtakCronjob(
             vedtakCronjob(
                 database = database,
                 env = env,
-                brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer
+                brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProdusent
             )
         } else {
             log.debug("Jeg er ikke leder")

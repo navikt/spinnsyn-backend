@@ -11,7 +11,7 @@ import io.mockk.verify
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.helse.flex.Environment
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
+import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.vedtak.cronjob.vedtakCronjob
@@ -33,7 +33,7 @@ object VedtakCronjobSpek : Spek({
 
     val testDb = TestDB()
     val env = mockk<Environment>()
-    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
+    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProdusent>()
 
     val grunntid = ZonedDateTime.of(2020, 3, 12, 3, 3, 0, 0, ZoneId.of("Europe/Oslo"))
 

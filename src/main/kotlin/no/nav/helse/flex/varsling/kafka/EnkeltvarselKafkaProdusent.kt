@@ -1,14 +1,13 @@
 package no.nav.helse.flex.varsling.kafka
 
+import no.nav.helse.flex.Environment
 import no.nav.helse.flex.log
-import no.nav.helse.flex.util.JacksonKafkaSerializer
+import no.nav.helse.flex.util.skapEnkeltvarselKafkaProducer
 import no.nav.helse.flex.varsling.domene.EnkeltVarsel
-import no.nav.syfo.kafka.toProducerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.Properties
 
-class EnkeltvarselKafkaProducer(
+class EnkeltvarselKafkaProdusent(
     private val kafkaproducer: KafkaProducer<String, EnkeltVarsel>
 ) {
     fun opprettEnkeltVarsel(enkeltVarsel: EnkeltVarsel) {
@@ -30,11 +29,7 @@ class EnkeltvarselKafkaProducer(
     }
 }
 
-fun skapEnkeltvarselKafkaProducer(kafkaBaseConfig: Properties): EnkeltvarselKafkaProducer {
-    val kafkaBrukernotifikasjonProducerConfig = kafkaBaseConfig.toProducerConfig(
-        "spinnsyn", valueSerializer = JacksonKafkaSerializer::class
-    )
-
-    val kafkaproducer = KafkaProducer<String, EnkeltVarsel>(kafkaBrukernotifikasjonProducerConfig)
-    return EnkeltvarselKafkaProducer(kafkaproducer = kafkaproducer)
+fun skapEnkeltvarselKafkaProdusent(env: Environment): EnkeltvarselKafkaProdusent {
+    val kafkaproducer = skapEnkeltvarselKafkaProducer(env)
+    return EnkeltvarselKafkaProdusent(kafkaproducer = kafkaproducer)
 }

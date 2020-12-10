@@ -4,7 +4,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.helse.flex.Environment
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
+import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.db.slettAnnulleringer
@@ -15,7 +15,7 @@ import java.time.Instant
 @KtorExperimentalAPI
 class VedtakNullstillService(
     private val database: DatabaseInterface,
-    private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     private val environment: Environment
 ) {
 
@@ -27,7 +27,7 @@ class VedtakNullstillService(
         vedtak.forEach {
             if (!it.lest) {
                 // Fjern brukernotifikasjonen
-                brukernotifikasjonKafkaProducer.sendDonemelding(
+                brukernotifikasjonKafkaProdusent.sendDonemelding(
                     Nokkel(environment.serviceuserUsername, it.id),
                     Done(Instant.now().toEpochMilli(), fnr, it.id)
                 )

@@ -11,7 +11,7 @@ import no.nav.helse.flex.application.metrics.MOTTATT_ANNULLERING_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_AUTOMATISK_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_MANUELT_VEDTAK
 import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
+import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.log
 import no.nav.helse.flex.vedtak.db.Annullering
@@ -40,7 +40,7 @@ class VedtakService(
     private val database: DatabaseInterface,
     private val applicationState: ApplicationState,
     private val vedtakConsumer: VedtakConsumer,
-    private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     private val environment: Environment,
     private val delayStart: Long = 10_000L
 ) {
@@ -109,7 +109,7 @@ class VedtakService(
 
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
 
-        brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
+        brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(
             Nokkel(environment.serviceuserUsername, id.toString()),
             Oppgave(
                 vedtaket.opprettet.toEpochMilli(),
@@ -180,7 +180,7 @@ class VedtakService(
     fun lesVedtak(fnr: String, vedtaksId: String): Boolean {
         val bleLest = database.lesVedtak(fnr, vedtaksId)
         if (bleLest) {
-            brukernotifikasjonKafkaProducer.sendDonemelding(
+            brukernotifikasjonKafkaProdusent.sendDonemelding(
                 Nokkel(environment.serviceuserUsername, vedtaksId),
                 Done(Instant.now().toEpochMilli(), fnr, vedtaksId)
             )

@@ -1,16 +1,15 @@
 package no.nav.helse.flex.brukernotifkasjon
 
-import io.confluent.kafka.serializers.KafkaAvroSerializer
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
+import no.nav.helse.flex.Environment
 import no.nav.helse.flex.log
-import no.nav.syfo.kafka.toProducerConfig
+import no.nav.helse.flex.util.skapBrukernotifikasjonKafkaProducer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.Properties
 
-class BrukernotifikasjonKafkaProducer(
+class BrukernotifikasjonKafkaProdusent(
     private val kafkaproducerOppgave: KafkaProducer<Nokkel, Oppgave>,
     private val kafkaproducerDone: KafkaProducer<Nokkel, Done>
 ) {
@@ -33,15 +32,9 @@ class BrukernotifikasjonKafkaProducer(
     }
 }
 
-fun skapBrukernotifikasjonKafkaProducer(kafkaBaseConfig: Properties): BrukernotifikasjonKafkaProducer {
-    val kafkaBrukernotifikasjonProducerConfig = kafkaBaseConfig.toProducerConfig(
-        "spinnsyn", valueSerializer = KafkaAvroSerializer::class, keySerializer = KafkaAvroSerializer::class
-    )
-
-    val kafkaproducerOppgave = KafkaProducer<Nokkel, Oppgave>(kafkaBrukernotifikasjonProducerConfig)
-    val kafkaproducerDone = KafkaProducer<Nokkel, Done>(kafkaBrukernotifikasjonProducerConfig)
-    return BrukernotifikasjonKafkaProducer(
-        kafkaproducerOppgave = kafkaproducerOppgave,
-        kafkaproducerDone = kafkaproducerDone
+fun skapBrukernotifikasjonKafkaProdusent(env: Environment): BrukernotifikasjonKafkaProdusent {
+    return BrukernotifikasjonKafkaProdusent(
+        kafkaproducerOppgave = skapBrukernotifikasjonKafkaProducer(env),
+        kafkaproducerDone = skapBrukernotifikasjonKafkaProducer(env)
     )
 }

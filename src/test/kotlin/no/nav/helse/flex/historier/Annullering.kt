@@ -21,12 +21,13 @@ import no.nav.helse.flex.application.IssuerInternalId
 import no.nav.helse.flex.application.JwtIssuer
 import no.nav.helse.flex.application.WellKnown
 import no.nav.helse.flex.application.configureApplication
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProducer
+import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.testutil.generateJWT
 import no.nav.helse.flex.testutil.mockSyfotilgangskontrollServer
 import no.nav.helse.flex.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import no.nav.helse.flex.tilRSVedtakListe
+import no.nav.helse.flex.util.skapVedtakKafkaConsumer
 import no.nav.helse.flex.vedtak.db.finnAnnullering
 import no.nav.helse.flex.vedtak.db.finnVedtak
 import no.nav.helse.flex.vedtak.domene.AnnulleringDto
@@ -38,16 +39,12 @@ import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.helse.flex.vedtak.service.tilRSVedtak
-import no.nav.syfo.kafka.toConsumerConfig
-import no.nav.syfo.kafka.toProducerConfig
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldEqual
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -57,7 +54,6 @@ import org.testcontainers.utility.DockerImageName
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Properties
 
 @KtorExperimentalAPI
 object Annullering : Spek({
@@ -105,7 +101,7 @@ object Annullering : Spek({
         tom = tom
     )
 
-    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
+    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProdusent>()
     val env = mockk<Environment>()
 
     val applicationState = ApplicationState()
@@ -118,6 +114,9 @@ object Annullering : Spek({
         every { env.spinnsynFrontendUrl } returns "https://www.nav.no/syk/sykepenger"
         every { env.serviceuserUsername } returns "srvspvedtak"
         every { env.syfotilgangskontrollApiGwKey } returns "whateverkey"
+        every { env.kafkaSecurityProtocol } returns "PLAINTEXT"
+        every { env.serviceuserUsername } returns "user"
+        every { env.serviceuserPassword } returns "pwd"
         every { env.isProd() } returns false
         every { env.apiGatewayUrl } returns mockHttpServerUrl
         every { env.isDev() } returns false
@@ -140,25 +139,18 @@ object Annullering : Spek({
             val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.4.3"))
                 .withNetwork(Network.newNetwork())
             kafka.start()
+            every { env.kafkaAutoOffsetReset } returns "earliest"
+            every { env.kafkaBootstrapServers } returns kafka.bootstrapServers
 
-            val kafkaConfig = Properties()
-            kafkaConfig.let {
-                it[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = kafka.bootstrapServers
-                it[ConsumerConfig.GROUP_ID_CONFIG] = "groupId"
-                it[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-                it[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
-            }
-            val consumerProperties = kafkaConfig.toConsumerConfig(
-                "consumer", valueDeserializer = StringDeserializer::class
-            )
-            val producerProperties = kafkaConfig.toProducerConfig(
-                "producer", valueSerializer = StringSerializer::class
+            val vedtakKafkaProducer = KafkaProducer<String, String>(
+                mapOf(
+                    ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafka.bootstrapServers,
+                    ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                    ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java
+                )
             )
 
-            val vedtakKafkaProducer = KafkaProducer<String, String>(producerProperties)
-
-            val vedtakKafkaConsumer = spyk(KafkaConsumer<String, String>(consumerProperties))
+            val vedtakKafkaConsumer = spyk(skapVedtakKafkaConsumer(env))
 
             val vedtakConsumer = VedtakConsumer(
                 vedtakKafkaConsumer,
@@ -168,13 +160,13 @@ object Annullering : Spek({
                 database = testDb,
                 applicationState = applicationState,
                 vedtakConsumer = vedtakConsumer,
-                brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+                brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer,
                 environment = env,
                 delayStart = 100L
             )
             val vedtakNullstillService = VedtakNullstillService(
                 database = testDb,
-                brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+                brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer,
                 environment = env
             )
 
@@ -224,7 +216,13 @@ object Annullering : Spek({
             fun TestApplicationRequest.medSelvbetjeningToken(subject: String) {
                 addHeader(
                     HttpHeaders.Authorization,
-                    "Bearer ${generateJWT(audience = selvbetjeningaudience, issuer = selvbetjeningissuer, subject = subject)}"
+                    "Bearer ${
+                    generateJWT(
+                        audience = selvbetjeningaudience,
+                        issuer = selvbetjeningissuer,
+                        subject = subject
+                    )
+                    }"
                 )
             }
 
@@ -240,7 +238,11 @@ object Annullering : Spek({
                 vedtakFraDb.size `should be equal to` 0
 
                 vedtakKafkaProducer.send(fnr, automatiskBehandletVedtak, "Vedtak")
-                stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 1)
+                stopApplicationNårAntallKafkaMeldingerErLest(
+                    vedtakKafkaConsumer,
+                    applicationState,
+                    antallKafkaMeldinger = 1
+                )
 
                 runBlocking {
                     vedtakService.start()
@@ -261,7 +263,13 @@ object Annullering : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
-                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0], annullert = false)
+                        RSVedtak(
+                            id = generertVedtakId[0],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak,
+                            opprettet = opprettet[0],
+                            annullert = false
+                        )
                     )
                 }
             }
@@ -297,7 +305,13 @@ object Annullering : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
-                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0], annullert = true)
+                        RSVedtak(
+                            id = generertVedtakId[0],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak,
+                            opprettet = opprettet[0],
+                            annullert = true
+                        )
                     )
                 }
             }
@@ -333,7 +347,13 @@ object Annullering : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
-                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0], annullert = true)
+                        RSVedtak(
+                            id = generertVedtakId[0],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak,
+                            opprettet = opprettet[0],
+                            annullert = true
+                        )
                     )
                 }
             }
@@ -343,7 +363,11 @@ object Annullering : Spek({
                 vedtakFraDb.size `should be equal to` 1
 
                 vedtakKafkaProducer.send(fnr, automatiskBehandletVedtak.copy(organisasjonsnummer = "456"), "Vedtak")
-                stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 1)
+                stopApplicationNårAntallKafkaMeldingerErLest(
+                    vedtakKafkaConsumer,
+                    applicationState,
+                    antallKafkaMeldinger = 1
+                )
 
                 runBlocking {
                     vedtakService.start()
@@ -364,8 +388,20 @@ object Annullering : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
-                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0], annullert = true),
-                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = automatiskBehandletVedtak.copy(organisasjonsnummer = "456"), opprettet = opprettet[1], annullert = true)
+                        RSVedtak(
+                            id = generertVedtakId[0],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak,
+                            opprettet = opprettet[0],
+                            annullert = true
+                        ),
+                        RSVedtak(
+                            id = generertVedtakId[1],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak.copy(organisasjonsnummer = "456"),
+                            opprettet = opprettet[1],
+                            annullert = true
+                        )
                     )
                 }
             }
@@ -374,8 +410,19 @@ object Annullering : Spek({
                 val vedtakFraDb = testDb.finnVedtak(fnr)
                 vedtakFraDb.size `should be equal to` 2
 
-                vedtakKafkaProducer.send(fnr, automatiskBehandletVedtak.copy(fom = LocalDate.now().minusDays(16), tom = LocalDate.now().minusDays(8)), "Vedtak")
-                stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 1)
+                vedtakKafkaProducer.send(
+                    fnr,
+                    automatiskBehandletVedtak.copy(
+                        fom = LocalDate.now().minusDays(16),
+                        tom = LocalDate.now().minusDays(8)
+                    ),
+                    "Vedtak"
+                )
+                stopApplicationNårAntallKafkaMeldingerErLest(
+                    vedtakKafkaConsumer,
+                    applicationState,
+                    antallKafkaMeldinger = 1
+                )
 
                 runBlocking {
                     vedtakService.start()
@@ -396,9 +443,30 @@ object Annullering : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
-                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0], annullert = true),
-                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = automatiskBehandletVedtak.copy(organisasjonsnummer = "456"), opprettet = opprettet[1], annullert = true),
-                        RSVedtak(id = generertVedtakId[2], lest = false, vedtak = automatiskBehandletVedtak.copy(fom = LocalDate.now().minusDays(16), tom = LocalDate.now().minusDays(8)), opprettet = opprettet[2], annullert = false)
+                        RSVedtak(
+                            id = generertVedtakId[0],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak,
+                            opprettet = opprettet[0],
+                            annullert = true
+                        ),
+                        RSVedtak(
+                            id = generertVedtakId[1],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak.copy(organisasjonsnummer = "456"),
+                            opprettet = opprettet[1],
+                            annullert = true
+                        ),
+                        RSVedtak(
+                            id = generertVedtakId[2],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak.copy(
+                                fom = LocalDate.now().minusDays(16),
+                                tom = LocalDate.now().minusDays(8)
+                            ),
+                            opprettet = opprettet[2],
+                            annullert = false
+                        )
                     )
                 }
             }
