@@ -18,19 +18,17 @@ import no.nav.helse.flex.application.IssuerInternalId
 import no.nav.helse.flex.application.JwtIssuer
 import no.nav.helse.flex.application.createApplicationEngine
 import no.nav.helse.flex.application.getWellKnown
-import no.nav.helse.flex.brukernotifkasjon.skapBrukernotifikasjonKafkaProducer
+import no.nav.helse.flex.brukernotifkasjon.skapBrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.Database
-import no.nav.helse.flex.util.KafkaClients
-import no.nav.helse.flex.util.PodLeaderCoordinator
+import no.nav.helse.flex.leaderelection.PodLeaderCoordinator
+import no.nav.helse.flex.util.skapVedtakKafkaConsumer
 import no.nav.helse.flex.varsling.cronjob.settOppVarslingCronjob
-import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProducer
+import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProdusent
 import no.nav.helse.flex.vedtak.cronjob.settOppVedtakCronjob
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
-import no.nav.syfo.kafka.envOverrides
-import no.nav.syfo.kafka.loadBaseConfig
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -60,31 +58,28 @@ fun main() {
 
     val database = Database(env)
 
-    val kafkaClients = KafkaClients(env)
     val applicationState = ApplicationState()
 
     DefaultExports.initialize()
 
-    val kafkaBaseConfig = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
-
-    val brukernotifikasjonKafkaProducer = skapBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
-    val enkeltvarselKafkaProducer = skapEnkeltvarselKafkaProducer(kafkaBaseConfig)
+    val brukernotifikasjonKafkaProducer = skapBrukernotifikasjonKafkaProdusent(env)
+    val enkeltvarselKafkaProducer = skapEnkeltvarselKafkaProdusent(env)
 
     val vedtakConsumer = VedtakConsumer(
-        kafkaClients.kafkaVedtakConsumer,
+        skapVedtakKafkaConsumer(env),
         listOf("aapen-helse-sporbar")
     )
     val vedtakService = VedtakService(
         database = database,
         applicationState = applicationState,
         vedtakConsumer = vedtakConsumer,
-        brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+        brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer,
         environment = env
     )
 
     val vedtakNullstillService = VedtakNullstillService(
         database = database,
-        brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+        brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer,
         environment = env
     )
 
@@ -112,13 +107,13 @@ fun main() {
     settOppVarslingCronjob(
         database = database,
         podLeaderCoordinator = podLeaderCoordinator,
-        enkeltvarselKafkaProducer = enkeltvarselKafkaProducer
+        enkeltvarselKafkaProdusent = enkeltvarselKafkaProducer
     )
     settOppVedtakCronjob(
         database = database,
         podLeaderCoordinator = podLeaderCoordinator,
         env = env,
-        brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer
+        brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer
     )
 }
 

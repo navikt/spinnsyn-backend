@@ -4,10 +4,10 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.flex.application.metrics.FØRSTEGANGSVARSEL
 import no.nav.helse.flex.application.metrics.REVARSEL
 import no.nav.helse.flex.db.DatabaseInterface
+import no.nav.helse.flex.leaderelection.PodLeaderCoordinator
 import no.nav.helse.flex.log
-import no.nav.helse.flex.util.PodLeaderCoordinator
 import no.nav.helse.flex.varsling.domene.EnkeltVarsel
-import no.nav.helse.flex.varsling.kafka.EnkeltvarselKafkaProducer
+import no.nav.helse.flex.varsling.kafka.EnkeltvarselKafkaProdusent
 import no.nav.helse.flex.vedtak.db.InternVedtak
 import no.nav.helse.flex.vedtak.db.finnInternVedtak
 import no.nav.helse.flex.vedtak.db.hentVedtakForRevarsling
@@ -23,7 +23,7 @@ import kotlin.concurrent.timer
 
 fun varslingCronjob(
     database: DatabaseInterface,
-    enkeltvarselKafkaProducer: EnkeltvarselKafkaProducer
+    enkeltvarselKafkaProdusent: EnkeltvarselKafkaProdusent
 ): VarslingCronjobResultat {
     val resultat = VarslingCronjobResultat()
     if (Instant.now().atZone(ZoneId.of("Europe/Oslo")).erUtenforFornuftigTidForVarsling()) {
@@ -41,7 +41,7 @@ fun varslingCronjob(
             val vedtak = database.finnInternVedtak(fnr = it.fnr, vedtaksId = it.id)!!
             if (vedtak.lest == null) {
                 val varselBestillingId = vedtak.varselBestillingId()
-                enkeltvarselKafkaProducer.opprettEnkeltVarsel(
+                enkeltvarselKafkaProdusent.opprettEnkeltVarsel(
                     EnkeltVarsel(
                         fodselsnummer = vedtak.fnr,
                         varselBestillingId = varselBestillingId,
@@ -67,7 +67,7 @@ fun varslingCronjob(
             val vedtak = database.finnInternVedtak(fnr = it.fnr, vedtaksId = it.id)!!
             if (vedtak.lest == null) {
                 val varselBestillingId = vedtak.revarselBestillingId()
-                enkeltvarselKafkaProducer.opprettEnkeltVarsel(
+                enkeltvarselKafkaProdusent.opprettEnkeltVarsel(
                     EnkeltVarsel(
                         fodselsnummer = vedtak.fnr,
                         varselBestillingId = varselBestillingId,
@@ -106,7 +106,7 @@ private fun InternVedtak.revarselBestillingId(): String {
 fun settOppVarslingCronjob(
     podLeaderCoordinator: PodLeaderCoordinator,
     database: DatabaseInterface,
-    enkeltvarselKafkaProducer: EnkeltvarselKafkaProducer
+    enkeltvarselKafkaProdusent: EnkeltvarselKafkaProdusent
 ) {
 
     val periodeMellomJobber = Duration.ofMinutes(1).toMillis()
@@ -116,7 +116,7 @@ fun settOppVarslingCronjob(
         period = periodeMellomJobber
     ) {
         if (podLeaderCoordinator.isLeader()) {
-            varslingCronjob(database = database, enkeltvarselKafkaProducer = enkeltvarselKafkaProducer)
+            varslingCronjob(database = database, enkeltvarselKafkaProdusent = enkeltvarselKafkaProdusent)
         } else {
             log.debug("Jeg er ikke leder")
         }

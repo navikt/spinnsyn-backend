@@ -13,7 +13,7 @@ import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.testutil.TestDB
 import no.nav.helse.flex.varsling.cronjob.varslingCronjob
 import no.nav.helse.flex.varsling.domene.EnkeltVarsel
-import no.nav.helse.flex.varsling.kafka.EnkeltvarselKafkaProducer
+import no.nav.helse.flex.varsling.kafka.EnkeltvarselKafkaProdusent
 import no.nav.helse.flex.vedtak.db.lesVedtak
 import no.nav.helse.flex.vedtak.db.opprettVedtak
 import no.nav.helse.flex.vedtak.domene.VedtakDto
@@ -32,7 +32,7 @@ object VedtakVarslingSpek : Spek({
     val testDb = TestDB()
 
     val grunntid = ZonedDateTime.of(2020, 3, 12, 3, 3, 0, 0, ZoneId.of("Europe/Oslo"))
-    val enkeltvarselKafkaProducer = mockk<EnkeltvarselKafkaProducer>()
+    val enkeltvarselKafkaProducer = mockk<EnkeltvarselKafkaProdusent>()
 
     val fnrSomSkalVarslesOgRevarsles = "01010111111"
     val vedtakIdSomSkalVarslesOgRevarsles = "5fae4253-1e31-4572-ac9c-0e388c22fb6c"

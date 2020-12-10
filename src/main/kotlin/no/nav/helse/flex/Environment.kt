@@ -1,15 +1,12 @@
 package no.nav.helse.flex
 
-import no.nav.syfo.kafka.KafkaConfig
-import no.nav.syfo.kafka.KafkaCredentials
-
-data class Environment(
+class Environment(
     val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
     val applicationName: String = getEnvVar("NAIS_APP_NAME"),
     val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
     val apiGatewayUrl: String = getEnvVar("API_GATEWAY_URL"),
     val syfotilgangskontrollApiGwKey: String = getEnvVar("SYFO_TILGANGSKONTROLL_SPINNSYN_BACKEND_API_GW_KEY"),
-    override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+    val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val spinnsynBackendDbHost: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_HOST"),
     val spinnsynBackendDbPort: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PORT"),
     val spinnsynBackendDbName: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_DATABASE"),
@@ -24,17 +21,10 @@ data class Environment(
     val veilederExpectedAudience: List<String> = getEnvVar("VEILEDER_EXPECTED_AUDIENCE").split(","),
     val electorPath: String = getEnvVar("ELECTOR_PATH"),
     val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "30000").toLong(),
-    val kafkaAutoOffsetReset: String = getEnvVar("KAFKA_AUTO_OFFSET_RESET", "none")
-) : KafkaConfig {
-
-    fun hentKafkaCredentials(): KafkaCredentials {
-        return object : KafkaCredentials {
-            override val kafkaPassword: String
-                get() = serviceuserPassword
-            override val kafkaUsername: String
-                get() = serviceuserUsername
-        }
-    }
+    val kafkaAutoOffsetReset: String = getEnvVar("KAFKA_AUTO_OFFSET_RESET", "none"),
+    val kafkaSecurityProtocol: String = getEnvVar("KAFKA_SECURITY_PROTOCOL", "SASL_SSL"),
+    val kafkaSchemaRegistryUrl: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL")
+) {
 
     fun jdbcUrl(): String {
         return "jdbc:postgresql://$spinnsynBackendDbHost:$spinnsynBackendDbPort/$spinnsynBackendDbName"
@@ -49,5 +39,5 @@ data class Environment(
     }
 }
 
-fun getEnvVar(varName: String, defaultValue: String? = null) =
+private fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
