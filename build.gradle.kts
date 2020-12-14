@@ -6,11 +6,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.helse.flex"
 version = "1.0.0"
 
-val coroutinesVersion = "1.4.2"
+val coroutinesVersion = "1.4.1"
 val jacksonVersion = "2.11.2"
 val postgresEmbeddedVersion = "0.13.3"
 val kluentVersion = "1.49"
-val ktorVersion = "1.3.2"
+val ktorVersion = "1.4.1"
 val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "5.1"
 val mockkVersion = "1.10.0"
@@ -41,7 +41,7 @@ tasks.test {
 
 plugins {
     id("org.jmailen.kotlinter") version "2.1.1"
-    kotlin("jvm") version "1.3.70"
+    kotlin("jvm") version "1.4.21"
     id("com.diffplug.gradle.spotless") version "3.23.1"
     id("com.github.johnrengelman.shadow") version "4.0.4"
     id("com.github.ben-manes.versions") version "0.29.0"
