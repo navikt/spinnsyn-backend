@@ -70,10 +70,25 @@ object VedtakVarslingSpek : Spek({
             revarsler `should be equal to` 0
         }
 
-        it("Vi kjører cronjobben på morgenen og varsler 2 stk") {
+        it("Vi kjører cronjobben på morgenen og varsler 0 stk") {
             every {
                 Instant.now()
             } returns grunntid.plusHours(6).toInstant()
+
+            val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer)
+            varsler `should be equal to` 0
+            revarsler `should be equal to` 0
+
+            val enkeltVarsler = mutableListOf<EnkeltVarsel>()
+            verify(exactly = 0) { enkeltvarselKafkaProducer.opprettEnkeltVarsel(capture(enkeltVarsler)) }
+
+            clearMocks(enkeltvarselKafkaProducer, answers = false)
+        }
+
+        it("Vi kjører cronjobben på morgenen dagen etter og varsler 2 stk") {
+            every {
+                Instant.now()
+            } returns grunntid.plusHours(6).plusDays(1).toInstant()
 
             val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer)
             varsler `should be equal to` 2
@@ -105,7 +120,7 @@ object VedtakVarslingSpek : Spek({
         it("Vi kjører cronjobben en uke senere og revarsler 1") {
             every {
                 Instant.now()
-            } returns grunntid.plusDays(7).plusHours(6).plusMinutes(1).toInstant()
+            } returns grunntid.plusDays(8).plusHours(6).plusMinutes(1).toInstant()
             val (varsler, revarsler) = varslingCronjob(testDb, enkeltvarselKafkaProducer)
             varsler `should be equal to` 0
             revarsler `should be equal to` 1

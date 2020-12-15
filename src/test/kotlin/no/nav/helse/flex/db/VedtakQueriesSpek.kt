@@ -46,6 +46,10 @@ object VedtakQueriesSpek : Spek({
             repeat((0..4).count()) {
                 testDb.nyttVedtak()
             }
+            every {
+                Instant.now()
+            } returns now.plusDays(1).toInstant()
+
             val vedtakForVarsling = testDb.hentVedtakForVarsling()
             vedtakForVarsling.size `should be equal to` 5
 
@@ -55,9 +59,16 @@ object VedtakQueriesSpek : Spek({
         }
 
         it("Et varslet vedtak skal ikke varsles igjen") {
+            mockkStatic(Instant::class)
+            every {
+                Instant.now()
+            } returns now.toInstant()
             repeat((0..4).count()) {
                 testDb.nyttVedtak()
             }
+            every {
+                Instant.now()
+            } returns now.plusDays(1).toInstant()
             val vedtakForVarsling = testDb.hentVedtakForVarsling()
             val tilfeldigVedtak = vedtakForVarsling.random()
             vedtakForVarsling.size `should be equal to` 5
@@ -67,10 +78,16 @@ object VedtakQueriesSpek : Spek({
         }
 
         it("Et uvarslet (og ulest) vedtak kan ikke revarsles før det er varslet") {
-
+            mockkStatic(Instant::class)
+            every {
+                Instant.now()
+            } returns now.toInstant()
             repeat((0..4).count()) {
                 testDb.nyttVedtak()
             }
+            every {
+                Instant.now()
+            } returns now.plusDays(1).toInstant()
             val vedtakForVarsling = testDb.hentVedtakForVarsling()
             vedtakForVarsling.random().also {
                 testDb.settVedtakRevarslet(it.id)
@@ -84,7 +101,7 @@ object VedtakQueriesSpek : Spek({
 
             every {
                 Instant.now()
-            } returns now.plusDays(8).toInstant()
+            } returns now.plusDays(9).toInstant()
 
             testDb.hentVedtakForVarsling().size `should be equal to` 0
             testDb.hentVedtakForRevarsling().size `should be equal to` 6
