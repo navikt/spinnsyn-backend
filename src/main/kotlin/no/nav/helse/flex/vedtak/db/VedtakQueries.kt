@@ -10,6 +10,8 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
@@ -103,7 +105,13 @@ private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest
     } else {
         null
     }
-    return Vedtak(id = id.toString(), vedtak = vedtak.tilVedtakDto(), lest = lest, lestDato = lestDato, opprettet = opprettet)
+    return Vedtak(
+        id = id.toString(),
+        vedtak = vedtak.tilVedtakDto(),
+        lest = lest,
+        lestDato = lestDato,
+        opprettet = opprettet
+    )
 }
 
 private fun Connection.finnVedtak(fnr: String): List<Vedtak> =
@@ -196,8 +204,15 @@ private fun Connection.hentVedtakForVarsling(): List<InternVedtak> =
             WHERE lest IS NULL
             AND varslet IS NULL
             AND revarslet IS NULL
+            AND opprettet < ?
         """
     ).use {
+        it.setTimestamp(
+            1,
+            Timestamp.from(
+                ZonedDateTime.ofInstant(Instant.now(), ZoneId.of("Europe/Oslo")).withHour(0).withMinute(0).toInstant()
+            )
+        )
         it.executeQuery().toList {
             toInternVedtak()
         }
