@@ -201,17 +201,24 @@ object VedtakVerdikjedeSpek : Spek({
                 vedtakNullstillService = vedtakNullstillService
             )
 
-            fun TestApplicationRequest.medSelvbetjeningToken(subject: String) {
+            fun TestApplicationRequest.medSelvbetjeningToken(subject: String, level: String = "Level4") {
                 addHeader(
                     HttpHeaders.Authorization,
-                    "Bearer ${generateJWT(audience = selvbetjeningaudience, issuer = selvbetjeningissuer, subject = subject)}"
+                    "Bearer ${
+                    generateJWT(
+                        audience = selvbetjeningaudience,
+                        issuer = selvbetjeningissuer,
+                        subject = subject,
+                        level = level
+                    )
+                    }"
                 )
             }
 
             fun TestApplicationRequest.medVeilederToken() {
                 addHeader(
                     HttpHeaders.Authorization,
-                    "Bearer ${generateJWT(audience = veilederaudience, issuer = veilederissuer)}"
+                    "Bearer ${generateJWT(audience = veilederaudience, issuer = veilederissuer, level = null)}"
                 )
             }
 
@@ -249,7 +256,11 @@ object VedtakVerdikjedeSpek : Spek({
                         listOf(RecordHeader("type", "Behandlingstilstand".toByteArray()))
                     )
                 )
-                stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 3)
+                stopApplicationNårAntallKafkaMeldingerErLest(
+                    vedtakKafkaConsumer,
+                    applicationState,
+                    antallKafkaMeldinger = 3
+                )
 
                 runBlocking {
                     vedtakService.start()
@@ -297,9 +308,29 @@ object VedtakVerdikjedeSpek : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
-                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0]),
-                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = manueltVedtak, opprettet = opprettet[1])
+                        RSVedtak(
+                            id = generertVedtakId[0],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak,
+                            opprettet = opprettet[0]
+                        ),
+                        RSVedtak(
+                            id = generertVedtakId[1],
+                            lest = false,
+                            vedtak = manueltVedtak,
+                            opprettet = opprettet[1]
+                        )
                     )
+                }
+            }
+
+            it("REST APIet for borger krever nivå 4") {
+                with(
+                    handleRequest(HttpMethod.Get, "/api/v1/vedtak") {
+                        medSelvbetjeningToken(fnr, level = "Level3")
+                    }
+                ) {
+                    response.status() shouldEqual HttpStatusCode.Unauthorized
                 }
             }
 
@@ -315,8 +346,18 @@ object VedtakVerdikjedeSpek : Spek({
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content!!.tilRSVedtakListe() shouldEqual listOf(
-                        RSVedtak(id = generertVedtakId[0], lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet[0]),
-                        RSVedtak(id = generertVedtakId[1], lest = false, vedtak = manueltVedtak, opprettet = opprettet[1])
+                        RSVedtak(
+                            id = generertVedtakId[0],
+                            lest = false,
+                            vedtak = automatiskBehandletVedtak,
+                            opprettet = opprettet[0]
+                        ),
+                        RSVedtak(
+                            id = generertVedtakId[1],
+                            lest = false,
+                            vedtak = manueltVedtak,
+                            opprettet = opprettet[1]
+                        )
                     )
                 }
             }
@@ -364,7 +405,6 @@ object VedtakVerdikjedeSpek : Spek({
             }
 
             it("Vedtaket kan hentes med vedtaksid i REST APIet") {
-                val annulleringer = testDb.finnAnnullering(fnr)
                 val dbVedtak = testDb.finnVedtak(fnr)[0]
                 val vedtak = dbVedtak.tilRSVedtak()
                 val generertVedtakId = vedtak.id
@@ -376,7 +416,12 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content!!.tilRSVedtak() shouldEqual RSVedtak(id = generertVedtakId, lest = false, vedtak = automatiskBehandletVedtak, opprettet = opprettet)
+                    response.content!!.tilRSVedtak() shouldEqual RSVedtak(
+                        id = generertVedtakId,
+                        lest = false,
+                        vedtak = automatiskBehandletVedtak,
+                        opprettet = opprettet
+                    )
                 }
             }
 
@@ -468,13 +513,28 @@ object VedtakVerdikjedeSpek : Spek({
                     }
                 ) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content!!.tilRSVedtak() shouldEqual RSVedtak(id = generertVedtakId, lest = true, lestDato = lestDato, vedtak = automatiskBehandletVedtak, opprettet = opprettet)
+                    response.content!!.tilRSVedtak() shouldEqual RSVedtak(
+                        id = generertVedtakId,
+                        lest = true,
+                        lestDato = lestDato,
+                        vedtak = automatiskBehandletVedtak,
+                        opprettet = opprettet
+                    )
                 }
 
                 runBlocking {
-                    stopApplicationNårAntallKafkaMeldingerErLest(vedtakKafkaConsumer, applicationState, antallKafkaMeldinger = 1)
+                    stopApplicationNårAntallKafkaMeldingerErLest(
+                        vedtakKafkaConsumer,
+                        applicationState,
+                        antallKafkaMeldinger = 1
+                    )
                     co.join()
-                    verify(exactly = 1) { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) }
+                    verify(exactly = 1) {
+                        brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
+                            any(),
+                            any()
+                        )
+                    }
                     testDb.finnVedtak(fnrForNyttVedtak).size `should be equal to` 1
                 }
             }
