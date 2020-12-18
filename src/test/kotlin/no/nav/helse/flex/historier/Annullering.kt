@@ -226,13 +226,6 @@ object Annullering : Spek({
                 )
             }
 
-            fun TestApplicationRequest.medVeilederToken() {
-                addHeader(
-                    HttpHeaders.Authorization,
-                    "Bearer ${generateJWT(audience = veilederaudience, issuer = veilederissuer)}"
-                )
-            }
-
             it("Et vedtak mottatt fra kafka blir lagret i db") {
                 val vedtakFraDb = testDb.finnVedtak(fnr)
                 vedtakFraDb.size `should be equal to` 0

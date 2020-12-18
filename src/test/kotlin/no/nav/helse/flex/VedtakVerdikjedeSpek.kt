@@ -218,7 +218,7 @@ object VedtakVerdikjedeSpek : Spek({
             fun TestApplicationRequest.medVeilederToken() {
                 addHeader(
                     HttpHeaders.Authorization,
-                    "Bearer ${generateJWT(audience = veilederaudience, issuer = veilederissuer)}"
+                    "Bearer ${generateJWT(audience = veilederaudience, issuer = veilederissuer, level = null)}"
                 )
             }
 
