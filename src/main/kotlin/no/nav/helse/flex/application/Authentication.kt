@@ -28,7 +28,9 @@ private fun Authentication.Configuration.configureJwtValidation(issuer: JwtIssue
                 hasExpectedAudience(
                     credentials,
                     issuer.expectedAudience
-                ) -> JWTPrincipal(credentials.payload)
+                ) && (issuer.issuerInternalId == IssuerInternalId.veileder || erNiva4(credentials)) -> JWTPrincipal(
+                    credentials.payload
+                )
                 else -> unauthorized(credentials)
             }
         }
@@ -46,4 +48,8 @@ fun unauthorized(credentials: JWTCredential): Principal? {
 
 fun hasExpectedAudience(credentials: JWTCredential, expectedAudience: List<String>): Boolean {
     return expectedAudience.any { credentials.payload.audience.contains(it) }
+}
+
+fun erNiva4(credentials: JWTCredential): Boolean {
+    return "Level4" == credentials.payload.getClaim("acr").asString()
 }
