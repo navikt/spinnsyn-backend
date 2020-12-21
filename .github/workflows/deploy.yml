@@ -2,7 +2,7 @@ name: "Build, publish and deploy"
 on:
   push:
   schedule:
-    - cron:  '*/15 * * * *'
+    - cron:  '0 8 * * *'
 env:
   APP: spinnsyn-backend
 jobs:
