@@ -49,6 +49,7 @@ spec:
         - host: navtestb2c.b2clogin.com
     inbound:
       rules:
+        - application: flex-gateway
         - application: spinnsyn-backend-proxy
         - application: spinnsyn-backend-veileder-proxy
         - application: spinnsyn-backend-mock-proxy # Kun i dev-gcp

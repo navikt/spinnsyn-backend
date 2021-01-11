@@ -49,6 +49,7 @@ spec:
         - host: navnob2c.b2clogin.com
     inbound:
       rules:
+        - application: flex-gateway
         - application: spinnsyn-backend-proxy
         - application: spinnsyn-backend-veileder-proxy
 
