@@ -197,3 +197,19 @@ tasks.named("dependencyUpdates", DependencyUpdatesTask::class.java).configure {
     outputDir = "build/dependencyUpdates"
     reportfileName = "report"
 }
+
+tasks.register("createDependabotFile") {
+    doLast {
+        mkdir("$projectDir/dependabot")
+        val file = File("$projectDir/dependabot/build.gradle")
+        file.writeText("// Do not edit manually! This file was created by the 'createDependabotFile' task defined in the root build.gradle.kts file.\n")
+        file.appendText("dependencies {\n")
+        project.configurations.getByName("runtimeClasspath").allDependencies
+            .filter { it.group != rootProject.name && it.version != null }
+            .forEach { file.appendText("    compile '${it.group}:${it.name}:${it.version}'\n") }
+        project.configurations.getByName("testRuntimeClasspath").allDependencies
+            .filter { it.group != rootProject.name && it.version != null }
+            .forEach { file.appendText("    testCompile '${it.group}:${it.name}:${it.version}'\n") }
+        file.appendText("}\n")
+    }
+}
