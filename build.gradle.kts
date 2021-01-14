@@ -44,7 +44,7 @@ plugins {
     kotlin("jvm") version "1.4.21"
     id("com.diffplug.gradle.spotless") version "3.23.1"
     id("com.github.johnrengelman.shadow") version "4.0.4"
-    id("com.github.ben-manes.versions") version "0.29.0"
+    id("com.github.ben-manes.versions") version "0.36.0"
     jacoco
 }
 
