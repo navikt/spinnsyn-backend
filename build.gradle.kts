@@ -197,3 +197,4 @@ tasks.named("dependencyUpdates", DependencyUpdatesTask::class.java).configure {
     outputDir = "build/dependencyUpdates"
     reportfileName = "report"
 }
+
