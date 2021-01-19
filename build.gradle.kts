@@ -10,18 +10,18 @@ val coroutinesVersion = "1.4.1"
 val jacksonVersion = "2.11.2"
 val postgresEmbeddedVersion = "0.13.3"
 val kluentVersion = "1.49"
-val ktorVersion = "1.4.1"
+val ktorVersion = "1.5.0"
 val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "5.1"
 val mockkVersion = "1.10.0"
 val nimbusdsVersion = "7.5.1"
-val prometheusVersion = "0.6.0"
+val prometheusVersion = "0.9.0"
 val spekVersion = "2.0.9"
-val testContainerKafkaVersion = "1.15.0"
+val testContainerKafkaVersion = "1.15.1"
 val confluentVersion = "5.5.1"
 
 val postgresVersion = "42.2.15"
-val flywayVersion = "6.5.4"
+val flywayVersion = "7.5.0"
 val hikariVersion = "3.4.5"
 val brukernotifikasjonAvroVersion = "1.2020.08.13-13.50-3b6ca1881161"
 
@@ -40,11 +40,11 @@ tasks.test {
 }
 
 plugins {
-    id("org.jmailen.kotlinter") version "2.1.1"
+    id("org.jmailen.kotlinter") version "3.3.0"
     kotlin("jvm") version "1.4.21"
     id("com.diffplug.gradle.spotless") version "3.23.1"
     id("com.github.johnrengelman.shadow") version "4.0.4"
-    id("com.github.ben-manes.versions") version "0.29.0"
+    id("com.github.ben-manes.versions") version "0.36.0"
     jacoco
 }
 
