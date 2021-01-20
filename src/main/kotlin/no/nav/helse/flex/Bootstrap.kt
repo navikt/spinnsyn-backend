@@ -22,9 +22,9 @@ import no.nav.helse.flex.brukernotifkasjon.skapBrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.Database
 import no.nav.helse.flex.leaderelection.PodLeaderCoordinator
 import no.nav.helse.flex.util.skapVedtakKafkaConsumer
-import no.nav.helse.flex.varsling.cronjob.settOppVarslingCronjob
+import no.nav.helse.flex.varsling.cronjob.VarslingCronjob
 import no.nav.helse.flex.varsling.kafka.skapEnkeltvarselKafkaProdusent
-import no.nav.helse.flex.vedtak.cronjob.settOppVedtakCronjob
+import no.nav.helse.flex.vedtak.cronjob.VedtakCronjob
 import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import no.nav.helse.flex.vedtak.service.SyfoTilgangskontrollService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
@@ -69,6 +69,9 @@ fun main() {
         skapVedtakKafkaConsumer(env),
         listOf("aapen-helse-sporbar")
     )
+
+    val podLeaderCoordinator = PodLeaderCoordinator(env = env)
+
     val vedtakService = VedtakService(
         database = database,
         applicationState = applicationState,
@@ -83,6 +86,21 @@ fun main() {
         environment = env
     )
 
+    val varslingCronjob = VarslingCronjob(
+        applicationState = applicationState,
+        podLeaderCoordinator = podLeaderCoordinator,
+        database = database,
+        enkeltvarselKafkaProdusent = enkeltvarselKafkaProducer
+    )
+
+    val vedtakCronjob = VedtakCronjob(
+        applicationState = applicationState,
+        podLeaderCoordinator = podLeaderCoordinator,
+        database = database,
+        env = env,
+        brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer
+    )
+
     val syfoTilgangskontrollService = SyfoTilgangskontrollService(environment = env)
 
     val applicationEngine = createApplicationEngine(
@@ -94,6 +112,7 @@ fun main() {
         veilederIssuer = veilederIssuer,
         applicationState = applicationState
     )
+
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
     applicationState.ready = true
@@ -103,18 +122,13 @@ fun main() {
         vedtakService.start()
     }
 
-    val podLeaderCoordinator = PodLeaderCoordinator(env = env)
-    settOppVarslingCronjob(
-        database = database,
-        podLeaderCoordinator = podLeaderCoordinator,
-        enkeltvarselKafkaProdusent = enkeltvarselKafkaProducer
-    )
-    settOppVedtakCronjob(
-        database = database,
-        podLeaderCoordinator = podLeaderCoordinator,
-        env = env,
-        brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer
-    )
+    createListener(applicationState) {
+        varslingCronjob.start()
+    }
+
+    createListener(applicationState) {
+        vedtakCronjob.start()
+    }
 }
 
 private fun hentSelvbetjeningJwtIssuer(env: Environment): JwtIssuer =

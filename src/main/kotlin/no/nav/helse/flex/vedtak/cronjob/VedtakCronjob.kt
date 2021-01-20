@@ -1,9 +1,13 @@
 package no.nav.helse.flex.vedtak.cronjob
 
 import io.ktor.util.KtorExperimentalAPI
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.helse.flex.Environment
+import no.nav.helse.flex.application.ApplicationState
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.leaderelection.PodLeaderCoordinator
@@ -16,8 +20,6 @@ import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.Date
-import kotlin.concurrent.fixedRateTimer
 
 fun vedtakCronjob(
     database: DatabaseInterface,
@@ -58,53 +60,67 @@ data class VedtakCronjobResultat(
 )
 
 @KtorExperimentalAPI
-fun settOppVedtakCronjob(
-    podLeaderCoordinator: PodLeaderCoordinator,
-    database: DatabaseInterface,
-    env: Environment,
-    brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent
+class VedtakCronjob(
+    private val applicationState: ApplicationState,
+    private val podLeaderCoordinator: PodLeaderCoordinator,
+    private val database: DatabaseInterface,
+    private val env: Environment,
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent
 ) {
+    suspend fun start() = coroutineScope {
+        val (initialDelay, interval) = hentKjøretider(env)
+        log.info("Schedulerer VedtakCronjob start: $initialDelay ms, interval: $interval ms")
+        delay(initialDelay)
 
-    val (klokkeslett, period) = hentKlokekslettOgPeriode(env)
+        while (applicationState.alive) {
+            val job = launch { run() }
+            delay(interval)
+            if (job.isActive) {
+                log.warn("VedtakCronjob er ikke ferdig, venter til den er ferdig")
+                job.join()
+            }
+        }
 
-    fixedRateTimer(
-        startAt = klokkeslett,
-        period = period
-    ) {
-        if (podLeaderCoordinator.isLeader()) {
-            vedtakCronjob(
-                database = database,
-                env = env,
-                brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProdusent
-            )
-        } else {
-            log.debug("Jeg er ikke leder")
+        log.info("Avslutter VedtakCronjob")
+    }
+
+    private fun run() {
+        try {
+            if (podLeaderCoordinator.isLeader()) {
+                vedtakCronjob(
+                    database = database,
+                    env = env,
+                    brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProdusent
+                )
+            } else {
+                log.debug("Jeg er ikke leder")
+            }
+        } catch (ex: Exception) {
+            log.error("Feil i VedtakCronjob, kjøres på nytt neste gang", ex)
         }
     }
 }
 
-private fun hentKlokekslettOgPeriode(env: Environment): Pair<Date, Long> {
+private fun hentKjøretider(env: Environment): Pair<Long, Long> {
     val osloTz = ZoneId.of("Europe/Oslo")
     val now = ZonedDateTime.now(osloTz)
     if (env.cluster == "dev-gcp" || env.cluster == "flex") {
-        val omEtMinutt = now.plusSeconds(60)
-        val femMinutter = Duration.ofMinutes(5)
-        return Pair(Date.from(omEtMinutt.toInstant()), femMinutter.toMillis())
+        val omEtMinutt = Duration.ofMinutes(1).toMillis()
+        val femMinutter = Duration.ofMinutes(5).toMillis()
+        return Pair(omEtMinutt, femMinutter)
     }
     if (env.cluster == "prod-gcp") {
+        val nesteNatt = now.next(LocalTime.of(2, 0, 0)) - now.toInstant().toEpochMilli()
         val enDag = Duration.ofDays(1).toMillis()
-        val nesteNatt = now.next(LocalTime.of(2, 0, 0))
         return Pair(nesteNatt, enDag)
     }
     throw IllegalStateException("Ukjent cluster name for cronjob ${env.cluster}")
 }
 
-private fun ZonedDateTime.next(atTime: LocalTime): Date {
+private fun ZonedDateTime.next(atTime: LocalTime): Long {
     return if (this.toLocalTime().isAfter(atTime)) {
-        Date.from(
-            this.plusDays(1).withHour(atTime.hour).withMinute(atTime.minute).withSecond(atTime.second).toInstant()
-        )
+        this.plusDays(1).withHour(atTime.hour).withMinute(atTime.minute).withSecond(atTime.second).toInstant().toEpochMilli()
     } else {
-        Date.from(this.withHour(atTime.hour).withMinute(atTime.minute).withSecond(atTime.second).toInstant())
+        this.withHour(atTime.hour).withMinute(atTime.minute).withSecond(atTime.second).toInstant().toEpochMilli()
     }
 }
