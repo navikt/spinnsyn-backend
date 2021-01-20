@@ -1,6 +1,10 @@
 package no.nav.helse.flex.varsling.cronjob
 
 import io.ktor.util.KtorExperimentalAPI
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import no.nav.helse.flex.application.ApplicationState
 import no.nav.helse.flex.application.metrics.FØRSTEGANGSVARSEL
 import no.nav.helse.flex.application.metrics.REVARSEL
 import no.nav.helse.flex.db.DatabaseInterface
@@ -19,7 +23,6 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
-import kotlin.concurrent.timer
 
 fun varslingCronjob(
     database: DatabaseInterface,
@@ -94,6 +97,13 @@ data class VarslingCronjobResultat(
 
 )
 
+private fun ZonedDateTime.erUtenforFornuftigTidForVarsling(): Boolean {
+    return when (this.hour) {
+        in 9..16 -> false
+        else -> true
+    }
+}
+
 private fun InternVedtak.varselBestillingId(): String {
     return UUID.nameUUIDFromBytes("${this.id}-første-varsel".toByteArray()).toString()
 }
@@ -103,29 +113,38 @@ private fun InternVedtak.revarselBestillingId(): String {
 }
 
 @KtorExperimentalAPI
-fun settOppVarslingCronjob(
-    podLeaderCoordinator: PodLeaderCoordinator,
-    database: DatabaseInterface,
-    enkeltvarselKafkaProdusent: EnkeltvarselKafkaProdusent
+class VarslingCronjob(
+    private val applicationState: ApplicationState,
+    private val podLeaderCoordinator: PodLeaderCoordinator,
+    private val database: DatabaseInterface,
+    private val enkeltvarselKafkaProdusent: EnkeltvarselKafkaProdusent
 ) {
+    suspend fun start() = coroutineScope {
+        val interval = Duration.ofMinutes(1).toMillis()
+        log.info("Schedulerer VarslingCronjob interval: $interval ms")
+        delay(interval)
 
-    val periodeMellomJobber = Duration.ofMinutes(1).toMillis()
-
-    timer(
-        initialDelay = periodeMellomJobber,
-        period = periodeMellomJobber
-    ) {
-        if (podLeaderCoordinator.isLeader()) {
-            varslingCronjob(database = database, enkeltvarselKafkaProdusent = enkeltvarselKafkaProdusent)
-        } else {
-            log.debug("Jeg er ikke leder")
+        while (applicationState.alive) {
+            val job = launch { run() }
+            delay(interval)
+            if (job.isActive) {
+                log.warn("VarslingCronjob er ikke ferdig, venter til den er ferdig")
+                job.join()
+            }
         }
-    }
-}
 
-fun ZonedDateTime.erUtenforFornuftigTidForVarsling(): Boolean {
-    return when (this.hour) {
-        in 9..16 -> false
-        else -> true
+        log.info("Avslutter VarslingCronjob")
+    }
+
+    private fun run() {
+        try {
+            if (podLeaderCoordinator.isLeader()) {
+                varslingCronjob(database = database, enkeltvarselKafkaProdusent = enkeltvarselKafkaProdusent)
+            } else {
+                log.debug("Jeg er ikke leder")
+            }
+        } catch (ex: Exception) {
+            log.error("Feil i VarslingCronjob, kjøres på nytt neste gang", ex)
+        }
     }
 }
