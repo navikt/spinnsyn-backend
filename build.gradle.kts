@@ -20,7 +20,7 @@ val spekVersion = "2.0.9"
 val testContainerKafkaVersion = "1.15.1"
 val confluentVersion = "5.5.1"
 
-val postgresVersion = "42.2.15"
+val postgresVersion = "42.2.18"
 val flywayVersion = "6.5.4"
 val hikariVersion = "3.4.5"
 val brukernotifikasjonAvroVersion = "1.2020.08.13-13.50-3b6ca1881161"
@@ -51,7 +51,7 @@ plugins {
 buildscript {
     dependencies {
         classpath("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
-        classpath("org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438")
+        classpath("org.glassfish.jaxb:jaxb-runtime:3.0.0")
         classpath("com.sun.activation:javax.activation:1.2.0")
     }
 }
