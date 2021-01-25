@@ -79,7 +79,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    ktlint("com.pinterest:ktlint:0.37.2")
+    ktlint("com.pinterest:ktlint:0.40.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
