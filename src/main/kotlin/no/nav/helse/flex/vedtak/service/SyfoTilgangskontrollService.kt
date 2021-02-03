@@ -30,9 +30,8 @@ class SyfoTilgangskontrollService(
             }
         }
 
-        val response: HttpResponse = httpClient.get("${environment.apiGatewayUrl}/syfo-tilgangskontroll/syfo-tilgangskontroll/api/tilgang/bruker?fnr=$fnr") {
+        val response: HttpResponse = httpClient.get("${environment.syfotilgangskontrollUrl}/syfo-tilgangskontroll/api/tilgang/bruker?fnr=$fnr") {
             header(HttpHeaders.Authorization, "Bearer $token")
-            header("x-nav-apiKey", environment.syfotilgangskontrollApiGwKey)
             accept(ContentType.Application.Json)
         }
 
