@@ -45,7 +45,7 @@ spec:
       external:
         - host: login.microsoftonline.com
         - host: kafka-schema-registry.nais.adeo.no
-        - host: api-gw.oera.no
+        - host: syfo-tilgangskontroll.prod-fss-pub.nais.io
         - host: navnob2c.b2clogin.com
     inbound:
       rules:
@@ -55,7 +55,6 @@ spec:
 
   envFrom:
     - secret: spinnsyn-backend-serviceuser
-    - secret: syfo-tilgangskontroll-spinnsyn-backend-api-gw-key
     - configmap: loginservice-idporten
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
@@ -68,5 +67,5 @@ spec:
       value: "9b4e07a3-4f4c-4bab-b866-87f62dff480d,ffca591d-dfc9-4ecf-9ac2-050d75b39fc0"
     - name: KAFKA_SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.adeo.no
-    - name: API_GATEWAY_URL
-      value: https://api-gw.oera.no
+    - name: SYFOTILGANGSKONTROLL_URL
+      value: https://syfo-tilgangskontroll.prod-fss-pub.nais.io

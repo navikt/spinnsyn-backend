@@ -31,7 +31,7 @@ fun mockSyfotilgangskontrollServer(port: Int, fnr: String): ApplicationEngine {
             }
         }
         routing {
-            get("/syfo-tilgangskontroll/syfo-tilgangskontroll/api/tilgang/bruker") {
+            get("/syfo-tilgangskontroll/api/tilgang/bruker") {
                 val fodselsnummer: String? = call.request.queryParameters["fnr"]!!
                 if (fodselsnummer == fnr) {
                     call.respond(Tilgang(true, "Veileder har tilgang til bruker"))

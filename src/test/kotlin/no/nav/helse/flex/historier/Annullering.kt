@@ -113,12 +113,11 @@ object Annullering : Spek({
         clearAllMocks()
         every { env.spinnsynFrontendUrl } returns "https://www.nav.no/syk/sykepenger"
         every { env.serviceuserUsername } returns "srvspvedtak"
-        every { env.syfotilgangskontrollApiGwKey } returns "whateverkey"
         every { env.kafkaSecurityProtocol } returns "PLAINTEXT"
         every { env.serviceuserUsername } returns "user"
         every { env.serviceuserPassword } returns "pwd"
         every { env.isProd() } returns false
-        every { env.apiGatewayUrl } returns mockHttpServerUrl
+        every { env.syfotilgangskontrollUrl } returns mockHttpServerUrl
         every { env.isDev() } returns false
         every { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) } just Runs
         every { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) } just Runs
