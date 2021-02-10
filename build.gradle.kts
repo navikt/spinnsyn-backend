@@ -42,7 +42,7 @@ tasks.test {
 plugins {
     id("org.jmailen.kotlinter") version "3.3.0"
     kotlin("jvm") version "1.4.30"
-    id("com.diffplug.spotless") version "5.9.0"
+    id("com.diffplug.spotless") version "5.10.0"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     id("com.github.ben-manes.versions") version "0.36.0"
     jacoco
