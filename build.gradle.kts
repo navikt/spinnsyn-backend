@@ -21,7 +21,7 @@ val testContainerKafkaVersion = "1.15.1"
 val confluentVersion = "6.0.1"
 
 val postgresVersion = "42.2.18"
-val flywayVersion = "7.5.2"
+val flywayVersion = "7.5.3"
 val hikariVersion = "4.0.1"
 val brukernotifikasjonAvroVersion = "1.2020.08.13-13.50-3b6ca1881161"
 
