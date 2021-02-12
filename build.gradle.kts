@@ -17,7 +17,7 @@ val mockkVersion = "1.10.0"
 val nimbusdsVersion = "9.5"
 val prometheusVersion = "0.10.0"
 val spekVersion = "2.0.15"
-val testContainerKafkaVersion = "1.15.1"
+val testContainerKafkaVersion = "1.15.2"
 val confluentVersion = "6.0.1"
 
 val postgresVersion = "42.2.18"
