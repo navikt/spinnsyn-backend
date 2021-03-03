@@ -13,6 +13,8 @@ import io.ktor.routing.delete
 import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.util.KtorExperimentalAPI
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.helse.flex.Environment
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.helse.flex.vedtak.service.VedtakService
@@ -28,7 +30,9 @@ fun Route.registerVedtakMockApi(vedtakService: VedtakService, env: Environment, 
                 throw IllegalStateException("Dette apiet er ikke på i produksjon")
             }
             val fnr = call.parameters["fnr"]!!
-            val vedtak = call.receiveTextWithCorrectEncoding()
+            val vedtak = withContext(Dispatchers.IO) {
+                call.receiveTextWithCorrectEncoding()
+            }
             val vedtakId = UUID.randomUUID()
             vedtakService.mottaVedtak(
                 id = vedtakId,
@@ -44,7 +48,9 @@ fun Route.registerVedtakMockApi(vedtakService: VedtakService, env: Environment, 
                 throw IllegalStateException("Dette apiet er ikke på i produksjon")
             }
             val fnr = call.parameters["fnr"]!!
-            val annullering = call.receiveTextWithCorrectEncoding()
+            val annullering = withContext(Dispatchers.IO) {
+                call.receiveTextWithCorrectEncoding()
+            }
             val annulleringId = UUID.randomUUID()
             vedtakService.mottaAnnullering(
                 id = annulleringId,
