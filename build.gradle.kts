@@ -10,7 +10,7 @@ val coroutinesVersion = "1.4.2-native-mt"
 val jacksonVersion = "2.12.1"
 val postgresEmbeddedVersion = "0.13.3"
 val kluentVersion = "1.65"
-val ktorVersion = "1.5.1"
+val ktorVersion = "1.5.2"
 val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "6.6"
 val mockkVersion = "1.10.0"
@@ -22,7 +22,7 @@ val confluentVersion = "6.1.0"
 
 val postgresVersion = "42.2.18"
 val flywayVersion = "7.5.2"
-val hikariVersion = "4.0.1"
+val hikariVersion = "4.0.3"
 val brukernotifikasjonAvroVersion = "1.2020.08.13-13.50-3b6ca1881161"
 
 val ktlint by configurations.creating
