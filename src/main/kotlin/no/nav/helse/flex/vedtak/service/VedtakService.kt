@@ -1,4 +1,5 @@
 package no.nav.helse.flex.vedtak.service
+/*
 
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
@@ -240,3 +241,4 @@ private fun ConsumerRecord<String, String>.erAnnullering(): Boolean {
         header.key() == "type" && String(header.value()) == "Annullering"
     }
 }
+*/

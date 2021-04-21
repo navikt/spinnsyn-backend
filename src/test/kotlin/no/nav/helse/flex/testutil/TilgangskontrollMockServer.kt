@@ -1,4 +1,5 @@
 package no.nav.helse.flex.testutil
+/*
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -42,3 +43,4 @@ fun mockSyfotilgangskontrollServer(port: Int, fnr: String): ApplicationEngine {
         }
     }
 }
+*/

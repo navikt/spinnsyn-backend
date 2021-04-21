@@ -1,4 +1,5 @@
 package no.nav.helse.flex.historier
+/*
 
 import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.http.HttpHeaders
@@ -476,3 +477,4 @@ fun KafkaProducer<String, String>.send(key: String, value: Dto, type: String) {
         )
     )
 }
+*/

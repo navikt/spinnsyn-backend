@@ -1,4 +1,5 @@
 package no.nav.helse.flex.varsling.kafka
+/*
 
 import no.nav.helse.flex.Environment
 import no.nav.helse.flex.log
@@ -33,3 +34,4 @@ fun skapEnkeltvarselKafkaProdusent(env: Environment): EnkeltvarselKafkaProdusent
     val kafkaproducer = skapEnkeltvarselKafkaProducer(env)
     return EnkeltvarselKafkaProdusent(kafkaproducer = kafkaproducer)
 }
+*/

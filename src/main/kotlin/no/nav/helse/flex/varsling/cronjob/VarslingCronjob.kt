@@ -1,4 +1,5 @@
 package no.nav.helse.flex.varsling.cronjob
+/*
 
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.coroutineScope
@@ -148,3 +149,4 @@ class VarslingCronjob(
         }
     }
 }
+*/

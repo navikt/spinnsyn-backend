@@ -1,24 +1,82 @@
 package no.nav.helse.flex.vedtak.db
 
-import no.nav.helse.flex.db.DatabaseInterface
-import no.nav.helse.flex.db.toList
-import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import org.postgresql.util.PGobject
-import java.sql.Connection
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-fun DatabaseInterface.finnVedtak(fnr: String): List<Vedtak> =
-    connection.use {
-        return it.finnVedtak(fnr)
+@Transactional
+@Repository
+class VedtakDAO(
+    private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+) {
+    fun finnVedtak(fnr: String): List<Vedtak> {
+        return namedParameterJdbcTemplate.query(
+            """
+            SELECT id, vedtak, lest, opprettet
+            FROM vedtak
+            WHERE fnr = :fnr
+            """,
+            MapSqlParameterSource()
+                .addValue("fnr", fnr)
+        ) { resultSet, _ ->
+            resultSet.toVedtak()
+        }
     }
+
+    fun opprettVedtak(id: UUID, vedtak: String, fnr: String, opprettet: Instant): Vedtak {
+        val vedtakJSON = PGobject().also { it.type = "json"; it.value = vedtak }
+        val nå = Timestamp.from(Instant.now())
+
+        namedParameterJdbcTemplate.update(
+            """
+            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, varslet, revarslet) 
+            VALUES (:id, :fnr, :vedtak, :opprettet, :varslet, :revarslet)
+        """,
+            MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("fnr", fnr)
+                .addValue("vedtak", vedtakJSON)
+                .addValue("opprettet", Timestamp.from(opprettet))
+                .addValue("varslet", nå)
+                .addValue("revarslet", nå)
+        )
+
+        return Vedtak(
+            id = id.toString(),
+            vedtak = vedtak.tilVedtakDto(),
+            lest = false,
+            lestDato = null,
+            opprettet = opprettet
+        )
+    }
+
+    fun lesVedtak(fnr: String, vedtaksId: String): Boolean {
+        val update = namedParameterJdbcTemplate.update(
+            """
+                   UPDATE vedtak
+                   SET lest = :lest
+                   WHERE fnr = :fnr
+                   AND id = :id
+                   AND lest is null
+                """,
+            MapSqlParameterSource()
+                .addValue("lest", Timestamp.from(Instant.now()))
+                .addValue("fnr", fnr)
+                .addValue("id", vedtaksId)
+        )
+
+        return update > 0
+    }
+}
+/*
 
 fun DatabaseInterface.finnInternVedtak(fnr: String, vedtaksId: String): InternVedtak? =
     connection.use {
@@ -30,22 +88,6 @@ fun DatabaseInterface.eierVedtak(fnr: String, vedtaksId: String): Boolean =
         return it.eierVedtak(fnr, vedtaksId)
     }
 
-fun DatabaseInterface.lesVedtak(fnr: String, vedtaksId: String): Boolean =
-    connection.use {
-        return it.lesVedtak(fnr, vedtaksId)
-    }
-
-fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant, ferdigVarslet: Boolean = true): Vedtak =
-    connection.use {
-        return it.opprettVedtak(
-            id = id,
-            vedtak = vedtak,
-            fnr = fnr,
-            lest = lest,
-            opprettet = opprettet,
-            ferdigVarslet = ferdigVarslet,
-        )
-    }
 
 fun DatabaseInterface.hentVedtakForVarsling(): List<InternVedtak> =
     connection.use {
@@ -79,56 +121,6 @@ fun DatabaseInterface.slettVedtak(vedtakId: String, fnr: String) {
         return it.slettVedtak(vedtakId, fnr)
     }
 }
-
-private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant, ferdigVarslet: Boolean): Vedtak {
-    val nå = if (ferdigVarslet) Timestamp.from(Instant.now()) else null
-
-    this.prepareStatement(
-        """
-            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, lest, varslet, revarslet) VALUES (?, ?, ?, ?, ?, ?, ?) 
-        """
-    ).use {
-        it.setString(1, id.toString())
-        it.setString(2, fnr)
-        it.setObject(3, PGobject().also { it.type = "json"; it.value = vedtak })
-        it.setTimestamp(4, Timestamp.from(opprettet))
-        if (lest) {
-            it.setTimestamp(5, Timestamp.from(opprettet))
-        } else {
-            it.setTimestamp(5, null)
-        }
-        it.setTimestamp(6, nå)
-        it.setTimestamp(7, nå)
-
-        it.executeUpdate()
-    }
-
-    this.commit()
-    val lestDato = if (lest) {
-        OffsetDateTime.now()
-    } else {
-        null
-    }
-    return Vedtak(
-        id = id.toString(),
-        vedtak = vedtak.tilVedtakDto(),
-        lest = lest,
-        lestDato = lestDato,
-        opprettet = opprettet
-    )
-}
-
-private fun Connection.finnVedtak(fnr: String): List<Vedtak> =
-    this.prepareStatement(
-        """
-            SELECT id, vedtak, lest, opprettet
-            FROM vedtak
-            WHERE fnr = ?;
-            """
-    ).use {
-        it.setString(1, fnr)
-        it.executeQuery().toList { toVedtak() }
-    }
 
 private fun Connection.finnVedtak(fnr: String, vedtaksId: String): Vedtak? {
     return this.prepareStatement(
@@ -179,26 +171,6 @@ private fun Connection.eierVedtak(fnr: String, vedtaksId: String): Boolean =
             getString("id")
         }.size > 0
     }
-
-private fun Connection.lesVedtak(fnr: String, vedtaksId: String): Boolean {
-    val retur = this.prepareStatement(
-        """
-           UPDATE vedtak
-           SET lest = ?
-           WHERE fnr = ?
-           AND id = ?
-           AND lest is null
-        """
-    ).use {
-        it.setTimestamp(1, Timestamp.from(Instant.now()))
-        it.setString(2, fnr)
-        it.setString(3, vedtaksId)
-        it.executeUpdate()
-        it.updateCount > 0
-    }
-    this.commit()
-    return retur
-}
 
 private fun Connection.hentVedtakForVarsling(): List<InternVedtak> =
     this.prepareStatement(
@@ -302,6 +274,8 @@ private fun Connection.slettVedtak(vedtakId: String, fnr: String) {
     this.commit()
 }
 
+ */
+
 private fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
@@ -320,20 +294,3 @@ private fun ResultSet.toInternVedtak(): InternVedtak =
         varslet = getObject("varslet", OffsetDateTime::class.java)?.toInstant(),
         revarslet = getObject("revarslet", OffsetDateTime::class.java)?.toInstant()
     )
-
-data class Vedtak(
-    val id: String,
-    val lest: Boolean,
-    val lestDato: OffsetDateTime?,
-    val vedtak: VedtakDto,
-    val opprettet: Instant
-)
-
-data class InternVedtak(
-    val id: String,
-    val fnr: String,
-    val lest: Instant?,
-    val opprettet: Instant,
-    val varslet: Instant?,
-    val revarslet: Instant?
-)

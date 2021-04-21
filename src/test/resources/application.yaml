@@ -1,0 +1,20 @@
+logging.config: "classpath:logback-local.xml"
+
+spring:
+  profiles:
+    active: test
+  flyway:
+    enabled: true
+
+on-prem-kafka:
+  bootstrap-servers: overskrives i AbstractContainerBaseTest
+  security-protocol: PLAINTEXT
+  username: AzureDiamond
+  password: hunter2
+  auto-offset-reset: earliest
+
+no.nav.security.jwt:
+  issuer:
+    loginservice:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/loginservice/.well-known/openid-configuration
+      accepted_audience: loginservice-client-id

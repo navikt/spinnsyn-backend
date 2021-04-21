@@ -1,4 +1,5 @@
 package no.nav.helse.flex
+/*
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -687,3 +688,4 @@ object VedtakVerdikjedeSpek : Spek({
 
 fun String.tilRSVedtakListe(): List<RSVedtak> = objectMapper.readValue(this)
 fun String.tilRSVedtak(): RSVedtak = objectMapper.readValue(this)
+*/

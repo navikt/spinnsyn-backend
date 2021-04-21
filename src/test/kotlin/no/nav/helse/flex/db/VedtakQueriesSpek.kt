@@ -1,4 +1,5 @@
 package no.nav.helse.flex.db
+/*
 
 import io.ktor.util.KtorExperimentalAPI
 import io.mockk.every
@@ -133,3 +134,4 @@ private fun DatabaseInterface.nyttVedtak(fnr: String = (0..10).joinToString("") 
         ).serialisertTilString(),
         ferdigVarslet = false
     )
+*/

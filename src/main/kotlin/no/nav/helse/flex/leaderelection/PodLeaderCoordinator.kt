@@ -1,4 +1,5 @@
 package no.nav.helse.flex.leaderelection
+/*
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -72,3 +73,4 @@ class PodLeaderCoordinator(
 
     private data class Leader(val name: String)
 }
+*/

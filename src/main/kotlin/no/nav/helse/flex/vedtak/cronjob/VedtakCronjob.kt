@@ -1,4 +1,5 @@
 package no.nav.helse.flex.vedtak.cronjob
+/*
 
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.coroutineScope
@@ -124,3 +125,4 @@ private fun ZonedDateTime.next(atTime: LocalTime): Long {
         this.withHour(atTime.hour).withMinute(atTime.minute).withSecond(atTime.second).toInstant().toEpochMilli()
     }
 }
+*/

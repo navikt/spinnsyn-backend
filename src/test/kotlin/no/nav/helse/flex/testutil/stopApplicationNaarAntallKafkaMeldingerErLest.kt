@@ -1,4 +1,5 @@
 package no.nav.helse.flex.testutil
+/*
 
 import io.mockk.every
 import no.nav.helse.flex.application.ApplicationState
@@ -36,3 +37,4 @@ fun stopApplicationNårAntallKafkaPollErGjort(
         cr
     }
 }
+*/

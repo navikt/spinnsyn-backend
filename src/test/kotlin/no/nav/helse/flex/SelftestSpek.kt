@@ -1,4 +1,5 @@
 package no.nav.helse.flex
+/*
 
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -58,3 +59,4 @@ object SelftestSpek : Spek({
         }
     }
 })
+*/

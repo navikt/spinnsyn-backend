@@ -5,15 +5,6 @@ class Environment(
     val applicationName: String = getEnvVar("NAIS_APP_NAME"),
     val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
     val syfotilgangskontrollUrl: String = getEnvVar("SYFOTILGANGSKONTROLL_URL"),
-    val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-    val spinnsynBackendDbHost: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_HOST"),
-    val spinnsynBackendDbPort: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PORT"),
-    val spinnsynBackendDbName: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_DATABASE"),
-    val spinnsynBackendDbUsername: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_USERNAME"),
-    val spinnsynBackendDbPassword: String = getEnvVar("NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PASSWORD"),
-    val spinnsynFrontendUrl: String = getEnvVar("SPINNSYN_FRONTEND_URL"),
-    val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
-    val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
     val loginserviceIdportenDiscoveryUrl: String = getEnvVar("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"),
     val loginserviceIdportenAudience: List<String> = getEnvVar("LOGINSERVICE_IDPORTEN_AUDIENCE").split(","),
     val veilederWellKnownUri: String = getEnvVar("VEILEDER_WELLKNOWN_URI"),
@@ -24,11 +15,6 @@ class Environment(
     val kafkaSecurityProtocol: String = getEnvVar("KAFKA_SECURITY_PROTOCOL", "SASL_SSL"),
     val kafkaSchemaRegistryUrl: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL")
 ) {
-
-    fun jdbcUrl(): String {
-        return "jdbc:postgresql://$spinnsynBackendDbHost:$spinnsynBackendDbPort/$spinnsynBackendDbName"
-    }
-
     fun isProd(): Boolean {
         return cluster == "prod-gcp"
     }

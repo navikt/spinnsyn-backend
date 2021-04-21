@@ -1,4 +1,5 @@
 package no.nav.helse.flex.vedtak.api
+/*
 
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -73,6 +74,7 @@ fun Route.registerVedtakMockApi(vedtakService: VedtakService, env: Environment, 
     }
 }
 
+*/
 /**
  * Receive the request as String.
  * If there is no Content-Type in the HTTP header specified use ISO_8859_1 as default charset, see https://www.w3.org/International/articles/http-charset/index#charset.
@@ -80,7 +82,8 @@ fun Route.registerVedtakMockApi(vedtakService: VedtakService, env: Environment, 
  *
  * https://github.com/ktorio/ktor/issues/384
  *
- */
+ *//*
+
 private suspend fun ApplicationCall.receiveTextWithCorrectEncoding(): String {
     fun ContentType.defaultCharset(): Charset = when (this) {
         ContentType.Application.Json -> Charsets.UTF_8
@@ -91,3 +94,4 @@ private suspend fun ApplicationCall.receiveTextWithCorrectEncoding(): String {
     val suitableCharset = contentType.charset() ?: contentType.defaultCharset()
     return receiveStream().bufferedReader(charset = suitableCharset).readText()
 }
+*/

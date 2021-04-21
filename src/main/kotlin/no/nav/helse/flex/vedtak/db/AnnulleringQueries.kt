@@ -1,4 +1,5 @@
 package no.nav.helse.flex.vedtak.db
+/*
 
 import no.nav.helse.flex.db.DatabaseInterface
 import no.nav.helse.flex.db.toList
@@ -31,7 +32,7 @@ fun DatabaseInterface.finnAnnullering(fnr: String, id: String): Annullering? =
             """
             SELECT id, fnr, annullering, opprettet
             FROM annullering
-            WHERE id = ? 
+            WHERE id = ?
             AND fnr = ?;
             """
         ).use {
@@ -48,7 +49,7 @@ fun DatabaseInterface.opprettAnnullering(id: UUID, fnr: String, annullering: Str
     connection.use { connection ->
         connection.prepareStatement(
             """
-            INSERT INTO ANNULLERING(id, fnr, annullering, opprettet) VALUES (?, ?, ?, ?) 
+            INSERT INTO ANNULLERING(id, fnr, annullering, opprettet) VALUES (?, ?, ?, ?)
         """
         ).use {
             it.setString(1, id.toString())
@@ -93,3 +94,4 @@ private fun ResultSet.toAnnullering(): Annullering =
         annullering = getString("annullering").tilAnnulleringDto(),
         opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant()
     )
+*/

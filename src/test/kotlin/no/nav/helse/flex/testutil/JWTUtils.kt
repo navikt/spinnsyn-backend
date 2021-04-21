@@ -1,4 +1,5 @@
 package no.nav.helse.flex.testutil
+/*
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -16,8 +17,10 @@ import java.util.UUID
 
 const val keyId = "localhost-signer"
 
+*/
 /* Utsteder en Bearer-token (En slik vi ber AzureAd om). OBS: Det er viktig at KeyId matcher kid i jwkset.json
- */
+ *//*
+
 fun generateJWT(
     consumerClientId: String = UUID.randomUUID().toString(),
     audience: String,
@@ -67,3 +70,4 @@ private fun getJWKSet(): JWKSet {
 }
 
 fun getFileAsString(filePath: String) = String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8)
+*/

@@ -1,4 +1,5 @@
 package no.nav.helse.flex.cronjob
+/*
 
 import io.ktor.util.KtorExperimentalAPI
 import io.mockk.Runs
@@ -129,3 +130,4 @@ private fun DatabaseInterface.nyttVedtak(
         ).serialisertTilString()
     )
 }
+*/

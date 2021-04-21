@@ -1,4 +1,5 @@
 package no.nav.helse.flex.testutil
+/*
 
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 
@@ -35,3 +36,4 @@ fun VedtakDto.somUtbetalingTilBruker(fnr: String = "01010112345", orgnummer: Str
         )
     )
 }
+*/

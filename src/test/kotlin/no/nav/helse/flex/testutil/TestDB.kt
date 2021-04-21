@@ -1,4 +1,5 @@
 package no.nav.helse.flex.testutil
+/*
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.helse.flex.db.DatabaseInterface
@@ -31,3 +32,4 @@ class TestDB : DatabaseInterface {
 fun getRandomPort() = ServerSocket(0).use {
     it.localPort
 }
+*/

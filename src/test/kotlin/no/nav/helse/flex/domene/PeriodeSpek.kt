@@ -1,4 +1,5 @@
 package no.nav.helse.flex.domene
+/*
 
 import no.nav.helse.flex.vedtak.domene.Periode
 import org.amshove.kluent.shouldEqual
@@ -40,3 +41,4 @@ fun Pair<String, String>.periode(): Periode {
     val tom = this.second.split(".").map { Integer.parseInt(it) }
     return Periode(LocalDate.of(2020, fom.last(), fom.first()), LocalDate.of(2020, tom.last(), tom.first()))
 }
+*/

@@ -1,4 +1,5 @@
 package no.nav.helse.flex.varsling
+/*
 
 import io.ktor.util.KtorExperimentalAPI
 import io.mockk.Runs
@@ -166,3 +167,4 @@ private fun DatabaseInterface.nyttVedtak(
         ferdigVarslet = false
     )
 }
+*/

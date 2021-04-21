@@ -1,4 +1,5 @@
 package no.nav.helse.flex.kafka
+/*
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -25,3 +26,4 @@ class JacksonKafkaSerializer<T : Any> : Serializer<T> {
 
     override fun close() {}
 }
+*/

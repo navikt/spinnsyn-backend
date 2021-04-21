@@ -1,4 +1,5 @@
 package no.nav.helse.flex.util
+/*
 
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
@@ -72,3 +73,4 @@ fun <K, V> skapBrukernotifikasjonKafkaProducer(env: Environment): KafkaProducer<
             AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to env.kafkaSchemaRegistryUrl
         )
     )
+*/

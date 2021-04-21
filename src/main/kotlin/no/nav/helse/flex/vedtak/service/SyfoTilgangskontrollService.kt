@@ -1,4 +1,5 @@
 package no.nav.helse.flex.vedtak.service
+/*
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -51,3 +52,4 @@ data class Tilgang(
     val harTilgang: Boolean,
     val begrunnelse: String?
 )
+*/

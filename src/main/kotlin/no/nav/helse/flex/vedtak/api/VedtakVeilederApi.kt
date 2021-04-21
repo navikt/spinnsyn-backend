@@ -1,4 +1,5 @@
 package no.nav.helse.flex.vedtak.api
+/*
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -54,3 +55,4 @@ fun Route.registerVeilederVedtakApi(
         }
     }
 }
+*/

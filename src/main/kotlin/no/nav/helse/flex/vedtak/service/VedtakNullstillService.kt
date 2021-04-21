@@ -1,4 +1,5 @@
 package no.nav.helse.flex.vedtak.service
+/*
 
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.brukernotifikasjon.schemas.Done
@@ -38,3 +39,4 @@ class VedtakNullstillService(
         return vedtak.size
     }
 }
+*/

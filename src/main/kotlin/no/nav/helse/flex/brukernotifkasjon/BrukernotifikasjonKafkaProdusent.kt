@@ -1,5 +1,5 @@
 package no.nav.helse.flex.brukernotifkasjon
-
+/*
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
@@ -38,3 +38,4 @@ fun skapBrukernotifikasjonKafkaProdusent(env: Environment): BrukernotifikasjonKa
         kafkaproducerDone = skapBrukernotifikasjonKafkaProducer(env)
     )
 }
+*/
