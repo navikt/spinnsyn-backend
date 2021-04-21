@@ -1,9 +1,13 @@
 package no.nav.helse.flex.vedtak.service
 
 import no.nav.helse.flex.logger
+import no.nav.helse.flex.vedtak.db.Annullering
+import no.nav.helse.flex.vedtak.db.AnnulleringDAO
 import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.VedtakDAO
+import no.nav.helse.flex.vedtak.domene.Periode
 import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
@@ -15,7 +19,8 @@ import java.util.*
 
 @Service
 class VedtakService(
-    private val vedtakDAO: VedtakDAO
+    private val vedtakDAO: VedtakDAO,
+    private val annulleringDAO: AnnulleringDAO,
 ) {
     private val log = logger()
 
@@ -27,9 +32,7 @@ class VedtakService(
                 vedtak = cr.value(),
                 opprettet = Instant.now()
             )
-        }
-        /* // TODO: Håndter annullering
-        else if (cr.erAnnullering()) {
+        } else if (cr.erAnnullering()) {
             mottaAnnullering(
                 id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
                 fnr = cr.key(),
@@ -37,18 +40,12 @@ class VedtakService(
                 opprettet = Instant.now()
             )
         }
-         */
     }
 
     fun hentVedtak(fnr: String): List<RSVedtak> {
-
-        return vedtakDAO.finnVedtak(fnr).map { it.tilRSVedtak() }
-
-        // TODO fiks annulleriong
-    /*     val annulleringer = database.finnAnnullering(fnr)
-        return database.finnVedtak(fnr)
+        val annulleringer = annulleringDAO.finnAnnullering(fnr)
+        return vedtakDAO.finnVedtak(fnr)
             .map { it.tilRSVedtak(annulleringer.forVedtak(it)) }
-            */
     }
 
     fun lesVedtak(fnr: String, vedtaksId: String): Boolean {
@@ -110,7 +107,7 @@ class VedtakService(
         }
          */
     }
-/*
+
     fun mottaAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant) {
         val annulleringSerialisert = try {
             annullering.tilAnnulleringDto()
@@ -119,7 +116,7 @@ class VedtakService(
             return
         }
 
-        vedtakDAO.finnAnnullering(fnr)
+        annulleringDAO.finnAnnullering(fnr)
             .firstOrNull { it.annullering == annulleringSerialisert }
             ?.let {
                 if (it.id == id.toString()) {
@@ -130,18 +127,18 @@ class VedtakService(
                 return
             }
 
-        database.opprettAnnullering(
+        annulleringDAO.opprettAnnullering(
             id = id,
             fnr = fnr,
             annullering = annullering,
             opprettet = opprettet
         )
 
-        MOTTATT_ANNULLERING_VEDTAK.inc()
+        // MOTTATT_ANNULLERING_VEDTAK.inc()
 
         log.info("Opprettet annullering med spinnsyn databaseid $id")
     }
-
+/*
     fun hentVedtak(fnr: String, vedtaksId: String): RSVedtak? {
         val annulleringer = database.finnAnnullering(fnr)
         val vedtak = database.finnVedtak(fnr)
@@ -152,24 +149,6 @@ class VedtakService(
     fun eierVedtak(fnr: String, vedtaksId: String) =
         database.eierVedtak(fnr, vedtaksId)
 
-    fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
-        this.any {
-            vedtak.matcherAnnullering(it)
-        }
-
-    fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
-        val vedtaksperiode = Periode(this.vedtak.fom, this.vedtak.tom)
-        val annulleringsperiode = Periode(
-            annullering.annullering.fom ?: return false,
-            annullering.annullering.tom
-                ?: return false
-        )
-        return vedtaksperiode.overlapper(annulleringsperiode) &&
-            (
-                this.vedtak.organisasjonsnummer == annullering.annullering.orgnummer ||
-                    this.vedtak.utbetalinger.any { it.mottaker == annullering.annullering.orgnummer }
-                )
-    }
 */
 }
 
@@ -191,6 +170,25 @@ fun Vedtak.tilRSVedtak(annullering: Boolean = false): RSVedtak {
         opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
         annullert = annullering
     )
+}
+
+fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
+    this.any {
+        vedtak.matcherAnnullering(it)
+    }
+
+fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
+    val vedtaksperiode = Periode(this.vedtak.fom, this.vedtak.tom)
+    val annulleringsperiode = Periode(
+        annullering.annullering.fom ?: return false,
+        annullering.annullering.tom
+            ?: return false
+    )
+    return vedtaksperiode.overlapper(annulleringsperiode) &&
+        (
+            this.vedtak.organisasjonsnummer == annullering.annullering.orgnummer ||
+                this.vedtak.utbetalinger.any { it.mottaker == annullering.annullering.orgnummer }
+            )
 }
 
 private fun ConsumerRecord<String, String>.erVedtak(): Boolean {

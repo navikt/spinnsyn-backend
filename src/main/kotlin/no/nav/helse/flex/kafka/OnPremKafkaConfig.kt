@@ -44,11 +44,14 @@ class OnPremKafkaConfig(
     }
 
     @Bean
-    fun onPremKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun onPremKafkaListenerContainerFactory(
+        kafkaErrorHandler: KafkaErrorHandler
+    ): ConcurrentKafkaListenerContainerFactory<String, String> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = DefaultKafkaConsumerFactory(skapKafkaConsumerConfig())
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         factory.containerProperties.authorizationExceptionRetryInterval = Duration.ofSeconds(2)
+        factory.setErrorHandler(kafkaErrorHandler)
 
         return factory
     }

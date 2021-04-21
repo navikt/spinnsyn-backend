@@ -1,31 +1,56 @@
 package no.nav.helse.flex.vedtak.db
-/*
 
-import no.nav.helse.flex.db.DatabaseInterface
-import no.nav.helse.flex.db.toList
 import no.nav.helse.flex.vedtak.domene.AnnulleringDto
 import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
 import org.postgresql.util.PGobject
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
-fun DatabaseInterface.finnAnnullering(fnr: String): List<Annullering> =
-    connection.use { connection ->
-        return connection.prepareStatement(
+@Transactional
+@Repository
+class AnnulleringDAO(
+    private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+) {
+
+    fun finnAnnullering(fnr: String): List<Annullering> {
+        return namedParameterJdbcTemplate.query(
             """
             SELECT id, fnr, annullering, opprettet
             FROM annullering
-            WHERE fnr = ?;
-            """
-        ).use {
-            it.setString(1, fnr)
-            it.executeQuery().toList { toAnnullering() }
+            WHERE fnr = :fnr
+            """,
+            MapSqlParameterSource()
+                .addValue("fnr", fnr)
+        ) { resultSet, _ ->
+            resultSet.toAnnullering()
         }
     }
 
+    fun opprettAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant) {
+        val annulleringJSON = PGobject().also { it.type = "json"; it.value = annullering }
+
+        namedParameterJdbcTemplate.update(
+            """
+            INSERT INTO ANNULLERING(id, fnr, annullering, opprettet)
+            VALUES (:id, :fnr, :annullering, :opprettet)
+        """,
+            MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("fnr", fnr)
+                .addValue("annullering", annulleringJSON)
+                .addValue("opprettet", Timestamp.from(opprettet))
+        )
+    }
+}
+
+/*
 fun DatabaseInterface.finnAnnullering(fnr: String, id: String): Annullering? =
     connection.use { connection ->
         return connection.prepareStatement(
@@ -44,27 +69,6 @@ fun DatabaseInterface.finnAnnullering(fnr: String, id: String): Annullering? =
         }
     }
 
-fun DatabaseInterface.opprettAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant): Annullering {
-    finnAnnullering(id = id.toString(), fnr = fnr)?.let { return it }
-    connection.use { connection ->
-        connection.prepareStatement(
-            """
-            INSERT INTO ANNULLERING(id, fnr, annullering, opprettet) VALUES (?, ?, ?, ?)
-        """
-        ).use {
-            it.setString(1, id.toString())
-            it.setString(2, fnr)
-            it.setObject(3, PGobject().also { it.type = "json"; it.value = annullering })
-            it.setTimestamp(4, Timestamp.from(opprettet))
-
-            it.executeUpdate()
-        }
-
-        connection.commit()
-        return Annullering(id = id.toString(), fnr = fnr, annullering = annullering.tilAnnulleringDto(), opprettet = opprettet)
-    }
-}
-
 fun DatabaseInterface.slettAnnulleringer(fnr: String) {
     connection.use { connection ->
         connection.prepareStatement(
@@ -79,6 +83,7 @@ fun DatabaseInterface.slettAnnulleringer(fnr: String) {
         connection.commit()
     }
 }
+ */
 
 data class Annullering(
     val id: String,
@@ -94,4 +99,3 @@ private fun ResultSet.toAnnullering(): Annullering =
         annullering = getString("annullering").tilAnnulleringDto(),
         opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant()
     )
-*/

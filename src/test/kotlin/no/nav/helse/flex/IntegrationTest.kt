@@ -4,6 +4,7 @@ import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.vedtak.db.VedtakDAO
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import org.amshove.kluent.`should be`
+import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -31,6 +32,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
     lateinit var vedtakDAO: VedtakDAO
 
     val fnr = "123"
+    val fnr2 = "101001001"
     val automatiskBehandletVedtak = VedtakDto(
         fom = LocalDate.now(),
         tom = LocalDate.now(),
@@ -97,5 +99,11 @@ class IntegrationTest : AbstractContainerBaseTest() {
                 .header("Authorization", "Bearer ${jwt(fnr)}")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNotFound)
+    }
+
+    @Test
+    @Order(6)
+    fun `Får ikke opp andre personers vedtak`() {
+        hentVedtak(fnr2).shouldBeEmpty()
     }
 }
