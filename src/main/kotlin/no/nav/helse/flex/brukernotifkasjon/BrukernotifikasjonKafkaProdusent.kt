@@ -36,4 +36,3 @@ class BrukernotifikasjonKafkaProdusent(
 
 const val OPPGAVE_TOPIC = "aapen-brukernotifikasjon-nyOppgave-v1"
 const val DONE_TOPIC = "aapen-brukernotifikasjon-done-v1"
-

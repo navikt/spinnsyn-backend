@@ -80,7 +80,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         oppgave.getTekst() shouldBeEqualTo "Sykepengene dine er beregnet - se resultatet"
         oppgave.getLink() shouldBeEqualTo "blah/vedtak/$id"
         oppgave.getGrupperingsId() shouldBeEqualTo id
-
+        oppgave.getEksternVarsling() shouldBeEqualTo true
     }
 
     @Test
@@ -102,6 +102,18 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
         val oppdatertVedtak = hentVedtak(fnr)
         oppdatertVedtak.first().lest shouldBeEqualTo true
+
+        val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
+        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
+        dones.shouldHaveSize(1)
+
+        val nokkel = dones[0].key()
+        nokkel.getEventId() shouldBeEqualTo vedtaksId
+        nokkel.getSystembruker() shouldBeEqualTo systembruker
+
+        val done = dones[0].value()
+        done.getFodselsnummer() shouldBeEqualTo fnr
+        done.getGrupperingsId() shouldBeEqualTo vedtaksId
     }
 
     @Test
@@ -111,6 +123,8 @@ class IntegrationTest : AbstractContainerBaseTest() {
         val bleLest = lesVedtak(fnr, vedtaksId)
 
         bleLest shouldBeEqualTo "Vedtak $vedtaksId er allerede lest"
+
+        doneKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test

@@ -10,7 +10,7 @@ import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
-import org.awaitility.Awaitility
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
@@ -82,9 +82,11 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
             )
         ).get()
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
+        await().atMost(5, TimeUnit.SECONDS).until {
             vedtakDAO.finnVedtak(fnr).isNotEmpty()
         }
+
+        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
     }
 
     @Test
@@ -108,9 +110,10 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
             )
         ).get()
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
+        await().atMost(5, TimeUnit.SECONDS).until {
             annulleringDAO.finnAnnullering(fnr).isNotEmpty()
         }
+        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
@@ -134,7 +137,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
             )
         ).get()
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
+        await().atMost(5, TimeUnit.SECONDS).until {
             annulleringDAO.finnAnnullering(fnr).size == 2
         }
     }
@@ -160,9 +163,10 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
             )
         ).get()
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
+        await().atMost(5, TimeUnit.SECONDS).until {
             vedtakDAO.finnVedtak(fnr).size == 2
         }
+        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
     }
 
     @Test
@@ -190,8 +194,9 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
             )
         ).get()
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
+        await().atMost(5, TimeUnit.SECONDS).until {
             vedtakDAO.finnVedtak(fnr).size == 3
         }
+        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
     }
 }

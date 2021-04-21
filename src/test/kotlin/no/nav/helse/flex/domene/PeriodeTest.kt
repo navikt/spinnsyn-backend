@@ -1,6 +1,5 @@
 package no.nav.helse.flex.domene
 
-
 import no.nav.helse.flex.vedtak.domene.Periode
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
@@ -23,7 +22,6 @@ class PeriodeTest {
         første.overlapper(første) shouldBeEqualTo true
     }
 
-
     @Test
     fun `0101 0101 og 0201 0201 overlapper ikke`() {
         val første = ("01.01" to "01.01").periode()
@@ -31,7 +29,6 @@ class PeriodeTest {
         første.overlapper(andre) shouldBeEqualTo false
         andre.overlapper(første) shouldBeEqualTo false
     }
-
 
     @Test
     fun `0101 0201 og 0201 0301 overlapper`() {
@@ -41,7 +38,6 @@ class PeriodeTest {
         andre.overlapper(første) shouldBeEqualTo true
     }
 }
-
 
 fun Pair<String, String>.periode(): Periode {
     val fom = this.first.split(".").map { Integer.parseInt(it) }
