@@ -117,7 +117,8 @@ class VedtakService(
                 id.toString(),
                 "Sykepengene dine er beregnet - se resultatet",
                 "${environment.spinnsynFrontendUrl}/vedtak/$id",
-                4
+                4,
+                true
             )
         )
 

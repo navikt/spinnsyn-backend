@@ -35,14 +35,15 @@ fun DatabaseInterface.lesVedtak(fnr: String, vedtaksId: String): Boolean =
         return it.lesVedtak(fnr, vedtaksId)
     }
 
-fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant): Vedtak =
+fun DatabaseInterface.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant, ferdigVarslet: Boolean = true): Vedtak =
     connection.use {
         return it.opprettVedtak(
             id = id,
             vedtak = vedtak,
             fnr = fnr,
             lest = lest,
-            opprettet = opprettet
+            opprettet = opprettet,
+            ferdigVarslet = ferdigVarslet,
         )
     }
 
@@ -79,11 +80,12 @@ fun DatabaseInterface.slettVedtak(vedtakId: String, fnr: String) {
     }
 }
 
-private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant): Vedtak {
+private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest: Boolean, opprettet: Instant, ferdigVarslet: Boolean): Vedtak {
+    val nå = if (ferdigVarslet) Timestamp.from(Instant.now()) else null
 
     this.prepareStatement(
         """
-            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, lest) VALUES (?, ?, ?, ?, ?) 
+            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, lest, varslet, revarslet) VALUES (?, ?, ?, ?, ?, ?, ?) 
         """
     ).use {
         it.setString(1, id.toString())
@@ -95,6 +97,8 @@ private fun Connection.opprettVedtak(id: UUID, vedtak: String, fnr: String, lest
         } else {
             it.setTimestamp(5, null)
         }
+        it.setTimestamp(6, nå)
+        it.setTimestamp(7, nå)
 
         it.executeUpdate()
     }

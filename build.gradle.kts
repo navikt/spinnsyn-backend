@@ -23,7 +23,7 @@ val confluentVersion = "6.1.0"
 val postgresVersion = "42.2.18"
 val flywayVersion = "7.5.2"
 val hikariVersion = "4.0.3"
-val brukernotifikasjonAvroVersion = "1.2020.08.13-13.50-3b6ca1881161"
+val brukernotifikasjonAvroVersion = "1.2021.01.18-11.12-b9c8c40b98d1"
 
 val ktlint by configurations.creating
 
