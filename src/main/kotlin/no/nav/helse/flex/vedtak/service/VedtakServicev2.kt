@@ -1,5 +1,9 @@
 package no.nav.helse.flex.vedtak.service
 
+import no.nav.brukernotifikasjon.schemas.Done
+import no.nav.brukernotifikasjon.schemas.Nokkel
+import no.nav.brukernotifikasjon.schemas.Oppgave
+import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.vedtak.db.Annullering
 import no.nav.helse.flex.vedtak.db.AnnulleringDAO
@@ -10,6 +14,7 @@ import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
@@ -21,6 +26,9 @@ import java.util.*
 class VedtakService(
     private val vedtakDAO: VedtakDAO,
     private val annulleringDAO: AnnulleringDAO,
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
+    @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
+    @Value("\${spinnsyn-frontend.url}") private val spinnsynFrontendUrl: String,
 ) {
     private val log = logger()
 
@@ -51,12 +59,10 @@ class VedtakService(
     fun lesVedtak(fnr: String, vedtaksId: String): Boolean {
         val bleLest = vedtakDAO.lesVedtak(fnr, vedtaksId)
         if (bleLest) {
-            /*  // TODO: Fix brukernotifikasjonKafkaProdusent
             brukernotifikasjonKafkaProdusent.sendDonemelding(
-                Nokkel(environment.serviceuserUsername, vedtaksId),
+                Nokkel(serviceuserUsername, vedtaksId),
                 Done(Instant.now().toEpochMilli(), fnr, vedtaksId)
             )
-             */
         }
         return bleLest
     }
@@ -85,18 +91,20 @@ class VedtakService(
 
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
 
-        /* // TODO: fix brukernotifikasjonKafkaProdusent
         brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(
-            Nokkel(environment.serviceuserUsername, id.toString()),
+            Nokkel(serviceuserUsername, id.toString()),
             Oppgave(
                 vedtaket.opprettet.toEpochMilli(),
                 fnr,
                 id.toString(),
                 "Sykepengene dine er beregnet - se resultatet",
-                "${environment.spinnsynFrontendUrl}/vedtak/$id",
-                4
+                "${spinnsynFrontendUrl}/vedtak/$id",
+                4,
+                true
             )
         )
+
+        /*
 
         MOTTATT_VEDTAK.inc()
 

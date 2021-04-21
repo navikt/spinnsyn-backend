@@ -1,10 +1,19 @@
 package no.nav.helse.flex
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.brukernotifikasjon.schemas.Done
+import no.nav.brukernotifikasjon.schemas.Nokkel
+import no.nav.brukernotifikasjon.schemas.Oppgave
+import no.nav.helse.flex.brukernotifkasjon.DONE_TOPIC
+import no.nav.helse.flex.brukernotifkasjon.OPPGAVE_TOPIC
 import no.nav.helse.flex.vedtak.service.RSVedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.amshove.kluent.shouldBeEmpty
+import org.apache.kafka.clients.consumer.Consumer
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -52,6 +61,31 @@ abstract class AbstractContainerBaseTest {
         ).andExpect(status().isOk).andReturn().response.contentAsString
 
         return json
+    }
+
+    @Autowired
+    lateinit var oppgaveKafkaConsumer: Consumer<Nokkel, Oppgave>
+
+    @Autowired
+    lateinit var doneKafkaConsumer: Consumer<Nokkel, Done>
+
+    @AfterAll
+    fun `Vi leser oppgave kafka topicet og feil hvis noe finnes og slik at subklassetestene leser alt`() {
+        oppgaveKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
+    }
+
+    @AfterAll
+    fun `Vi leser done kafka topicet og feil hvis noe finnes og slik at subklassetestene leser alt`() {
+        doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
+    }
+
+    @BeforeAll
+    fun `Vi leser oppgave og done kafka topicet og feiler om noe eksisterer`() {
+        oppgaveKafkaConsumer.subscribeHvisIkkeSubscribed(OPPGAVE_TOPIC)
+        doneKafkaConsumer.subscribeHvisIkkeSubscribed(DONE_TOPIC)
+
+        oppgaveKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
+        doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
     }
 
     companion object {

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -30,6 +31,8 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var vedtakDAO: VedtakDAO
+
+    @Value("\${on-prem-kafka.username}") lateinit var systembruker: String
 
     val fnr = "123"
     val fnr2 = "101001001"
@@ -59,6 +62,25 @@ class IntegrationTest : AbstractContainerBaseTest() {
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             vedtakDAO.finnVedtak(fnr).isNotEmpty()
         }
+
+        val id = vedtakDAO.finnVedtak(fnr).first().id
+
+        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+        doneKafkaConsumer.ventPåRecords(antall = 0)
+
+        oppgaver.shouldHaveSize(1)
+
+        val nokkel = oppgaver[0].key()
+        nokkel.getSystembruker() shouldBeEqualTo systembruker
+
+        val oppgave = oppgaver[0].value()
+
+        oppgave.getFodselsnummer() shouldBeEqualTo fnr
+        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
+        oppgave.getTekst() shouldBeEqualTo "Sykepengene dine er beregnet - se resultatet"
+        oppgave.getLink() shouldBeEqualTo "blah/vedtak/$id"
+        oppgave.getGrupperingsId() shouldBeEqualTo id
+
     }
 
     @Test

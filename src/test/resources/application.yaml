@@ -12,9 +12,12 @@ on-prem-kafka:
   username: AzureDiamond
   password: hunter2
   auto-offset-reset: earliest
+  schema-registry-url: blah
 
 no.nav.security.jwt:
   issuer:
     loginservice:
       discoveryurl: http://localhost:${mock-oauth2-server.port}/loginservice/.well-known/openid-configuration
       accepted_audience: loginservice-client-id
+
+spinnsyn-frontend.url: blah

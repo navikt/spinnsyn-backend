@@ -13,6 +13,7 @@ spring:
     password: ${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PASSWORD}
 
 on-prem-kafka:
+  schema-registry-url: ${KAFKA_SCHEMA_REGISTRY_URL}
   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS_URL}
   security-protocol: SASL_SSL
   username: ${SERVICEUSER_USERNAME}
@@ -26,6 +27,8 @@ management:
     path-mapping.prometheus: /prometheus
 
 logging.config: "classpath:logback.xml"
+
+spinnsyn-frontend.url: ${SPINNSYN_FRONTEND_URL}
 
 no.nav.security.jwt:
   issuer:
