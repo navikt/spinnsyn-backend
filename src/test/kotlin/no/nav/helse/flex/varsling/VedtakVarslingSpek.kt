@@ -162,6 +162,7 @@ private fun DatabaseInterface.nyttVedtak(
             utbetalinger = emptyList(),
             dokumenter = emptyList(),
             automatiskBehandling = true
-        ).serialisertTilString()
+        ).serialisertTilString(),
+        ferdigVarslet = false
     )
 }

@@ -130,5 +130,6 @@ private fun DatabaseInterface.nyttVedtak(fnr: String = (0..10).joinToString("") 
             utbetalinger = emptyList(),
             dokumenter = emptyList(),
             automatiskBehandling = true
-        ).serialisertTilString()
+        ).serialisertTilString(),
+        ferdigVarslet = false
     )
