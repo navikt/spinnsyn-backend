@@ -43,10 +43,33 @@ abstract class AbstractContainerBaseTest {
 
     fun jwt(fnr: String) = server.token(subject = fnr)
 
+    fun veilederToken(uniqueName: String? = null): String {
+        val claims = mutableMapOf("acr" to "Level4")
+        if (uniqueName != null) {
+            claims["unique_name"] = uniqueName
+        }
+
+        return server.token(
+            subject = "veileder123",
+            issuerId = "veileder",
+            audience = "veileder-audience",
+            claims = claims
+        )
+    }
     fun hentVedtak(fnr: String): List<RSVedtak> {
         val json = mockMvc.perform(
             get("/api/v1/vedtak")
                 .header("Authorization", "Bearer ${jwt(fnr)}")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk).andReturn().response.contentAsString
+
+        return objectMapper.readValue(json)
+    }
+
+    fun hentVedtakSomVeileder(fnr: String, veilederToken: String): List<RSVedtak> {
+        val json = mockMvc.perform(
+            get("/api/v1/veileder/vedtak?fnr=$fnr")
+                .header("Authorization", "Bearer $veilederToken")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString
 

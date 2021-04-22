@@ -32,7 +32,8 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Autowired
     lateinit var vedtakDAO: VedtakDAO
 
-    @Value("\${on-prem-kafka.username}") lateinit var systembruker: String
+    @Value("\${on-prem-kafka.username}")
+    lateinit var systembruker: String
 
     val fnr = "123"
     val fnr2 = "101001001"
@@ -141,5 +142,14 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Order(6)
     fun `Får ikke opp andre personers vedtak`() {
         hentVedtak(fnr2).shouldBeEmpty()
+    }
+
+    @Test
+    @Order(7)
+    fun `En veileder kan hente vedtaket`() {
+        val vedtak = hentVedtakSomVeileder(fnr, veilederToken())
+
+        vedtak shouldHaveSize 1
+        vedtak.first().lest `should be` true
     }
 }

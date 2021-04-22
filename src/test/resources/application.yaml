@@ -19,5 +19,8 @@ no.nav.security.jwt:
     loginservice:
       discoveryurl: http://localhost:${mock-oauth2-server.port}/loginservice/.well-known/openid-configuration
       accepted_audience: loginservice-client-id
+    veileder:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/veileder/.well-known/openid-configuration
+      accepted_audience: veileder-audience
 
 spinnsyn-frontend.url: blah

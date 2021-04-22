@@ -35,3 +35,7 @@ no.nav.security.jwt:
     loginservice:
       discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
       accepted_audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
+    veileder:
+      discoveryurl: ${VEILEDER_WELLKNOWN_URI}
+      accepted_audience: ${VEILEDER_EXPECTED_AUDIENCE}
+
