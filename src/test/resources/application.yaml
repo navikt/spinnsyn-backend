@@ -24,3 +24,4 @@ no.nav.security.jwt:
       accepted_audience: veileder-audience
 
 spinnsyn-frontend.url: blah
+syfotilgangskontroll.url: http://syfotilgangskontroll

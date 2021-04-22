@@ -18,8 +18,11 @@ import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
+import org.springframework.test.web.client.MockRestServiceServer.createServer
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -31,6 +34,9 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var vedtakDAO: VedtakDAO
+
+    @Autowired
+    lateinit var restTemplate: RestTemplate
 
     @Value("\${on-prem-kafka.username}")
     lateinit var systembruker: String
@@ -86,11 +92,26 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(2)
-    fun `henter vedtak`() {
+    fun `vi henter vedtaket`() {
         val vedtak = hentVedtak(fnr)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
+    }
+
+    @Test
+    @Order(2)
+    fun `vi kan ikke hente vedtaket uten token`() {
+        mockMvc.perform(
+            get("/api/v1/vedtak")
+                .header("Authorization", "Bearer blabla")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnauthorized)
+
+        mockMvc.perform(
+            get("/api/v1/vedtak")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isUnauthorized)
     }
 
     @Test
@@ -146,10 +167,40 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(7)
-    fun `En veileder kan hente vedtaket`() {
-        val vedtak = hentVedtakSomVeileder(fnr, veilederToken())
+    fun `En veileder med tilgang kan hente vedtaket`() {
+
+        val mockSyfotilgangscontrollServer = createServer(restTemplate)
+        val veilederToken = veilederToken()
+        mockSyfotilgangscontrollServer.mockTilgangskontrollResponse(
+            tilgang = true,
+            fnr = fnr,
+            veilederToken = veilederToken
+        )
+        val vedtak = hentVedtakSomVeileder(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` true
+        mockSyfotilgangscontrollServer.verify()
+    }
+
+    @Test
+    @Order(8)
+    fun `En veileder uten tilgang kan ikke hente vedtaket`() {
+
+        val mockSyfotilgangscontrollServer = createServer(restTemplate)
+        val veilederToken = veilederToken()
+        mockSyfotilgangscontrollServer.mockTilgangskontrollResponse(
+            tilgang = false,
+            fnr = fnr,
+            veilederToken = veilederToken
+        )
+
+        mockMvc.perform(
+            get("/api/v1/veileder/vedtak?fnr=$fnr")
+                .header("Authorization", "Bearer $veilederToken")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isForbidden).andReturn()
+
+        mockSyfotilgangscontrollServer.verify()
     }
 }

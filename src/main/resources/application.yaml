@@ -29,6 +29,7 @@ management:
 logging.config: "classpath:logback.xml"
 
 spinnsyn-frontend.url: ${SPINNSYN_FRONTEND_URL}
+syfo-tilgangskontroll.url: ${SYFOTILGANGSKONTROLL_URL}
 
 no.nav.security.jwt:
   issuer:
