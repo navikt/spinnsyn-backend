@@ -7,7 +7,7 @@ group = "no.nav.helse.flex"
 version = "1.0.0"
 
 val coroutinesVersion = "1.4.2-native-mt"
-val jacksonVersion = "2.12.1"
+val jacksonVersion = "2.12.3"
 val postgresEmbeddedVersion = "0.13.3"
 val kluentVersion = "1.65"
 val ktorVersion = "1.5.1"
