@@ -16,7 +16,7 @@ val logstashEncoderVersion = "6.6"
 val mockkVersion = "1.10.0"
 val nimbusdsVersion = "9.5"
 val prometheusVersion = "0.10.0"
-val spekVersion = "2.0.15"
+val spekVersion = "2.0.16"
 val testContainerKafkaVersion = "1.15.2"
 val confluentVersion = "6.1.0"
 
