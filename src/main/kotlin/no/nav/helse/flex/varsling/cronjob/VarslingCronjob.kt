@@ -124,7 +124,7 @@ class VarslingCronjob(
         log.info("Schedulerer VarslingCronjob interval: $interval ms")
         delay(interval)
 
-        while (applicationState.alive) {
+        while (applicationState.ready) {
             val job = launch { run() }
             delay(interval)
             if (job.isActive) {

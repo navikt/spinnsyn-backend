@@ -19,19 +19,18 @@ object SelftestSpek : Spek({
             start()
             val applicationState = ApplicationState()
             applicationState.ready = true
-            applicationState.alive = true
             application.routing { registerNaisApi(applicationState) }
 
-            it("Returns ok on is_alive") {
-                with(handleRequest(HttpMethod.Get, "/is_alive")) {
+            it("Returns ok on internal/health") {
+                with(handleRequest(HttpMethod.Get, "/internal/health")) {
                     response.status() shouldEqual HttpStatusCode.OK
                     response.content shouldEqual "I'm alive! :)"
                 }
             }
-            it("Returns ok in is_ready") {
-                with(handleRequest(HttpMethod.Get, "/is_ready")) {
+            it("Returns ok in internal/health") {
+                with(handleRequest(HttpMethod.Get, "/internal/health")) {
                     response.status() shouldEqual HttpStatusCode.OK
-                    response.content shouldEqual "I'm ready! :)"
+                    response.content shouldEqual "I'm alive! :)"
                 }
             }
         }
@@ -41,18 +40,17 @@ object SelftestSpek : Spek({
             start()
             val applicationState = ApplicationState()
             applicationState.ready = false
-            applicationState.alive = false
             application.routing { registerNaisApi(applicationState) }
 
             it("Returns internal server error when liveness check fails") {
-                with(handleRequest(HttpMethod.Get, "/is_alive")) {
+                with(handleRequest(HttpMethod.Get, "/internal/health")) {
                     response.status() shouldEqual HttpStatusCode.InternalServerError
-                    response.content shouldEqual "I'm dead x_x"
+                    response.content shouldEqual "Please wait! I'm not ready :("
                 }
             }
 
             it("Returns internal server error when readyness check fails") {
-                with(handleRequest(HttpMethod.Get, "/is_ready")) {
+                with(handleRequest(HttpMethod.Get, "/internal/health")) {
                     response.status() shouldEqual HttpStatusCode.InternalServerError
                     response.content shouldEqual "Please wait! I'm not ready :("
                 }

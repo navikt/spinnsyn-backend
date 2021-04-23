@@ -114,7 +114,6 @@ object VedtakVerdikjedeSpek : Spek({
 
     beforeEachTest {
         setupEnvMock()
-        applicationState.alive = true
         applicationState.ready = true
     }
 
