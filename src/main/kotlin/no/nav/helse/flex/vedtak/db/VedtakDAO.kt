@@ -99,12 +99,3 @@ private fun ResultSet.toVedtak(): Vedtak =
         opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant()
     )
 
-private fun ResultSet.toInternVedtak(): InternVedtak =
-    InternVedtak(
-        id = getString("id"),
-        fnr = getString("fnr"),
-        lest = getObject("lest", OffsetDateTime::class.java)?.toInstant(),
-        opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant(),
-        varslet = getObject("varslet", OffsetDateTime::class.java)?.toInstant(),
-        revarslet = getObject("revarslet", OffsetDateTime::class.java)?.toInstant()
-    )

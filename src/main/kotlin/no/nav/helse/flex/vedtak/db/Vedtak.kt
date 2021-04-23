@@ -14,11 +14,3 @@ data class Vedtak(
     val opprettet: Instant
 )
 
-data class InternVedtak(
-    val id: String,
-    val fnr: String,
-    val lest: Instant?,
-    val opprettet: Instant,
-    val varslet: Instant?,
-    val revarslet: Instant?
-)
