@@ -137,7 +137,6 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
         doneKafkaConsumer.ventPåRecords(antall = 1)
     }
 
-
     @Test
     @Order(6)
     fun `Vi har nå ingen vedtak`() {

@@ -10,13 +10,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.Instant
 
-
 @Service
 class VedtakNullstillService(
     private val vedtakDAO: VedtakDAO,
     private val annulleringDAO: AnnulleringDAO,
     private val environmentToggles: EnvironmentToggles,
-
 
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
@@ -40,4 +38,3 @@ class VedtakNullstillService(
         return vedtak.size
     }
 }
-

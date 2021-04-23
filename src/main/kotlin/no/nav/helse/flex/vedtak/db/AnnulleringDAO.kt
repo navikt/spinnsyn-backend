@@ -59,8 +59,6 @@ class AnnulleringDAO(
                 .addValue("fnr", fnr)
         )
     }
-
-
 }
 
 data class Annullering(
