@@ -13,4 +13,3 @@ data class Vedtak(
     val vedtak: VedtakDto,
     val opprettet: Instant
 )
-

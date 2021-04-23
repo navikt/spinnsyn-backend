@@ -98,4 +98,3 @@ private fun ResultSet.toVedtak(): Vedtak =
         vedtak = getString("vedtak").tilVedtakDto(),
         opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant()
     )
-
