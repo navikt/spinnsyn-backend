@@ -32,7 +32,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Value("\${on-prem-kafka.username}")
     lateinit var systembruker: String
 
-    val fnr = "983475"
+    val fnr = "234232323"
     val fom = LocalDate.now().minusDays(7)
     val tom = LocalDate.now()
     val automatiskBehandletVedtak = VedtakDto(

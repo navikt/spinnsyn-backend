@@ -1,6 +1,5 @@
 package no.nav.helse.flex.kafka
 
-import no.nav.helse.flex.logger
 import no.nav.helse.flex.vedtak.service.VedtakService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
@@ -13,8 +12,6 @@ const val SPORBAR_TOPIC = "aapen-helse-sporbar"
 class HelseSporbarKafkaListener(
     private val vedtakService: VedtakService
 ) {
-
-    private val log = logger()
 
     @KafkaListener(
         topics = [SPORBAR_TOPIC],

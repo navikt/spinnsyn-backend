@@ -72,8 +72,7 @@ class VedtakService(
         val vedtakSerialisert = try {
             vedtak.tilVedtakDto()
         } catch (e: Exception) {
-            log.error("Kunne ikke deserialisere vedtak", e)
-            return
+            throw RuntimeException("Kunne ikke deserialisere vedtak", e)
         }
 
         vedtakDAO.finnVedtak(fnr)
@@ -120,8 +119,7 @@ class VedtakService(
         val annulleringSerialisert = try {
             annullering.tilAnnulleringDto()
         } catch (e: Exception) {
-            log.error("Kunne ikke deserialisere annullering", e)
-            return
+            throw RuntimeException("Kunne ikke deserialisere annulering", e)
         }
 
         annulleringDAO.finnAnnullering(fnr)
