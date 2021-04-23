@@ -25,3 +25,4 @@ no.nav.security.jwt:
 
 spinnsyn-frontend.url: blah
 syfotilgangskontroll.url: http://syfotilgangskontroll
+nais.cluster: test

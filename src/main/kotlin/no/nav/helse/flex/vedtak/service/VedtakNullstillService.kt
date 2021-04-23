@@ -1,42 +1,43 @@
 package no.nav.helse.flex.vedtak.service
-/*
 
-import io.ktor.util.KtorExperimentalAPI
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.helse.flex.Environment
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
-import no.nav.helse.flex.db.DatabaseInterface
-import no.nav.helse.flex.vedtak.db.finnVedtak
-import no.nav.helse.flex.vedtak.db.slettAnnulleringer
-import no.nav.helse.flex.vedtak.db.slettVedtak
-import java.lang.IllegalStateException
+import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.vedtak.db.AnnulleringDAO
+import no.nav.helse.flex.vedtak.db.VedtakDAO
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
 import java.time.Instant
 
-@KtorExperimentalAPI
-class VedtakNullstillService(
-    private val database: DatabaseInterface,
-    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
-    private val environment: Environment
-) {
 
+@Service
+class VedtakNullstillService(
+    private val vedtakDAO: VedtakDAO,
+    private val annulleringDAO: AnnulleringDAO,
+    private val environmentToggles: EnvironmentToggles,
+
+
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
+    @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
+) {
     fun nullstill(fnr: String): Int {
-        if (environment.isProd()) {
+        if (environmentToggles.isProduction()) {
             throw IllegalStateException("Kan ikke nullstille i produksjon")
         }
-        val vedtak = database.finnVedtak(fnr)
+        val vedtak = vedtakDAO.finnVedtak(fnr)
         vedtak.forEach {
             if (!it.lest) {
                 // Fjern brukernotifikasjonen
                 brukernotifikasjonKafkaProdusent.sendDonemelding(
-                    Nokkel(environment.serviceuserUsername, it.id),
+                    Nokkel(serviceuserUsername, it.id),
                     Done(Instant.now().toEpochMilli(), fnr, it.id)
                 )
             }
-            database.slettVedtak(vedtakId = it.id, fnr = fnr)
+            vedtakDAO.slettVedtak(vedtakId = it.id, fnr = fnr)
         }
-        database.slettAnnulleringer(fnr)
+        annulleringDAO.slettAnnulleringer(fnr)
         return vedtak.size
     }
 }
-*/
+

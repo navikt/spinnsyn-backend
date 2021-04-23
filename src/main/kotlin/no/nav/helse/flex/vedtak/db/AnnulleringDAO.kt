@@ -48,42 +48,20 @@ class AnnulleringDAO(
                 .addValue("opprettet", Timestamp.from(opprettet))
         )
     }
-}
 
-/*
-fun DatabaseInterface.finnAnnullering(fnr: String, id: String): Annullering? =
-    connection.use { connection ->
-        return connection.prepareStatement(
-            """
-            SELECT id, fnr, annullering, opprettet
-            FROM annullering
-            WHERE id = ?
-            AND fnr = ?;
-            """
-        ).use {
-            it.setString(1, id)
-            it.setString(2, fnr)
-            it.executeQuery()
-                .toList { toAnnullering() }
-                .firstOrNull()
-        }
-    }
-
-fun DatabaseInterface.slettAnnulleringer(fnr: String) {
-    connection.use { connection ->
-        connection.prepareStatement(
+    fun slettAnnulleringer(fnr: String) {
+        namedParameterJdbcTemplate.update(
             """
                 DELETE FROM ANNULLERING
-                WHERE fnr = ?;
-            """
-        ).use {
-            it.setString(1, fnr)
-            it.execute()
-        }
-        connection.commit()
+                WHERE fnr = :fnr;
+            """,
+            MapSqlParameterSource()
+                .addValue("fnr", fnr)
+        )
     }
+
+
 }
- */
 
 data class Annullering(
     val id: String,
