@@ -23,9 +23,12 @@ class VedtakTestdataController(
     val environmentToggles: EnvironmentToggles,
     val vedtakNullstillService: VedtakNullstillService,
 ) {
+
+    data class Melding(val melding: String) // Fordi flex-proxy trenger json
+
     @PostMapping("/vedtak/{fnr}", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun opprettVedtak(@PathVariable fnr: String, @RequestBody vedtak: String): String {
+    fun opprettVedtak(@PathVariable fnr: String, @RequestBody vedtak: String): Melding {
         if (environmentToggles.isProduction()) {
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
@@ -36,12 +39,12 @@ class VedtakTestdataController(
             vedtak = vedtak,
             opprettet = Instant.now()
         )
-        return "Vedtak med $vedtakId opprettet"
+        return Melding("Vedtak med $vedtakId opprettet")
     }
 
     @PostMapping("/annullering/{fnr}", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun opprettAnnullering(@PathVariable fnr: String, @RequestBody annullering: String): String {
+    fun opprettAnnullering(@PathVariable fnr: String, @RequestBody annullering: String): Melding {
         if (environmentToggles.isProduction()) {
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
@@ -52,16 +55,16 @@ class VedtakTestdataController(
             annullering = annullering,
             opprettet = Instant.now()
         )
-        return "Annullering med $annulleringId opprettet"
+        return Melding("Annullering med $annulleringId opprettet")
     }
 
     @DeleteMapping("/vedtak/{fnr}", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun slettVedtak(@PathVariable fnr: String): String {
+    fun slettVedtak(@PathVariable fnr: String): Melding {
         if (environmentToggles.isProduction()) {
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
         val antall = vedtakNullstillService.nullstill(fnr)
-        return "Slettet $antall"
+        return Melding("Slettet $antall")
     }
 }
