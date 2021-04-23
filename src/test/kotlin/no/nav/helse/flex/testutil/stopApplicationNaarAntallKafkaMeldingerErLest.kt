@@ -16,7 +16,6 @@ fun stopApplicationNårAntallKafkaMeldingerErLest(
         i -= cr.count()
         if (i <= 0) {
             applicationState.ready = false
-            applicationState.alive = false
         }
         cr
     }
@@ -33,7 +32,6 @@ fun stopApplicationNårAntallKafkaPollErGjort(
         i -= 1
         if (i <= 0) {
             applicationState.ready = false
-            applicationState.alive = false
         }
         cr
     }

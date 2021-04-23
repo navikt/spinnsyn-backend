@@ -45,7 +45,7 @@ class VedtakService(
     private val delayStart: Long = 10_000L
 ) {
     suspend fun start() {
-        while (applicationState.alive) {
+        while (applicationState.ready) {
             try {
                 run()
             } catch (ex: Exception) {

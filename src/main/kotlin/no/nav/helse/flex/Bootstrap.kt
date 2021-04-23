@@ -168,7 +168,6 @@ fun createListener(applicationState: ApplicationState, action: suspend Coroutine
         } catch (ex: Exception) {
             log.error("Noe gikk veldig galt, avslutter applikasjon: {}", ex.message)
         } finally {
-            applicationState.alive = false
             applicationState.ready = false
         }
     }

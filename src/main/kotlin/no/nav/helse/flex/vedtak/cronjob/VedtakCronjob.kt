@@ -72,7 +72,7 @@ class VedtakCronjob(
         log.info("Schedulerer VedtakCronjob start: $initialDelay ms, interval: $interval ms")
         delay(initialDelay)
 
-        while (applicationState.alive) {
+        while (applicationState.ready) {
             val job = launch { run() }
             delay(interval)
             if (job.isActive) {

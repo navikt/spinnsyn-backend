@@ -127,7 +127,6 @@ object Annullering : Spek({
 
     beforeEachTest {
         setupEnvMock()
-        applicationState.alive = true
         applicationState.ready = true
     }
 
