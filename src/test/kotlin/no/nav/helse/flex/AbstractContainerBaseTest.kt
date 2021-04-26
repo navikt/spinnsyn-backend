@@ -123,6 +123,7 @@ abstract class AbstractContainerBaseTest {
             KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.1.0")).also {
                 it.start()
                 System.setProperty("on-prem-kafka.bootstrap-servers", it.bootstrapServers)
+                System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
             }
         }
     }
