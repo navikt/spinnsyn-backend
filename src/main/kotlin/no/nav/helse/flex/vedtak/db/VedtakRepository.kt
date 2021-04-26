@@ -7,7 +7,9 @@ import org.springframework.stereotype.Repository
 import java.time.Instant
 
 @Repository
-interface VedtakRepository : CrudRepository<VedtakDbRecord, String>
+interface VedtakRepository : CrudRepository<VedtakDbRecord, String> {
+    fun findVedtakDbRecordsByFnr(fnr: String): List<VedtakDbRecord>
+}
 
 @Table("vedtak_v2")
 data class VedtakDbRecord(

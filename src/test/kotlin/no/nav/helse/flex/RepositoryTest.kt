@@ -16,7 +16,7 @@ class RepositoryTest : AbstractContainerBaseTest() {
     fun `Lagrer og oppdaterer vedtak`() {
         val vedtak = VedtakDbRecord(
             id = null,
-            fnr = "123",
+            fnr = "827364",
             vedtak = "test data",
             opprettet = Instant.now(),
             lest = null
