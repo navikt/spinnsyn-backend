@@ -7,8 +7,7 @@ import org.springframework.stereotype.Repository
 import java.time.Instant
 
 @Repository
-interface VedtakRepository : CrudRepository<VedtakDbRecord, String> {
-}
+interface VedtakRepository : CrudRepository<VedtakDbRecord, String>
 
 @Table("vedtak_v2")
 data class VedtakDbRecord(

@@ -11,10 +11,12 @@ class VedtakServiceV2(
     private val vedtakRepository: VedtakRepository,
 ) {
     fun handterMelding(cr: ConsumerRecord<String, String>) {
-        vedtakRepository.save(VedtakDbRecord(
-            fnr = cr.key(),
-            vedtak = cr.value(),
-            opprettet = Instant.now()
-        ))
+        vedtakRepository.save(
+            VedtakDbRecord(
+                fnr = cr.key(),
+                vedtak = cr.value(),
+                opprettet = Instant.now()
+            )
+        )
     }
 }

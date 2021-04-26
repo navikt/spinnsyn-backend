@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Instant
 
-class RepositoryTest: AbstractContainerBaseTest() {
+class RepositoryTest : AbstractContainerBaseTest() {
     @Autowired
     lateinit var vedtakRepository: VedtakRepository
 
