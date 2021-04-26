@@ -1,5 +1,6 @@
 package no.nav.helse.flex.vedtak.api
 
+import no.nav.helse.flex.metrikk.Metrikk
 import no.nav.helse.flex.vedtak.service.RSVedtak
 import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 class VedtakController(
     val vedtakService: VedtakService,
     val tokenValidationContextHolder: TokenValidationContextHolder,
+    val metrikk: Metrikk,
 ) {
 
     @GetMapping("/vedtak", produces = [APPLICATION_JSON_VALUE])
@@ -39,7 +41,7 @@ class VedtakController(
         }
 
         if (vedtakService.lesVedtak(fnr, vedtaksId)) {
-            // VEDTAK_LEST.inc()
+            metrikk.VEDTAK_LEST.increment()
             return "Leste vedtak $vedtaksId"
         } else {
             return "Vedtak $vedtaksId er allerede lest"

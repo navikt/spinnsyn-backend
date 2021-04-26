@@ -5,6 +5,7 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.logger
+import no.nav.helse.flex.metrikk.Metrikk
 import no.nav.helse.flex.vedtak.db.Annullering
 import no.nav.helse.flex.vedtak.db.AnnulleringDAO
 import no.nav.helse.flex.vedtak.db.Vedtak
@@ -27,6 +28,7 @@ class VedtakService(
     private val vedtakDAO: VedtakDAO,
     private val annulleringDAO: AnnulleringDAO,
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
+    private val metrikk: Metrikk,
     @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
     @Value("\${spinnsyn-frontend.url}") private val spinnsynFrontendUrl: String,
 ) {
@@ -103,16 +105,13 @@ class VedtakService(
             )
         )
 
-        /*
-
-        MOTTATT_VEDTAK.inc()
+        metrikk.MOTTATT_VEDTAK.increment()
 
         if (vedtakSerialisert.automatiskBehandling) {
-            MOTTATT_AUTOMATISK_VEDTAK.inc()
+            metrikk.MOTTATT_AUTOMATISK_VEDTAK.increment()
         } else {
-            MOTTATT_MANUELT_VEDTAK.inc()
+            metrikk.MOTTATT_MANUELT_VEDTAK.increment()
         }
-         */
     }
 
     fun mottaAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant) {
@@ -140,7 +139,7 @@ class VedtakService(
             opprettet = opprettet
         )
 
-        // MOTTATT_ANNULLERING_VEDTAK.inc()
+        metrikk.MOTTATT_ANNULLERING_VEDTAK.increment()
 
         log.info("Opprettet annullering med spinnsyn databaseid $id")
     }
