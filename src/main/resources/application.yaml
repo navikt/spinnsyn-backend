@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  main.banner-mode: 'off'
+  profiles:
+    active: default
+  flyway:
+    enabled: true
+  datasource:
+    url: "jdbc:postgresql://${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_HOST}:${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PORT}/${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_DATABASE}"
+    username: ${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_USERNAME}
+    password: ${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PASSWORD}
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 3
+
+on-prem-kafka:
+  schema-registry-url: ${KAFKA_SCHEMA_REGISTRY_URL}
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS_URL}
+  security-protocol: SASL_SSL
+  username: ${SERVICEUSER_USERNAME}
+  password: ${SERVICEUSER_PASSWORD}
+
+management:
+  endpoint.prometheus.enabled: true
+  endpoints.web:
+    base-path: /internal
+    exposure.include: health,prometheus
+    path-mapping.prometheus: /prometheus
+
+logging.config: "classpath:logback.xml"
+
+spinnsyn-frontend.url: ${SPINNSYN_FRONTEND_URL}
+syfo-tilgangskontroll.url: ${SYFOTILGANGSKONTROLL_URL}
+nais.cluster: ${NAIS_CLUSTER_NAME}
+
+no.nav.security.jwt:
+  issuer:
+    loginservice:
+      discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
+      accepted_audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
+    veileder:
+      discoveryurl: ${VEILEDER_WELLKNOWN_URI}
+      accepted_audience: ${VEILEDER_EXPECTED_AUDIENCE}
+

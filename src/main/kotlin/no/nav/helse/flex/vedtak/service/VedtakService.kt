@@ -1,88 +1,72 @@
 package no.nav.helse.flex.vedtak.service
 
-import io.ktor.util.KtorExperimentalAPI
-import kotlinx.coroutines.delay
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
-import no.nav.helse.flex.Environment
-import no.nav.helse.flex.application.ApplicationState
-import no.nav.helse.flex.application.metrics.MOTTATT_ANNULLERING_VEDTAK
-import no.nav.helse.flex.application.metrics.MOTTATT_AUTOMATISK_VEDTAK
-import no.nav.helse.flex.application.metrics.MOTTATT_MANUELT_VEDTAK
-import no.nav.helse.flex.application.metrics.MOTTATT_VEDTAK
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
-import no.nav.helse.flex.db.DatabaseInterface
-import no.nav.helse.flex.log
+import no.nav.helse.flex.logger
+import no.nav.helse.flex.metrikk.Metrikk
 import no.nav.helse.flex.vedtak.db.Annullering
+import no.nav.helse.flex.vedtak.db.AnnulleringDAO
 import no.nav.helse.flex.vedtak.db.Vedtak
-import no.nav.helse.flex.vedtak.db.eierVedtak
-import no.nav.helse.flex.vedtak.db.finnAnnullering
-import no.nav.helse.flex.vedtak.db.finnVedtak
-import no.nav.helse.flex.vedtak.db.lesVedtak
-import no.nav.helse.flex.vedtak.db.opprettAnnullering
-import no.nav.helse.flex.vedtak.db.opprettVedtak
+import no.nav.helse.flex.vedtak.db.VedtakDAO
 import no.nav.helse.flex.vedtak.domene.Periode
 import no.nav.helse.flex.vedtak.domene.VedtakDto
 import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
 import no.nav.helse.flex.vedtak.domene.tilVedtakDto
-import no.nav.helse.flex.vedtak.kafka.VedtakConsumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import java.lang.Exception
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
-@KtorExperimentalAPI
+@Service
 class VedtakService(
-    private val database: DatabaseInterface,
-    private val applicationState: ApplicationState,
-    private val vedtakConsumer: VedtakConsumer,
+    private val vedtakDAO: VedtakDAO,
+    private val annulleringDAO: AnnulleringDAO,
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
-    private val environment: Environment,
-    private val delayStart: Long = 10_000L
+    private val metrikk: Metrikk,
+    @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
+    @Value("\${spinnsyn-frontend.url}") private val spinnsynFrontendUrl: String,
 ) {
-    suspend fun start() {
-        while (applicationState.ready) {
-            try {
-                run()
-            } catch (ex: Exception) {
-                log.error("Feil ved konsumering fra kafka, restarter om $delayStart ms", ex)
-                vedtakConsumer.unsubscribe()
-            }
-            delay(delayStart)
+    private val log = logger()
+
+    fun handterMelding(cr: ConsumerRecord<String, String>) {
+        if (cr.erVedtak()) {
+            mottaVedtak(
+                id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
+                fnr = cr.key(),
+                vedtak = cr.value(),
+                opprettet = Instant.now()
+            )
+        } else if (cr.erAnnullering()) {
+            mottaAnnullering(
+                id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
+                fnr = cr.key(),
+                annullering = cr.value(),
+                opprettet = Instant.now()
+            )
         }
     }
 
-    private fun run() {
-        log.info("VedtakService started")
-        vedtakConsumer.subscribe()
+    fun hentVedtak(fnr: String): List<RSVedtak> {
+        val annulleringer = annulleringDAO.finnAnnullering(fnr)
+        return vedtakDAO.finnVedtak(fnr)
+            .map { it.tilRSVedtak(annulleringer.forVedtak(it)) }
+    }
 
-        while (applicationState.ready) {
-            val cr = vedtakConsumer.poll()
-            cr.forEach {
-                if (it.erVedtak()) {
-                    mottaVedtak(
-                        id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray()),
-                        fnr = it.key(),
-                        vedtak = it.value(),
-                        opprettet = Instant.now()
-                    )
-                } else if (it.erAnnullering()) {
-                    mottaAnnullering(
-                        id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray()),
-                        fnr = it.key(),
-                        annullering = it.value(),
-                        opprettet = Instant.now()
-                    )
-                }
-            }
-            if (!cr.isEmpty) {
-                vedtakConsumer.commitSync()
-            }
+    fun lesVedtak(fnr: String, vedtaksId: String): Boolean {
+        val bleLest = vedtakDAO.lesVedtak(fnr, vedtaksId)
+        if (bleLest) {
+            brukernotifikasjonKafkaProdusent.sendDonemelding(
+                Nokkel(serviceuserUsername, vedtaksId),
+                Done(Instant.now().toEpochMilli(), fnr, vedtaksId)
+            )
         }
+        return bleLest
     }
 
     fun mottaVedtak(id: UUID, fnr: String, vedtak: String, opprettet: Instant) {
@@ -90,11 +74,10 @@ class VedtakService(
         val vedtakSerialisert = try {
             vedtak.tilVedtakDto()
         } catch (e: Exception) {
-            log.error("Kunne ikke deserialisere vedtak", e)
-            return
+            throw RuntimeException("Kunne ikke deserialisere vedtak", e)
         }
 
-        database.finnVedtak(fnr)
+        vedtakDAO.finnVedtak(fnr)
             .firstOrNull { it.vedtak == vedtakSerialisert }
             ?.let {
                 if (it.id == id.toString()) {
@@ -105,29 +88,29 @@ class VedtakService(
                 return
             }
 
-        val vedtaket = database.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, lest = false, opprettet = opprettet)
+        val vedtaket = vedtakDAO.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, opprettet = opprettet)
 
         log.info("Opprettet vedtak med spinnsyn databaseid $id")
 
         brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(
-            Nokkel(environment.serviceuserUsername, id.toString()),
+            Nokkel(serviceuserUsername, id.toString()),
             Oppgave(
                 vedtaket.opprettet.toEpochMilli(),
                 fnr,
                 id.toString(),
                 "Sykepengene dine er beregnet - se resultatet",
-                "${environment.spinnsynFrontendUrl}/vedtak/$id",
+                "$spinnsynFrontendUrl/vedtak/$id",
                 4,
                 true
             )
         )
 
-        MOTTATT_VEDTAK.inc()
+        metrikk.MOTTATT_VEDTAK.increment()
 
         if (vedtakSerialisert.automatiskBehandling) {
-            MOTTATT_AUTOMATISK_VEDTAK.inc()
+            metrikk.MOTTATT_AUTOMATISK_VEDTAK.increment()
         } else {
-            MOTTATT_MANUELT_VEDTAK.inc()
+            metrikk.MOTTATT_MANUELT_VEDTAK.increment()
         }
     }
 
@@ -135,11 +118,10 @@ class VedtakService(
         val annulleringSerialisert = try {
             annullering.tilAnnulleringDto()
         } catch (e: Exception) {
-            log.error("Kunne ikke deserialisere annullering", e)
-            return
+            throw RuntimeException("Kunne ikke deserialisere annulering", e)
         }
 
-        database.finnAnnullering(fnr)
+        annulleringDAO.finnAnnullering(fnr)
             .firstOrNull { it.annullering == annulleringSerialisert }
             ?.let {
                 if (it.id == id.toString()) {
@@ -150,43 +132,16 @@ class VedtakService(
                 return
             }
 
-        database.opprettAnnullering(
+        annulleringDAO.opprettAnnullering(
             id = id,
             fnr = fnr,
             annullering = annullering,
             opprettet = opprettet
         )
 
-        MOTTATT_ANNULLERING_VEDTAK.inc()
+        metrikk.MOTTATT_ANNULLERING_VEDTAK.increment()
 
         log.info("Opprettet annullering med spinnsyn databaseid $id")
-    }
-
-    fun hentVedtak(fnr: String): List<RSVedtak> {
-        val annulleringer = database.finnAnnullering(fnr)
-        return database.finnVedtak(fnr)
-            .map { it.tilRSVedtak(annulleringer.forVedtak(it)) }
-    }
-
-    fun hentVedtak(fnr: String, vedtaksId: String): RSVedtak? {
-        val annulleringer = database.finnAnnullering(fnr)
-        val vedtak = database.finnVedtak(fnr)
-            .find { it.id == vedtaksId }
-        return vedtak?.tilRSVedtak(annulleringer.forVedtak(vedtak))
-    }
-
-    fun eierVedtak(fnr: String, vedtaksId: String) =
-        database.eierVedtak(fnr, vedtaksId)
-
-    fun lesVedtak(fnr: String, vedtaksId: String): Boolean {
-        val bleLest = database.lesVedtak(fnr, vedtaksId)
-        if (bleLest) {
-            brukernotifikasjonKafkaProdusent.sendDonemelding(
-                Nokkel(environment.serviceuserUsername, vedtaksId),
-                Done(Instant.now().toEpochMilli(), fnr, vedtaksId)
-            )
-        }
-        return bleLest
     }
 }
 

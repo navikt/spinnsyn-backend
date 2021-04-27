@@ -16,10 +16,7 @@ data class VedtakDto(
     val organisasjonsnummer: String? = null,
     val utbetalinger: List<UtbetalingDto> = emptyList(),
     val dokumenter: List<Dokument> = emptyList()
-) : Dto {
-    override fun serialisertTilString(): String =
-        objectMapper.writeValueAsString(this)
-
+) {
     data class UtbetalingDto(
         val mottaker: String,
         val fagområde: String,
