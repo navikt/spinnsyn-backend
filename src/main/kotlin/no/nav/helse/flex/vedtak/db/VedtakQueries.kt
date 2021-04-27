@@ -233,7 +233,7 @@ private fun Connection.hentVedtakForRevarsling(): List<InternVedtak> {
             AND varslet < ?
         """
     ).use {
-        it.setTimestamp(1, Timestamp.from(Instant.now().minus(7, ChronoUnit.DAYS)))
+        it.setTimestamp(1, Timestamp.from(Instant.now()))
         it.executeQuery().toList {
             toInternVedtak()
         }
