@@ -21,7 +21,7 @@ class VedtakVeilederController(
 
     @GetMapping("/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    @ProtectedWithClaims(issuer = "veileder", claimMap = ["acr=Level4"])
+    @ProtectedWithClaims(issuer = "veileder")
     fun hentVedtak(@RequestParam fnr: String): List<RSVedtak> {
         if (!syfoTilgangskontrollClient.sjekkTilgangVeilederToken(veilederToken(), fnr).harTilgang) {
             throw IkkeTilgangException()
