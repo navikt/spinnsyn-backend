@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@master
       - name: Generate version and image name
         run: |
-          TIME=$(TZ="Europe/Oslo" date +%Y.%m.%d-%H.%m)
+          TIME=$(TZ="Europe/Oslo" date +%Y.%m.%d-%H.%M)
           COMMIT=$(git rev-parse --short=8 HEAD)
           VERSION=$TIME-$COMMIT
           echo "IMAGE=docker.pkg.github.com/${GITHUB_REPOSITORY}/$APP:$VERSION" >> $GITHUB_ENV
