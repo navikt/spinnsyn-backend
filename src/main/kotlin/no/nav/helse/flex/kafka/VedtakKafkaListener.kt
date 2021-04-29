@@ -1,8 +1,11 @@
 package no.nav.helse.flex.kafka
 
+import no.nav.helse.flex.kafka.ConsumerStoppedEventExt.restart
 import no.nav.helse.flex.vedtak.service.MottaVedtakService
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.event.ConsumerStoppedEvent
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
@@ -21,5 +24,10 @@ class VedtakKafkaListener(
         mottaVedtakService.handterMelding(cr)
 
         acknowledgment.acknowledge()
+    }
+
+    @EventListener
+    fun eventHandler(event: ConsumerStoppedEvent) {
+        event.restart()
     }
 }
