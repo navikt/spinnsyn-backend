@@ -1,24 +1,24 @@
 package no.nav.helse.flex.kafka
 
-import no.nav.helse.flex.vedtak.service.MottaVedtakService
+import no.nav.helse.flex.vedtak.service.MottaUtbetalingService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
-const val VEDTAK_TOPIC = "tbd.vedtak"
+const val UTBETALING_TOPIC = "tbd.utbetaling"
 
 @Component
-class VedtakKafkaListener(
-    private val mottaVedtakService: MottaVedtakService
+class UtbetalingKafkaListener(
+    private val mottaUtbetalingService: MottaUtbetalingService
 ) {
 
     @KafkaListener(
-        topics = [VEDTAK_TOPIC],
+        topics = [UTBETALING_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory"
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        mottaVedtakService.handterMelding(cr)
+        mottaUtbetalingService.handterMelding(cr)
 
         acknowledgment.acknowledge()
     }

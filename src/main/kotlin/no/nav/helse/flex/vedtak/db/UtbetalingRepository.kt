@@ -7,17 +7,17 @@ import org.springframework.stereotype.Repository
 import java.time.Instant
 
 @Repository
-interface VedtakRepository : CrudRepository<VedtakDbRecord, String> {
-    fun findVedtakDbRecordsByFnr(fnr: String): List<VedtakDbRecord>
+interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
+    fun findUtbetalingDbRecordsByFnr(fnr: String): List<UtbetalingDbRecord>
 }
 
-@Table("vedtak_v2")
-data class VedtakDbRecord(
+@Table("utbetaling")
+data class UtbetalingDbRecord(
     @Id
     val id: String? = null,
     val fnr: String,
-    val vedtak: String,
+    val utbetaling: String,
     val opprettet: Instant,
-    val utbetalingId: String?,
-    val lest: Instant? = null,
+    val utbetalingId: String,
+    val utbetalingType: String
 )

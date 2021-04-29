@@ -3,7 +3,6 @@ package no.nav.helse.flex.vedtak.domene
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.objectMapper
 import java.time.LocalDate
-import java.util.UUID
 
 data class VedtakFattetForEksternDto(
     val fødselsnummer: String,
@@ -15,7 +14,7 @@ data class VedtakFattetForEksternDto(
     val dokumenter: List<Dokument>,
     val inntekt: Double,
     val sykepengegrunnlag: Double,
-    val utbetalingId: UUID?
+    val utbetalingId: String?
 )
 
 fun String.tilVedtakFattetForEksternDto(): VedtakFattetForEksternDto = objectMapper.readValue(this)

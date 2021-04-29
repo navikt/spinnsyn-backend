@@ -1,0 +1,1 @@
+ALTER TABLE vedtak_v2 ADD COLUMN utbetaling_id VARCHAR(36) NULL;
