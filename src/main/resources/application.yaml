@@ -23,7 +23,7 @@ on-prem-kafka:
   password: ${SERVICEUSER_PASSWORD}
 
 aiven-kafka:
-  auto-offset-reset: earliest
+  auto-offset-reset: latest #TODO endre til none
   security-protocol: SSL
 
 management:
