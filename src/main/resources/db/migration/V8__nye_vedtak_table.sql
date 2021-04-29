@@ -1,0 +1,12 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE vedtak_v2
+(
+    ID VARCHAR(36) DEFAULT uuid_generate_v4() PRIMARY KEY,
+    FNR VARCHAR(11) NOT NULL,
+    VEDTAK TEXT NOT NULL,
+    OPPRETTET TIMESTAMP WITH TIME ZONE NOT NULL,
+    LEST TIMESTAMP WITH TIME ZONE NULL
+);
+
+create index vedtak_v2_fnr_idx on vedtak_v2 (fnr);

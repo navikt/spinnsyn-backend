@@ -23,6 +23,8 @@ spec:
     initialDelay: 30
     periodSeconds: 5
     timeout: 5
+  kafka:
+    pool: nav-dev
   leaderElection: true
   prometheus:
     enabled: true

@@ -22,6 +22,10 @@ on-prem-kafka:
   username: ${SERVICEUSER_USERNAME}
   password: ${SERVICEUSER_PASSWORD}
 
+aiven-kafka:
+  auto-offset-reset: latest #TODO endre til none
+  security-protocol: SSL
+
 management:
   endpoint.prometheus.enabled: true
   endpoints.web:

@@ -1,0 +1,12 @@
+
+CREATE TABLE utbetaling
+(
+    ID VARCHAR(36) DEFAULT uuid_generate_v4() PRIMARY KEY,
+    FNR VARCHAR(11) NOT NULL,
+    UTBETALING_ID VARCHAR(36),
+    UTBETALING_TYPE VARCHAR(36),
+    UTBETALING TEXT NOT NULL,
+    OPPRETTET TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+create index utbetaling_fnr_idx on utbetaling (fnr);
