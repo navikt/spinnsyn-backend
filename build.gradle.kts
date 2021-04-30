@@ -44,7 +44,7 @@ val logstashLogbackEncoderVersion = "6.6"
 val kluentVersion = "1.65"
 val brukernotifikasjonAvroVersion = "1.2021.01.18-11.12-b9c8c40b98d1"
 val confluentVersion = "6.1.1"
-val tokenSupportVersion = "1.3.5"
+val tokenSupportVersion = "1.3.6"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
