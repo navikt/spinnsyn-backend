@@ -1,7 +1,7 @@
 package no.nav.helse.flex.vedtak.api
 
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.vedtak.service.RetroVedtakService
+import no.nav.helse.flex.vedtak.service.RetroMottaVedtakService
 import no.nav.helse.flex.vedtak.service.VedtakNullstillService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
@@ -19,7 +19,7 @@ import java.util.*
 @RequestMapping("/api/v1/mock")
 @Unprotected
 class VedtakTestdataController(
-    val retroVedtakService: RetroVedtakService,
+    val retroMottaVedtakService: RetroMottaVedtakService,
     val environmentToggles: EnvironmentToggles,
     val vedtakNullstillService: VedtakNullstillService,
 ) {
@@ -33,7 +33,7 @@ class VedtakTestdataController(
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
         val vedtakId = UUID.randomUUID()
-        retroVedtakService.mottaVedtak(
+        retroMottaVedtakService.mottaVedtak(
             id = vedtakId,
             fnr = fnr,
             vedtak = vedtak,
@@ -49,7 +49,7 @@ class VedtakTestdataController(
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
         val annulleringId = UUID.randomUUID()
-        retroVedtakService.mottaAnnullering(
+        retroMottaVedtakService.mottaAnnullering(
             id = annulleringId,
             fnr = fnr,
             annullering = annullering,

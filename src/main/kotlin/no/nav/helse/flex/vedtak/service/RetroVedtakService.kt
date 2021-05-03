@@ -7,7 +7,6 @@ import RSVedtak
 import RSVedtakWrapper
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
@@ -19,9 +18,6 @@ import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.VedtakDAO
 import no.nav.helse.flex.vedtak.domene.Periode
 import no.nav.helse.flex.vedtak.domene.VedtakDto
-import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
-import no.nav.helse.flex.vedtak.domene.tilVedtakDto
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -41,24 +37,6 @@ class RetroVedtakService(
     @Value("\${spinnsyn-frontend.url}") private val spinnsynFrontendUrl: String,
 ) {
     private val log = logger()
-
-    fun handterMelding(cr: ConsumerRecord<String, String>) {
-        if (cr.erVedtak()) {
-            mottaVedtak(
-                id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
-                fnr = cr.key(),
-                vedtak = cr.value(),
-                opprettet = Instant.now()
-            )
-        } else if (cr.erAnnullering()) {
-            mottaAnnullering(
-                id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
-                fnr = cr.key(),
-                annullering = cr.value(),
-                opprettet = Instant.now()
-            )
-        }
-    }
 
     fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
         return hentRetroVedtak(fnr)
@@ -102,81 +80,6 @@ class RetroVedtakService(
             return "Leste vedtak $vedtaksId"
         }
         return "Vedtak $vedtaksId er allerede lest"
-    }
-
-    fun mottaVedtak(id: UUID, fnr: String, vedtak: String, opprettet: Instant) {
-
-        val vedtakSerialisert = try {
-            vedtak.tilVedtakDto()
-        } catch (e: Exception) {
-            throw RuntimeException("Kunne ikke deserialisere vedtak", e)
-        }
-
-        vedtakDAO.finnVedtak(fnr)
-            .firstOrNull { it.vedtak == vedtakSerialisert }
-            ?.let {
-                if (it.id == id.toString()) {
-                    log.info("Vedtak $id er allerede mottat, går videre")
-                } else {
-                    log.warn("Oppretter ikke duplikate vedtak ny id: $id, eksisterende id: ${it.id}")
-                }
-                return
-            }
-
-        val vedtaket = vedtakDAO.opprettVedtak(fnr = fnr, vedtak = vedtak, id = id, opprettet = opprettet)
-
-        log.info("Opprettet vedtak med spinnsyn databaseid $id")
-
-        brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(
-            Nokkel(serviceuserUsername, id.toString()),
-            Oppgave(
-                vedtaket.opprettet.toEpochMilli(),
-                fnr,
-                id.toString(),
-                "Sykepengene dine er beregnet - se resultatet",
-                "$spinnsynFrontendUrl/vedtak/$id",
-                4,
-                true
-            )
-        )
-
-        metrikk.MOTTATT_VEDTAK.increment()
-
-        if (vedtakSerialisert.automatiskBehandling) {
-            metrikk.MOTTATT_AUTOMATISK_VEDTAK.increment()
-        } else {
-            metrikk.MOTTATT_MANUELT_VEDTAK.increment()
-        }
-    }
-
-    fun mottaAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant) {
-        val annulleringSerialisert = try {
-            annullering.tilAnnulleringDto()
-        } catch (e: Exception) {
-            throw RuntimeException("Kunne ikke deserialisere annulering", e)
-        }
-
-        annulleringDAO.finnAnnullering(fnr)
-            .firstOrNull { it.annullering == annulleringSerialisert }
-            ?.let {
-                if (it.id == id.toString()) {
-                    log.info("Annullering $id er allerede mottat, går videre")
-                } else {
-                    log.warn("Oppretter ikke duplikate annulleringer ny id: $id, eksisterende id: ${it.id}")
-                }
-                return
-            }
-
-        annulleringDAO.opprettAnnullering(
-            id = id,
-            fnr = fnr,
-            annullering = annullering,
-            opprettet = opprettet
-        )
-
-        metrikk.MOTTATT_ANNULLERING_VEDTAK.increment()
-
-        log.info("Opprettet annullering med spinnsyn databaseid $id")
     }
 }
 
@@ -258,18 +161,6 @@ fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
             this.vedtak.organisasjonsnummer == annullering.annullering.orgnummer ||
                 this.vedtak.utbetalinger.any { it.mottaker == annullering.annullering.orgnummer }
             )
-}
-
-private fun ConsumerRecord<String, String>.erVedtak(): Boolean {
-    return headers().any { header ->
-        header.key() == "type" && String(header.value()) == "Vedtak"
-    }
-}
-
-private fun ConsumerRecord<String, String>.erAnnullering(): Boolean {
-    return headers().any { header ->
-        header.key() == "type" && String(header.value()) == "Annullering"
-    }
 }
 
 class VedtakIkkeFunnetException : AbstractApiError(
