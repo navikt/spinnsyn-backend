@@ -1,8 +1,8 @@
 package no.nav.helse.flex.vedtak.api
 
 import no.nav.helse.flex.client.SyfoTilgangskontrollClient
-import no.nav.helse.flex.vedtak.service.RSVedtak
-import no.nav.helse.flex.vedtak.service.VedtakService
+import no.nav.helse.flex.vedtak.service.RetroRSVedtak
+import no.nav.helse.flex.vedtak.service.RetroVedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 @Controller
 @RequestMapping("/api/v1/veileder")
 class VedtakVeilederController(
-    val vedtakService: VedtakService,
+    val retroVedtakService: RetroVedtakService,
     val tokenValidationContextHolder: TokenValidationContextHolder,
     val syfoTilgangskontrollClient: SyfoTilgangskontrollClient,
 ) {
@@ -22,11 +22,11 @@ class VedtakVeilederController(
     @GetMapping("/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @ProtectedWithClaims(issuer = "veileder")
-    fun hentVedtak(@RequestParam fnr: String): List<RSVedtak> {
+    fun hentVedtak(@RequestParam fnr: String): List<RetroRSVedtak> {
         if (!syfoTilgangskontrollClient.sjekkTilgangVeilederToken(veilederToken(), fnr).harTilgang) {
             throw IkkeTilgangException()
         }
-        return vedtakService.hentVedtak(fnr)
+        return retroVedtakService.hentRetroVedtak(fnr)
     }
 
     private fun veilederToken(): String {
