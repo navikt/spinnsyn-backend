@@ -1,12 +1,13 @@
 package no.nav.helse.flex
 
+import RSVedtakWrapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.DONE_TOPIC
 import no.nav.helse.flex.brukernotifkasjon.OPPGAVE_TOPIC
-import no.nav.helse.flex.vedtak.service.RSVedtak
+import no.nav.helse.flex.vedtak.service.RetroRSVedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -56,7 +57,8 @@ abstract class AbstractContainerBaseTest {
             claims = claims
         )
     }
-    fun hentVedtak(fnr: String): List<RSVedtak> {
+
+    fun hentV1Vedtak(fnr: String): List<RetroRSVedtak> {
         val json = mockMvc.perform(
             get("/api/v1/vedtak")
                 .header("Authorization", "Bearer ${jwt(fnr)}")
@@ -66,7 +68,17 @@ abstract class AbstractContainerBaseTest {
         return objectMapper.readValue(json)
     }
 
-    fun hentVedtakSomVeileder(fnr: String, veilederToken: String): List<RSVedtak> {
+    fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
+        val json = mockMvc.perform(
+            get("/api/v2/vedtak")
+                .header("Authorization", "Bearer ${jwt(fnr)}")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk).andReturn().response.contentAsString
+
+        return objectMapper.readValue(json)
+    }
+
+    fun hentVedtakSomVeileder(fnr: String, veilederToken: String): List<RetroRSVedtak> {
         val json = mockMvc.perform(
             get("/api/v1/veileder/vedtak?fnr=$fnr")
                 .header("Authorization", "Bearer $veilederToken")
@@ -78,7 +90,7 @@ abstract class AbstractContainerBaseTest {
 
     fun lesVedtak(fnr: String, id: String): String {
         val json = mockMvc.perform(
-            post("/api/v1/vedtak/$id/les")
+            post("/api/v2/vedtak/$id/les")
                 .header("Authorization", "Bearer ${jwt(fnr)}")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString

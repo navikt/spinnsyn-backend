@@ -101,7 +101,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `vi henter vedtaket`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentV1Vedtak(fnr)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
@@ -121,7 +121,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `Vi henter vedtaket som nå er annullert`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentV1Vedtak(fnr)
 
         vedtak shouldHaveSize 1
         vedtak.first().annullert `should be` true
@@ -140,6 +140,6 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `Vi har nå ingen vedtak`() {
-        hentVedtak(fnr) shouldHaveSize 0
+        hentV1Vedtak(fnr) shouldHaveSize 0
     }
 }

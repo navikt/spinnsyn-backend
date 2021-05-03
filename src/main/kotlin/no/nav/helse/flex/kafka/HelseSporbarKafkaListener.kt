@@ -1,6 +1,6 @@
 package no.nav.helse.flex.kafka
 
-import no.nav.helse.flex.vedtak.service.VedtakService
+import no.nav.helse.flex.vedtak.service.RetroVedtakService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
@@ -10,7 +10,7 @@ const val SPORBAR_TOPIC = "aapen-helse-sporbar"
 
 @Component
 class HelseSporbarKafkaListener(
-    private val vedtakService: VedtakService
+    private val retroVedtakService: RetroVedtakService
 ) {
 
     @KafkaListener(
@@ -18,7 +18,7 @@ class HelseSporbarKafkaListener(
         containerFactory = "onPremKafkaListenerContainerFactory"
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        vedtakService.handterMelding(cr)
+        retroVedtakService.handterMelding(cr)
 
         acknowledgment.acknowledge()
     }
