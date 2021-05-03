@@ -3,6 +3,8 @@ package no.nav.helse.flex
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.vedtak.db.VedtakDAO
 import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.vedtak.domene.VedtakDto.UtbetalingDto
+import no.nav.helse.flex.vedtak.domene.VedtakDto.UtbetalingDto.UtbetalingslinjeDto
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeEqualTo
@@ -41,14 +43,32 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Value("\${on-prem-kafka.username}")
     lateinit var systembruker: String
 
-    val fnr = "123"
-    val fnr2 = "101001001"
+    final val fnr = "123"
+    final val fnr2 = "101001001"
+    final val orgnummer = "999999999"
     val automatiskBehandletVedtak = VedtakDto(
         fom = LocalDate.now(),
         tom = LocalDate.now(),
         forbrukteSykedager = 1,
         gjenståendeSykedager = 2,
-        utbetalinger = emptyList(),
+        organisasjonsnummer = orgnummer,
+        utbetalinger = listOf(
+            UtbetalingDto(
+                mottaker = orgnummer,
+                fagområde = "SPREF",
+                totalbeløp = 42,
+                utbetalingslinjer = listOf(
+                    UtbetalingslinjeDto(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now(),
+                        dagsats = 12,
+                        beløp = 33,
+                        grad = 100.0,
+                        sykedager = 3
+                    )
+                )
+            )
+        ),
         dokumenter = emptyList(),
         automatiskBehandling = true
     )
@@ -93,10 +113,17 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `vi henter vedtaket`() {
+        val vedtakv1 = hentV1Vedtak(fnr)
         val vedtak = hentVedtak(fnr)
+
+        vedtakv1 shouldHaveSize 1
+        vedtakv1.first().lest `should be` false
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
+        vedtak.first().vedtak.sykepengegrunnlag `should be` vedtakv1.first().vedtak.sykepengegrunnlag
+        vedtak.first().vedtak.inntekt `should be` vedtakv1.first().vedtak.månedsinntekt
+        vedtak.first().vedtak.utbetaling.arbeidsgiverOppdrag.nettoBeløp `should be` vedtakv1.first().vedtak.utbetalinger.first().totalbeløp
     }
 
     @Test
@@ -117,12 +144,12 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(3)
     fun `les vedtak`() {
-        val vedtaksId = hentVedtak(fnr).first().id
+        val vedtaksId = hentV1Vedtak(fnr).first().id
         val bleLest = lesVedtak(fnr, vedtaksId)
 
         bleLest shouldBeEqualTo "Leste vedtak $vedtaksId"
 
-        val oppdatertVedtak = hentVedtak(fnr)
+        val oppdatertVedtak = hentV1Vedtak(fnr)
         oppdatertVedtak.first().lest shouldBeEqualTo true
 
         val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
@@ -141,7 +168,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `leser vedtak på nytt og ingenting skjer`() {
-        val vedtaksId = hentVedtak(fnr).first().id
+        val vedtaksId = hentV1Vedtak(fnr).first().id
         val bleLest = lesVedtak(fnr, vedtaksId)
 
         bleLest shouldBeEqualTo "Vedtak $vedtaksId er allerede lest"
@@ -162,7 +189,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `Får ikke opp andre personers vedtak`() {
-        hentVedtak(fnr2).shouldBeEmpty()
+        hentV1Vedtak(fnr2).shouldBeEmpty()
     }
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.helse.flex
 
+import RSVedtakWrapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
@@ -56,9 +57,20 @@ abstract class AbstractContainerBaseTest {
             claims = claims
         )
     }
-    fun hentVedtak(fnr: String): List<RetroRSVedtak> {
+
+    fun hentV1Vedtak(fnr: String): List<RetroRSVedtak> {
         val json = mockMvc.perform(
             get("/api/v1/vedtak")
+                .header("Authorization", "Bearer ${jwt(fnr)}")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk).andReturn().response.contentAsString
+
+        return objectMapper.readValue(json)
+    }
+
+    fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
+        val json = mockMvc.perform(
+            get("/api/v2/vedtak")
                 .header("Authorization", "Bearer ${jwt(fnr)}")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString
@@ -78,7 +90,7 @@ abstract class AbstractContainerBaseTest {
 
     fun lesVedtak(fnr: String, id: String): String {
         val json = mockMvc.perform(
-            post("/api/v1/vedtak/$id/les")
+            post("/api/v2/vedtak/$id/les")
                 .header("Authorization", "Bearer ${jwt(fnr)}")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString

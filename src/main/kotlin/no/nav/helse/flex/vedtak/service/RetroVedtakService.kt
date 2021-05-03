@@ -61,7 +61,24 @@ class RetroVedtakService(
     }
 
     fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
-        return hentRetroVedtak(fnr).filter { it.vedtak.organisasjonsnummer != null }.map { it.tilRSVedtakWrapper() }
+        return hentRetroVedtak(fnr)
+            .filter {
+                if (it.vedtak.organisasjonsnummer == null) {
+                    log.warn("Forventet at vedtak ${it.id} har orgnummer")
+                    false
+                } else {
+                    true
+                }
+            }
+            .filter { rsVedtak ->
+                if (rsVedtak.vedtak.utbetalinger.find { it.fagområde == "SPREF" } == null) {
+                    log.warn("Forventet at vedtak ${rsVedtak.id} har SPREF utbetaling")
+                    false
+                } else {
+                    true
+                }
+            }
+            .map { it.tilRSVedtakWrapper() }
     }
 
     fun hentRetroVedtak(fnr: String): List<RetroRSVedtak> {
