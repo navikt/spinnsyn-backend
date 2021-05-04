@@ -25,7 +25,7 @@ class VedtakV2TestdataController(
     data class Melding(val melding: String) // Fordi flex-proxy trenger json
     data class VedtakV2(val vedtak: String, val utbetaling: String?)
 
-    @PostMapping("/vedtak/{fnr}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/vedtak/{fnr}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     fun opprettVedtakV2(@PathVariable fnr: String, @RequestBody vedtakV2: VedtakV2): Melding {
         if (environmentToggles.isProduction()) {
