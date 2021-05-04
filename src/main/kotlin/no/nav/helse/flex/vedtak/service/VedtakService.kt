@@ -69,6 +69,7 @@ class VedtakService(
                         gjenståendeSykedager = utbetaling.gjenståendeSykedager,
                         automatiskBehandling = utbetaling.automatiskBehandling,
                         utbetalingsdager = utbetaling.utbetalingsdager.map { it.tilRsUtbetalingsdag() },
+                        utbetalingId = utbetaling.utbetalingId,
                         arbeidsgiverOppdrag = RSOppdrag(
                             mottaker = utbetaling.arbeidsgiverOppdrag.mottaker,
                             nettoBeløp = utbetaling.arbeidsgiverOppdrag.nettoBeløp,

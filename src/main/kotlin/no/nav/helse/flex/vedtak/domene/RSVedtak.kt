@@ -24,6 +24,7 @@ data class RSVedtak(
 
 data class RSUtbetalingUtbetalt(
     val organisasjonsnummer: String,
+    val utbetalingId: String?,
     val forbrukteSykedager: Int,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean,

@@ -87,6 +87,7 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
                 forbrukteSykedager = this.vedtak.forbrukteSykedager,
                 gjenståendeSykedager = this.vedtak.gjenståendeSykedager,
                 automatiskBehandling = this.vedtak.automatiskBehandling,
+                utbetalingId = null,
                 utbetalingsdager = emptyList(),
                 arbeidsgiverOppdrag = RSOppdrag(
                     mottaker = arbeidsgiveroppdrag.mottaker,
