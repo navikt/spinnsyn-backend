@@ -1,7 +1,8 @@
 package no.nav.helse.flex.vedtak.api
 
-import RSVedtakWrapper
-import no.nav.helse.flex.vedtak.service.RetroVedtakService
+import no.nav.helse.flex.vedtak.domene.RSVedtakWrapper
+import no.nav.helse.flex.vedtak.service.LesVedtakService
+import no.nav.helse.flex.vedtak.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -15,8 +16,9 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 @RequestMapping("/api/v2")
 class VedtakController(
-    val retroVedtakService: RetroVedtakService,
+    val vedtakService: VedtakService,
     val tokenValidationContextHolder: TokenValidationContextHolder,
+    val lesVedtakService: LesVedtakService
 ) {
 
     @GetMapping("/vedtak", produces = [APPLICATION_JSON_VALUE])
@@ -24,7 +26,7 @@ class VedtakController(
     @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
     fun hentVedtak(): List<RSVedtakWrapper> {
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
-        return retroVedtakService.hentVedtak(fnr)
+        return vedtakService.hentVedtak(fnr)
     }
 
     @PostMapping(value = ["/vedtak/{vedtaksId}/les"], produces = [APPLICATION_JSON_VALUE])
@@ -32,7 +34,7 @@ class VedtakController(
     @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
-        return retroVedtakService.lesVedtak(fnr, vedtaksId)
+        return lesVedtakService.lesVedtak(fnr, vedtaksId)
     }
 }
 

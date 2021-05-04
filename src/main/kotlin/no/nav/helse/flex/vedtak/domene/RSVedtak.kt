@@ -1,4 +1,5 @@
-import no.nav.helse.flex.vedtak.domene.Dokument
+package no.nav.helse.flex.vedtak.domene
+
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
