@@ -15,23 +15,29 @@ class MottaVedtakService(
     val log = logger()
 
     fun handterMelding(cr: ConsumerRecord<String, String>) {
+        mottaVedtak(
+            fnr = cr.key(),
+            vedtak = cr.value(),
+        )
+    }
 
+    fun mottaVedtak(fnr: String, vedtak: String) {
         val vedtakSerialisert = try {
-            cr.value().tilVedtakFattetForEksternDto()
+            vedtak.tilVedtakFattetForEksternDto()
         } catch (e: Exception) {
             throw RuntimeException("Kunne ikke deserialisere vedtak", e)
         }
 
-        val vedtak = vedtakRepository.save(
+        val vedtakDB = vedtakRepository.save(
             VedtakDbRecord(
-                fnr = cr.key(),
-                vedtak = cr.value(),
+                fnr = fnr,
+                vedtak = vedtak,
                 opprettet = Instant.now(),
                 utbetalingId = vedtakSerialisert.utbetalingId,
                 lest = Instant.EPOCH
             )
         )
 
-        log.info("Opprettet vedtak med database id: ${vedtak.id} for utbetaling id ${vedtak.utbetalingId}")
+        log.info("Opprettet vedtak med database id: ${vedtakDB.id} for utbetaling id ${vedtakDB.utbetalingId}")
     }
 }
