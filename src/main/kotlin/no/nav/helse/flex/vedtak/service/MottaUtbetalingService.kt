@@ -7,6 +7,7 @@ import no.nav.helse.flex.vedtak.domene.tilUtbetalingUtbetalt
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.*
 
 @Service
 class MottaUtbetalingService(
@@ -15,23 +16,30 @@ class MottaUtbetalingService(
     val log = logger()
 
     fun handterMelding(cr: ConsumerRecord<String, String>) {
+        mottaUtbetaling(
+            fnr = cr.key(),
+            utbetaling = cr.value(),
+            opprettet = Instant.now()
+        )
+    }
 
+    fun mottaUtbetaling(fnr: String, utbetaling: String, opprettet: Instant) {
         val utbetalingSerialisert = try {
-            cr.value().tilUtbetalingUtbetalt()
+            utbetaling.tilUtbetalingUtbetalt()
         } catch (e: Exception) {
             throw RuntimeException("Kunne ikke deserialisere utbetaling", e)
         }
 
-        val utbetaling = utbetalingRepository.save(
+        val utbetalingDB = utbetalingRepository.save(
             UtbetalingDbRecord(
-                fnr = cr.key(),
+                fnr = fnr,
                 utbetalingType = utbetalingSerialisert.type,
-                utbetaling = cr.value(),
-                opprettet = Instant.now(),
+                utbetaling = utbetaling,
+                opprettet = opprettet,
                 utbetalingId = utbetalingSerialisert.utbetalingId
             )
         )
 
-        log.info("Opprettet utbetaling med database id: ${utbetaling.id} og utbetaling id ${utbetaling.utbetalingId}")
+        log.info("Opprettet utbetaling med database id: ${utbetalingDB.id} og utbetaling id ${utbetalingDB.utbetalingId}")
     }
 }
