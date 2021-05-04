@@ -2,7 +2,7 @@ package no.nav.helse.flex.vedtak.api
 
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.vedtak.service.MottaUtbetalingService
-import no.nav.helse.flex.vedtak.service.RetroMottaVedtakService
+import no.nav.helse.flex.vedtak.service.MottaVedtakService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
@@ -12,13 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import java.time.Instant
-import java.util.*
 
 @Controller
-@RequestMapping("/api/v2/mock")
+@RequestMapping("/api/v2/testdata")
 @Unprotected
 class VedtakV2TestdataController(
-    val mottaVedtakService: RetroMottaVedtakService,
+    val mottaVedtakService: MottaVedtakService,
     val mottaUtbetalingService: MottaUtbetalingService,
     val environmentToggles: EnvironmentToggles,
 ) {
@@ -32,12 +31,9 @@ class VedtakV2TestdataController(
         if (environmentToggles.isProduction()) {
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
-        val vedtakId = UUID.randomUUID()
         mottaVedtakService.mottaVedtak(
-            id = vedtakId,
             fnr = fnr,
             vedtak = vedtakV2.vedtak,
-            opprettet = Instant.now()
         )
 
         if (vedtakV2.utbetaling != null) {
@@ -48,6 +44,6 @@ class VedtakV2TestdataController(
             )
         }
 
-        return Melding("Vedtak med $vedtakId opprettet")
+        return Melding("Vedtak v2 opprettet")
     }
 }
