@@ -1,27 +1,12 @@
 package no.nav.helse.flex.vedtak.service
 
-import RSOppdrag
-import RSUtbetalingUtbetalt
-import RSUtbetalingslinje
-import RSVedtak
-import RSVedtakWrapper
-import no.nav.brukernotifikasjon.schemas.Done
-import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.metrikk.Metrikk
-import no.nav.helse.flex.vedtak.api.AbstractApiError
-import no.nav.helse.flex.vedtak.api.LogLevel
 import no.nav.helse.flex.vedtak.db.Annullering
 import no.nav.helse.flex.vedtak.db.AnnulleringDAO
 import no.nav.helse.flex.vedtak.db.Vedtak
 import no.nav.helse.flex.vedtak.db.VedtakDAO
-import no.nav.helse.flex.vedtak.domene.Periode
-import no.nav.helse.flex.vedtak.domene.VedtakDto
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
+import no.nav.helse.flex.vedtak.domene.*
 import org.springframework.stereotype.Service
-import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -31,10 +16,6 @@ import java.util.*
 class RetroVedtakService(
     private val vedtakDAO: VedtakDAO,
     private val annulleringDAO: AnnulleringDAO,
-    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
-    private val metrikk: Metrikk,
-    @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
-    @Value("\${spinnsyn-frontend.url}") private val spinnsynFrontendUrl: String,
 ) {
     private val log = logger()
 
@@ -63,23 +44,6 @@ class RetroVedtakService(
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
         return vedtakDAO.finnVedtak(fnr)
             .map { it.tilRetroRSVedtak(annulleringer.forVedtak(it)) }
-    }
-
-    fun lesVedtak(fnr: String, vedtaksId: String): String {
-        if (hentRetroVedtak(fnr).none { it.id == vedtaksId }) {
-            throw VedtakIkkeFunnetException()
-        }
-
-        val bleLest = vedtakDAO.lesVedtak(fnr, vedtaksId)
-        if (bleLest) {
-            brukernotifikasjonKafkaProdusent.sendDonemelding(
-                Nokkel(serviceuserUsername, vedtaksId),
-                Done(Instant.now().toEpochMilli(), fnr, vedtaksId)
-            )
-            metrikk.VEDTAK_LEST.increment()
-            return "Leste vedtak $vedtaksId"
-        }
-        return "Vedtak $vedtaksId er allerede lest"
     }
 }
 
@@ -162,10 +126,3 @@ fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
                 this.vedtak.utbetalinger.any { it.mottaker == annullering.annullering.orgnummer }
             )
 }
-
-class VedtakIkkeFunnetException : AbstractApiError(
-    message = "Fant ikke vedtak",
-    httpStatus = HttpStatus.NOT_FOUND,
-    reason = "VEDTAK_IKKE_FUNNET",
-    loglevel = LogLevel.WARN
-)
