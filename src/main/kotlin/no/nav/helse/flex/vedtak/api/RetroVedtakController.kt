@@ -1,5 +1,6 @@
 package no.nav.helse.flex.vedtak.api
 
+import no.nav.helse.flex.vedtak.service.LesVedtakService
 import no.nav.helse.flex.vedtak.service.RetroRSVedtak
 import no.nav.helse.flex.vedtak.service.RetroVedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 class RetroVedtakController(
     val retroVedtakService: RetroVedtakService,
     val tokenValidationContextHolder: TokenValidationContextHolder,
+    val lesVedtakService: LesVedtakService
 ) {
 
     @GetMapping("/vedtak", produces = [APPLICATION_JSON_VALUE])
@@ -32,6 +34,6 @@ class RetroVedtakController(
     @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
-        return retroVedtakService.lesVedtak(fnr, vedtaksId)
+        return lesVedtakService.lesVedtak(fnr, vedtaksId)
     }
 }

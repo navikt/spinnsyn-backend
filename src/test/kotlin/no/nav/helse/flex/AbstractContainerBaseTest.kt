@@ -1,12 +1,12 @@
 package no.nav.helse.flex
 
-import RSVedtakWrapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.DONE_TOPIC
 import no.nav.helse.flex.brukernotifkasjon.OPPGAVE_TOPIC
+import no.nav.helse.flex.vedtak.domene.RSVedtakWrapper
 import no.nav.helse.flex.vedtak.service.RetroRSVedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
