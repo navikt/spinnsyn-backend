@@ -8,7 +8,7 @@ import no.nav.helse.flex.vedtak.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.vedtak.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.vedtak.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.vedtak.domene.tilVedtakFattetForEksternDto
-import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -32,10 +32,11 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Autowired
     lateinit var utbetalingRepository: UtbetalingRepository
 
-    final val fnr = "123"
+    final val fnr = "1233342"
     final val aktørId = "321"
     final val org = "987"
     final val now = LocalDate.now()
+    val utbetalingId = "124542"
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
@@ -46,7 +47,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         dokumenter = emptyList(),
         inntekt = 0.0,
         sykepengegrunnlag = 0.0,
-        utbetalingId = "124542"
+        utbetalingId = utbetalingId
     )
 
     val utbetaling = UtbetalingUtbetalt(
@@ -55,7 +56,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         organisasjonsnummer = org,
         fom = now,
         tom = now,
-        utbetalingId = "124324534",
+        utbetalingId = utbetalingId,
         event = "eventet",
         forbrukteSykedager = 42,
         gjenståendeSykedager = 3254,
@@ -94,6 +95,13 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(2)
+    fun `finner ikke vedtaket`() {
+        hentV1Vedtak(fnr).shouldBeEmpty()
+        hentVedtak(fnr).shouldBeEmpty()
+    }
+
+    @Test
+    @Order(3)
     fun `mottar utbetaling`() {
         kafkaProducer.send(
             ProducerRecord(
@@ -112,5 +120,62 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
+    }
+
+    @Test
+    @Order(4)
+    fun `finner ikke vedtaket i v1`() {
+        hentV1Vedtak(fnr).shouldBeEmpty()
+    }
+
+    @Test
+    @Order(4)
+    fun `finner vedtaket i v2`() {
+        val vedtak = hentVedtak(fnr)
+        vedtak.shouldHaveSize(1)
+        vedtak[0].annullert.`should be false`()
+        vedtak[0].lest.`should be true`()
+        vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
+    }
+
+    @Test
+    @Order(5)
+    fun `vi endrer vedtaket til å være ulest`() {
+        val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
+        vedtakRepository.save(dbVedtak.copy(lest = null))
+
+        val vedtak = hentVedtak(fnr)
+        vedtak.shouldHaveSize(1)
+        vedtak[0].lest.`should be false`()
+    }
+
+    @Test
+    @Order(6)
+    fun `vi leser vedtaket`() {
+        val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
+        vedtakRepository.save(dbVedtak.copy(lest = null))
+
+        val vedtak = hentVedtak(fnr)
+
+        vedtak.shouldHaveSize(1)
+        vedtak[0].lest.`should be false`()
+
+        val vedtaksId = vedtak[0].id
+
+        lesVedtak(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
+
+        lesVedtak(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
+
+        val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
+        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
+        dones.shouldHaveSize(1)
+
+        val nokkel = dones[0].key()
+        nokkel.getEventId() `should be equal to` vedtaksId
+
+        val done = dones[0].value()
+        done.getFodselsnummer() `should be equal to` fnr
+
+        vedtakRepository.findVedtakDbRecordsByFnr(fnr).first().lest.`should not be null`()
     }
 }
