@@ -13,7 +13,7 @@ data class RSVedtakWrapper(
 )
 
 data class RSVedtak(
-    val organisasjonsnummer: String,
+    val organisasjonsnummer: String?,
     val fom: LocalDate,
     val tom: LocalDate,
     val dokumenter: List<Dokument>,
@@ -23,7 +23,7 @@ data class RSVedtak(
 )
 
 data class RSUtbetalingUtbetalt(
-    val organisasjonsnummer: String,
+    val organisasjonsnummer: String?,
     val utbetalingId: String?,
     val forbrukteSykedager: Int,
     val gjenståendeSykedager: Int,
