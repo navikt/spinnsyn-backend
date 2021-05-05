@@ -21,14 +21,6 @@ class RetroVedtakService(
 
     fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
         return hentRetroVedtak(fnr)
-            .filter {
-                if (it.vedtak.organisasjonsnummer == null) {
-                    log.warn("Forventet at vedtak ${it.id} har orgnummer")
-                    false
-                } else {
-                    true
-                }
-            }
             .filter { rsVedtak ->
                 if (rsVedtak.vedtak.utbetalinger.find { it.fagområde == "SPREF" } == null) {
                     log.warn("Forventet at vedtak ${rsVedtak.id} har SPREF utbetaling")
@@ -76,7 +68,7 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
         lestDato = this.lestDato,
         opprettet = this.opprettet,
         vedtak = RSVedtak(
-            organisasjonsnummer = this.vedtak.organisasjonsnummer!!,
+            organisasjonsnummer = this.vedtak.organisasjonsnummer,
             dokumenter = this.vedtak.dokumenter,
             sykepengegrunnlag = this.vedtak.sykepengegrunnlag,
             inntekt = this.vedtak.månedsinntekt,
