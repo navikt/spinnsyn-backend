@@ -52,6 +52,7 @@ spec:
     inbound:
       rules:
         - application: flex-gateway
+        - application: flex-intern-gateway
         - application: spinnsyn-backend-proxy
         - application: spinnsyn-backend-veileder-proxy
 
