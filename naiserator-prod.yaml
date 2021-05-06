@@ -53,8 +53,6 @@ spec:
       rules:
         - application: flex-gateway
         - application: flex-intern-gateway
-        - application: spinnsyn-backend-proxy
-        - application: spinnsyn-backend-veileder-proxy
 
   envFrom:
     - secret: spinnsyn-backend-serviceuser
