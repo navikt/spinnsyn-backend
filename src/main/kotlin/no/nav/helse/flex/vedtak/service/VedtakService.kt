@@ -86,7 +86,7 @@ class VedtakService(
 
 private fun UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto.tilRsUtbetalingslinje(): RSUtbetalingslinje {
     return RSUtbetalingslinje(
-        fom = fom, tom = tom, dagsats = dagsats, totalbeløp = totalbeløp, grad = grad
+        fom = fom, tom = tom, dagsats = dagsats, totalbeløp = totalbeløp, grad = grad, stønadsdager = stønadsdager
     )
 }
 

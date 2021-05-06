@@ -93,11 +93,12 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
 
 private fun VedtakDto.UtbetalingDto.UtbetalingslinjeDto.tilRsUtbetalingslinje(): RSUtbetalingslinje {
     return RSUtbetalingslinje(
-        dagsats = this.dagsats,
+        dagsats = this.beløp,
         fom = this.fom,
         tom = this.tom,
         grad = this.grad,
-        totalbeløp = this.beløp
+        totalbeløp = this.beløp * this.sykedager,
+        stønadsdager = this.sykedager
     )
 }
 
