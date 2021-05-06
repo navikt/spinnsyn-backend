@@ -44,6 +44,7 @@ data class RSUtbetalingslinje(
     val dagsats: Int,
     val totalbeløp: Int,
     val grad: Double,
+    val stønadsdager: Int
 )
 
 data class RSUtbetalingdag(
