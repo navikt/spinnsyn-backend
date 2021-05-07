@@ -2,7 +2,9 @@ package no.nav.helse.flex
 
 import no.nav.helse.flex.vedtak.db.VedtakDAO
 import no.nav.helse.flex.vedtak.domene.AnnulleringDto
+import no.nav.helse.flex.vedtak.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.vedtak.domene.VedtakFattetForEksternDto
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
@@ -35,15 +37,17 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     val fnr = "234232323"
     val fom = LocalDate.now().minusDays(7)
     val tom = LocalDate.now()
+    val orgnummer = "123"
+    val utbetalingId = "239fj20j3f"
     val automatiskBehandletVedtak = VedtakDto(
         fom = fom,
         tom = tom,
         forbrukteSykedager = 1,
         gjenståendeSykedager = 2,
-        organisasjonsnummer = "123",
+        organisasjonsnummer = orgnummer,
         utbetalinger = listOf(
             VedtakDto.UtbetalingDto(
-                mottaker = "123",
+                mottaker = orgnummer,
                 fagområde = "idk",
                 totalbeløp = 1400,
                 utbetalingslinjer = listOf(
@@ -63,10 +67,44 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     )
     val annulleringDto = AnnulleringDto(
         fødselsnummer = fnr,
-        orgnummer = "123",
+        orgnummer = orgnummer,
         tidsstempel = LocalDateTime.now(),
         fom = fom,
         tom = tom
+    )
+
+    val vedtak = VedtakFattetForEksternDto(
+        fødselsnummer = fnr,
+        aktørId = fnr,
+        organisasjonsnummer = orgnummer,
+        fom = fom,
+        tom = tom,
+        skjæringstidspunkt = fom,
+        dokumenter = emptyList(),
+        inntekt = 0.0,
+        sykepengegrunnlag = 0.0,
+        utbetalingId = utbetalingId
+    )
+    val utbetaling = UtbetalingUtbetalt(
+        fødselsnummer = fnr,
+        aktørId = fnr,
+        organisasjonsnummer = orgnummer,
+        fom = fom,
+        tom = tom,
+        utbetalingId = utbetalingId,
+        event = "utbetaling_utbetalt",
+        forbrukteSykedager = 42,
+        gjenståendeSykedager = 3254,
+        automatiskBehandling = true,
+        arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
+            mottaker = orgnummer,
+            fagområde = "SPREF",
+            fagsystemId = "1234",
+            nettoBeløp = 123,
+            utbetalingslinjer = emptyList()
+        ),
+        type = "UTBETALING",
+        utbetalingsdager = emptyList()
     )
 
     @Test
@@ -129,6 +167,19 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(5)
+    fun `Oppretter nytt vedtak og utbetaling`() {
+        data class VedtakV2(val vedtak: String, val utbetaling: String?)
+        val body = VedtakV2(vedtak.serialisertTilString(), utbetaling.serialisertTilString())
+
+        mockMvc.perform(
+            post("/api/v2/testdata/vedtak/$fnr")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body.serialisertTilString())
+        ).andExpect(status().is2xxSuccessful).andReturn()
+    }
+
+    @Test
+    @Order(6)
     fun `Sletter vedtaket`() {
         mockMvc.perform(
             delete("/api/v1/mock/vedtak/$fnr")
@@ -138,8 +189,9 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     fun `Vi har nå ingen vedtak`() {
         hentV1Vedtak(fnr) shouldHaveSize 0
+        hentVedtak(fnr) shouldHaveSize 0
     }
 }
