@@ -113,30 +113,23 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `vi henter vedtaket`() {
-        val vedtakv1 = hentV1Vedtak(fnr)
         val vedtak = hentVedtak(fnr)
-
-        vedtakv1 shouldHaveSize 1
-        vedtakv1.first().lest `should be` false
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
-        vedtak.first().vedtak.sykepengegrunnlag `should be` vedtakv1.first().vedtak.sykepengegrunnlag
-        vedtak.first().vedtak.inntekt `should be` vedtakv1.first().vedtak.månedsinntekt
-        vedtak.first().vedtak.utbetaling.arbeidsgiverOppdrag.nettoBeløp `should be` vedtakv1.first().vedtak.utbetalinger.first().totalbeløp
     }
 
     @Test
     @Order(2)
     fun `vi kan ikke hente vedtaket uten token`() {
         mockMvc.perform(
-            get("/api/v1/vedtak")
+            get("/api/v2/vedtak")
                 .header("Authorization", "Bearer blabla")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isUnauthorized)
 
         mockMvc.perform(
-            get("/api/v1/vedtak")
+            get("/api/v2/vedtak")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isUnauthorized)
     }
@@ -144,12 +137,12 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(3)
     fun `les vedtak`() {
-        val vedtaksId = hentV1Vedtak(fnr).first().id
+        val vedtaksId = hentVedtak(fnr).first().id
         val bleLest = lesVedtak(fnr, vedtaksId)
 
         bleLest shouldBeEqualTo "Leste vedtak $vedtaksId"
 
-        val oppdatertVedtak = hentV1Vedtak(fnr)
+        val oppdatertVedtak = hentVedtak(fnr)
         oppdatertVedtak.first().lest shouldBeEqualTo true
 
         val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
@@ -168,7 +161,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `leser vedtak på nytt og ingenting skjer`() {
-        val vedtaksId = hentV1Vedtak(fnr).first().id
+        val vedtaksId = hentVedtak(fnr).first().id
         val bleLest = lesVedtak(fnr, vedtaksId)
 
         bleLest shouldBeEqualTo "Vedtak $vedtaksId er allerede lest"
@@ -189,7 +182,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `Får ikke opp andre personers vedtak`() {
-        hentV1Vedtak(fnr2).shouldBeEmpty()
+        hentVedtak(fnr2).shouldBeEmpty()
     }
 
     @Test

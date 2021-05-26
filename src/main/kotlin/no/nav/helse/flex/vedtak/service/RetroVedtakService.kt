@@ -34,7 +34,8 @@ class RetroVedtakService(
 
     fun hentRetroVedtak(fnr: String): List<RetroRSVedtak> {
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
-        return vedtakDAO.finnVedtak(fnr)
+        val finnVedtak = vedtakDAO.finnVedtak(fnr)
+        return finnVedtak
             .map { it.tilRetroRSVedtak(annulleringer.forVedtak(it)) }
     }
 }

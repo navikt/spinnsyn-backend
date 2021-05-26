@@ -44,7 +44,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         utbetalinger = listOf(
             VedtakDto.UtbetalingDto(
                 mottaker = "123",
-                fagområde = "idk",
+                fagområde = "SPREF",
                 totalbeløp = 1400,
                 utbetalingslinjer = listOf(
                     VedtakDto.UtbetalingDto.UtbetalingslinjeDto(
@@ -92,7 +92,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     @Test
     @Order(3)
     fun `Vedtaket blir funnet i REST APIet`() {
-        val vedtakene = hentV1Vedtak(fnr)
+        val vedtakene = hentVedtak(fnr)
         vedtakene shouldHaveSize 1
         vedtakene.first().annullert shouldBe false
     }
@@ -119,7 +119,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     @Test
     @Order(5)
     fun `Det annullerte vedtaket blir funnet i REST APIet`() {
-        val vedtakene = hentV1Vedtak(fnr)
+        val vedtakene = hentVedtak(fnr)
         vedtakene shouldHaveSize 1
         vedtakene.first().annullert shouldBe true
     }
@@ -145,7 +145,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     @Test
     @Order(7)
     fun `Man finner fremdeles kun ett vedtak i REST APIet`() {
-        val vedtakene = hentV1Vedtak(fnr)
+        val vedtakene = hentVedtak(fnr)
         vedtakene shouldHaveSize 1
         vedtakene.first().annullert shouldBe true
     }
@@ -172,7 +172,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     @Test
     @Order(9)
     fun `Man finner to annullerte vedtak i REST APIet`() {
-        val vedtakene = hentV1Vedtak(fnr)
+        val vedtakene = hentVedtak(fnr)
         vedtakene shouldHaveSize 2
         vedtakene.first().annullert shouldBe true
         vedtakene.last().annullert shouldBe true
