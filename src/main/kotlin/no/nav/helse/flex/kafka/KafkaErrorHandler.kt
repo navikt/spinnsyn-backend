@@ -18,18 +18,17 @@ class KafkaErrorHandler : SeekToCurrentErrorHandler(
 
     override fun handle(
         thrownException: Exception,
-        records: List<ConsumerRecord<*, *>>?,
-        consumer: Consumer<*, *>?,
+        records: MutableList<ConsumerRecord<*, *>>,
+        consumer: Consumer<*, *>,
         container: MessageListenerContainer
     ) {
-
-        records?.forEach { record ->
+        records.forEach { record ->
             log.error(
                 "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
                 thrownException
             )
         }
-        if (records == null || records.isEmpty()) {
+        if (records.isEmpty()) {
             log.error("Feil i listener uten noen records", thrownException)
         }
 
