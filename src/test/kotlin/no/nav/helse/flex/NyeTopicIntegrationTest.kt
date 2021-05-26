@@ -1,16 +1,16 @@
 package no.nav.helse.flex
 
+import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
+import no.nav.helse.flex.vedtak.db.AnnulleringDAO
 import no.nav.helse.flex.vedtak.db.UtbetalingRepository
 import no.nav.helse.flex.vedtak.db.VedtakRepository
-import no.nav.helse.flex.vedtak.domene.UtbetalingUtbetalt
-import no.nav.helse.flex.vedtak.domene.VedtakFattetForEksternDto
-import no.nav.helse.flex.vedtak.domene.tilUtbetalingUtbetalt
-import no.nav.helse.flex.vedtak.domene.tilVedtakFattetForEksternDto
+import no.nav.helse.flex.vedtak.domene.*
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
@@ -31,6 +32,9 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var utbetalingRepository: UtbetalingRepository
+
+    @Autowired
+    lateinit var annulleringDAO: AnnulleringDAO
 
     final val fnr = "1233342"
     final val aktørId = "321"
@@ -70,6 +74,14 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         ),
         type = "UTBETALING",
         utbetalingsdager = emptyList()
+    )
+
+    val annulleringDto = AnnulleringDto(
+        fødselsnummer = fnr,
+        orgnummer = org,
+        tidsstempel = LocalDateTime.now(),
+        fom = now,
+        tom = now
     )
 
     @Test
@@ -177,5 +189,31 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         done.getFodselsnummer() `should be equal to` fnr
 
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).first().lest.`should not be null`()
+    }
+
+    @Test
+    @Order(7)
+    fun `Ei annullering mottatt på kafka blir lagret i db`() {
+        kafkaProducer.send(
+            ProducerRecord(
+                SPORBAR_TOPIC,
+                null,
+                fnr,
+                annulleringDto.serialisertTilString(),
+                listOf(RecordHeader("type", "Annullering".toByteArray()))
+            )
+        ).get()
+
+        await().atMost(5, TimeUnit.SECONDS).until {
+            annulleringDAO.finnAnnullering(fnr).size == 1
+        }
+    }
+
+    @Test
+    @Order(8)
+    fun `vi finner vedtaket i v2 hvor det nå er annullert`() {
+        val vedtak = hentVedtak(fnr)
+        vedtak.shouldHaveSize(1)
+        vedtak[0].annullert.`should be true`()
     }
 }
