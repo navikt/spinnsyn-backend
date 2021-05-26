@@ -10,6 +10,8 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 3
 
+elector.path: dont_look_for_leader
+
 on-prem-kafka:
   bootstrap-servers: overskrives i AbstractContainerBaseTest
   security-protocol: PLAINTEXT
