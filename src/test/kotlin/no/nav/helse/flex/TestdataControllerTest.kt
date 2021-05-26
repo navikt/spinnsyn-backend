@@ -48,7 +48,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
         utbetalinger = listOf(
             VedtakDto.UtbetalingDto(
                 mottaker = orgnummer,
-                fagområde = "idk",
+                fagområde = "SPREF",
                 totalbeløp = 1400,
                 utbetalingslinjer = listOf(
                     VedtakDto.UtbetalingDto.UtbetalingslinjeDto(
@@ -139,7 +139,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `vi henter vedtaket`() {
-        val vedtak = hentV1Vedtak(fnr)
+        val vedtak = hentVedtak(fnr)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
@@ -159,7 +159,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `Vi henter vedtaket som nå er annullert`() {
-        val vedtak = hentV1Vedtak(fnr)
+        val vedtak = hentVedtak(fnr)
 
         vedtak shouldHaveSize 1
         vedtak.first().annullert `should be` true
@@ -191,7 +191,6 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(7)
     fun `Vi har nå ingen vedtak`() {
-        hentV1Vedtak(fnr) shouldHaveSize 0
         hentVedtak(fnr) shouldHaveSize 0
     }
 }

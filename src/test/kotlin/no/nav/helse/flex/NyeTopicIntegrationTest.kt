@@ -108,7 +108,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `finner ikke vedtaket`() {
-        hentV1Vedtak(fnr).shouldBeEmpty()
         hentVedtak(fnr).shouldBeEmpty()
     }
 
@@ -132,12 +131,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
-    }
-
-    @Test
-    @Order(4)
-    fun `finner ikke vedtaket i v1`() {
-        hentV1Vedtak(fnr).shouldBeEmpty()
     }
 
     @Test

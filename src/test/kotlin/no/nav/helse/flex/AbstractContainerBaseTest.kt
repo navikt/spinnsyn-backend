@@ -58,16 +58,6 @@ abstract class AbstractContainerBaseTest {
         )
     }
 
-    fun hentV1Vedtak(fnr: String): List<RetroRSVedtak> {
-        val json = mockMvc.perform(
-            get("/api/v1/vedtak")
-                .header("Authorization", "Bearer ${jwt(fnr)}")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk).andReturn().response.contentAsString
-
-        return objectMapper.readValue(json)
-    }
-
     fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
         val json = mockMvc.perform(
             get("/api/v2/vedtak")
