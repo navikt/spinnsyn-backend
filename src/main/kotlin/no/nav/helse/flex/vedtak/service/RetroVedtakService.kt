@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
-import java.util.*
 
 @Service
 class RetroVedtakService(
@@ -92,9 +91,51 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
     )
 }
 
+fun RSVedtakWrapper.tilRetroRSVedtak(): RetroRSVedtak {
+    return RetroRSVedtak(
+        id = this.id,
+        annullert = this.annullert,
+        lest = this.lest,
+        lestDato = this.lestDato,
+        opprettet = this.opprettet,
+
+        vedtak = VedtakDto(
+            automatiskBehandling = this.vedtak.utbetaling.automatiskBehandling,
+            organisasjonsnummer = this.vedtak.organisasjonsnummer,
+            dokumenter = this.vedtak.dokumenter,
+            sykepengegrunnlag = this.vedtak.sykepengegrunnlag,
+            månedsinntekt = this.vedtak.inntekt,
+            fom = this.vedtak.fom,
+            tom = this.vedtak.tom,
+            forbrukteSykedager = this.vedtak.utbetaling.forbrukteSykedager,
+            gjenståendeSykedager = this.vedtak.utbetaling.gjenståendeSykedager,
+            utbetalinger = listOf(
+                VedtakDto.UtbetalingDto(
+                    mottaker = this.vedtak.utbetaling.arbeidsgiverOppdrag.mottaker,
+                    fagområde = "SPREF",
+                    totalbeløp = this.vedtak.utbetaling.arbeidsgiverOppdrag.nettoBeløp,
+                    utbetalingslinjer = this.vedtak.utbetaling.arbeidsgiverOppdrag.utbetalingslinjer.map { it.tilUtbetalingslinjeDto() }
+                )
+            )
+        )
+    )
+}
+
+private fun RSUtbetalingslinje.tilUtbetalingslinjeDto(): VedtakDto.UtbetalingDto.UtbetalingslinjeDto {
+    return VedtakDto.UtbetalingDto.UtbetalingslinjeDto(
+        beløp = this.dagsats,
+        fom = this.fom,
+        tom = this.tom,
+        grad = this.grad,
+        dagsats = this.dagsatsTransformasjonHjelper,
+        sykedager = this.stønadsdager,
+    )
+}
+
 private fun VedtakDto.UtbetalingDto.UtbetalingslinjeDto.tilRsUtbetalingslinje(): RSUtbetalingslinje {
     return RSUtbetalingslinje(
         dagsats = this.beløp,
+        dagsatsTransformasjonHjelper = this.dagsats,
         fom = this.fom,
         tom = this.tom,
         grad = this.grad,
