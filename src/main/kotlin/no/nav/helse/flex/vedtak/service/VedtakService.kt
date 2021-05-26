@@ -84,6 +84,12 @@ class VedtakService(
 
         return vedtakMedUtbetaling.map { it.tilRsVedtakWrapper() }
     }
+
+    fun hentRetroVedtak(fnr: String): List<RetroRSVedtak> {
+        return this.hentVedtak(fnr).map {
+            it.tilRetroRSVedtak()
+        }
+    }
 }
 
 private fun List<Annullering>.annullererVedtak(vedtakDbRecord: VedtakFattetForEksternDto): Boolean {
@@ -104,7 +110,13 @@ fun VedtakFattetForEksternDto.matcherAnnullering(annullering: Annullering): Bool
 
 private fun UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto.tilRsUtbetalingslinje(): RSUtbetalingslinje {
     return RSUtbetalingslinje(
-        fom = fom, tom = tom, dagsats = dagsats, totalbeløp = totalbeløp, grad = grad, stønadsdager = stønadsdager
+        fom = fom,
+        tom = tom,
+        dagsats = dagsats,
+        totalbeløp = totalbeløp,
+        grad = grad,
+        stønadsdager = stønadsdager,
+        dagsatsTransformasjonHjelper = dagsats
     )
 }
 

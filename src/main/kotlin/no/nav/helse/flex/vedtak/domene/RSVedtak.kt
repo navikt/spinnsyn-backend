@@ -42,6 +42,7 @@ data class RSUtbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
     val dagsats: Int,
+    val dagsatsTransformasjonHjelper: Int,
     val totalbeløp: Int,
     val grad: Double,
     val stønadsdager: Int

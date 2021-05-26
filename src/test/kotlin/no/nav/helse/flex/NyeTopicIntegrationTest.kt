@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
@@ -35,6 +37,9 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var annulleringDAO: AnnulleringDAO
+
+    @Autowired
+    lateinit var restTemplate: RestTemplate
 
     final val fnr = "1233342"
     final val aktørId = "321"
@@ -145,6 +150,24 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(5)
+    fun `En veileder med tilgang kan hente vedtaket`() {
+
+        val mockSyfotilgangscontrollServer = MockRestServiceServer.createServer(restTemplate)
+        val veilederToken = veilederToken()
+        mockSyfotilgangscontrollServer.mockTilgangskontrollResponse(
+            tilgang = true,
+            fnr = fnr,
+            veilederToken = veilederToken
+        )
+        val vedtak = hentVedtakSomVeileder(fnr, veilederToken)
+
+        vedtak shouldHaveSize 1
+        vedtak.first().lest `should be` true
+        mockSyfotilgangscontrollServer.verify()
+    }
+
+    @Test
+    @Order(6)
     fun `vi endrer vedtaket til å være ulest`() {
         val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
         vedtakRepository.save(dbVedtak.copy(lest = null))
@@ -155,7 +178,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     fun `vi leser vedtaket`() {
         val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
         vedtakRepository.save(dbVedtak.copy(lest = null))
@@ -185,7 +208,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     fun `Ei annullering mottatt på kafka blir lagret i db`() {
         kafkaProducer.send(
             ProducerRecord(
@@ -203,7 +226,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     fun `vi finner vedtaket i v2 hvor det nå er annullert`() {
         val vedtak = hentVedtak(fnr)
         vedtak.shouldHaveSize(1)
