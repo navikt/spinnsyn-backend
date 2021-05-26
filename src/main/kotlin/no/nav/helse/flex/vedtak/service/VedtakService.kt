@@ -12,7 +12,8 @@ class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
     private val retroVedtakService: RetroVedtakService,
-    private val environmentToggles: EnvironmentToggles
+    private val environmentToggles: EnvironmentToggles,
+    private val annulleringDAO: AnnulleringDAO
 
 ) {
 
@@ -32,6 +33,7 @@ class VedtakService(
     private fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
         val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+        val annulleringer = annulleringDAO.finnAnnullering(fnr)
 
         val eksisterendeUtbetalinger = utbetalinger
             .filter { it.utbetalingType == "UTBETALING" }
@@ -52,7 +54,7 @@ class VedtakService(
 
             return RSVedtakWrapper(
                 id = this.id!!,
-                annullert = false, // TODO håndter annulleringer i den nye
+                annullert = annulleringer.annullererVedtak(vedtaket),
                 lest = this.lest != null,
                 lestDato = this.lest?.atZone(ZoneId.of("Europe/Oslo"))?.toOffsetDateTime(),
                 opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
@@ -82,6 +84,22 @@ class VedtakService(
 
         return vedtakMedUtbetaling.map { it.tilRsVedtakWrapper() }
     }
+}
+
+private fun List<Annullering>.annullererVedtak(vedtakDbRecord: VedtakFattetForEksternDto): Boolean {
+    return this.any {
+        vedtakDbRecord.matcherAnnullering(it)
+    }
+}
+
+fun VedtakFattetForEksternDto.matcherAnnullering(annullering: Annullering): Boolean {
+    val vedtaksperiode = Periode(this.fom, this.tom)
+    val annulleringsperiode = Periode(
+        annullering.annullering.fom ?: return false,
+        annullering.annullering.tom
+            ?: return false
+    )
+    return vedtaksperiode.overlapper(annulleringsperiode) && (this.organisasjonsnummer == annullering.annullering.orgnummer)
 }
 
 private fun UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto.tilRsUtbetalingslinje(): RSUtbetalingslinje {
