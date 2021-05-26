@@ -10,7 +10,7 @@ plugins {
 group = "no.nav.helse.flex"
 version = "1.0.0"
 description = "spinnsyn-backend"
-java.sourceCompatibility = JavaVersion.VERSION_16
+java.sourceCompatibility = JavaVersion.VERSION_14
 
 ext["okhttp3.version"] = "4.9.0" // For at token support testen kjører
 
@@ -82,7 +82,7 @@ tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "16"
+        jvmTarget = "14"
         if (System.getenv("CI") == "true") {
             kotlinOptions.allWarningsAsErrors = true
         }
