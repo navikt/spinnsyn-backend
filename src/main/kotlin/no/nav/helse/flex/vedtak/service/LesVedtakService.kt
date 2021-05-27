@@ -54,6 +54,10 @@ class LesVedtakService(
             return ALLEREDE_LEST
         }
 
+        if (vedtakDbRecord.brukernotifikasjonSendt == null) {
+            return ALDRI_SENDT_BRUKERNOTIFIKASJON
+        }
+
         vedtakRepository.save(vedtakDbRecord.copy(lest = Instant.now()))
 
         return LEST
@@ -74,7 +78,8 @@ class LesVedtakService(
     enum class LesResultat {
         IKKE_FUNNET,
         LEST,
-        ALLEREDE_LEST
+        ALLEREDE_LEST,
+        ALDRI_SENDT_BRUKERNOTIFIKASJON,
     }
 
     class VedtakIkkeFunnetException(vedtaksId: String) : AbstractApiError(
