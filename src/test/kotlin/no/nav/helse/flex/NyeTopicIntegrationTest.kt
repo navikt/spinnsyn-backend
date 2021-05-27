@@ -140,11 +140,18 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
+    fun `finner vedtaket med queryen for brukernotifkasjon`() {
+        val vedtak = vedtakRepository.findByLestIsNullAndAndBrukernotifikasjonSendtIsNull()
+        vedtak.shouldHaveSize(1)
+    }
+
+    @Test
+    @Order(4)
     fun `finner vedtaket i v2`() {
         val vedtak = hentVedtak(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
-        vedtak[0].lest.`should be true`()
+        vedtak[0].lest.`should be false`()
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
     }
 
@@ -162,23 +169,12 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         val vedtak = hentVedtakSomVeileder(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
-        vedtak.first().lest `should be` true
+        vedtak.first().lest `should be` false
         mockSyfotilgangscontrollServer.verify()
     }
 
     @Test
     @Order(6)
-    fun `vi endrer vedtaket til å være ulest`() {
-        val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
-        vedtakRepository.save(dbVedtak.copy(lest = null))
-
-        val vedtak = hentVedtak(fnr)
-        vedtak.shouldHaveSize(1)
-        vedtak[0].lest.`should be false`()
-    }
-
-    @Test
-    @Order(7)
     fun `vi leser vedtaket`() {
         val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
         vedtakRepository.save(dbVedtak.copy(lest = null))
@@ -205,6 +201,13 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         done.getFodselsnummer() `should be equal to` fnr
 
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).first().lest.`should not be null`()
+    }
+
+    @Test
+    @Order(7)
+    fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
+        val vedtak = vedtakRepository.findByLestIsNullAndAndBrukernotifikasjonSendtIsNull()
+        vedtak.shouldBeEmpty()
     }
 
     @Test

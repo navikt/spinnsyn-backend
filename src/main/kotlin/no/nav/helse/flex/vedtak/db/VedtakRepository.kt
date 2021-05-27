@@ -9,6 +9,7 @@ import java.time.Instant
 @Repository
 interface VedtakRepository : CrudRepository<VedtakDbRecord, String> {
     fun findVedtakDbRecordsByFnr(fnr: String): List<VedtakDbRecord>
+    fun findByLestIsNullAndAndBrukernotifikasjonSendtIsNull(): List<VedtakDbRecord>
 }
 
 @Table("vedtak_v2")
@@ -18,6 +19,7 @@ data class VedtakDbRecord(
     val fnr: String,
     val vedtak: String,
     val opprettet: Instant,
+    val brukernotifikasjonSendt: Instant? = null,
     val utbetalingId: String?,
     val lest: Instant? = null,
 )
