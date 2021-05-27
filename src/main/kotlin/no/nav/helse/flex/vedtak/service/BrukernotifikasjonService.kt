@@ -1,0 +1,77 @@
+package no.nav.helse.flex.vedtak.service
+
+import no.nav.brukernotifikasjon.schemas.Nokkel
+import no.nav.brukernotifikasjon.schemas.Oppgave
+import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
+import no.nav.helse.flex.logger
+import no.nav.helse.flex.metrikk.Metrikk
+import no.nav.helse.flex.vedtak.db.*
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.stereotype.Service
+import java.time.Instant
+
+@Service
+class BrukernotifikasjonService(
+    private val vedtakRepository: VedtakRepository,
+    private val utbetalingRepository: UtbetalingRepository,
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
+    private val metrikk: Metrikk,
+    @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
+    @Value("\${spinnsyn-frontend.url}") private val spinnsynFrontendUrl: String,
+) {
+
+    val log = logger()
+
+    fun prosseserVedtak(): Int {
+        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNull()
+        log.info("Fant ${vedtak.size} vedtak som ikke er lest og mangler brukernotifikasjon")
+        var sendt = 0
+        vedtak.forEach { vedtaket ->
+            val refreshetVedtak = vedtakRepository.findByIdOrNull(vedtaket.id!!)!!
+            if (refreshetVedtak.lest != null || refreshetVedtak.brukernotifikasjonSendt != null) {
+                log.info("Vedtak ${refreshetVedtak.id} er allerede lest eller fått brukernotifkasjon")
+                return@forEach
+            }
+
+            if (refreshetVedtak.utbetalingId == null) {
+                log.info("Vedtak ${refreshetVedtak.id} har utbetalingid null, det er rart og skal ikke skje")
+                return@forEach
+            }
+
+            val utbetalingEksisterer = utbetalingRepository
+                .findUtbetalingDbRecordsByFnr(refreshetVedtak.fnr)
+                .any { u -> u.utbetalingId == refreshetVedtak.utbetalingId }
+
+            if (!utbetalingEksisterer) {
+                if (refreshetVedtak.opprettet.isBefore(Instant.now().minusSeconds(60))) {
+                    log.warn("Vedtak ${refreshetVedtak.id} har ikke tilhørende utbetaling id etter 1 minutt. Sender ikke notifikasjon")
+                }
+                return@forEach
+            }
+
+            sendNotifikasjon(vedtaket)
+            sendt += 1
+        }
+        return sendt
+    }
+
+    fun sendNotifikasjon(vedtakDbRecord: VedtakDbRecord) {
+        val id = vedtakDbRecord.id!!
+        val sendtTidspunkt = Instant.now()
+        brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(
+            Nokkel(serviceuserUsername, vedtakDbRecord.id),
+            Oppgave(
+                sendtTidspunkt.toEpochMilli(),
+                vedtakDbRecord.fnr,
+                id,
+                "Sykepengene dine er beregnet - se resultatet",
+                "$spinnsynFrontendUrl/vedtak/$id",
+                4,
+                true
+            )
+        )
+        vedtakRepository.save(vedtakDbRecord.copy(brukernotifikasjonSendt = sendtTidspunkt))
+        metrikk.BRUKERNOTIFIKASJON_SENDT.increment()
+    }
+}
