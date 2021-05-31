@@ -1,4 +1,4 @@
-package no.nav.helse.flex.vedtak.domene
+package no.nav.helse.flex.domene
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.objectMapper

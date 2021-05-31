@@ -1,13 +1,13 @@
 package no.nav.helse.flex
 
+import no.nav.helse.flex.db.AnnulleringDAO
+import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.db.VedtakRepository
+import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.vedtak.db.AnnulleringDAO
-import no.nav.helse.flex.vedtak.db.UtbetalingRepository
-import no.nav.helse.flex.vedtak.db.VedtakRepository
-import no.nav.helse.flex.vedtak.domene.*
-import no.nav.helse.flex.vedtak.service.BrukernotifikasjonService
+import no.nav.helse.flex.service.BrukernotifikasjonService
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord

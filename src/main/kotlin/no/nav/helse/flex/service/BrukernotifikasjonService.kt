@@ -1,11 +1,11 @@
-package no.nav.helse.flex.vedtak.service
+package no.nav.helse.flex.service
 
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
+import no.nav.helse.flex.db.*
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
-import no.nav.helse.flex.vedtak.db.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service

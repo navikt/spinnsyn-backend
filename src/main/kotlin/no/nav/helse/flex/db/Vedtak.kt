@@ -1,6 +1,6 @@
-package no.nav.helse.flex.vedtak.db
+package no.nav.helse.flex.db
 
-import no.nav.helse.flex.vedtak.domene.VedtakDto
+import no.nav.helse.flex.domene.VedtakDto
 import org.springframework.data.annotation.Id
 import java.time.Instant
 import java.time.OffsetDateTime

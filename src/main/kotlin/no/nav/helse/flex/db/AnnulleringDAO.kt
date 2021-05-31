@@ -1,7 +1,7 @@
-package no.nav.helse.flex.vedtak.db
+package no.nav.helse.flex.db
 
-import no.nav.helse.flex.vedtak.domene.AnnulleringDto
-import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
+import no.nav.helse.flex.domene.AnnulleringDto
+import no.nav.helse.flex.domene.tilAnnulleringDto
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate

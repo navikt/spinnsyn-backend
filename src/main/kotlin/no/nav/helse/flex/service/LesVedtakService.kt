@@ -1,13 +1,13 @@
-package no.nav.helse.flex.vedtak.service
+package no.nav.helse.flex.service
 
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
+import no.nav.helse.flex.api.AbstractApiError
+import no.nav.helse.flex.api.LogLevel
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
+import no.nav.helse.flex.db.*
 import no.nav.helse.flex.metrikk.Metrikk
-import no.nav.helse.flex.vedtak.api.AbstractApiError
-import no.nav.helse.flex.vedtak.api.LogLevel
-import no.nav.helse.flex.vedtak.db.*
-import no.nav.helse.flex.vedtak.service.LesVedtakService.LesResultat.*
+import no.nav.helse.flex.service.LesVedtakService.LesResultat.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service

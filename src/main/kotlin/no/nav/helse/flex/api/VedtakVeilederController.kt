@@ -1,8 +1,8 @@
-package no.nav.helse.flex.vedtak.api
+package no.nav.helse.flex.api
 
 import no.nav.helse.flex.client.SyfoTilgangskontrollClient
-import no.nav.helse.flex.vedtak.service.RetroRSVedtak
-import no.nav.helse.flex.vedtak.service.VedtakService
+import no.nav.helse.flex.service.RetroRSVedtak
+import no.nav.helse.flex.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder

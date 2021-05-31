@@ -1,13 +1,12 @@
-package no.nav.helse.flex.vedtak.service
+package no.nav.helse.flex.service
 
+import no.nav.helse.flex.db.UtbetalingDbRecord
+import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.vedtak.db.UtbetalingDbRecord
-import no.nav.helse.flex.vedtak.db.UtbetalingRepository
-import no.nav.helse.flex.vedtak.domene.tilUtbetalingUtbetalt
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.util.*
 
 @Service
 class MottaUtbetalingService(

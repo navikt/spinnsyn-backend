@@ -1,4 +1,4 @@
-package no.nav.helse.flex.vedtak.api
+package no.nav.helse.flex.api
 
 import no.nav.helse.flex.logger
 import no.nav.security.token.support.core.exceptions.JwtTokenInvalidClaimException

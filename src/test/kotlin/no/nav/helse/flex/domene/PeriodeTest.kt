@@ -1,6 +1,5 @@
 package no.nav.helse.flex.domene
 
-import no.nav.helse.flex.vedtak.domene.Periode
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

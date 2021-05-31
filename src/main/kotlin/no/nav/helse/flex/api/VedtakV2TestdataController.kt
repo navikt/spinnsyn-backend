@@ -1,8 +1,8 @@
-package no.nav.helse.flex.vedtak.api
+package no.nav.helse.flex.api
 
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.vedtak.service.MottaUtbetalingService
-import no.nav.helse.flex.vedtak.service.MottaVedtakService
+import no.nav.helse.flex.service.MottaUtbetalingService
+import no.nav.helse.flex.service.MottaVedtakService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
