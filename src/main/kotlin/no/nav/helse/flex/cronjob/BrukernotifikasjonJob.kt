@@ -19,6 +19,8 @@ class BrukernotifikasjonJob(
             log.info("Kjører brukernotifikasjonjob")
             val antall = brukernotifikasjonService.prosseserVedtak()
             log.info("Ferdig med brukernotifikasjonjob. $antall notifikasjoner sendt")
+        } else {
+            log.info("Kjører ikke brukernotifikasjonjob siden denne podden ikke er leader")
         }
     }
 }

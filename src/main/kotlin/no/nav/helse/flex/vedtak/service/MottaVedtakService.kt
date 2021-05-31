@@ -45,7 +45,6 @@ class MottaVedtakService(
                 lest = lest
             )
         )
-        log.info("Toggle sier ${environmentToggles.isProduction()} . lest settes til $lest for vedtak ${vedtakDB.id}")
 
         log.info("Opprettet vedtak med database id: ${vedtakDB.id} for utbetaling id ${vedtakDB.utbetalingId}")
     }
