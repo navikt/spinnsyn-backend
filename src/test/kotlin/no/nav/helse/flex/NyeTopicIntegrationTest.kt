@@ -7,6 +7,7 @@ import no.nav.helse.flex.vedtak.db.AnnulleringDAO
 import no.nav.helse.flex.vedtak.db.UtbetalingRepository
 import no.nav.helse.flex.vedtak.db.VedtakRepository
 import no.nav.helse.flex.vedtak.domene.*
+import no.nav.helse.flex.vedtak.service.BrukernotifikasjonService
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
@@ -40,6 +42,12 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    lateinit var brukernotifikasjonService: BrukernotifikasjonService
+
+    @Value("\${on-prem-kafka.username}")
+    lateinit var systembruker: String
 
     final val fnr = "1233342"
     final val aktørId = "321"
@@ -117,6 +125,13 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
+    @Order(2)
+    fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
+        val antall = brukernotifikasjonService.prosseserVedtak()
+        antall `should be equal to` 0
+    }
+
+    @Test
     @Order(3)
     fun `mottar utbetaling`() {
         kafkaProducer.send(
@@ -140,12 +155,45 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
+    fun `finner vedtaket med queryen for brukernotifkasjon`() {
+        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNull()
+        vedtak.shouldHaveSize(1)
+    }
+
+    @Test
+    @Order(4)
     fun `finner vedtaket i v2`() {
         val vedtak = hentVedtak(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
-        vedtak[0].lest.`should be true`()
+        vedtak[0].lest.`should be false`()
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
+    }
+
+    @Test
+    @Order(4)
+    fun `en brukernotifkasjon går ut når cronjobben kjøres`() {
+        val antall = brukernotifikasjonService.prosseserVedtak()
+        antall `should be equal to` 1
+
+        val id = hentVedtak(fnr).first().id
+
+        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+        doneKafkaConsumer.ventPåRecords(antall = 0)
+
+        oppgaver.shouldHaveSize(1)
+
+        val nokkel = oppgaver[0].key()
+        nokkel.getSystembruker() shouldBeEqualTo systembruker
+
+        val oppgave = oppgaver[0].value()
+
+        oppgave.getFodselsnummer() shouldBeEqualTo fnr
+        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
+        oppgave.getTekst() shouldBeEqualTo "Sykepengene dine er beregnet - se resultatet"
+        oppgave.getLink() shouldBeEqualTo "blah/vedtak/$id"
+        oppgave.getGrupperingsId() shouldBeEqualTo id
+        oppgave.getEksternVarsling() shouldBeEqualTo true
     }
 
     @Test
@@ -162,23 +210,12 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         val vedtak = hentVedtakSomVeileder(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
-        vedtak.first().lest `should be` true
+        vedtak.first().lest `should be` false
         mockSyfotilgangscontrollServer.verify()
     }
 
     @Test
     @Order(6)
-    fun `vi endrer vedtaket til å være ulest`() {
-        val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
-        vedtakRepository.save(dbVedtak.copy(lest = null))
-
-        val vedtak = hentVedtak(fnr)
-        vedtak.shouldHaveSize(1)
-        vedtak[0].lest.`should be false`()
-    }
-
-    @Test
-    @Order(7)
     fun `vi leser vedtaket`() {
         val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
         vedtakRepository.save(dbVedtak.copy(lest = null))
@@ -205,6 +242,13 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         done.getFodselsnummer() `should be equal to` fnr
 
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).first().lest.`should not be null`()
+    }
+
+    @Test
+    @Order(7)
+    fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
+        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNull()
+        vedtak.shouldBeEmpty()
     }
 
     @Test
