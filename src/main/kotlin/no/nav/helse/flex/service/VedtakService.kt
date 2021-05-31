@@ -23,14 +23,14 @@ class VedtakService(
             return retroVedtak
         }
         val nyeVedtak = hentVedtakFraNyeTabeller(fnr)
-        // TODO fjern duplikater på et eller annet vis. Kanskje vi gjør det på vei inn??
+
         return ArrayList<RSVedtakWrapper>().also {
             it.addAll(retroVedtak)
             it.addAll(nyeVedtak)
         }
     }
 
-    private fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
+    fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
         val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
