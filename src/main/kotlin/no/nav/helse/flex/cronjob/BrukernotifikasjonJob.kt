@@ -1,7 +1,7 @@
 package no.nav.helse.flex.cronjob
 
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.vedtak.service.BrukernotifikasjonService
+import no.nav.helse.flex.service.BrukernotifikasjonService
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 

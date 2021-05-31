@@ -1,8 +1,8 @@
-package no.nav.helse.flex.vedtak.service
+package no.nav.helse.flex.service
 
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.vedtak.db.*
-import no.nav.helse.flex.vedtak.domene.*
+import no.nav.helse.flex.db.*
+import no.nav.helse.flex.domene.*
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.ZoneId

@@ -1,14 +1,14 @@
-package no.nav.helse.flex.vedtak.service
+package no.nav.helse.flex.service
 
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
+import no.nav.helse.flex.db.AnnulleringDAO
+import no.nav.helse.flex.db.VedtakDAO
+import no.nav.helse.flex.domene.tilAnnulleringDto
+import no.nav.helse.flex.domene.tilVedtakDto
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
-import no.nav.helse.flex.vedtak.db.AnnulleringDAO
-import no.nav.helse.flex.vedtak.db.VedtakDAO
-import no.nav.helse.flex.vedtak.domene.tilAnnulleringDto
-import no.nav.helse.flex.vedtak.domene.tilVedtakDto
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service

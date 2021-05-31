@@ -1,4 +1,4 @@
-package no.nav.helse.flex.vedtak.db
+package no.nav.helse.flex.db
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table

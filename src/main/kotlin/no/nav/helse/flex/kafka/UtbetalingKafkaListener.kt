@@ -1,7 +1,7 @@
 package no.nav.helse.flex.kafka
 
 import no.nav.helse.flex.kafka.ConsumerStoppedEventExt.restart
-import no.nav.helse.flex.vedtak.service.MottaUtbetalingService
+import no.nav.helse.flex.service.MottaUtbetalingService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener

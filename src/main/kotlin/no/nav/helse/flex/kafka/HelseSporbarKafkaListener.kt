@@ -1,6 +1,6 @@
 package no.nav.helse.flex.kafka
 
-import no.nav.helse.flex.vedtak.service.RetroMottaVedtakService
+import no.nav.helse.flex.service.RetroMottaVedtakService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment

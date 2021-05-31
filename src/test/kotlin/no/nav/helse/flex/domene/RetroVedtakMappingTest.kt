@@ -1,10 +1,8 @@
 package no.nav.helse.flex.domene
 
-import no.nav.helse.flex.vedtak.db.Vedtak
-import no.nav.helse.flex.vedtak.domene.Dokument
-import no.nav.helse.flex.vedtak.domene.VedtakDto
-import no.nav.helse.flex.vedtak.service.tilRSVedtakWrapper
-import no.nav.helse.flex.vedtak.service.tilRetroRSVedtak
+import no.nav.helse.flex.db.Vedtak
+import no.nav.helse.flex.service.tilRSVedtakWrapper
+import no.nav.helse.flex.service.tilRetroRSVedtak
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

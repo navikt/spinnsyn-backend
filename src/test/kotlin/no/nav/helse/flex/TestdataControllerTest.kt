@@ -1,10 +1,10 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.vedtak.db.VedtakDAO
-import no.nav.helse.flex.vedtak.domene.AnnulleringDto
-import no.nav.helse.flex.vedtak.domene.UtbetalingUtbetalt
-import no.nav.helse.flex.vedtak.domene.VedtakDto
-import no.nav.helse.flex.vedtak.domene.VedtakFattetForEksternDto
+import no.nav.helse.flex.db.VedtakDAO
+import no.nav.helse.flex.domene.AnnulleringDto
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
+import no.nav.helse.flex.domene.VedtakDto
+import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize

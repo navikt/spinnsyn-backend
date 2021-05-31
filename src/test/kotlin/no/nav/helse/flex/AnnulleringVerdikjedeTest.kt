@@ -1,10 +1,10 @@
 package no.nav.helse.flex
 
+import no.nav.helse.flex.db.AnnulleringDAO
+import no.nav.helse.flex.db.VedtakDAO
+import no.nav.helse.flex.domene.AnnulleringDto
+import no.nav.helse.flex.domene.VedtakDto
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
-import no.nav.helse.flex.vedtak.db.AnnulleringDAO
-import no.nav.helse.flex.vedtak.db.VedtakDAO
-import no.nav.helse.flex.vedtak.domene.AnnulleringDto
-import no.nav.helse.flex.vedtak.domene.VedtakDto
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer

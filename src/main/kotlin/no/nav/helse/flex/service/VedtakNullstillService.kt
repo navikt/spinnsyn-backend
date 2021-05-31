@@ -1,13 +1,13 @@
-package no.nav.helse.flex.vedtak.service
+package no.nav.helse.flex.service
 
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.vedtak.db.AnnulleringDAO
-import no.nav.helse.flex.vedtak.db.UtbetalingRepository
-import no.nav.helse.flex.vedtak.db.VedtakDAO
-import no.nav.helse.flex.vedtak.db.VedtakRepository
+import no.nav.helse.flex.db.AnnulleringDAO
+import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.db.VedtakDAO
+import no.nav.helse.flex.db.VedtakRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.Instant

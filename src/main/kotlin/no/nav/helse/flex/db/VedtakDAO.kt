@@ -1,6 +1,6 @@
-package no.nav.helse.flex.vedtak.db
+package no.nav.helse.flex.db
 
-import no.nav.helse.flex.vedtak.domene.tilVedtakDto
+import no.nav.helse.flex.domene.tilVedtakDto
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate

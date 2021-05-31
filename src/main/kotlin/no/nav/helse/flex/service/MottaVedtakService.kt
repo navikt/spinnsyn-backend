@@ -1,10 +1,10 @@
-package no.nav.helse.flex.vedtak.service
+package no.nav.helse.flex.service
 
 import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.db.VedtakDbRecord
+import no.nav.helse.flex.db.VedtakRepository
+import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.vedtak.db.VedtakDbRecord
-import no.nav.helse.flex.vedtak.db.VedtakRepository
-import no.nav.helse.flex.vedtak.domene.tilVedtakFattetForEksternDto
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 import java.time.Instant

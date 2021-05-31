@@ -1,8 +1,8 @@
-package no.nav.helse.flex.vedtak.api
+package no.nav.helse.flex.api
 
-import no.nav.helse.flex.vedtak.domene.RSVedtakWrapper
-import no.nav.helse.flex.vedtak.service.LesVedtakService
-import no.nav.helse.flex.vedtak.service.VedtakService
+import no.nav.helse.flex.domene.RSVedtakWrapper
+import no.nav.helse.flex.service.LesVedtakService
+import no.nav.helse.flex.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE

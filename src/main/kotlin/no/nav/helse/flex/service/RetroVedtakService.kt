@@ -1,11 +1,11 @@
-package no.nav.helse.flex.vedtak.service
+package no.nav.helse.flex.service
 
+import no.nav.helse.flex.db.Annullering
+import no.nav.helse.flex.db.AnnulleringDAO
+import no.nav.helse.flex.db.Vedtak
+import no.nav.helse.flex.db.VedtakDAO
+import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.vedtak.db.Annullering
-import no.nav.helse.flex.vedtak.db.AnnulleringDAO
-import no.nav.helse.flex.vedtak.db.Vedtak
-import no.nav.helse.flex.vedtak.db.VedtakDAO
-import no.nav.helse.flex.vedtak.domene.*
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.OffsetDateTime
