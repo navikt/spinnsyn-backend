@@ -30,13 +30,19 @@ class VedtakService(
         }
     }
 
-    fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
+    fun hentVedtakFraNyeTabeller(fnr: String, kunUtbetaling: Boolean = true): List<RSVedtakWrapper> {
         val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
 
         val eksisterendeUtbetalinger = utbetalinger
-            .filter { it.utbetalingType == "UTBETALING" }
+            .filter {
+                if (kunUtbetaling) {
+                    it.utbetalingType == "UTBETALING"
+                } else {
+                    true
+                }
+            }
 
         val eksisterendeUtbetalingIder = eksisterendeUtbetalinger
             .map { it.utbetalingId }
