@@ -29,6 +29,11 @@ class MottaUtbetalingService(
             throw RuntimeException("Kunne ikke deserialisere utbetaling", e)
         }
 
+        if (utbetalingRepository.existsByUtbetalingId(utbetalingSerialisert.utbetalingId)) {
+            log.warn("Vedtak med utbetaling id ${utbetalingSerialisert.utbetalingId} eksisterer allerede")
+            return
+        }
+
         val utbetalingDB = utbetalingRepository.save(
             UtbetalingDbRecord(
                 fnr = fnr,

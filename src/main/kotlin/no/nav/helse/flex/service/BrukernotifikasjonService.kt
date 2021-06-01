@@ -24,7 +24,7 @@ class BrukernotifikasjonService(
     val log = logger()
 
     fun prosseserVedtak(): Int {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNull()
+        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         log.info("Fant ${vedtak.size} vedtak som ikke er lest og mangler brukernotifikasjon")
         var sendt = 0
         vedtak.forEach { vedtaket ->
@@ -39,14 +39,19 @@ class BrukernotifikasjonService(
                 return@forEach
             }
 
-            val utbetalingEksisterer = utbetalingRepository
+            val utbetaling = utbetalingRepository
                 .findUtbetalingDbRecordsByFnr(refreshetVedtak.fnr)
-                .any { u -> u.utbetalingId == refreshetVedtak.utbetalingId }
+                .firstOrNull { u -> u.utbetalingId == refreshetVedtak.utbetalingId }
 
-            if (!utbetalingEksisterer) {
+            if (utbetaling == null) {
                 if (refreshetVedtak.opprettet.isBefore(Instant.now().minusSeconds(60))) {
                     log.warn("Vedtak ${refreshetVedtak.id} har ikke tilhørende utbetaling id etter 1 minutt. Sender ikke notifikasjon")
                 }
+                return@forEach
+            }
+
+            if (utbetaling.utbetalingType != "UTBETALING") {
+                vedtakRepository.save(vedtaket.copy(brukernotifikasjonUtelatt = Instant.now()))
                 return@forEach
             }
 

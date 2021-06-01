@@ -36,6 +36,13 @@ class MottaVedtakService(
             null
         }
 
+        vedtakSerialisert.utbetalingId?.let {
+            if (vedtakRepository.existsByUtbetalingId(it)) {
+                log.warn("Vedtak med utbetaling id $it eksisterer allerede")
+                return
+            }
+        }
+
         val vedtakDB = vedtakRepository.save(
             VedtakDbRecord(
                 fnr = fnr,
