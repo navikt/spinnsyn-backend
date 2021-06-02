@@ -34,6 +34,7 @@ class VedtakV2TestdataController(
         mottaVedtakService.mottaVedtak(
             fnr = fnr,
             vedtak = vedtakV2.vedtak,
+            timestamp = Instant.now(),
         )
 
         if (vedtakV2.utbetaling != null) {
