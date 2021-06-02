@@ -1,6 +1,5 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.VedtakDAO
 import no.nav.helse.flex.domene.AnnulleringDto
 import no.nav.helse.flex.domene.VedtakDto
@@ -28,9 +27,6 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var vedtakDAO: VedtakDAO
-
-    @Autowired
-    lateinit var annulleringDAO: AnnulleringDAO
 
     val fnr = "983475"
     val fom = LocalDate.now().minusDays(7)

@@ -1,8 +1,5 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.db.AnnulleringDAO
-import no.nav.helse.flex.db.UtbetalingRepository
-import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
@@ -30,15 +27,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
-
-    @Autowired
-    lateinit var vedtakRepository: VedtakRepository
-
-    @Autowired
-    lateinit var utbetalingRepository: UtbetalingRepository
-
-    @Autowired
-    lateinit var annulleringDAO: AnnulleringDAO
 
     @Autowired
     lateinit var restTemplate: RestTemplate
@@ -156,7 +144,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `finner vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNull()
+        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         vedtak.shouldHaveSize(1)
     }
 
@@ -247,7 +235,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(7)
     fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNull()
+        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         vedtak.shouldBeEmpty()
     }
 
@@ -275,5 +263,88 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         val vedtak = hentVedtak(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be true`()
+    }
+
+    @Test
+    @Order(10)
+    fun `mottar vedtak med null utbetaling id`() {
+
+        vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(1)
+
+        kafkaProducer.send(
+            ProducerRecord(
+                VEDTAK_TOPIC,
+                null,
+                fnr,
+                vedtak.copy(utbetalingId = null).serialisertTilString()
+            )
+        ).get()
+
+        await().atMost(5, TimeUnit.SECONDS).until {
+            vedtakRepository.findVedtakDbRecordsByFnr(fnr).size == 2
+        }
+    }
+
+    @Test
+    @Order(11)
+    fun `mottar enda et vedtak med null utbetaling id`() {
+        vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(2)
+
+        kafkaProducer.send(
+            ProducerRecord(
+                VEDTAK_TOPIC,
+                null,
+                fnr,
+                vedtak.copy(utbetalingId = null).serialisertTilString()
+            )
+        ).get()
+
+        await().atMost(5, TimeUnit.SECONDS).until {
+            vedtakRepository.findVedtakDbRecordsByFnr(fnr).size == 3
+        }
+    }
+
+    @Test
+    @Order(12)
+    fun `mottar duplikat av det første vedtaket`() {
+
+        vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(3)
+
+        kafkaProducer.send(
+            ProducerRecord(
+                VEDTAK_TOPIC,
+                null,
+                fnr,
+                vedtak.serialisertTilString()
+            )
+        ).get()
+
+        await().during(2, TimeUnit.SECONDS).until {
+            vedtakRepository.findVedtakDbRecordsByFnr(fnr).size == 3
+        }
+
+        vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(3)
+    }
+
+    @Test
+    @Order(13)
+    fun `mottar duplikat av den første utbetalingen`() {
+
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).shouldHaveSize(1)
+
+        kafkaProducer.send(
+            ProducerRecord(
+                UTBETALING_TOPIC,
+                null,
+                fnr,
+                utbetaling.serialisertTilString()
+            )
+        ).get()
+
+        await().during(5, TimeUnit.SECONDS).until {
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).size == 1
+        }
+
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).shouldHaveSize(1)
     }
 }

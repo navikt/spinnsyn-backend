@@ -23,12 +23,12 @@ class MigreringAnalyseController(
     @GetMapping("/analyse", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @ProtectedWithClaims(issuer = "veileder")
-    fun hentVedtak(@RequestParam fnr: String, @RequestParam kunUtbetaling: Boolean): AnalyseResponse {
+    fun hentVedtak(@RequestParam fnr: String): AnalyseResponse {
         if (!syfoTilgangskontrollClient.sjekkTilgangVeilederToken(veilederToken(), fnr).harTilgang) {
             throw IkkeTilgangException()
         }
 
-        val fraNye = vedtakService.hentVedtakFraNyeTabeller(fnr, kunUtbetaling)
+        val fraNye = vedtakService.hentVedtakFraNyeTabeller(fnr)
         val fraGamle = retroVedtakService.hentVedtak(fnr)
 
         return AnalyseResponse(fraNye = fraNye, fraGamle = fraGamle)

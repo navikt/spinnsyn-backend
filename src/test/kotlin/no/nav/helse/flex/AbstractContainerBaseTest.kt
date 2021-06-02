@@ -6,6 +6,9 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.DONE_TOPIC
 import no.nav.helse.flex.brukernotifkasjon.OPPGAVE_TOPIC
+import no.nav.helse.flex.db.AnnulleringDAO
+import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.service.RetroRSVedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -13,13 +16,13 @@ import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.amshove.kluent.shouldBeEmpty
 import org.apache.kafka.clients.consumer.Consumer
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -41,6 +44,18 @@ abstract class AbstractContainerBaseTest {
 
     @Autowired
     lateinit var server: MockOAuth2Server
+
+    @Autowired
+    lateinit var utbetalingRepository: UtbetalingRepository
+
+    @Autowired
+    lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    lateinit var annulleringDAO: AnnulleringDAO
+
+    @Autowired
+    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
     fun jwt(fnr: String) = server.token(subject = fnr)
 
@@ -128,6 +143,15 @@ abstract class AbstractContainerBaseTest {
                 System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
             }
         }
+    }
+
+    @Test
+    @Order(99)
+    fun opprydning() {
+        utbetalingRepository.deleteAll()
+        vedtakRepository.deleteAll()
+        namedParameterJdbcTemplate.update("DELETE FROM ANNULLERING", MapSqlParameterSource())
+        namedParameterJdbcTemplate.update("DELETE FROM VEDTAK", MapSqlParameterSource())
     }
 }
 
