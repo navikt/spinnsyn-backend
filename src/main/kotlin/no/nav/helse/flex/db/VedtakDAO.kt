@@ -23,6 +23,7 @@ class VedtakDAO(
             SELECT id, vedtak, lest, opprettet
             FROM vedtak
             WHERE fnr = :fnr
+            AND mottatt_etter_migrering = False
             """,
             MapSqlParameterSource()
                 .addValue("fnr", fnr)
