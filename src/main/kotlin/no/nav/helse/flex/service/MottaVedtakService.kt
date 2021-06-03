@@ -1,6 +1,5 @@
 package no.nav.helse.flex.service
 
-import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.db.VedtakDbRecord
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.Dokument
@@ -15,7 +14,6 @@ import java.time.LocalDate
 @Service
 class MottaVedtakService(
     private val vedtakRepository: VedtakRepository,
-    private val environmentToggles: EnvironmentToggles,
     private val retroVedtakService: RetroVedtakService,
 ) {
     val log = logger()
@@ -38,22 +36,10 @@ class MottaVedtakService(
         if (timestamp.isBefore(Instant.now().minusSeconds(120))) {
             val gamleVedtak = retroVedtakService.hentRetroVedtak(fnr)
             val duplikater = gamleVedtak.filter { it.matcher(vedtakSerialisert) }
-            if (duplikater.isEmpty()) {
-                log.info("Fant ikke duplikat for vedtak med utbetalingsid ${vedtakSerialisert.utbetalingId}")
+            if (duplikater.isNotEmpty()) {
+                log.info("Fant duplikat for vedtak med utbetalingsid ${vedtakSerialisert.utbetalingId} i gamle tabeller")
+                return
             }
-            if (duplikater.size == 1) {
-                log.info("Fant duplikat for vedtak med utbetalingsid ${vedtakSerialisert.utbetalingId}")
-            }
-
-            if (duplikater.size > 1) {
-                log.info("Fant flere duplikat for vedtak med utbetalingsid ${vedtakSerialisert.utbetalingId}")
-            }
-        }
-
-        val lest = if (environmentToggles.isProduction()) {
-            Instant.EPOCH
-        } else {
-            null
         }
 
         vedtakSerialisert.utbetalingId?.let {
@@ -69,7 +55,7 @@ class MottaVedtakService(
                 vedtak = vedtak,
                 opprettet = Instant.now(),
                 utbetalingId = vedtakSerialisert.utbetalingId,
-                lest = lest
+                lest = null
             )
         )
 
