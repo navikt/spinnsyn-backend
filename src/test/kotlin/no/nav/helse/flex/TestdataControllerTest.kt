@@ -1,12 +1,12 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.db.VedtakDAO
+import no.nav.helse.flex.db.VedtakTestDAO
 import no.nav.helse.flex.domene.AnnulleringDto
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakDto
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import org.amshove.kluent.`should be`
-import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -27,6 +27,9 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var vedtakDAO: VedtakDAO
+
+    @Autowired
+    lateinit var vedtakTestDAO: VedtakTestDAO
 
     @Autowired
     lateinit var restTemplate: RestTemplate
@@ -116,24 +119,11 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
                 .content(automatiskBehandletVedtak.serialisertTilString())
         ).andExpect(status().is2xxSuccessful).andReturn()
 
-        val id = vedtakDAO.finnVedtak(fnr).first().id
+        val id = vedtakTestDAO.finnVedtakEtterMigrering(fnr).first().id
+        vedtakTestDAO.merkVedtakMottattFørMigrering(id)
 
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
         doneKafkaConsumer.ventPåRecords(antall = 0)
-
-        oppgaver.shouldHaveSize(1)
-
-        val nokkel = oppgaver[0].key()
-        nokkel.getSystembruker() shouldBeEqualTo systembruker
-
-        val oppgave = oppgaver[0].value()
-
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Sykepengene dine er beregnet - se resultatet"
-        oppgave.getLink() shouldBeEqualTo "blah/vedtak/$id"
-        oppgave.getGrupperingsId() shouldBeEqualTo id
-        oppgave.getEksternVarsling() shouldBeEqualTo true
     }
 
     @Test
