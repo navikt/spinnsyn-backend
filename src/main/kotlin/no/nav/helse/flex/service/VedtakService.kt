@@ -1,6 +1,5 @@
 package no.nav.helse.flex.service
 
-import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.*
 import org.springframework.stereotype.Service
@@ -12,16 +11,13 @@ class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
     private val retroVedtakService: RetroVedtakService,
-    private val environmentToggles: EnvironmentToggles,
     private val annulleringDAO: AnnulleringDAO
 
 ) {
 
     fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
         val retroVedtak = retroVedtakService.hentVedtak(fnr)
-        if (environmentToggles.isProduction()) {
-            return retroVedtak
-        }
+
         val nyeVedtak = hentVedtakFraNyeTabeller(fnr)
 
         return ArrayList<RSVedtakWrapper>().also {
