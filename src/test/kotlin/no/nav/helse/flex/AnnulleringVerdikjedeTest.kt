@@ -1,10 +1,12 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.db.VedtakDAO
+import no.nav.helse.flex.db.VedtakTestDAO
 import no.nav.helse.flex.domene.AnnulleringDto
 import no.nav.helse.flex.domene.VedtakDto
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import org.amshove.kluent.shouldBe
+import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -27,6 +29,9 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var vedtakDAO: VedtakDAO
+
+    @Autowired
+    lateinit var vedtakTestDAO: VedtakTestDAO
 
     val fnr = "983475"
     val fom = LocalDate.now().minusDays(7)
@@ -79,15 +84,19 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakDAO.finnVedtak(fnr).isNotEmpty()
+            vedtakTestDAO.finnVedtakEtterMigrering(fnr).isNotEmpty()
         }
 
-        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
     @Order(3)
     fun `Vedtaket blir funnet i REST APIet`() {
+        hentVedtak(fnr).shouldBeEmpty()
+        val id = vedtakTestDAO.finnVedtakEtterMigrering(fnr).first().id
+        vedtakTestDAO.merkVedtakMottattFørMigrering(id)
+
         val vedtakene = hentVedtak(fnr)
         vedtakene shouldHaveSize 1
         vedtakene.first().annullert shouldBe false
@@ -160,14 +169,18 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakDAO.finnVedtak(fnr).size == 2
+            vedtakTestDAO.finnVedtakEtterMigrering(fnr).isNotEmpty()
         }
-        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+
+        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
     @Order(9)
     fun `Man finner to annullerte vedtak i REST APIet`() {
+        val id = vedtakTestDAO.finnVedtakEtterMigrering(fnr).first().id
+        vedtakTestDAO.merkVedtakMottattFørMigrering(id)
+
         val vedtakene = hentVedtak(fnr)
         vedtakene shouldHaveSize 2
         vedtakene.first().annullert shouldBe true
@@ -177,6 +190,8 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     @Test
     @Order(10)
     fun `Enda et vedtak mottatt fra kafka blir lagret i db`() {
+        vedtakTestDAO.finnVedtakEtterMigrering(fnr).shouldBeEmpty()
+
         onpremKafkaProducer.send(
             ProducerRecord(
                 SPORBAR_TOPIC,
@@ -191,8 +206,8 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakDAO.finnVedtak(fnr).size == 3
+            vedtakTestDAO.finnVedtakEtterMigrering(fnr).isNotEmpty()
         }
-        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
     }
 }

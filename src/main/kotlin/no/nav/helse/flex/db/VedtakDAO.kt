@@ -38,8 +38,8 @@ class VedtakDAO(
 
         namedParameterJdbcTemplate.update(
             """
-            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, varslet, revarslet) 
-            VALUES (:id, :fnr, :vedtak, :opprettet, :varslet, :revarslet)
+            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, varslet, revarslet, mottatt_etter_migrering) 
+            VALUES (:id, :fnr, :vedtak, :opprettet, :varslet, :revarslet, true)
         """,
             MapSqlParameterSource()
                 .addValue("id", id)
@@ -91,7 +91,7 @@ class VedtakDAO(
     }
 }
 
-private fun ResultSet.toVedtak(): Vedtak =
+fun ResultSet.toVedtak(): Vedtak =
     Vedtak(
         id = getString("id"),
         lest = getObject("lest", OffsetDateTime::class.java) != null,

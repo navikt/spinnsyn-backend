@@ -1,6 +1,7 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.db.VedtakDAO
+import no.nav.helse.flex.db.VedtakTestDAO
 import no.nav.helse.flex.domene.VedtakDto
 import no.nav.helse.flex.domene.VedtakDto.UtbetalingDto
 import no.nav.helse.flex.domene.VedtakDto.UtbetalingDto.UtbetalingslinjeDto
@@ -36,6 +37,9 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var vedtakDAO: VedtakDAO
+
+    @Autowired
+    lateinit var vedtakTestDAO: VedtakTestDAO
 
     @Autowired
     lateinit var restTemplate: RestTemplate
@@ -87,32 +91,17 @@ class IntegrationTest : AbstractContainerBaseTest() {
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakDAO.finnVedtak(fnr).isNotEmpty()
+            vedtakTestDAO.finnVedtakEtterMigrering(fnr).isNotEmpty()
         }
-
-        val id = vedtakDAO.finnVedtak(fnr).first().id
-
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
-
-        oppgaver.shouldHaveSize(1)
-
-        val nokkel = oppgaver[0].key()
-        nokkel.getSystembruker() shouldBeEqualTo systembruker
-
-        val oppgave = oppgaver[0].value()
-
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Sykepengene dine er beregnet - se resultatet"
-        oppgave.getLink() shouldBeEqualTo "blah/vedtak/$id"
-        oppgave.getGrupperingsId() shouldBeEqualTo id
-        oppgave.getEksternVarsling() shouldBeEqualTo true
     }
 
     @Test
     @Order(2)
-    fun `vi henter vedtaket`() {
+    fun `vi henter vedtaket etter at det er satt mottatt før migrering`() {
+        hentVedtak(fnr).shouldBeEmpty()
+        val id = vedtakTestDAO.finnVedtakEtterMigrering(fnr).first().id
+        vedtakTestDAO.merkVedtakMottattFørMigrering(id)
+
         val vedtak = hentVedtak(fnr)
 
         vedtak shouldHaveSize 1
