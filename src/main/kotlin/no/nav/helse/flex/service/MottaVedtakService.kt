@@ -42,9 +42,15 @@ class MottaVedtakService(
             }
         }
 
-        vedtakSerialisert.utbetalingId?.let {
-            if (vedtakRepository.existsByUtbetalingId(it)) {
-                log.warn("Vedtak med utbetaling id $it eksisterer allerede")
+        if (vedtakSerialisert.utbetalingId != null) {
+            if (vedtakRepository.existsByUtbetalingId(vedtakSerialisert.utbetalingId)) {
+                log.warn("Vedtak med utbetaling id ${vedtakSerialisert.utbetalingId} eksisterer allerede")
+                return
+            }
+        } else {
+            val eksisterendeVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
+            if (eksisterendeVedtak.any { it.vedtak == vedtak }) {
+                log.info("Fant duplikat for vedtak med utbetalingsid ${vedtakSerialisert.utbetalingId} i nye tabeller")
                 return
             }
         }

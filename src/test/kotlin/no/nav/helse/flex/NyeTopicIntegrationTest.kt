@@ -295,7 +295,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak.copy(utbetalingId = null).serialisertTilString()
+                vedtak.copy(utbetalingId = null).copy(fom = LocalDate.now().minusDays(5)).serialisertTilString()
             )
         ).get()
 
