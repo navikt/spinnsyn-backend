@@ -30,7 +30,7 @@ class MottaUtbetalingService(
         }
 
         if (utbetalingRepository.existsByUtbetalingId(utbetalingSerialisert.utbetalingId)) {
-            log.warn("Vedtak med utbetaling id ${utbetalingSerialisert.utbetalingId} eksisterer allerede")
+            log.warn("Utbetaling med utbetaling id ${utbetalingSerialisert.utbetalingId} eksisterer allerede")
             return
         }
 
