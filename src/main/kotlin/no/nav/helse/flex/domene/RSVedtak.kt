@@ -30,6 +30,7 @@ data class RSUtbetalingUtbetalt(
     val automatiskBehandling: Boolean,
     val arbeidsgiverOppdrag: RSOppdrag,
     val utbetalingsdager: List<RSUtbetalingdag>,
+    val utbetalingType: String,
 )
 
 data class RSOppdrag(

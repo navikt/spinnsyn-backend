@@ -32,7 +32,7 @@ class VedtakService(
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
 
         val eksisterendeUtbetalinger = utbetalinger
-            .filter { it.utbetalingType == "UTBETALING" }
+            .filter { it.utbetalingType == "UTBETALING" || it.utbetalingType == "REVURDERING" }
 
         val eksisterendeUtbetalingIder = eksisterendeUtbetalinger
             .map { it.utbetalingId }
@@ -62,6 +62,7 @@ class VedtakService(
                     fom = vedtaket.fom,
                     tom = vedtaket.tom,
                     utbetaling = RSUtbetalingUtbetalt(
+                        utbetalingType = utbetaling.type,
                         organisasjonsnummer = utbetaling.organisasjonsnummer,
                         forbrukteSykedager = utbetaling.forbrukteSykedager,
                         gjenståendeSykedager = utbetaling.gjenståendeSykedager,
