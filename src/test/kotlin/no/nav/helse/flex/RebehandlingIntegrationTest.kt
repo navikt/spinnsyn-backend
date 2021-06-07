@@ -69,7 +69,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
             nettoBeløp = 123,
             utbetalingslinjer = emptyList()
         ),
-        type = "REBEHANDLING",
+        type = "REVURDERING",
         utbetalingsdager = emptyList()
     )
 
@@ -126,7 +126,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first()
         dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("REBEHANDLING")
+        dbUtbetaling.utbetalingType.shouldBeEqualTo("REVURDERING")
     }
 
     @Test
@@ -138,18 +138,19 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
-    fun `finner ikke vedtaket i v2`() {
+    fun `finner vedtaket i v2`() {
         val vedtak = hentVedtak(fnr)
-        vedtak.shouldHaveSize(0)
+        vedtak.shouldHaveSize(1)
+        vedtak.first().vedtak.utbetaling.utbetalingType `should be equal to` "REVURDERING"
     }
 
     @Test
     @Order(4)
-    fun `ingen brukernotifkasjon går ut når cronjobben kjøres`() {
+    fun `1 brukernotifkasjon går ut når cronjobben kjøres`() {
         val antall = brukernotifikasjonService.prosseserVedtak()
-        antall `should be equal to` 0
+        antall `should be equal to` 1
 
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
+        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
         doneKafkaConsumer.ventPåRecords(antall = 0)
     }
 

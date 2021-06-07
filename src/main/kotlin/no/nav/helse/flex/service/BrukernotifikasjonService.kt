@@ -24,7 +24,8 @@ class BrukernotifikasjonService(
     val log = logger()
 
     fun prosseserVedtak(): Int {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        val vedtak =
+            vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         log.info("Fant ${vedtak.size} vedtak som ikke er lest og mangler brukernotifikasjon")
         var sendt = 0
         vedtak.forEach { vedtaket ->
@@ -50,7 +51,7 @@ class BrukernotifikasjonService(
                 return@forEach
             }
 
-            if (utbetaling.utbetalingType != "UTBETALING") {
+            if (!listOf("REVURDERING", "UTBETALING").contains(utbetaling.utbetalingType)) {
                 vedtakRepository.save(vedtaket.copy(brukernotifikasjonUtelatt = Instant.now()))
                 return@forEach
             }

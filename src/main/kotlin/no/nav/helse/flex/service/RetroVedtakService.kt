@@ -76,16 +76,17 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
             tom = this.vedtak.tom,
             utbetaling = RSUtbetalingUtbetalt(
                 organisasjonsnummer = this.vedtak.organisasjonsnummer,
+                utbetalingId = null,
                 forbrukteSykedager = this.vedtak.forbrukteSykedager,
                 gjenståendeSykedager = this.vedtak.gjenståendeSykedager,
                 automatiskBehandling = this.vedtak.automatiskBehandling,
-                utbetalingId = null,
-                utbetalingsdager = emptyList(),
                 arbeidsgiverOppdrag = RSOppdrag(
                     mottaker = arbeidsgiveroppdrag.mottaker,
                     nettoBeløp = arbeidsgiveroppdrag.totalbeløp,
                     utbetalingslinjer = arbeidsgiveroppdrag.utbetalingslinjer.map { it.tilRsUtbetalingslinje() }
-                )
+                ),
+                utbetalingsdager = emptyList(),
+                utbetalingType = "UTBETALING"
             )
         )
     )
