@@ -20,13 +20,15 @@ class VedtakService(
 
         val nyeVedtak = hentVedtakFraNyeTabeller(fnr)
 
-        return ArrayList<RSVedtakWrapper>().also {
+        val alleVedtak = ArrayList<RSVedtakWrapper>().also {
             it.addAll(retroVedtak)
             it.addAll(nyeVedtak)
-        }
+        }.toList()
+
+        return alleVedtak.markerRevurderte()
     }
 
-    fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
+    private fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
         val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
@@ -53,6 +55,7 @@ class VedtakService(
                 annullert = annulleringer.annullererVedtak(vedtaket),
                 lest = this.lest != null,
                 lestDato = this.lest?.atZone(ZoneId.of("Europe/Oslo"))?.toOffsetDateTime(),
+                opprettetTimestamp = this.opprettet,
                 opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
                 vedtak = RSVedtak(
                     organisasjonsnummer = vedtaket.organisasjonsnummer,
@@ -89,6 +92,25 @@ class VedtakService(
     }
 }
 
+private fun List<RSVedtakWrapper>.markerRevurderte(): List<RSVedtakWrapper> {
+
+    val revurderinger = this.filter { it.vedtak.utbetaling.utbetalingType == "REVURDERING" }
+
+    return this.map {
+
+        val denneErRevurdert = revurderinger
+            .filter { revurdering -> revurdering.opprettetTimestamp.isAfter(it.opprettetTimestamp) }
+            .filter { revurdering -> revurdering.vedtak.organisasjonsnummer == it.vedtak.organisasjonsnummer }
+            .any { revurdering -> revurdering.vedtak.overlapper(it.vedtak) }
+
+        if (denneErRevurdert) {
+            it.copy(revurdert = true)
+        } else {
+            it
+        }
+    }
+}
+
 private fun List<Annullering>.annullererVedtak(vedtakDbRecord: VedtakFattetForEksternDto): Boolean {
     return this.any {
         vedtakDbRecord.matcherAnnullering(it)
@@ -96,8 +118,8 @@ private fun List<Annullering>.annullererVedtak(vedtakDbRecord: VedtakFattetForEk
 }
 
 fun VedtakFattetForEksternDto.matcherAnnullering(annullering: Annullering): Boolean {
-    val vedtaksperiode = Periode(this.fom, this.tom)
-    val annulleringsperiode = Periode(
+    val vedtaksperiode = PeriodeImpl(this.fom, this.tom)
+    val annulleringsperiode = PeriodeImpl(
         annullering.annullering.fom ?: return false,
         annullering.annullering.tom
             ?: return false

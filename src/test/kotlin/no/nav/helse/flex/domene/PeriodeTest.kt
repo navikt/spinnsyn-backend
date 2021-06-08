@@ -41,5 +41,5 @@ class PeriodeTest {
 fun Pair<String, String>.periode(): Periode {
     val fom = this.first.split(".").map { Integer.parseInt(it) }
     val tom = this.second.split(".").map { Integer.parseInt(it) }
-    return Periode(LocalDate.of(2020, fom.last(), fom.first()), LocalDate.of(2020, tom.last(), tom.first()))
+    return PeriodeImpl(LocalDate.of(2020, fom.last(), fom.first()), LocalDate.of(2020, tom.last(), tom.first()))
 }

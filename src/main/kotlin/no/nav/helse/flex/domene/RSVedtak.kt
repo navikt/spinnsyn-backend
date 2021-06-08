@@ -1,5 +1,6 @@
 package no.nav.helse.flex.domene
 
+import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -9,18 +10,20 @@ data class RSVedtakWrapper(
     val lestDato: OffsetDateTime? = null,
     val vedtak: RSVedtak,
     val opprettet: LocalDate,
-    val annullert: Boolean = false
+    val opprettetTimestamp: Instant,
+    val annullert: Boolean = false,
+    val revurdert: Boolean = false
 )
 
 data class RSVedtak(
     val organisasjonsnummer: String?,
-    val fom: LocalDate,
-    val tom: LocalDate,
+    override val fom: LocalDate,
+    override val tom: LocalDate,
     val dokumenter: List<Dokument>,
     val inntekt: Double?,
     val sykepengegrunnlag: Double?,
     val utbetaling: RSUtbetalingUtbetalt,
-)
+) : Periode
 
 data class RSUtbetalingUtbetalt(
     val organisasjonsnummer: String?,
