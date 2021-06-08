@@ -7,6 +7,7 @@ import no.nav.helse.flex.db.VedtakDAO
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.logger
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -45,6 +46,7 @@ data class RetroRSVedtak(
     val lestDato: OffsetDateTime? = null,
     val vedtak: VedtakDto,
     val opprettet: LocalDate,
+    val opprettetTimestamp: Instant,
     val annullert: Boolean = false
 )
 
@@ -55,6 +57,7 @@ fun Vedtak.tilRetroRSVedtak(annullering: Boolean = false): RetroRSVedtak {
         lestDato = this.lestDato,
         vedtak = this.vedtak,
         opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
+        opprettetTimestamp = this.opprettet,
         annullert = annullering
     )
 }
@@ -66,6 +69,7 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
         annullert = this.annullert,
         lest = this.lest,
         lestDato = this.lestDato,
+        opprettetTimestamp = this.opprettetTimestamp,
         opprettet = this.opprettet,
         vedtak = RSVedtak(
             organisasjonsnummer = this.vedtak.organisasjonsnummer,
@@ -99,7 +103,7 @@ fun RSVedtakWrapper.tilRetroRSVedtak(): RetroRSVedtak {
         lest = this.lest,
         lestDato = this.lestDato,
         opprettet = this.opprettet,
-
+        opprettetTimestamp = this.opprettetTimestamp,
         vedtak = VedtakDto(
             automatiskBehandling = this.vedtak.utbetaling.automatiskBehandling,
             organisasjonsnummer = this.vedtak.organisasjonsnummer,
@@ -151,8 +155,8 @@ fun List<Annullering>.forVedtak(vedtak: Vedtak): Boolean =
     }
 
 fun Vedtak.matcherAnnullering(annullering: Annullering): Boolean {
-    val vedtaksperiode = Periode(this.vedtak.fom, this.vedtak.tom)
-    val annulleringsperiode = Periode(
+    val vedtaksperiode = PeriodeImpl(this.vedtak.fom, this.vedtak.tom)
+    val annulleringsperiode = PeriodeImpl(
         annullering.annullering.fom ?: return false,
         annullering.annullering.tom
             ?: return false
