@@ -52,4 +52,5 @@ data class RSUtbetalingslinje(
 data class RSUtbetalingdag(
     val dato: LocalDate,
     val type: String,
+    val begrunnelser: List<String>,
 )
