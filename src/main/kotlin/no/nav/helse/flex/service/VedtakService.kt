@@ -120,6 +120,7 @@ private fun UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto.tilRsUtbetalingsli
 private fun UtbetalingUtbetalt.UtbetalingdagDto.tilRsUtbetalingsdag(): RSUtbetalingdag {
     return RSUtbetalingdag(
         dato = this.dato,
-        type = this.type
+        type = this.type,
+        begrunnelser = this.begrunnelser
     )
 }

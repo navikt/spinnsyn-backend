@@ -38,7 +38,8 @@ data class UtbetalingUtbetalt(
 
     data class UtbetalingdagDto(
         val dato: LocalDate,
-        val type: String
+        val type: String,
+        val begrunnelser: List<String>,
     )
 }
 

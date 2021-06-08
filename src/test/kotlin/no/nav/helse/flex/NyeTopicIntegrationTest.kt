@@ -1,6 +1,7 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
@@ -74,7 +75,13 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
             utbetalingslinjer = emptyList()
         ),
         type = "UTBETALING",
-        utbetalingsdager = emptyList()
+        utbetalingsdager = listOf(
+            UtbetalingdagDto(
+                dato = now,
+                type = "AvvistDag",
+                begrunnelser = listOf("MinimumSykdomsgrad")
+            )
+        )
     )
 
     val annulleringDto = AnnulleringDto(
@@ -156,6 +163,9 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
+        vedtak[0].vedtak.utbetaling.utbetalingsdager[0].dato `should be equal to` now
+        vedtak[0].vedtak.utbetaling.utbetalingsdager[0].type `should be equal to` "AvvistDag"
+        vedtak[0].vedtak.utbetaling.utbetalingsdager[0].begrunnelser[0] `should be equal to` "MinimumSykdomsgrad"
     }
 
     @Test
