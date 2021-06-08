@@ -72,7 +72,7 @@ class BrukernotifikasjonService(
                 vedtakDbRecord.fnr,
                 id,
                 "Sykepengene dine er beregnet - se resultatet",
-                "$spinnsynFrontendUrl/vedtak/$id",
+                spinnsynFrontendUrl,
                 4,
                 true
             )

@@ -189,7 +189,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         oppgave.getFodselsnummer() shouldBeEqualTo fnr
         oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
         oppgave.getTekst() shouldBeEqualTo "Sykepengene dine er beregnet - se resultatet"
-        oppgave.getLink() shouldBeEqualTo "blah/vedtak/$id"
+        oppgave.getLink() shouldBeEqualTo "blah"
         oppgave.getGrupperingsId() shouldBeEqualTo id
         oppgave.getEksternVarsling() shouldBeEqualTo true
     }
