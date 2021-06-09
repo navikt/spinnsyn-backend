@@ -54,11 +54,11 @@ class LesVedtakService(
             return ALLEREDE_LEST
         }
 
+        vedtakRepository.save(vedtakDbRecord.copy(lest = Instant.now()))
+
         if (vedtakDbRecord.brukernotifikasjonSendt == null) {
             return ALDRI_SENDT_BRUKERNOTIFIKASJON
         }
-
-        vedtakRepository.save(vedtakDbRecord.copy(lest = Instant.now()))
 
         return LEST
     }
