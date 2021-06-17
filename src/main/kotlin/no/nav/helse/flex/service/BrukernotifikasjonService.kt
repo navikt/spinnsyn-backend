@@ -71,7 +71,7 @@ class BrukernotifikasjonService(
                 sendtTidspunkt.toEpochMilli(),
                 vedtakDbRecord.fnr,
                 id,
-                "Sykepengene dine er beregnet - se resultatet",
+                "Oppgave: Sykepengene dine er beregnet - se resultatet",
                 spinnsynFrontendUrl,
                 4,
                 true
