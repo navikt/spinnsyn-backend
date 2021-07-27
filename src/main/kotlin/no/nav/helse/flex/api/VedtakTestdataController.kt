@@ -1,53 +1,81 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.service.MottaUtbetalingService
+import no.nav.helse.flex.service.MottaVedtakService
 import no.nav.helse.flex.service.RetroMottaVedtakService
 import no.nav.helse.flex.service.VedtakNullstillService
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import java.time.Instant
 import java.util.*
 
 @Controller
-@RequestMapping("/api/v1/mock")
-@Unprotected
+@RequestMapping("/api/v1/testdata")
 class VedtakTestdataController(
     val retroMottaVedtakService: RetroMottaVedtakService,
     val environmentToggles: EnvironmentToggles,
     val vedtakNullstillService: VedtakNullstillService,
+    val mottaVedtakService: MottaVedtakService,
+    val tokenValidationContextHolder: TokenValidationContextHolder,
+    val mottaUtbetalingService: MottaUtbetalingService,
 ) {
 
-    data class Melding(val melding: String) // Fordi flex-proxy trenger json
+    data class VedtakV2(val vedtak: String, val utbetaling: String?)
 
-    @PostMapping("/vedtak/{fnr}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        "/vedtak",
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @ResponseBody
-    fun opprettVedtak(@PathVariable fnr: String, @RequestBody vedtak: String): Melding {
+    @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
+    fun opprettVedtak(@RequestBody vedtakV2: VedtakV2): String {
         if (environmentToggles.isProduction()) {
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
-        val vedtakId = UUID.randomUUID()
-        retroMottaVedtakService.mottaVedtak(
-            id = vedtakId,
+        val fnr = tokenValidationContextHolder.fnrFraOIDC()
+
+        mottaVedtakService.mottaVedtak(
             fnr = fnr,
-            vedtak = vedtak,
-            opprettet = Instant.now()
+            vedtak = vedtakV2.vedtak,
+            timestamp = Instant.now(),
         )
-        return Melding("Vedtak med $vedtakId opprettet")
+
+        if (vedtakV2.utbetaling != null) {
+            mottaUtbetalingService.mottaUtbetaling(
+                fnr = fnr,
+                utbetaling = vedtakV2.utbetaling,
+                opprettet = Instant.now()
+            )
+        }
+
+        return "Vedtak opprettet på $fnr"
     }
 
-    @PostMapping("/annullering/{fnr}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/fnr", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun opprettAnnullering(@PathVariable fnr: String, @RequestBody annullering: String): Melding {
+    @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
+    fun hvemErJeg(): String {
         if (environmentToggles.isProduction()) {
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
+        return tokenValidationContextHolder.fnrFraOIDC()
+    }
+
+    @PostMapping("/annullering", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseBody
+    @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
+
+    fun opprettAnnullering(@RequestBody annullering: String): String {
+        if (environmentToggles.isProduction()) {
+            throw IllegalStateException("Dette apiet er ikke på i produksjon")
+        }
+        val fnr = tokenValidationContextHolder.fnrFraOIDC()
+
         val annulleringId = UUID.randomUUID()
         retroMottaVedtakService.mottaAnnullering(
             id = annulleringId,
@@ -55,16 +83,20 @@ class VedtakTestdataController(
             annullering = annullering,
             opprettet = Instant.now()
         )
-        return Melding("Annullering med $annulleringId opprettet")
+        return "Annullering med $annulleringId opprettet på $fnr"
     }
 
-    @DeleteMapping("/vedtak/{fnr}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @DeleteMapping("/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun slettVedtak(@PathVariable fnr: String): Melding {
+    @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
+
+    fun slettVedtak(): String {
         if (environmentToggles.isProduction()) {
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
+        val fnr = tokenValidationContextHolder.fnrFraOIDC()
+
         val antall = vedtakNullstillService.nullstill(fnr)
-        return Melding("Slettet $antall")
+        return "Slettet $antall vedtak på $fnr"
     }
 }
