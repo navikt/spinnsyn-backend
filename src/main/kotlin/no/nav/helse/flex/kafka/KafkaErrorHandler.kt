@@ -19,7 +19,7 @@ class KafkaErrorHandler : SeekToCurrentErrorHandler(
     override fun handle(
         thrownException: Exception,
         records: List<ConsumerRecord<*, *>>?,
-        consumer: Consumer<*, *>?,
+        consumer: Consumer<*, *>,
         container: MessageListenerContainer
     ) {
 
