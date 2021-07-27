@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "2.4.5"
+    id("org.springframework.boot") version "2.5.3"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.5.10"
-    kotlin("plugin.spring") version "1.5.10"
+    kotlin("jvm") version "1.5.21"
+    kotlin("plugin.spring") version "1.5.21"
 }
 
 group = "no.nav.helse.flex"
@@ -39,12 +39,12 @@ repositories {
     }
 }
 
-val testContainersVersion = "1.15.3"
+val testContainersVersion = "1.16.0"
 val logstashLogbackEncoderVersion = "6.6"
-val kluentVersion = "1.66"
+val kluentVersion = "1.68"
 val brukernotifikasjonAvroVersion = "1.2021.01.18-11.12-b9c8c40b98d1"
-val confluentVersion = "6.1.1"
-val tokenSupportVersion = "1.3.7"
+val confluentVersion = "6.2.0"
+val tokenSupportVersion = "1.3.8"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
@@ -70,7 +70,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
-    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
     testImplementation("org.awaitility:awaitility")
 }
