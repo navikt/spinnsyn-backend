@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -33,9 +32,6 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Value("\${on-prem-kafka.username}")
-    lateinit var systembruker: String
 
     val fnr = "234232323"
     val fom = LocalDate.now().minusDays(7)
@@ -113,17 +109,16 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(1)
     fun `Oppretter vedtak`() {
+        data class VedtakV2(val vedtak: String, val utbetaling: String?)
+
+        val body = VedtakV2(vedtak.serialisertTilString(), utbetaling.serialisertTilString())
+
         mockMvc.perform(
-            post("/api/v1/mock/vedtak/$fnr")
+            post("/api/v1/testdata/vedtak")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(automatiskBehandletVedtak.serialisertTilString())
+                .header("Authorization", "Bearer ${jwt(fnr)}")
+                .content(body.serialisertTilString())
         ).andExpect(status().is2xxSuccessful).andReturn()
-
-        val id = vedtakTestDAO.finnVedtakEtterMigrering(fnr).first().id
-        vedtakTestDAO.merkVedtakMottattFørMigrering(id)
-
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
@@ -140,8 +135,9 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Order(3)
     fun `Oppretter annullering`() {
         mockMvc.perform(
-            post("/api/v1/mock/annullering/$fnr")
+            post("/api/v1/testdata/annullering")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer ${jwt(fnr)}")
                 .content(annulleringDto.serialisertTilString())
         ).andExpect(status().is2xxSuccessful).andReturn()
     }
@@ -157,29 +153,17 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(5)
-    fun `Oppretter nytt vedtak og utbetaling`() {
-        data class VedtakV2(val vedtak: String, val utbetaling: String?)
-        val body = VedtakV2(vedtak.serialisertTilString(), utbetaling.serialisertTilString())
-
+    fun `Sletter vedtaket`() {
         mockMvc.perform(
-            post("/api/v2/testdata/vedtak/$fnr")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body.serialisertTilString())
+            delete("/api/v1/testdata/vedtak")
+                .header("Authorization", "Bearer ${jwt(fnr)}")
         ).andExpect(status().is2xxSuccessful).andReturn()
+
+//        doneKafkaConsumer.ventPåRecords(antall = 1)
     }
 
     @Test
     @Order(6)
-    fun `Sletter vedtaket`() {
-        mockMvc.perform(
-            delete("/api/v1/mock/vedtak/$fnr")
-        ).andExpect(status().is2xxSuccessful).andReturn()
-
-        doneKafkaConsumer.ventPåRecords(antall = 1)
-    }
-
-    @Test
-    @Order(7)
     fun `Vi har nå ingen vedtak`() {
         hentVedtak(fnr) shouldHaveSize 0
     }
