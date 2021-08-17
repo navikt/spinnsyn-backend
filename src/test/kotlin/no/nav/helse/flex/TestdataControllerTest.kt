@@ -93,6 +93,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
         utbetalingId = utbetalingId,
         event = "utbetaling_utbetalt",
         forbrukteSykedager = 42,
+        antallVedtak = null,
         gjenståendeSykedager = 3254,
         automatiskBehandling = true,
         arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(

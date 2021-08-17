@@ -13,6 +13,7 @@ data class UtbetalingUtbetalt(
     val fom: LocalDate,
     val tom: LocalDate,
     val forbrukteSykedager: Int,
+    val antallVedtak: Int?,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean,
     val arbeidsgiverOppdrag: OppdragDto,
