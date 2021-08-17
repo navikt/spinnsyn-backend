@@ -4,6 +4,7 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.*
+import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
 import org.springframework.beans.factory.annotation.Value
@@ -56,7 +57,33 @@ class BrukernotifikasjonService(
                 return@forEach
             }
 
-            sendNotifikasjon(vedtaket)
+            val utbetalingUtbetalt = utbetaling.utbetaling.tilUtbetalingUtbetalt()
+            val antallVedtak = utbetalingUtbetalt.antallVedtak ?: 1
+
+            if (antallVedtak == 0) {
+                log.error("Antall vedtak er 0 for vedtak ${refreshetVedtak.id}")
+                return@forEach
+            }
+
+            if (antallVedtak > 1) {
+                // Har vi fått alle vedtakene?
+                val vedtakene = vedtakRepository.findVedtakDbRecordsByFnr(refreshetVedtak.fnr)
+                    .filter { it.utbetalingId == utbetalingUtbetalt.utbetalingId }
+                    .sortedBy { it.id }
+
+                if (vedtakene.size != antallVedtak) {
+                    log.warn("Fant ${vedtakene.size} men forventet $antallVedtak")
+                    return@forEach
+                }
+
+                if (refreshetVedtak.id != vedtakene.first().id) {
+                    // Vi varsler kun på vedtaket med "lavest" id
+                    vedtakRepository.save(vedtaket.copy(brukernotifikasjonUtelatt = Instant.now()))
+                    return@forEach
+                }
+            }
+
+            sendNotifikasjon(refreshetVedtak)
             sendt += 1
         }
         return sendt

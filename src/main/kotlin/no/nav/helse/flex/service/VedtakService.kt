@@ -2,6 +2,7 @@ package no.nav.helse.flex.service
 
 import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.logger
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.ZoneId
@@ -14,6 +15,8 @@ class VedtakService(
     private val annulleringDAO: AnnulleringDAO
 
 ) {
+
+    val log = logger()
 
     fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
         val retroVedtak = retroVedtakService.hentVedtak(fnr)
@@ -43,8 +46,34 @@ class VedtakService(
             .filter { it.utbetalingId != null }
             .filter { eksisterendeUtbetalingIder.contains(it.utbetalingId) }
 
+        fun VedtakDbRecord.relaterteVedtak(): List<VedtakDbRecord> = vedtak
+            .filter { it.utbetalingId == this.utbetalingId }
+            .sortedBy { it.id }
+
+        fun VedtakDbRecord.harAlleVedtakOgErForstILista(): Boolean {
+            val utbetaling = utbetalinger
+                .find { it.utbetalingId == this.utbetalingId }!!
+                .utbetaling
+                .tilUtbetalingUtbetalt()
+
+            val antallVedtak = utbetaling.antallVedtak ?: 1
+
+            val vedtakene = relaterteVedtak()
+
+            if (vedtakene.size != antallVedtak) {
+                log.warn("Fant ${vedtakene.size} men forventet $antallVedtak")
+                return false
+            }
+
+            // Vi viser og varsler vedtakene med lavest db id
+            return this.id == vedtakene.first().id
+        }
+
         fun VedtakDbRecord.tilRsVedtakWrapper(): RSVedtakWrapper {
             val vedtaket = this.vedtak.tilVedtakFattetForEksternDto()
+
+            val vedtakene = relaterteVedtak().map { it.vedtak.tilVedtakFattetForEksternDto() }
+
             val utbetaling = utbetalinger
                 .find { it.utbetalingId == this.utbetalingId }!!
                 .utbetaling
@@ -58,12 +87,12 @@ class VedtakService(
                 opprettetTimestamp = this.opprettet,
                 opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
                 vedtak = RSVedtak(
-                    organisasjonsnummer = vedtaket.organisasjonsnummer,
-                    dokumenter = vedtaket.dokumenter,
-                    sykepengegrunnlag = vedtaket.sykepengegrunnlag,
-                    inntekt = vedtaket.inntekt,
-                    fom = vedtaket.fom,
-                    tom = vedtaket.tom,
+                    organisasjonsnummer = vedtaket.organisasjonsnummer, // TODO hva om den endrer seg
+                    dokumenter = vedtakene.flatMap { it.dokumenter },
+                    sykepengegrunnlag = vedtaket.sykepengegrunnlag, // TODO hva om den endrer seg
+                    inntekt = vedtaket.inntekt, // TODO hva om den endrer seg
+                    fom = vedtakene.minOf { it.fom },
+                    tom = vedtakene.maxOf { it.tom },
                     utbetaling = RSUtbetalingUtbetalt(
                         utbetalingType = utbetaling.type,
                         organisasjonsnummer = utbetaling.organisasjonsnummer,
@@ -82,7 +111,9 @@ class VedtakService(
             )
         }
 
-        return vedtakMedUtbetaling.map { it.tilRsVedtakWrapper() }
+        return vedtakMedUtbetaling
+            .filter { it.harAlleVedtakOgErForstILista() }
+            .map { it.tilRsVedtakWrapper() }
     }
 
     fun hentRetroVedtak(fnr: String): List<RetroRSVedtak> {
