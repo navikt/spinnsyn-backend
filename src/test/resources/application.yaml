@@ -24,6 +24,9 @@ aiven-kafka:
   auto-offset-reset: earliest
   security-protocol: PLAINTEXT
 
+AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}]"
+
+
 no.nav.security.jwt:
   issuer:
     loginservice:
@@ -32,6 +35,19 @@ no.nav.security.jwt:
     veileder:
       discoveryurl: http://localhost:${mock-oauth2-server.port}/veileder/.well-known/openid-configuration
       accepted_audience: veileder-audience
+    azureator:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/azureator/.well-known/openid-configuration
+      accepted_audience: spinnsyn-backend-client-id
+  client:
+    registration:
+      onbehalfof-syfotilgangskontroll:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: syfotilgangskontroll-client
+        authentication:
+          client-id: client-id
+          client-secret: secretzz
+          client-auth-method: client_secret_basic
 
 management:
   endpoint.prometheus.enabled: true

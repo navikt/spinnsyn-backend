@@ -53,6 +53,9 @@ spec:
       rules:
         - application: flex-gateway
         - application: flex-intern-gateway
+        - application: syfomodiaperson
+          namespace: teamsykefravr
+          cluster: dev-fss
   azure:
     application:
       enabled: true
@@ -72,3 +75,5 @@ spec:
       value: https://kafka-schema-registry.nais-q.adeo.no
     - name: SYFOTILGANGSKONTROLL_URL
       value: https://syfo-tilgangskontroll.dev-fss-pub.nais.io
+    - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
+      value: "32e36aa5-1d12-452a-9b1e-9f3f557cbb4d"

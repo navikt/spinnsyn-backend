@@ -214,6 +214,21 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
+    @Order(5)
+    fun `En veileder med obo tilgang kan hente vedtaket`() {
+
+        val veilederToken = skapAzureJwt()
+        mockSyfoTilgangskontroll(true, fnr)
+
+        val vedtak = hentVedtakSomVeilederObo(fnr, veilederToken)
+
+        vedtak shouldHaveSize 1
+        vedtak.first().lest `should be` false
+        syfotilgangskontrollMockRestServiceServer?.verify()
+        syfotilgangskontrollMockRestServiceServer?.reset()
+    }
+
+    @Test
     @Order(6)
     fun `vi leser vedtaket`() {
         val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()

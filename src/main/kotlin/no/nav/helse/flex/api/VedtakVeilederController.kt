@@ -6,7 +6,6 @@ import no.nav.helse.flex.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -34,10 +33,3 @@ class VedtakVeilederController(
         return context.getJwtToken("veileder").tokenAsString
     }
 }
-
-class IkkeTilgangException : AbstractApiError(
-    message = "Ingen tilgang til vedtak for veileder",
-    httpStatus = HttpStatus.FORBIDDEN,
-    reason = "INGEN_TILGANG",
-    loglevel = LogLevel.WARN
-)
