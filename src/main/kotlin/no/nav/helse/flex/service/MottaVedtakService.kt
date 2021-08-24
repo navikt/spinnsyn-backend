@@ -29,17 +29,10 @@ class MottaVedtakService(
             throw RuntimeException("Kunne ikke deserialisere vedtak", e)
         }
 
-        if (vedtakSerialisert.utbetalingId != null) {
-            if (vedtakRepository.existsByUtbetalingId(vedtakSerialisert.utbetalingId)) {
-                log.warn("Vedtak med utbetaling id ${vedtakSerialisert.utbetalingId} eksisterer allerede")
-                return
-            }
-        } else {
-            val eksisterendeVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
-            if (eksisterendeVedtak.any { it.vedtak == vedtak }) {
-                log.info("Fant duplikat for vedtak med utbetalingsid ${vedtakSerialisert.utbetalingId} i nye tabeller")
-                return
-            }
+        val eksisterendeVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
+        if (eksisterendeVedtak.any { it.vedtak == vedtak }) {
+            log.info("Fant duplikat for vedtak med utbetalingsid ${vedtakSerialisert.utbetalingId} i nye tabeller")
+            return
         }
 
         val vedtakDB = vedtakRepository.save(
