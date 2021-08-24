@@ -12,7 +12,11 @@ data class RSVedtakWrapper(
     val opprettet: LocalDate,
     val opprettetTimestamp: Instant,
     val annullert: Boolean = false,
-    val revurdert: Boolean = false
+    val revurdert: Boolean = false,
+    val dager: List<RSDag> = emptyList(),
+    val dagligUtbetalingsbelop: Int = 0,
+    val antallDagerMedUtbetaling: Int = 0,
+    val sykepengebelop: Int = 0,
 )
 
 data class RSVedtak(
@@ -55,5 +59,13 @@ data class RSUtbetalingslinje(
 data class RSUtbetalingdag(
     val dato: LocalDate,
     val type: String,
+    val begrunnelser: List<String>,
+)
+
+data class RSDag(
+    val dato: LocalDate,
+    val belop: Int,
+    val grad: Double,
+    val dagtype: String,
     val begrunnelser: List<String>,
 )
