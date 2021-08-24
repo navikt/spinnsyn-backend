@@ -53,7 +53,9 @@ spec:
       rules:
         - application: flex-gateway
         - application: flex-intern-gateway
-
+  azure:
+    application:
+      enabled: true
   envFrom:
     - secret: spinnsyn-backend-serviceuser
     - configmap: loginservice-idporten
