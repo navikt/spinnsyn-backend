@@ -4,8 +4,10 @@ import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.logger
 import org.springframework.stereotype.Service
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.streams.toList
 
 @Service
 class VedtakService(
@@ -23,12 +25,15 @@ class VedtakService(
 
         val nyeVedtak = hentVedtakFraNyeTabeller(fnr)
 
-        val alleVedtak = ArrayList<RSVedtakWrapper>().also {
-            it.addAll(retroVedtak)
-            it.addAll(nyeVedtak)
-        }.toList()
+        val alleVedtak = ArrayList<RSVedtakWrapper>()
+            .also {
+                it.addAll(retroVedtak)
+                it.addAll(nyeVedtak)
+            }
+            .leggTilDagerIVedtakPeriode()
+            .markerRevurderte()
 
-        return alleVedtak.markerRevurderte()
+        return alleVedtak
     }
 
     private fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
@@ -120,6 +125,82 @@ class VedtakService(
         return this.hentVedtak(fnr).map {
             it.tilRetroRSVedtak()
         }
+    }
+}
+
+private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> {
+    return map { rSVedtakWrapper ->
+        val fom = rSVedtakWrapper.vedtak.fom
+        val tom = rSVedtakWrapper.vedtak.tom
+        val helg = listOf(
+            DayOfWeek.SATURDAY,
+            DayOfWeek.SUNDAY
+        )
+
+        // Setter opp alle dager i perioden
+        var dager = fom.datesUntil(tom.plusDays(1))
+            .map { dato ->
+                RSDag(
+                    dato = dato,
+                    belop = 0,
+                    grad = 0.0,
+                    dagtype = if (dato.dayOfWeek in helg) "NavHelgDag" else "NavDag",
+                    begrunnelser = emptyList()
+                )
+            }.toList()
+
+        // Oppdaterer dager med beløp og grad
+        rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag.utbetalingslinjer.forEach { linje ->
+            val periode = linje.fom..linje.tom
+            val utbetalingslinjeUtenUtbetaling = linje.stønadsdager == 0
+
+            dager = dager.map OppdaterBelopOgGrad@{ dag ->
+                if (dag.dato in periode && dag.dato.dayOfWeek !in helg) {
+                    if (utbetalingslinjeUtenUtbetaling) {
+                        return@OppdaterBelopOgGrad dag.copy(
+                            belop = 0,
+                            grad = 0.0
+                        )
+                    } else {
+                        return@OppdaterBelopOgGrad dag.copy(
+                            belop = linje.dagsats,
+                            grad = linje.grad
+                        )
+                    }
+                }
+                return@OppdaterBelopOgGrad dag
+            }
+        }
+
+        // Oppdater dager med dagtype og begrunnelser
+        dager = dager.map { dag ->
+            rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager
+                .find { it.dato == dag.dato }
+                ?.let {
+                    dag.copy(
+                        begrunnelser = it.begrunnelser,
+                        dagtype = if (it.type == "NavDag" && dag.grad != 100.0) {
+                            "NavDagDelvisSyk"
+                        } else if (it.type == "NavDag") {
+                            "NavDagSyk"
+                        } else {
+                            it.type
+                        }
+                    )
+                }
+                ?: dag
+        }
+
+        // Dager med utbetaling
+        val stønadsdager = dager.filter {
+            it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
+        }
+        rSVedtakWrapper.copy(
+            dager = dager,
+            dagligUtbetalingsbelop = stønadsdager.maxOfOrNull { it.belop } ?: 0,
+            antallDagerMedUtbetaling = stønadsdager.size,
+            sykepengebelop = stønadsdager.sumOf { it.belop },
+        )
     }
 }
 

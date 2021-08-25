@@ -1,0 +1,25 @@
+{
+    "fødselsnummer": "14127317470",
+    "aktørId": "2405551885299",
+    "organisasjonsnummer": "896929119",
+    "fom": "2021-07-01",
+    "tom": "2021-07-31",
+    "skjæringstidspunkt": "2021-07-01",
+    "dokumenter": [
+      {
+        "dokumentId": "39d09126-c3a7-4b75-bd8e-c38f6c5f2079",
+        "type": "Søknad"
+      },
+      {
+        "dokumentId": "8a3c5108-50aa-43fc-9cd4-286714d79c27",
+        "type": "Inntektsmelding"
+      },
+      {
+        "dokumentId": "90cb9178-dda9-4703-a691-a2bdc00a12ab",
+        "type": "Sykmelding"
+      }
+    ],
+    "inntekt": 18000.0,
+    "sykepengegrunnlag": 216000.0,
+    "utbetalingId": "136c79d9-e57e-444a-bad2-140431d4f1d7"
+}
