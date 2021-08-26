@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -193,24 +192,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         oppgave.getLink() shouldBeEqualTo "blah"
         oppgave.getGrupperingsId() shouldBeEqualTo id
         oppgave.getEksternVarsling() shouldBeEqualTo true
-    }
-
-    @Test
-    @Order(5)
-    fun `En veileder med tilgang kan hente vedtaket`() {
-
-        val mockSyfotilgangscontrollServer = MockRestServiceServer.createServer(restTemplate)
-        val veilederToken = veilederToken()
-        mockSyfotilgangscontrollServer.mockTilgangskontrollResponse(
-            tilgang = true,
-            fnr = fnr,
-            veilederToken = veilederToken
-        )
-        val vedtak = hentVedtakSomVeileder(fnr, veilederToken)
-
-        vedtak shouldHaveSize 1
-        vedtak.first().lest `should be` false
-        mockSyfotilgangscontrollServer.verify()
     }
 
     @Test
