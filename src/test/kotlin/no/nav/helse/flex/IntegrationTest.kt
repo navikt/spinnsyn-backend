@@ -21,7 +21,6 @@ import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
-import org.springframework.test.web.client.MockRestServiceServer.createServer
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -176,40 +175,33 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(7)
-    fun `En veileder med tilgang kan hente vedtaket`() {
+    fun `En veileder med obo tilgang kan hente vedtaket`() {
 
-        val mockSyfotilgangscontrollServer = createServer(restTemplate)
-        val veilederToken = veilederToken()
-        mockSyfotilgangscontrollServer.mockTilgangskontrollResponse(
-            tilgang = true,
-            fnr = fnr,
-            veilederToken = veilederToken
-        )
-        val vedtak = hentVedtakSomVeileder(fnr, veilederToken)
+        val veilederToken = skapAzureJwt()
+        mockSyfoTilgangskontroll(true, fnr)
+
+        val vedtak = hentVedtakSomVeilederObo(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` true
-        mockSyfotilgangscontrollServer.verify()
+        syfotilgangskontrollMockRestServiceServer?.verify()
+        syfotilgangskontrollMockRestServiceServer?.reset()
     }
 
     @Test
     @Order(8)
     fun `En veileder uten tilgang kan ikke hente vedtaket`() {
 
-        val mockSyfotilgangscontrollServer = createServer(restTemplate)
-        val veilederToken = veilederToken()
-        mockSyfotilgangscontrollServer.mockTilgangskontrollResponse(
-            tilgang = false,
-            fnr = fnr,
-            veilederToken = veilederToken
-        )
+        val veilederToken = skapAzureJwt()
+        mockSyfoTilgangskontroll(false, fnr)
 
         mockMvc.perform(
-            get("/api/v1/veileder/vedtak?fnr=$fnr")
+            get("/api/v2/veileder/vedtak?fnr=$fnr")
                 .header("Authorization", "Bearer $veilederToken")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isForbidden).andReturn()
 
-        mockSyfotilgangscontrollServer.verify()
+        syfotilgangskontrollMockRestServiceServer?.verify()
+        syfotilgangskontrollMockRestServiceServer?.reset()
     }
 }

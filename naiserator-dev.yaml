@@ -67,10 +67,6 @@ spec:
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: SPINNSYN_FRONTEND_URL
       value: "https://www-gcp.dev.nav.no/syk/sykepenger"
-    - name: VEILEDER_WELLKNOWN_URI
-      value: "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration"
-    - name: VEILEDER_EXPECTED_AUDIENCE
-      value: "38e07d31-659d-4595-939a-f18dce3446c5,281ba984-745f-48b8-a79c-9444b8688361"
     - name: KAFKA_SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais-q.adeo.no
     - name: SYFOTILGANGSKONTROLL_URL
