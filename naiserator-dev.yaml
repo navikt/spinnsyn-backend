@@ -72,4 +72,4 @@ spec:
     - name: SYFOTILGANGSKONTROLL_URL
       value: https://syfo-tilgangskontroll.dev-fss-pub.nais.io
     - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
-      value: "32e36aa5-1d12-452a-9b1e-9f3f557cbb4d"
+      value: dev-fss.teamsykefravr.syfo-tilgangskontroll
