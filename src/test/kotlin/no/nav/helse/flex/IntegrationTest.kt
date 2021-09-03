@@ -196,7 +196,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         mockSyfoTilgangskontroll(false, fnr)
 
         mockMvc.perform(
-            get("/api/v2/veileder/vedtak?fnr=$fnr")
+            get("/api/v3/veileder/vedtak?fnr=$fnr")
                 .header("Authorization", "Bearer $veilederToken")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isForbidden).andReturn()

@@ -120,12 +120,6 @@ class VedtakService(
             .filter { it.harAlleVedtakOgErForstILista() }
             .map { it.tilRsVedtakWrapper() }
     }
-
-    fun hentRetroVedtak(fnr: String): List<RetroRSVedtak> {
-        return this.hentVedtak(fnr).map {
-            it.tilRetroRSVedtak()
-        }
-    }
 }
 
 private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> {
