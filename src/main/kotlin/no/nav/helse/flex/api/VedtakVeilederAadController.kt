@@ -4,7 +4,6 @@ import no.nav.helse.flex.client.SyfoTilgangskontrollOboClient
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation.NamespaceAndApp
 import no.nav.helse.flex.domene.RSVedtakWrapper
-import no.nav.helse.flex.service.RetroRSVedtak
 import no.nav.helse.flex.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -18,23 +17,6 @@ class VedtakVeilederAadController(
     private val vedtakService: VedtakService,
     private val syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient,
 ) {
-
-    @GetMapping("/api/v2/veileder/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
-    @ResponseBody
-    @ProtectedWithClaims(issuer = "azureator")
-    fun hentRetroVedtak(@RequestParam fnr: String): List<RetroRSVedtak> {
-        clientIdValidation.validateClientId(
-            NamespaceAndApp(
-                namespace = "teamsykefravr",
-                app = "syfomodiaperson"
-            )
-        )
-
-        if (!syfoTilgangskontrollClient.sjekkTilgangVeileder(fnr)) {
-            throw IkkeTilgangException()
-        }
-        return vedtakService.hentRetroVedtak(fnr)
-    }
 
     @GetMapping("/api/v3/veileder/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
