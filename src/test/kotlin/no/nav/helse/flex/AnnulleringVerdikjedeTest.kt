@@ -1,12 +1,12 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.db.VedtakDAO
-import no.nav.helse.flex.db.VedtakTestDAO
 import no.nav.helse.flex.domene.AnnulleringDto
-import no.nav.helse.flex.domene.VedtakDto
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
+import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
+import no.nav.helse.flex.kafka.UTBETALING_TOPIC
+import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import org.amshove.kluent.shouldBe
-import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -28,43 +28,57 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     lateinit var onpremKafkaProducer: KafkaProducer<String, String>
 
     @Autowired
-    lateinit var vedtakDAO: VedtakDAO
+    lateinit var kafkaProducer: KafkaProducer<String, String>
 
-    @Autowired
-    lateinit var vedtakTestDAO: VedtakTestDAO
-
-    val fnr = "983475"
-    val fom = LocalDate.now().minusDays(7)
-    val tom = LocalDate.now()
-    val automatiskBehandletVedtak = VedtakDto(
+    final val fnr = "983475"
+    final val fom = LocalDate.now().minusDays(7)
+    final val tom = LocalDate.now()
+    final val org = "394783764"
+    final val utbetalingId = "124542"
+    val vedtak = VedtakFattetForEksternDto(
+        fødselsnummer = fnr,
+        aktørId = fnr,
+        organisasjonsnummer = org,
         fom = fom,
         tom = tom,
-        forbrukteSykedager = 1,
-        gjenståendeSykedager = 2,
-        organisasjonsnummer = "123",
-        utbetalinger = listOf(
-            VedtakDto.UtbetalingDto(
-                mottaker = "123",
-                fagområde = "SPREF",
-                totalbeløp = 1400,
-                utbetalingslinjer = listOf(
-                    VedtakDto.UtbetalingDto.UtbetalingslinjeDto(
-                        fom = fom,
-                        tom = tom,
-                        dagsats = 14,
-                        beløp = 1400,
-                        grad = 100.0,
-                        sykedager = 100
-                    )
-                )
-            )
-        ),
+        skjæringstidspunkt = fom,
         dokumenter = emptyList(),
-        automatiskBehandling = true
+        inntekt = 0.0,
+        sykepengegrunnlag = 0.0,
+        utbetalingId = utbetalingId
+    )
+
+    val utbetaling = UtbetalingUtbetalt(
+        fødselsnummer = fnr,
+        aktørId = fnr,
+        organisasjonsnummer = org,
+        fom = fom,
+        tom = tom,
+        utbetalingId = utbetalingId,
+        antallVedtak = null,
+        event = "eventet",
+        forbrukteSykedager = 42,
+        gjenståendeSykedager = 3254,
+        automatiskBehandling = true,
+        arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
+            mottaker = org,
+            fagområde = "SP",
+            fagsystemId = "1234",
+            nettoBeløp = 123,
+            utbetalingslinjer = emptyList()
+        ),
+        type = "UTBETALING",
+        utbetalingsdager = listOf(
+            UtbetalingUtbetalt.UtbetalingdagDto(
+                dato = fom,
+                type = "AvvistDag",
+                begrunnelser = listOf("MinimumSykdomsgrad")
+            )
+        )
     )
     val annulleringDto = AnnulleringDto(
         fødselsnummer = fnr,
-        orgnummer = "123",
+        orgnummer = org,
         tidsstempel = LocalDateTime.now(),
         fom = fom,
         tom = tom
@@ -72,19 +86,27 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(2)
-    fun `Et vedtak mottatt fra kafka blir lagret i db`() {
-        onpremKafkaProducer.send(
+    fun `Et vedtak med utbetaling mottatt fra kafka blir lagret i db`() {
+        kafkaProducer.send(
             ProducerRecord(
-                SPORBAR_TOPIC,
+                VEDTAK_TOPIC,
                 null,
                 fnr,
-                automatiskBehandletVedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "Vedtak".toByteArray()))
+                vedtak.serialisertTilString()
+            )
+        ).get()
+
+        kafkaProducer.send(
+            ProducerRecord(
+                UTBETALING_TOPIC,
+                null,
+                fnr,
+                utbetaling.serialisertTilString()
             )
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakTestDAO.finnVedtakEtterMigrering(fnr).isNotEmpty()
+            vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
@@ -93,10 +115,6 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     @Test
     @Order(3)
     fun `Vedtaket blir funnet i REST APIet`() {
-        hentVedtak(fnr).shouldBeEmpty()
-        val id = vedtakTestDAO.finnVedtakEtterMigrering(fnr).first().id
-        vedtakTestDAO.merkVedtakMottattFørMigrering(id)
-
         val vedtakene = hentVedtak(fnr)
         vedtakene shouldHaveSize 1
         vedtakene.first().annullert shouldBe false
@@ -158,18 +176,35 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     @Test
     @Order(8)
     fun `Et nytt vedtak mottatt fra kafka blir lagret i db`() {
-        onpremKafkaProducer.send(
+        kafkaProducer.send(
             ProducerRecord(
-                SPORBAR_TOPIC,
+                VEDTAK_TOPIC,
                 null,
                 fnr,
-                automatiskBehandletVedtak.copy(organisasjonsnummer = "456").serialisertTilString(),
-                listOf(RecordHeader("type", "Vedtak".toByteArray()))
+                vedtak.copy(
+                    organisasjonsnummer = "456",
+                    utbetalingId = "$utbetalingId nr2"
+                ).serialisertTilString()
+            )
+        ).get()
+
+        kafkaProducer.send(
+            ProducerRecord(
+                UTBETALING_TOPIC,
+                null,
+                fnr,
+                utbetaling.copy(
+                    organisasjonsnummer = "456",
+                    utbetalingId = "$utbetalingId nr2",
+                    arbeidsgiverOppdrag = utbetaling.arbeidsgiverOppdrag.copy(
+                        mottaker = "456",
+                    )
+                ).serialisertTilString()
             )
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakTestDAO.finnVedtakEtterMigrering(fnr).isNotEmpty()
+            vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
@@ -178,36 +213,9 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     @Test
     @Order(9)
     fun `Man finner to annullerte vedtak i REST APIet`() {
-        val id = vedtakTestDAO.finnVedtakEtterMigrering(fnr).first().id
-        vedtakTestDAO.merkVedtakMottattFørMigrering(id)
-
         val vedtakene = hentVedtak(fnr)
         vedtakene shouldHaveSize 2
         vedtakene.first().annullert shouldBe true
         vedtakene.last().annullert shouldBe true
-    }
-
-    @Test
-    @Order(10)
-    fun `Enda et vedtak mottatt fra kafka blir lagret i db`() {
-        vedtakTestDAO.finnVedtakEtterMigrering(fnr).shouldBeEmpty()
-
-        onpremKafkaProducer.send(
-            ProducerRecord(
-                SPORBAR_TOPIC,
-                null,
-                fnr,
-                automatiskBehandletVedtak.copy(
-                    fom = LocalDate.now().minusDays(16),
-                    tom = LocalDate.now().minusDays(8)
-                ).serialisertTilString(),
-                listOf(RecordHeader("type", "Vedtak".toByteArray()))
-            )
-        ).get()
-
-        await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakTestDAO.finnVedtakEtterMigrering(fnr).isNotEmpty()
-        }
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
     }
 }
