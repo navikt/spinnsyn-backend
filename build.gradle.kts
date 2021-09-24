@@ -43,7 +43,7 @@ val testContainersVersion = "1.16.0"
 val logstashLogbackEncoderVersion = "6.6"
 val kluentVersion = "1.68"
 val brukernotifikasjonAvroVersion = "1.2021.01.18-11.12-b9c8c40b98d1"
-val confluentVersion = "6.2.0"
+val confluentVersion = "6.2.1"
 val tokenSupportVersion = "1.3.8"
 
 dependencies {
