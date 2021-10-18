@@ -1,0 +1,23 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: vedtak-status
+  namespace: flex
+  labels:
+    team: flex
+  annotations:
+    dcat.data.nav.no/title: "flex.vedtak-status"
+    dcat.data.nav.no/description: "Topic for publisering av status på vedtak"
+spec:
+  pool: {{kafkaPool}}
+  config:
+    cleanupPolicy: delete
+    minimumInSyncReplicas: 1
+    partitions: 3
+    replication: 3
+    retentionBytes: -1  # Messages will never be deleted because of disk space
+    retentionHours: -1  # Messages will never be timed out
+  acl:
+    - team: flex
+      application: spinnsyn-backend
+      access: write
