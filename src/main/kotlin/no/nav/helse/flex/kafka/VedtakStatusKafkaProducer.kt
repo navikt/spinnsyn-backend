@@ -7,7 +7,7 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import org.springframework.stereotype.Component
 
 @Component
-class LovmeFilterKafkaProducer(
+class VedtakStatusKafkaProducer(
     private val producer: KafkaProducer<String, VedtakStatusDTO>
 ) {
 
@@ -29,7 +29,6 @@ class LovmeFilterKafkaProducer(
 }
 
 data class VedtakStatusDTO(
-    // TODO: Representerer per nå vedtaksId, men skal bli utbetalingsId.
+    // TODO: Utvid med nødvendige data.
     val id: String
-    // TODO: Legg ved vedtaksId for vedtak tilhørende en utbetaling hvis det er behov for det.
 )
