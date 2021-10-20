@@ -19,7 +19,7 @@ buildscript {
         maven("https://plugins.gradle.org/m2/")
     }
     dependencies {
-        classpath("org.jlleitschuh.gradle:ktlint-gradle:10.1.0")
+        classpath("org.jlleitschuh.gradle:ktlint-gradle:10.2.0")
     }
 }
 
@@ -39,7 +39,7 @@ repositories {
     }
 }
 
-val testContainersVersion = "1.16.0"
+val testContainersVersion = "1.16.1"
 val logstashLogbackEncoderVersion = "6.6"
 val kluentVersion = "1.68"
 val brukernotifikasjonAvroVersion = "1.2021.01.18-11.12-b9c8c40b98d1"
