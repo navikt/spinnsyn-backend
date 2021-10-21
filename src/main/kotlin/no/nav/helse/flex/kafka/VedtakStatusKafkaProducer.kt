@@ -29,6 +29,12 @@ class VedtakStatusKafkaProducer(
 }
 
 data class VedtakStatusDTO(
-    // TODO: Utvid med nødvendige data.
-    val id: String
+    val id: String,
+    val fnr: String,
+    val vedtakStatus: VedtakStatus
 )
+
+enum class VedtakStatus {
+    MOTATT,
+    LEST,
+}
