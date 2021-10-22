@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
-import kotlin.streams.toList
 
 @Service
 class VedtakService(
