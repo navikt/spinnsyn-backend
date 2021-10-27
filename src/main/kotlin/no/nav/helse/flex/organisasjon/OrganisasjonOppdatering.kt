@@ -2,10 +2,10 @@ package no.nav.helse.flex.organisasjon
 
 import no.nav.helse.flex.logger
 import no.nav.syfo.kafka.felles.SykepengesoknadDTO
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.time.Instant
 
-@Service
+@Component
 class OrganisasjonOppdatering(
     private val organisasjonRepository: OrganisasjonRepository
 ) {
