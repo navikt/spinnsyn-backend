@@ -36,6 +36,10 @@ repositories {
 
     maven {
         url = uri("https://maven.pkg.github.com/navikt/maven-release")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
     }
 }
 
@@ -45,6 +49,7 @@ val kluentVersion = "1.68"
 val brukernotifikasjonAvroVersion = "1.2021.01.18-11.12-b9c8c40b98d1"
 val confluentVersion = "6.2.0"
 val tokenSupportVersion = "1.3.8"
+val syfoKafkaVersion = "2021.07.20-09.39-6be2c52c"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
@@ -66,6 +71,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
+    implementation("no.nav.syfo.kafka:felles:$syfoKafkaVersion")
 
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

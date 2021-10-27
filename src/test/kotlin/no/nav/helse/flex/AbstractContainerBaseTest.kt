@@ -10,6 +10,7 @@ import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSVedtakWrapper
+import no.nav.helse.flex.organisasjon.OrganisasjonRepository
 import no.nav.helse.flex.service.RetroRSVedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
@@ -53,6 +54,9 @@ abstract class AbstractContainerBaseTest {
 
     @Autowired
     lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    lateinit var organisasjonRepository: OrganisasjonRepository
 
     @Autowired
     lateinit var annulleringDAO: AnnulleringDAO
