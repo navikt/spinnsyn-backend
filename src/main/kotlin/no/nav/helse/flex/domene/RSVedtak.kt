@@ -11,6 +11,7 @@ data class RSVedtakWrapper(
     val vedtak: RSVedtak,
     val opprettet: LocalDate,
     val opprettetTimestamp: Instant,
+    val orgnavn: String?,
     val annullert: Boolean = false,
     val revurdert: Boolean = false,
     val dager: List<RSDag> = emptyList(),

@@ -3,6 +3,7 @@ package no.nav.helse.flex.service
 import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.logger
+import no.nav.helse.flex.organisasjon.LeggTilOrganisasjonnavn
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -13,8 +14,8 @@ class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
     private val retroVedtakService: RetroVedtakService,
-    private val annulleringDAO: AnnulleringDAO
-
+    private val annulleringDAO: AnnulleringDAO,
+    private val leggTilOrganisasjonavn: LeggTilOrganisasjonnavn,
 ) {
 
     val log = logger()
@@ -31,8 +32,13 @@ class VedtakService(
             }
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
+            .leggTilOrgnavn()
 
         return alleVedtak
+    }
+
+    private fun List<RSVedtakWrapper>.leggTilOrgnavn(): List<RSVedtakWrapper> {
+        return leggTilOrganisasjonavn.leggTilOrganisasjonnavn(this)
     }
 
     private fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
@@ -87,6 +93,7 @@ class VedtakService(
                 id = this.id!!,
                 annullert = annulleringer.annullererVedtak(vedtaket),
                 lest = this.lest != null,
+                orgnavn = vedtaket.organisasjonsnummer,
                 lestDato = this.lest?.atZone(ZoneId.of("Europe/Oslo"))?.toOffsetDateTime(),
                 opprettetTimestamp = this.opprettet,
                 opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),

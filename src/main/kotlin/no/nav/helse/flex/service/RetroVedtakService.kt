@@ -69,6 +69,7 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
         annullert = this.annullert,
         lest = this.lest,
         lestDato = this.lestDato,
+        orgnavn = this.vedtak.organisasjonsnummer,
         opprettetTimestamp = this.opprettetTimestamp,
         opprettet = this.opprettet,
         vedtak = RSVedtak(

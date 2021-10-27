@@ -5,6 +5,7 @@ import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
+import no.nav.helse.flex.organisasjon.Organisasjon
 import no.nav.helse.flex.service.BrukernotifikasjonService
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.client.RestTemplate
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
@@ -39,7 +41,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     final val fnr = "1233342"
     final val aktørId = "321"
-    final val org = "987"
+    final val org = "987123123"
     final val now = LocalDate.now()
     val utbetalingId = "124542"
     val vedtak = VedtakFattetForEksternDto(
@@ -151,7 +153,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `finner vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        val vedtak =
+            vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         vedtak.shouldHaveSize(1)
     }
 
@@ -162,10 +165,16 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
+        vedtak[0].orgnavn `should be equal to` org
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].dato `should be equal to` now
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].type `should be equal to` "AvvistDag"
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].begrunnelser[0] `should be equal to` "MinimumSykdomsgrad"
+
+        organisasjonRepository.save(Organisasjon(navn = "Barneskolen", orgnummer = org, oppdatert = Instant.now(), opprettet = Instant.now(), oppdatertAv = "bla"))
+
+        val vedtakMedNavn = hentVedtak(fnr)
+        vedtakMedNavn[0].orgnavn `should be equal to` "Barneskolen"
     }
 
     @Test
@@ -242,7 +251,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(7)
     fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        val vedtak =
+            vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         vedtak.shouldBeEmpty()
     }
 
