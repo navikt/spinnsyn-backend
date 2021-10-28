@@ -18,6 +18,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.client.RestTemplate
 import java.time.Instant
 import java.time.LocalDate
@@ -171,7 +174,15 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].type `should be equal to` "AvvistDag"
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].begrunnelser[0] `should be equal to` "MinimumSykdomsgrad"
 
-        organisasjonRepository.save(Organisasjon(navn = "Barneskolen", orgnummer = org, oppdatert = Instant.now(), opprettet = Instant.now(), oppdatertAv = "bla"))
+        organisasjonRepository.save(
+            Organisasjon(
+                navn = "Barneskolen",
+                orgnummer = org,
+                oppdatert = Instant.now(),
+                opprettet = Instant.now(),
+                oppdatertAv = "bla"
+            )
+        )
 
         val vedtakMedNavn = hentVedtak(fnr)
         vedtakMedNavn[0].orgnavn `should be equal to` "Barneskolen"
@@ -216,6 +227,35 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         vedtak.first().lest `should be` false
         syfotilgangskontrollMockRestServiceServer?.verify()
         syfotilgangskontrollMockRestServiceServer?.reset()
+    }
+
+    @Test
+    @Order(5)
+    fun `spinnsyn-frontend-arkivering kan hente vedtaket`() {
+
+        val token = skapAzureJwt(subject = "spinnsyn-frontend-arkivering-client-id")
+
+        val vedtak = hentVedtakSomSpinnsynFrontendArkivering(fnr, token)
+
+        vedtak shouldHaveSize 1
+        vedtak.first().lest `should be` false
+    }
+
+    @Test
+    @Order(5)
+    fun `Maskin til maskin apiet trenger tokens`() {
+        mockMvc.perform(
+            get("/api/v1/arkivering/vedtak")
+                .header("Authorization", "Bearer blabla-fake-token")
+                .header("fnr", fnr)
+                .contentType(APPLICATION_JSON)
+        ).andExpect(status().isUnauthorized)
+
+        mockMvc.perform(
+            get("/api/v1/arkivering/vedtak")
+                .header("fnr", fnr)
+                .contentType(APPLICATION_JSON)
+        ).andExpect(status().isUnauthorized)
     }
 
     @Test

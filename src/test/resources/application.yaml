@@ -24,7 +24,7 @@ aiven-kafka:
   auto-offset-reset: earliest
   security-protocol: PLAINTEXT
 
-AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}]"
+AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"},{\"name\":\"dev-gcp:flex:spinnsyn-frontend-arkivering\",\"clientId\":\"spinnsyn-frontend-arkivering-client-id\"}]"
 
 
 no.nav.security.jwt:

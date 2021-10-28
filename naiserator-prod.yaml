@@ -53,6 +53,7 @@ spec:
       rules:
         - application: flex-gateway
         - application: flex-intern-gateway
+        - application: spinnsyn-frontend-arkivering
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: prod-fss

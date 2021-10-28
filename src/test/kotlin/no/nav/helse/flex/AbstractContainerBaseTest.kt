@@ -11,7 +11,6 @@ import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.organisasjon.OrganisasjonRepository
-import no.nav.helse.flex.service.RetroRSVedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -88,20 +87,21 @@ abstract class AbstractContainerBaseTest {
         return objectMapper.readValue(json)
     }
 
-    fun hentVedtakSomVeileder(fnr: String, veilederToken: String): List<RetroRSVedtak> {
+    fun hentVedtakSomVeilederObo(fnr: String, token: String): List<RSVedtakWrapper> {
         val json = mockMvc.perform(
-            get("/api/v1/veileder/vedtak?fnr=$fnr")
-                .header("Authorization", "Bearer $veilederToken")
+            get("/api/v3/veileder/vedtak?fnr=$fnr")
+                .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString
 
         return objectMapper.readValue(json)
     }
 
-    fun hentVedtakSomVeilederObo(fnr: String, token: String): List<RSVedtakWrapper> {
+    fun hentVedtakSomSpinnsynFrontendArkivering(fnr: String, token: String): List<RSVedtakWrapper> {
         val json = mockMvc.perform(
-            get("/api/v3/veileder/vedtak?fnr=$fnr")
+            get("/api/v1/arkivering/vedtak")
                 .header("Authorization", "Bearer $token")
+                .header("fnr", fnr)
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString
 
