@@ -160,8 +160,7 @@ abstract class AbstractContainerBaseTest {
         }
     }
 
-    @Test
-    @Order(99)
+    @AfterAll
     fun opprydning() {
         utbetalingRepository.deleteAll()
         vedtakRepository.deleteAll()
