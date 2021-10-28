@@ -55,7 +55,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         fom = fom,
         tom = tom,
         utbetalingId = utbetalingId,
-        antallVedtak = null,
+        antallVedtak = 1,
         event = "eventet",
         forbrukteSykedager = 42,
         gjenståendeSykedager = 3254,

@@ -67,7 +67,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         fom = now,
         tom = now,
         utbetalingId = utbetalingId,
-        antallVedtak = null,
+        antallVedtak = 1,
         event = "eventet",
         forbrukteSykedager = 42,
         gjenståendeSykedager = 3254,

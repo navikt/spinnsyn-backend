@@ -42,7 +42,8 @@ class MottaUtbetalingService(
                 utbetalingType = utbetalingSerialisert.type,
                 utbetaling = utbetaling,
                 opprettet = opprettet,
-                utbetalingId = utbetalingSerialisert.utbetalingId
+                utbetalingId = utbetalingSerialisert.utbetalingId,
+                antallVedtak = utbetalingSerialisert.antallVedtak!!
             )
         )
 

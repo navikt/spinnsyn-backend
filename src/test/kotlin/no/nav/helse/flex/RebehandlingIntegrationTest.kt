@@ -60,7 +60,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
         tom = now,
         utbetalingId = utbetalingId,
         event = "eventet",
-        antallVedtak = null,
+        antallVedtak = 1,
         forbrukteSykedager = 42,
         gjenståendeSykedager = 3254,
         automatiskBehandling = true,
@@ -72,7 +72,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
             utbetalingslinjer = emptyList()
         ),
         type = "UTBETALING",
-        utbetalingsdager = emptyList()
+        utbetalingsdager = emptyList(),
     )
 
     @Test
