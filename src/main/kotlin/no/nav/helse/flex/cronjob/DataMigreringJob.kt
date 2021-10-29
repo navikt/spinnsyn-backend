@@ -18,7 +18,7 @@ class DataMigreringJob(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 1000L * 60, fixedDelay = 1000L * 60 * 10)
+    @Scheduled(initialDelay = 1000L * 60 * 2, fixedDelay = 1000L * 60 * 1)
     fun run() {
         if (leaderElection.isLeader()) {
             log.info("Kjører data migrering")
