@@ -46,49 +46,28 @@ class VedtakService(
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
 
-        val eksisterendeUtbetalinger = utbetalinger
+        val eksisterendeUtbetalingIder = utbetalinger
             .filter { it.utbetalingType == "UTBETALING" || it.utbetalingType == "REVURDERING" }
-
-        val eksisterendeUtbetalingIder = eksisterendeUtbetalinger
             .map { it.utbetalingId }
 
         val vedtakMedUtbetaling = vedtak
             .filter { it.utbetalingId != null }
             .filter { eksisterendeUtbetalingIder.contains(it.utbetalingId) }
 
-        fun VedtakDbRecord.relaterteVedtak(): List<VedtakDbRecord> = vedtak
+        fun UtbetalingDbRecord.harAlleVedtak() = vedtakMedUtbetaling
+            .filter { it.utbetalingId == this.utbetalingId }
+            .size == antallVedtak
+
+        fun UtbetalingDbRecord.relaterteVedtak(): List<VedtakDbRecord> = vedtakMedUtbetaling
             .filter { it.utbetalingId == this.utbetalingId }
             .sortedBy { it.id }
 
-        fun VedtakDbRecord.harAlleVedtakOgErForstILista(): Boolean {
-            val utbetaling = utbetalinger
-                .find { it.utbetalingId == this.utbetalingId }!!
-                .utbetaling
-                .tilUtbetalingUtbetalt()
+        fun UtbetalingDbRecord.tilRsVedtakWrapper(): RSVedtakWrapper {
+            val vedtakForUtbetaling = relaterteVedtak().map { it.vedtak.tilVedtakFattetForEksternDto() }
+            val vedtaket = vedtakForUtbetaling.first()
+            val utbetalingen = this.utbetaling.tilUtbetalingUtbetalt()
 
-            val antallVedtak = utbetaling.antallVedtak ?: 1
-
-            val vedtakene = relaterteVedtak()
-
-            if (vedtakene.size != antallVedtak) {
-                log.warn("Fant ${vedtakene.size} men forventet $antallVedtak")
-                return false
-            }
-
-            // Vi viser og varsler vedtakene med lavest db id
-            return this.id == vedtakene.first().id
-        }
-
-        fun VedtakDbRecord.tilRsVedtakWrapper(): RSVedtakWrapper {
-            val vedtaket = this.vedtak.tilVedtakFattetForEksternDto()
-
-            val vedtakene = relaterteVedtak().map { it.vedtak.tilVedtakFattetForEksternDto() }
-
-            val utbetaling = utbetalinger
-                .find { it.utbetalingId == this.utbetalingId }!!
-                .utbetaling
-                .tilUtbetalingUtbetalt()
-
+            // TODO: Støtt visning av vedtak med forskjellig inntekt, sykepengegrunnlag organisasjonsnummer.
             return RSVedtakWrapper(
                 id = this.id!!,
                 annullert = annulleringer.annullererVedtak(vedtaket),
@@ -98,32 +77,32 @@ class VedtakService(
                 opprettetTimestamp = this.opprettet,
                 opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
                 vedtak = RSVedtak(
-                    organisasjonsnummer = vedtaket.organisasjonsnummer, // TODO hva om den endrer seg
-                    dokumenter = vedtakene.flatMap { it.dokumenter },
-                    sykepengegrunnlag = vedtaket.sykepengegrunnlag, // TODO hva om den endrer seg
-                    inntekt = vedtaket.inntekt, // TODO hva om den endrer seg
-                    fom = vedtakene.minOf { it.fom },
-                    tom = vedtakene.maxOf { it.tom },
+                    organisasjonsnummer = vedtaket.organisasjonsnummer,
+                    dokumenter = vedtakForUtbetaling.flatMap { it.dokumenter },
+                    sykepengegrunnlag = vedtaket.sykepengegrunnlag,
+                    inntekt = vedtaket.inntekt,
+                    fom = vedtakForUtbetaling.minOf { it.fom },
+                    tom = vedtakForUtbetaling.maxOf { it.tom },
                     utbetaling = RSUtbetalingUtbetalt(
-                        utbetalingType = utbetaling.type,
-                        organisasjonsnummer = utbetaling.organisasjonsnummer,
-                        forbrukteSykedager = utbetaling.forbrukteSykedager,
-                        gjenståendeSykedager = utbetaling.gjenståendeSykedager,
-                        automatiskBehandling = utbetaling.automatiskBehandling,
-                        utbetalingsdager = utbetaling.utbetalingsdager.map { it.tilRsUtbetalingsdag() },
-                        utbetalingId = utbetaling.utbetalingId,
+                        utbetalingType = utbetalingen.type,
+                        organisasjonsnummer = utbetalingen.organisasjonsnummer,
+                        forbrukteSykedager = utbetalingen.forbrukteSykedager,
+                        gjenståendeSykedager = utbetalingen.gjenståendeSykedager,
+                        automatiskBehandling = utbetalingen.automatiskBehandling,
+                        utbetalingsdager = utbetalingen.utbetalingsdager.map { it.tilRsUtbetalingsdag() },
+                        utbetalingId = utbetalingen.utbetalingId,
                         arbeidsgiverOppdrag = RSOppdrag(
-                            mottaker = utbetaling.arbeidsgiverOppdrag.mottaker,
-                            nettoBeløp = utbetaling.arbeidsgiverOppdrag.nettoBeløp,
-                            utbetalingslinjer = utbetaling.arbeidsgiverOppdrag.utbetalingslinjer.map { it.tilRsUtbetalingslinje() }
+                            mottaker = utbetalingen.arbeidsgiverOppdrag.mottaker,
+                            nettoBeløp = utbetalingen.arbeidsgiverOppdrag.nettoBeløp,
+                            utbetalingslinjer = utbetalingen.arbeidsgiverOppdrag.utbetalingslinjer.map { it.tilRsUtbetalingslinje() }
                         )
                     )
                 )
             )
         }
 
-        return vedtakMedUtbetaling
-            .filter { it.harAlleVedtakOgErForstILista() }
+        return utbetalinger
+            .filter { it.harAlleVedtak() }
             .map { it.tilRsVedtakWrapper() }
     }
 }

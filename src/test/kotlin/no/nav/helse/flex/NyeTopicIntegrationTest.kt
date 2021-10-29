@@ -127,7 +127,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
-        val antall = brukernotifikasjonService.prosseserVedtak()
+        val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 0
     }
 
@@ -155,10 +155,10 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
-    fun `finner vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak =
-            vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        vedtak.shouldHaveSize(1)
+    fun `finner utbetalingen med query for brukernotifkasjon`() {
+        val utbetaling =
+            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        utbetaling.shouldHaveSize(1)
     }
 
     @Test
@@ -191,7 +191,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `en brukernotifkasjon går ut når cronjobben kjøres`() {
-        val antall = brukernotifikasjonService.prosseserVedtak()
+        val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 1
 
         val id = hentVedtak(fnr).first().id
@@ -261,9 +261,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `vi leser vedtaket`() {
-        val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
-        vedtakRepository.save(dbVedtak.copy(lest = null))
-
         val vedtak = hentVedtak(fnr)
 
         vedtak.shouldHaveSize(1)
@@ -285,14 +282,14 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         val done = dones[0].value()
         done.getFodselsnummer() `should be equal to` fnr
 
-        vedtakRepository.findVedtakDbRecordsByFnr(fnr).first().lest.`should not be null`()
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first().lest.`should not be null`()
     }
 
     @Test
     @Order(7)
     fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
         val vedtak =
-            vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         vedtak.shouldBeEmpty()
     }
 
