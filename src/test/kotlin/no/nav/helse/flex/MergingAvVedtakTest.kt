@@ -267,7 +267,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     fun `vi bruker varslet med id for å done brukernotifikasjonen`() {
         val vedtakMedUtbetalingId = hentVedtak(fnr).first()
         val vedtakVarselId = vedtakRepository

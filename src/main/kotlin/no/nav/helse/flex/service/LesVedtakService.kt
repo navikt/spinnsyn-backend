@@ -20,7 +20,6 @@ class LesVedtakService(
     private val vedtakDAO: VedtakDAO,
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     private val metrikk: Metrikk,
-    private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
     @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
 ) {
@@ -29,7 +28,7 @@ class LesVedtakService(
         val (lestUtbetaling, varsletMed) = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
         val lestGammeltVedtak = lesGammeltVedtak(fnr = fnr, vedtaksId = vedtaksId)
 
-        if (lestGammeltVedtak == IKKE_FUNNET && lestUtbetaling == IKKE_FUNNET_UTBETALING) {
+        if (lestGammeltVedtak == IKKE_FUNNET && lestUtbetaling == IKKE_FUNNET) {
             throw VedtakIkkeFunnetException(vedtaksId)
         }
 
@@ -59,30 +58,20 @@ class LesVedtakService(
     }
 
     private fun lesUtbetaling(fnr: String, utbetalingsId: String): Pair<LesResultat, String?> {
-        // Finner utbetaling når frontend bruker utbetalingsid
-        var utbetalingDbRecord = utbetalingRepository
+        val utbetalingDbRecord = utbetalingRepository
             .findUtbetalingDbRecordsByFnr(fnr)
             .find { it.id == utbetalingsId }
-
-        // Finner utbetaling via vedtaket
-        // TODO: Denne kan fjernes når vi ved at ingen sitter med vedtaksid i frontend
-        if (utbetalingDbRecord == null) {
-            val vedtakDbRecord = vedtakRepository
-                .findVedtakDbRecordsByFnr(fnr)
-                .find { it.id == utbetalingsId }
-                ?: return IKKE_FUNNET to null
-
-            utbetalingDbRecord = utbetalingRepository
-                .findUtbetalingDbRecordsByFnr(fnr)
-                .find { it.utbetalingId == vedtakDbRecord.utbetalingId }
-                ?: return IKKE_FUNNET_UTBETALING to null
-        }
+            ?: return IKKE_FUNNET to null
 
         if (utbetalingDbRecord.lest != null) {
             return ALLEREDE_LEST to null
         }
 
-        utbetalingRepository.save(utbetalingDbRecord.copy(lest = Instant.now()))
+        utbetalingRepository.save(
+            utbetalingDbRecord.copy(
+                lest = Instant.now()
+            )
+        )
 
         if (utbetalingDbRecord.brukernotifikasjonSendt == null) {
             return ALDRI_SENDT_BRUKERNOTIFIKASJON to null
@@ -105,7 +94,6 @@ class LesVedtakService(
 
     enum class LesResultat {
         IKKE_FUNNET,
-        IKKE_FUNNET_UTBETALING,
         LEST,
         ALLEREDE_LEST,
         ALDRI_SENDT_BRUKERNOTIFIKASJON,
@@ -115,13 +103,6 @@ class LesVedtakService(
         message = "Fant ikke vedtak $vedtaksId",
         httpStatus = HttpStatus.NOT_FOUND,
         reason = "VEDTAK_IKKE_FUNNET",
-        loglevel = LogLevel.WARN
-    )
-
-    class UtbetalingIkkeFunnetException(vedtaksId: String) : AbstractApiError(
-        message = "Fant ikke utbetaling for vedtak $vedtaksId",
-        httpStatus = HttpStatus.NOT_FOUND,
-        reason = "UTBETALING_IKKE_FUNNET",
         loglevel = LogLevel.WARN
     )
 }
