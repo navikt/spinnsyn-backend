@@ -6,6 +6,7 @@ import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -17,6 +18,7 @@ class DataMigreringJob(
 ) {
     val log = logger()
 
+    @Scheduled(initialDelay = 1000L * 60 * 2, fixedDelay = 1000L * 60 * 1)
     fun run() {
         if (leaderElection.isLeader()) {
             log.info("Kjører data migrering")
@@ -28,7 +30,6 @@ class DataMigreringJob(
     }
 
     fun migrate(batchSize: Int = 1000): Int {
-        log.debug("Using batchSize: $batchSize")
         var totaltProsesserte = 0
         var prosessertILoop = -1
 
@@ -36,7 +37,12 @@ class DataMigreringJob(
             .takeWhile { it.isNotEmpty() && prosessertILoop != 0; }
             .forEach { utbetalingerSomSkalProsesseres ->
                 prosessertILoop = 0
+
+                log.info("Migrering har hentet ${utbetalingerSomSkalProsesseres.size}")
+
                 utbetalingerSomSkalProsesseres.forEach utbetaling@{ dbId ->
+                    log.info("Migrerer utbetaling $dbId")
+
                     val utbetalingDbRecord = utbetalingRepository.findByIdOrNull(dbId)
                     val utbetaling = utbetalingDbRecord?.utbetaling?.tilUtbetalingUtbetalt()
 
