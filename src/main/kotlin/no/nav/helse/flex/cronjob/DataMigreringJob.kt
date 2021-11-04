@@ -6,7 +6,6 @@ import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -18,7 +17,6 @@ class DataMigreringJob(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 1000L * 60 * 2, fixedDelay = 1000L * 60 * 1)
     fun run() {
         if (leaderElection.isLeader()) {
             log.info("Kjører data migrering")
