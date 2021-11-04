@@ -12,8 +12,21 @@ import java.time.Instant
 interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
     fun findUtbetalingDbRecordsByFnr(fnr: String): List<UtbetalingDbRecord>
     fun existsByUtbetalingId(utbetalingId: String): Boolean
-    @Query("""select ID from UTBETALING where ANTALL_VEDTAK = -1 LIMIT :batchSize;""")
-    fun utbetalingerUtenAntallVedtakSatt(@Param("batchSize") batchSize: Int): List<String>
+    @Query(
+        """
+        select id
+        from utbetaling ut
+        inner join (
+            select count(utbetaling_id) as antall, utbetaling_id
+            from vedtak_v2
+            group by utbetaling_id
+        ) vedtak on vedtak.utbetaling_id = ut.utbetaling_id
+        where vedtak.antall = ut.antall_vedtak
+        and varslet_med is null 
+        limit 1000;
+        """
+    )
+    fun utbetalingerSomSkalProsesseres(@Param("batchSize") batchSize: Int): List<String>
 }
 
 @Table("utbetaling")
@@ -29,5 +42,5 @@ data class UtbetalingDbRecord(
     val lest: Instant? = null,
     val brukernotifikasjonSendt: Instant? = null,
     val brukernotifikasjonUtelatt: Instant? = null,
-    // val varsletMed: String,
+    val varsletMed: String? = null,
 )
