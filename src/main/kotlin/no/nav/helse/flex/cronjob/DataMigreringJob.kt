@@ -38,11 +38,7 @@ class DataMigreringJob(
             .forEach { utbetalingerSomSkalProsesseres ->
                 prosessertILoop = 0
 
-                log.info("Migrering har hentet ${utbetalingerSomSkalProsesseres.size}")
-
                 utbetalingerSomSkalProsesseres.forEach utbetaling@{ dbId ->
-                    log.info("Migrerer utbetaling $dbId")
-
                     val utbetalingDbRecord = utbetalingRepository.findByIdOrNull(dbId)
                     val utbetaling = utbetalingDbRecord?.utbetaling?.tilUtbetalingUtbetalt()
 
