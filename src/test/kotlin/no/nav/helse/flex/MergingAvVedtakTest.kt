@@ -267,6 +267,9 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         val done = dones[0].value()
         done.getFodselsnummer() `should be equal to` fnr
 
-        vedtakRepository.findVedtakDbRecordsByFnr(fnr).first { it.id == vedtak[0].id }.lest.`should not be null`()
+        val vedtakDbRecord = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first { it.id == vedtak[0].id }
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.utbetalingId == vedtakDbRecord.utbetalingId }
+        vedtakDbRecord.lest.`should not be null`()
+        utbetalingDbRecord.lest.`should be equal to`(vedtakDbRecord.lest)
     }
 }
