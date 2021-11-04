@@ -1,6 +1,5 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.cronjob.DataMigreringJob
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
@@ -31,9 +30,6 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var brukernotifikasjonService: BrukernotifikasjonService
-
-    @Autowired
-    lateinit var dataMigreringJob: DataMigreringJob
 
     @Value("\${on-prem-kafka.username}")
     lateinit var systembruker: String
@@ -275,19 +271,5 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.utbetalingId == vedtakDbRecord.utbetalingId }
         vedtakDbRecord.lest.`should not be null`()
         utbetalingDbRecord.lest.`should be equal to`(vedtakDbRecord.lest)
-    }
-
-    @Test
-    @Order(13)
-    fun `migrering cron job flytter data over til utbetaling`() {
-        dataMigreringJob.run()
-
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.utbetalingId == utbetalingId }
-        val vedtakId = hentVedtak(fnr).first().id
-
-        utbetalingDbRecord.lest.shouldNotBeNull()
-        utbetalingDbRecord.brukernotifikasjonSendt.shouldNotBeNull()
-        utbetalingDbRecord.brukernotifikasjonUtelatt.shouldBeNull()
-        utbetalingDbRecord.varsletMed.shouldBeEqualTo(vedtakId)
     }
 }
