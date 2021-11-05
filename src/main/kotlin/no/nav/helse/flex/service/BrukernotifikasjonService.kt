@@ -51,14 +51,12 @@ class BrukernotifikasjonService(
                 return@forEach
             }
 
-            if (antallVedtak > 1) {
-                val vedtakene = vedtakRepository.findVedtakDbRecordsByFnr(oppdatertUtbetaling.fnr)
-                    .filter { it.utbetalingId == utbetalingUtbetalt.utbetalingId }
-                    .sortedBy { it.id }
+            val vedtakene = vedtakRepository.findVedtakDbRecordsByFnr(oppdatertUtbetaling.fnr)
+                .filter { it.utbetalingId == utbetalingUtbetalt.utbetalingId }
+                .sortedBy { it.id }
 
-                if (vedtakene.size != antallVedtak) {
-                    return@forEach
-                }
+            if (vedtakene.size != antallVedtak) {
+                return@forEach
             }
 
             sendNotifikasjon(oppdatertUtbetaling)
