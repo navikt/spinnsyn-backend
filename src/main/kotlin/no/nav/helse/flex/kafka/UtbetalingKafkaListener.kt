@@ -4,7 +4,6 @@ import no.nav.helse.flex.kafka.ConsumerStoppedEventExt.restart
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.MottaUtbetalingService
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.context.annotation.Profile
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.event.ConsumerStoppedEvent
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component
 
 const val UTBETALING_TOPIC = "tbd.utbetaling"
 
-@Profile("test")
 @Component
 class UtbetalingKafkaListener(
     private val mottaUtbetalingService: MottaUtbetalingService
