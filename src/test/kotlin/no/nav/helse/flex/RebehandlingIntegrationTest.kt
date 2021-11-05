@@ -105,7 +105,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
-        val antall = brukernotifikasjonService.prosseserVedtak()
+        val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 0
     }
 
@@ -133,10 +133,10 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
-    fun `finner vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak =
-            vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        vedtak.shouldHaveSize(1)
+    fun `finner utbetalingen med query for brukernotifkasjon`() {
+        val utbetaling =
+            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        utbetaling.shouldHaveSize(1)
     }
 
     @Test
@@ -197,7 +197,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(7)
     fun `2 brukernotifkasjoner går ut når cronjobben kjøres`() {
-        val antall = brukernotifikasjonService.prosseserVedtak()
+        val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 2
 
         oppgaveKafkaConsumer.ventPåRecords(antall = 2)
@@ -206,10 +206,10 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(8)
-    fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak =
-            vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        vedtak.shouldBeEmpty()
+    fun `finner ikke lengre utbetalingen med query for brukernotifkasjon`() {
+        val utbetaling =
+            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        utbetaling.shouldBeEmpty()
     }
 
     @Test

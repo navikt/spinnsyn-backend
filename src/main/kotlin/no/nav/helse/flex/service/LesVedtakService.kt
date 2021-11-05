@@ -26,86 +26,69 @@ class LesVedtakService(
 ) {
 
     fun lesVedtak(fnr: String, vedtaksId: String): String {
-        val now = Instant.now()
-        val lestNyttVedtak = lesNyttVedtak(fnr = fnr, vedtaksId = vedtaksId, now = now)
-        val lestUtbetaling = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId, now = now)
+        val (lestUtbetaling, varsletMed) = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
         val lestGammeltVedtak = lesGammeltVedtak(fnr = fnr, vedtaksId = vedtaksId)
 
-        // TODO: Denne kan fjernes når vi ikke lengre bruker lesNyttVedtak
-        if (lestGammeltVedtak == IKKE_FUNNET && lestNyttVedtak == IKKE_FUNNET) {
+        if (lestGammeltVedtak == IKKE_FUNNET && lestUtbetaling == IKKE_FUNNET_UTBETALING) {
             throw VedtakIkkeFunnetException(vedtaksId)
         }
 
-        if (lestGammeltVedtak == IKKE_FUNNET && lestUtbetaling == IKKE_FUNNET_UTBETALING) {
-            throw UtbetalingIkkeFunnetException(vedtaksId)
-        }
-
-        if (lestGammeltVedtak == LEST || lestNyttVedtak == LEST || lestUtbetaling == LEST) {
-            brukernotifikasjonKafkaProdusent.sendDonemelding(
-                Nokkel(serviceuserUsername, vedtaksId),
-                Done(Instant.now().toEpochMilli(), fnr, vedtaksId)
-            )
-            metrikk.VEDTAK_LEST.increment()
+        if (lestUtbetaling == LEST) {
+            sendDoneMelding(fnr, varsletMed!!)
             return "Leste vedtak $vedtaksId"
         }
 
-        if (lestNyttVedtak == ALDRI_SENDT_BRUKERNOTIFIKASJON || lestUtbetaling == ALDRI_SENDT_BRUKERNOTIFIKASJON) {
+        if (lestGammeltVedtak == LEST) {
+            sendDoneMelding(fnr, vedtaksId)
+            return "Leste vedtak $vedtaksId"
+        }
+
+        if (lestUtbetaling == ALDRI_SENDT_BRUKERNOTIFIKASJON) {
             return "Leste vedtak $vedtaksId"
         }
 
         return "Vedtak $vedtaksId er allerede lest"
     }
 
-    private fun lesNyttVedtak(fnr: String, vedtaksId: String, now: Instant): LesResultat {
-        val vedtakDbRecord = vedtakRepository
-            .findVedtakDbRecordsByFnr(fnr)
-            .find { it.id == vedtaksId }
-            ?: return IKKE_FUNNET
-
-        if (vedtakDbRecord.lest != null) {
-            return ALLEREDE_LEST
-        }
-
-        vedtakRepository.save(vedtakDbRecord.copy(lest = now))
-
-        if (vedtakDbRecord.brukernotifikasjonSendt == null) {
-            return ALDRI_SENDT_BRUKERNOTIFIKASJON
-        }
-
-        return LEST
+    private fun sendDoneMelding(fnr: String, id: String) {
+        brukernotifikasjonKafkaProdusent.sendDonemelding(
+            Nokkel(serviceuserUsername, id),
+            Done(Instant.now().toEpochMilli(), fnr, id)
+        )
+        metrikk.VEDTAK_LEST.increment()
     }
 
-    private fun lesUtbetaling(fnr: String, utbetalingsId: String, now: Instant): LesResultat {
+    private fun lesUtbetaling(fnr: String, utbetalingsId: String): Pair<LesResultat, String?> {
         // Finner utbetaling når frontend bruker utbetalingsid
         var utbetalingDbRecord = utbetalingRepository
             .findUtbetalingDbRecordsByFnr(fnr)
-            .find { it.utbetalingId == utbetalingsId }
+            .find { it.id == utbetalingsId }
 
-        // Hvis frontend bruker vedtaksid
+        // Finner utbetaling via vedtaket
         // TODO: Denne kan fjernes når vi ved at ingen sitter med vedtaksid i frontend
         if (utbetalingDbRecord == null) {
             val vedtakDbRecord = vedtakRepository
                 .findVedtakDbRecordsByFnr(fnr)
                 .find { it.id == utbetalingsId }
-                ?: return IKKE_FUNNET
+                ?: return IKKE_FUNNET to null
 
             utbetalingDbRecord = utbetalingRepository
                 .findUtbetalingDbRecordsByFnr(fnr)
                 .find { it.utbetalingId == vedtakDbRecord.utbetalingId }
-                ?: return IKKE_FUNNET_UTBETALING
+                ?: return IKKE_FUNNET_UTBETALING to null
         }
 
         if (utbetalingDbRecord.lest != null) {
-            return ALLEREDE_LEST
+            return ALLEREDE_LEST to null
         }
 
-        utbetalingRepository.save(utbetalingDbRecord.copy(lest = now))
+        utbetalingRepository.save(utbetalingDbRecord.copy(lest = Instant.now()))
 
         if (utbetalingDbRecord.brukernotifikasjonSendt == null) {
-            return ALDRI_SENDT_BRUKERNOTIFIKASJON
+            return ALDRI_SENDT_BRUKERNOTIFIKASJON to null
         }
 
-        return LEST
+        return LEST to utbetalingDbRecord.varsletMed
     }
 
     private fun lesGammeltVedtak(fnr: String, vedtaksId: String): LesResultat {

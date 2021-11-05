@@ -3,7 +3,9 @@ package no.nav.helse.flex.service
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
-import no.nav.helse.flex.db.*
+import no.nav.helse.flex.db.UtbetalingDbRecord
+import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
@@ -24,79 +26,55 @@ class BrukernotifikasjonService(
 
     val log = logger()
 
-    fun prosseserVedtak(): Int {
-        val vedtak =
-            vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        log.info("Fant ${vedtak.size} vedtak som ikke er lest og mangler brukernotifikasjon")
+    fun prosseserUtbetaling(): Int {
+        val utbetalinger =
+            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         var sendt = 0
-        vedtak.forEach { vedtaket ->
-            val refreshetVedtak = vedtakRepository.findByIdOrNull(vedtaket.id!!)!!
-            if (refreshetVedtak.lest != null || refreshetVedtak.brukernotifikasjonSendt != null) {
-                log.info("Vedtak ${refreshetVedtak.id} er allerede lest eller fått brukernotifkasjon")
-                return@forEach
-            }
+        utbetalinger.forEach { utbetaling ->
+            val oppdatertUtbetaling = utbetalingRepository.findByIdOrNull(utbetaling.id!!)!!
 
-            if (refreshetVedtak.utbetalingId == null) {
-                log.info("Vedtak ${refreshetVedtak.id} har utbetalingid null, det er rart og skal ikke skje")
-                return@forEach
-            }
-
-            val utbetaling = utbetalingRepository
-                .findUtbetalingDbRecordsByFnr(refreshetVedtak.fnr)
-                .firstOrNull { u -> u.utbetalingId == refreshetVedtak.utbetalingId }
-
-            if (utbetaling == null) {
-                if (refreshetVedtak.opprettet.isBefore(Instant.now().minusSeconds(60))) {
-                    log.warn("Vedtak ${refreshetVedtak.id} har ikke tilhørende utbetaling id etter 1 minutt. Sender ikke notifikasjon")
-                }
+            if (oppdatertUtbetaling.lest != null || oppdatertUtbetaling.brukernotifikasjonSendt != null) {
+                log.info("Utbetaling ${oppdatertUtbetaling.id} er allerede lest eller fått brukernotifkasjon")
                 return@forEach
             }
 
             if (!listOf("REVURDERING", "UTBETALING").contains(utbetaling.utbetalingType)) {
-                vedtakRepository.save(vedtaket.copy(brukernotifikasjonUtelatt = Instant.now()))
+                utbetalingRepository.save(oppdatertUtbetaling.copy(brukernotifikasjonUtelatt = Instant.now()))
                 return@forEach
             }
 
-            val utbetalingUtbetalt = utbetaling.utbetaling.tilUtbetalingUtbetalt()
-            val antallVedtak = utbetalingUtbetalt.antallVedtak ?: 1
-
+            val utbetalingUtbetalt = oppdatertUtbetaling.utbetaling.tilUtbetalingUtbetalt()
+            val antallVedtak = oppdatertUtbetaling.antallVedtak
             if (antallVedtak == 0) {
-                log.error("Antall vedtak er 0 for vedtak ${refreshetVedtak.id}")
+                log.error("Utbetaling ${oppdatertUtbetaling.id} har ingen vedtak.")
                 return@forEach
             }
 
             if (antallVedtak > 1) {
-                // Har vi fått alle vedtakene?
-                val vedtakene = vedtakRepository.findVedtakDbRecordsByFnr(refreshetVedtak.fnr)
+                val vedtakene = vedtakRepository.findVedtakDbRecordsByFnr(oppdatertUtbetaling.fnr)
                     .filter { it.utbetalingId == utbetalingUtbetalt.utbetalingId }
                     .sortedBy { it.id }
 
                 if (vedtakene.size != antallVedtak) {
-                    log.warn("Fant ${vedtakene.size} men forventet $antallVedtak")
-                    return@forEach
-                }
-
-                if (refreshetVedtak.id != vedtakene.first().id) {
-                    // Vi varsler kun på vedtaket med "lavest" id
-                    vedtakRepository.save(vedtaket.copy(brukernotifikasjonUtelatt = Instant.now()))
+                    log.warn("Fant ${vedtakene.size} vedtak for utbetaling ${oppdatertUtbetaling.id} men forventet $antallVedtak.")
                     return@forEach
                 }
             }
 
-            sendNotifikasjon(refreshetVedtak)
+            sendNotifikasjon(oppdatertUtbetaling)
             sendt += 1
         }
         return sendt
     }
 
-    fun sendNotifikasjon(vedtakDbRecord: VedtakDbRecord) {
-        val id = vedtakDbRecord.id!!
+    fun sendNotifikasjon(utbetalingDbRecord: UtbetalingDbRecord) {
+        val id = utbetalingDbRecord.id!!
         val sendtTidspunkt = Instant.now()
         brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(
-            Nokkel(serviceuserUsername, vedtakDbRecord.id),
+            Nokkel(serviceuserUsername, id),
             Oppgave(
                 sendtTidspunkt.toEpochMilli(),
-                vedtakDbRecord.fnr,
+                utbetalingDbRecord.fnr,
                 id,
                 "Oppgave: Sykepengene dine er beregnet - se resultatet",
                 spinnsynFrontendUrl,
@@ -104,7 +82,7 @@ class BrukernotifikasjonService(
                 true
             )
         )
-        vedtakRepository.save(vedtakDbRecord.copy(brukernotifikasjonSendt = sendtTidspunkt))
+        utbetalingRepository.save(utbetalingDbRecord.copy(brukernotifikasjonSendt = sendtTidspunkt, varsletMed = id))
         metrikk.BRUKERNOTIFIKASJON_SENDT.increment()
     }
 }

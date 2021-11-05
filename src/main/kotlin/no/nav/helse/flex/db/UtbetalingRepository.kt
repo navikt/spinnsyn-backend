@@ -10,6 +10,7 @@ import java.time.Instant
 interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
     fun findUtbetalingDbRecordsByFnr(fnr: String): List<UtbetalingDbRecord>
     fun existsByUtbetalingId(utbetalingId: String): Boolean
+    fun findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull(): List<UtbetalingDbRecord>
 }
 
 @Table("utbetaling")

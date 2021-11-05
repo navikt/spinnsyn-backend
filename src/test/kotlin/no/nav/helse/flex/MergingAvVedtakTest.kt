@@ -38,7 +38,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     final val aktørId = "321"
     final val org = "987"
     final val now = LocalDate.now()
-    val utbetalingId = "124542"
+    final val utbetalingId = "124542"
     val vedtak1 = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
@@ -124,7 +124,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
-        val antall = brukernotifikasjonService.prosseserVedtak()
+        val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 0
     }
 
@@ -152,15 +152,15 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
-    fun `finner vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        vedtak.shouldHaveSize(1)
+    fun `finner utbetalingen med query for brukernotifkasjon`() {
+        val utbetaling = utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        utbetaling.shouldHaveSize(1)
     }
 
     @Test
     @Order(5)
     fun `ingen brukernotifkasjon går ut før det siste vedtaket er der`() {
-        val antall = brukernotifikasjonService.prosseserVedtak()
+        val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 0
     }
 
@@ -200,16 +200,9 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(9)
-    fun `finner begge vedtakene med queryen for brukernotifkasjon`() {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        vedtak.shouldHaveSize(2)
-    }
-
-    @Test
     @Order(10)
     fun `en brukernotifkasjon går ut når cronjobben kjøres`() {
-        val antall = brukernotifikasjonService.prosseserVedtak()
+        val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 1
 
         val id = hentVedtak(fnr).first().id
@@ -233,20 +226,16 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(11)
-    fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak = vedtakRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+    @Order(12)
+    fun `finner ikke lengre utebetalingen med query for brukernotifkasjon`() {
+        val vedtak = utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         vedtak.shouldBeEmpty()
     }
 
     @Test
-    @Order(12)
-    fun `vi leser vedtaket`() {
-
+    @Order(13)
+    fun `vi leser vedtaket som ble varslet på utbetaling`() {
         val vedtak = hentVedtak(fnr)
-
-        val dbVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first { it.id == vedtak[0].id }
-        vedtakRepository.save(dbVedtak.copy(lest = null))
 
         vedtak.shouldHaveSize(1)
         vedtak[0].lest.`should be false`()
@@ -254,22 +243,57 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         val vedtaksId = vedtak[0].id
 
         lesVedtak(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
-
         lesVedtak(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
 
-        val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
+        val doned = doneKafkaConsumer.ventPåRecords(antall = 1)
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
-        dones.shouldHaveSize(1)
+        doned.shouldHaveSize(1)
 
-        val nokkel = dones[0].key()
+        val nokkel = doned[0].key()
         nokkel.getEventId() `should be equal to` vedtaksId
 
-        val done = dones[0].value()
+        val done = doned[0].value()
         done.getFodselsnummer() `should be equal to` fnr
 
-        val vedtakDbRecord = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first { it.id == vedtak[0].id }
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.utbetalingId == vedtakDbRecord.utbetalingId }
-        vedtakDbRecord.lest.`should not be null`()
-        utbetalingDbRecord.lest.`should be equal to`(vedtakDbRecord.lest)
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtaksId }
+        utbetalingDbRecord.lest.`should not be null`()
+        utbetalingDbRecord.varsletMed.`should be equal to`(vedtaksId)
+    }
+
+    @Test
+    @Order(13)
+    fun `vi bruker varslet med id for å done brukernotifikasjonen`() {
+        val vedtakMedUtbetalingId = hentVedtak(fnr).first()
+        val vedtakVarselId = vedtakRepository
+            .findVedtakDbRecordsByFnr(fnr)
+            .filter { it.utbetalingId == vedtakMedUtbetalingId.vedtak.utbetaling.utbetalingId }
+            .sortedBy { it.id }
+            .first()
+
+        utbetalingRepository.save(
+            utbetalingRepository
+                .findById(vedtakMedUtbetalingId.id)
+                .get()
+                .copy(
+                    lest = null,
+                    varsletMed = vedtakVarselId.id
+                )
+        )
+
+        lesVedtak(fnr, vedtakMedUtbetalingId.id) `should be equal to` "Leste vedtak ${vedtakMedUtbetalingId.id}"
+        lesVedtak(fnr, vedtakMedUtbetalingId.id) `should be equal to` "Vedtak ${vedtakMedUtbetalingId.id} er allerede lest"
+
+        val doned = doneKafkaConsumer.ventPåRecords(antall = 1)
+        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
+        doned.shouldHaveSize(1)
+
+        val nokkel = doned[0].key()
+        nokkel.getEventId() `should be equal to` vedtakVarselId.id
+
+        val done = doned[0].value()
+        done.getFodselsnummer() `should be equal to` fnr
+
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtakMedUtbetalingId.id }
+        utbetalingDbRecord.lest.`should not be null`()
     }
 }
