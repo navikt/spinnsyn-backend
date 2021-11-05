@@ -46,7 +46,8 @@ class BrukernotifikasjonService(
             val utbetalingUtbetalt = oppdatertUtbetaling.utbetaling.tilUtbetalingUtbetalt()
             val antallVedtak = oppdatertUtbetaling.antallVedtak
             if (antallVedtak == 0) {
-                log.error("Utbetaling ${oppdatertUtbetaling.id} har ingen vedtak.")
+                log.error("Utbetaling ${oppdatertUtbetaling.id} forventer 0 vedtak. Alle utebetalinger skal ha" +
+                    " minst ett vedtak.")
                 return@forEach
             }
 
@@ -56,7 +57,6 @@ class BrukernotifikasjonService(
                     .sortedBy { it.id }
 
                 if (vedtakene.size != antallVedtak) {
-                    log.warn("Fant ${vedtakene.size} vedtak for utbetaling ${oppdatertUtbetaling.id} men forventet $antallVedtak.")
                     return@forEach
                 }
             }
