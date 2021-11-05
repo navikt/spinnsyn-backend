@@ -46,8 +46,10 @@ class BrukernotifikasjonService(
             val utbetalingUtbetalt = oppdatertUtbetaling.utbetaling.tilUtbetalingUtbetalt()
             val antallVedtak = oppdatertUtbetaling.antallVedtak
             if (antallVedtak == 0) {
-                log.error("Utbetaling ${oppdatertUtbetaling.id} forventer 0 vedtak. Alle utebetalinger skal ha" +
-                    " minst ett vedtak.")
+                log.error(
+                    "Utbetaling ${oppdatertUtbetaling.id} forventer 0 vedtak. Alle utebetalinger skal ha" +
+                        " minst ett vedtak."
+                )
                 return@forEach
             }
 
