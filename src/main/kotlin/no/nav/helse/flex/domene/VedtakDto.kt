@@ -12,6 +12,9 @@ data class VedtakDto(
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean = false,
     val sykepengegrunnlag: Double? = null,
+    val grunnlagForSykepengegrunnlag: Double? = null,
+    val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>? = null,
+    val begrensning: String? = null, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
     val månedsinntekt: Double? = null,
     val organisasjonsnummer: String? = null,
     val utbetalinger: List<UtbetalingDto> = emptyList(),

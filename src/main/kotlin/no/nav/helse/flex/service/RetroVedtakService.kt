@@ -79,6 +79,9 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
             inntekt = this.vedtak.månedsinntekt,
             fom = this.vedtak.fom,
             tom = this.vedtak.tom,
+            grunnlagForSykepengegrunnlag = this.vedtak.grunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = this.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver,
+            begrensning = this.vedtak.begrensning,
             utbetaling = RSUtbetalingUtbetalt(
                 organisasjonsnummer = this.vedtak.organisasjonsnummer,
                 utbetalingId = null,

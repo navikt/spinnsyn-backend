@@ -67,7 +67,6 @@ class VedtakService(
             val vedtaket = vedtakForUtbetaling.first()
             val utbetalingen = this.utbetaling.tilUtbetalingUtbetalt()
 
-            // TODO: Støtt visning av vedtak med forskjellig inntekt, sykepengegrunnlag organisasjonsnummer.
             return RSVedtakWrapper(
                 id = this.id!!,
                 annullert = annulleringer.annullererVedtak(vedtaket),
@@ -83,6 +82,9 @@ class VedtakService(
                     inntekt = vedtaket.inntekt,
                     fom = vedtakForUtbetaling.minOf { it.fom },
                     tom = vedtakForUtbetaling.maxOf { it.tom },
+                    grunnlagForSykepengegrunnlag = vedtaket.grunnlagForSykepengegrunnlag,
+                    grunnlagForSykepengegrunnlagPerArbeidsgiver = vedtaket.grunnlagForSykepengegrunnlagPerArbeidsgiver?.filter { it.key == vedtaket.organisasjonsnummer },
+                    begrensning = vedtaket.begrensning,
                     utbetaling = RSUtbetalingUtbetalt(
                         utbetalingType = utbetalingen.type,
                         organisasjonsnummer = utbetalingen.organisasjonsnummer,

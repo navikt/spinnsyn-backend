@@ -14,6 +14,9 @@ data class VedtakFattetForEksternDto(
     val dokumenter: List<Dokument>,
     val inntekt: Double,
     val sykepengegrunnlag: Double,
+    val grunnlagForSykepengegrunnlag: Double,
+    val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>?,
+    val begrensning: String?, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
     val utbetalingId: String?
 )
 

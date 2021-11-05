@@ -49,7 +49,10 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
         dokumenter = emptyList(),
         inntekt = 0.0,
         sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId
+        utbetalingId = utbetalingId,
+        grunnlagForSykepengegrunnlag = 0.0,
+        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+        begrensning = "VET_IKKE"
     )
 
     val utbetaling = UtbetalingUtbetalt(

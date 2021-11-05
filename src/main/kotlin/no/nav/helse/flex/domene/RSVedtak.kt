@@ -28,6 +28,9 @@ data class RSVedtak(
     val inntekt: Double?,
     val sykepengegrunnlag: Double?,
     val utbetaling: RSUtbetalingUtbetalt,
+    val grunnlagForSykepengegrunnlag: Double?,
+    val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>?,
+    val begrensning: String? // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
 ) : Periode
 
 data class RSUtbetalingUtbetalt(
