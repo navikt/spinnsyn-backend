@@ -43,7 +43,6 @@ class MottaVedtakService(
                 vedtak = vedtak,
                 opprettet = Instant.now(),
                 utbetalingId = vedtakSerialisert.utbetalingId,
-                lest = null
             )
         )
 
