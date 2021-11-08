@@ -18,8 +18,5 @@ data class VedtakDbRecord(
     val fnr: String,
     val vedtak: String,
     val opprettet: Instant,
-    val brukernotifikasjonSendt: Instant? = null,
-    val brukernotifikasjonUtelatt: Instant? = null,
     val utbetalingId: String?,
-    val lest: Instant? = null,
 )
