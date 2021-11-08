@@ -1,5 +1,6 @@
 package no.nav.helse.flex.kafka
 
+import no.nav.helse.flex.domene.VedtakStatusDTO
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -76,5 +77,3 @@ class AivenKafkaConfig(
         return KafkaProducer<String, VedtakStatusDTO>(kafkaConfig)
     }
 }
-
-const val VEDTAK_STATUS_TOPIC = "flex.vedtak-status"

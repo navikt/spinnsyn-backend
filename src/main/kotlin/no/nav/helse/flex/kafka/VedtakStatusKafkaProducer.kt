@@ -1,17 +1,20 @@
 package no.nav.helse.flex.kafka
 
+import no.nav.helse.flex.domene.VedtakStatusDTO
 import no.nav.helse.flex.logger
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.springframework.stereotype.Component
 
+const val VEDTAK_STATUS_TOPIC = "flex.vedtak-status"
+
 @Component
 class VedtakStatusKafkaProducer(
     private val producer: KafkaProducer<String, VedtakStatusDTO>
 ) {
 
-    val log = logger()
+    private val log = logger()
 
     fun produserMelding(vedtakStatusDTO: VedtakStatusDTO): RecordMetadata {
         try {
@@ -26,15 +29,4 @@ class VedtakStatusKafkaProducer(
             throw e
         }
     }
-}
-
-data class VedtakStatusDTO(
-    val id: String,
-    val fnr: String,
-    val vedtakStatus: VedtakStatus
-)
-
-enum class VedtakStatus {
-    MOTATT,
-    LEST,
 }

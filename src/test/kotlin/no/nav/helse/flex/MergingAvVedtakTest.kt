@@ -1,11 +1,19 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
+import no.nav.helse.flex.domene.VedtakFattetForEksternDto
+import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
+import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.service.BrukernotifikasjonService
-import org.amshove.kluent.*
+import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should be false`
+import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.shouldBeEmpty
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -15,7 +23,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -24,9 +31,6 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
-
-    @Autowired
-    lateinit var restTemplate: RestTemplate
 
     @Autowired
     lateinit var brukernotifikasjonService: BrukernotifikasjonService
@@ -159,7 +163,8 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `finner utbetalingen med query for brukernotifkasjon`() {
-        val utbetaling = utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        val utbetaling =
+            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         utbetaling.shouldHaveSize(1)
     }
 
@@ -234,7 +239,8 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(12)
     fun `finner ikke lengre utebetalingen med query for brukernotifkasjon`() {
-        val vedtak = utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
+        val vedtak =
+            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
         vedtak.shouldBeEmpty()
     }
 
@@ -287,7 +293,10 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         )
 
         lesVedtak(fnr, vedtakMedUtbetalingId.id) `should be equal to` "Leste vedtak ${vedtakMedUtbetalingId.id}"
-        lesVedtak(fnr, vedtakMedUtbetalingId.id) `should be equal to` "Vedtak ${vedtakMedUtbetalingId.id} er allerede lest"
+        lesVedtak(
+            fnr,
+            vedtakMedUtbetalingId.id
+        ) `should be equal to` "Vedtak ${vedtakMedUtbetalingId.id} er allerede lest"
 
         val doned = doneKafkaConsumer.ventPåRecords(antall = 1)
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
@@ -299,7 +308,8 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         val done = doned[0].value()
         done.getFodselsnummer() `should be equal to` fnr
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtakMedUtbetalingId.id }
+        val utbetalingDbRecord =
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtakMedUtbetalingId.id }
         utbetalingDbRecord.lest.`should not be null`()
     }
 }

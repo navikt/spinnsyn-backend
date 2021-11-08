@@ -1,8 +1,12 @@
 package no.nav.helse.flex.service
 
+import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakDbRecord
 import no.nav.helse.flex.db.VedtakRepository
+import no.nav.helse.flex.domene.VedtakStatus
+import no.nav.helse.flex.domene.VedtakStatusDTO
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
+import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -13,6 +17,9 @@ import java.time.Instant
 class MottaVedtakService(
     private val vedtakRepository: VedtakRepository,
     private val metrikk: Metrikk,
+    private val utbetalingRepository: UtbetalingRepository,
+    private val vedtakStatusProducer: VedtakStatusKafkaProducer,
+
 ) {
     val log = logger()
 
@@ -48,6 +55,14 @@ class MottaVedtakService(
 
         log.info("Opprettet vedtak med database id: ${vedtakDB.id} for utbetaling id ${vedtakDB.utbetalingId}")
 
+        if (vedtakSerialisert.utbetalingId != null) {
+            val id = utbetalingRepository.hentIdHvisAlleVedtak(vedtakSerialisert.utbetalingId)
+            if (id != null) {
+                vedtakStatusProducer.produserMelding(
+                    VedtakStatusDTO(fnr = fnr, id = id, vedtakStatus = VedtakStatus.MOTATT)
+                )
+            }
+        }
         metrikk.MOTTATT_VEDTAK.increment()
     }
 }

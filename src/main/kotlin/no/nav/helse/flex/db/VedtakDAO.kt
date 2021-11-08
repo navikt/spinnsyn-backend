@@ -77,6 +77,24 @@ class VedtakDAO(
         return update > 0
     }
 
+    fun vedtakErUlest(fnr: String, vedtaksId: String): Boolean {
+        return namedParameterJdbcTemplate.queryForObject(
+            """
+                SELECT count(id)
+                FROM vedtak
+                WHERE fnr = :fnr
+                AND id = :id
+                AND lest is null
+            """,
+
+            MapSqlParameterSource()
+                .addValue("fnr", fnr)
+                .addValue("id", vedtaksId),
+
+            Integer::class.java
+        )?.toInt() == 1
+    }
+
     fun slettVedtak(vedtakId: String, fnr: String) {
         namedParameterJdbcTemplate.update(
             """

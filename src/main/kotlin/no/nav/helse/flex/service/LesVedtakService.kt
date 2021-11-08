@@ -6,6 +6,9 @@ import no.nav.helse.flex.api.AbstractApiError
 import no.nav.helse.flex.api.LogLevel
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.*
+import no.nav.helse.flex.domene.VedtakStatus
+import no.nav.helse.flex.domene.VedtakStatusDTO
+import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.metrikk.Metrikk
 import no.nav.helse.flex.service.LesVedtakService.LesResultat.*
 import org.springframework.beans.factory.annotation.Value
@@ -21,32 +24,53 @@ class LesVedtakService(
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     private val metrikk: Metrikk,
     private val utbetalingRepository: UtbetalingRepository,
+    private val vedtakStatusProducer: VedtakStatusKafkaProducer,
     @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
 ) {
 
     fun lesVedtak(fnr: String, vedtaksId: String): String {
-        val (lestUtbetaling, varsletMed) = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
-        val lestGammeltVedtak = lesGammeltVedtak(fnr = fnr, vedtaksId = vedtaksId)
+        val (lesUtbetaling, varsletMed) = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
+        val lesGammeltVedtak = lesGammeltVedtak(fnr = fnr, vedtaksId = vedtaksId)
 
-        if (lestGammeltVedtak == IKKE_FUNNET && lestUtbetaling == IKKE_FUNNET) {
+        if (lesGammeltVedtak == IKKE_FUNNET && lesUtbetaling == IKKE_FUNNET) {
             throw VedtakIkkeFunnetException(vedtaksId)
         }
 
-        if (lestUtbetaling == LEST) {
+        if (lesGammeltVedtak == ALLEREDE_LEST || lesUtbetaling == ALLEREDE_LEST) {
+            return "Vedtak $vedtaksId er allerede lest"
+        }
+
+        if (lesGammeltVedtak == LEST) {
+            vedtakDAO.lesVedtak(fnr, vedtaksId)
+        }
+
+        if (lesUtbetaling == ALDRI_SENDT_BRUKERNOTIFIKASJON) {
+            vedtakStatusProducer.produserMelding(
+                VedtakStatusDTO(fnr = fnr, id = vedtaksId, vedtakStatus = VedtakStatus.LEST)
+            )
+
+            utbetalingRepository.updateLestByFnrAndId(
+                lest = Instant.now(),
+                fnr = fnr,
+                id = vedtaksId
+            )
+        }
+
+        if (lesUtbetaling == LEST) {
+            vedtakStatusProducer.produserMelding(
+                VedtakStatusDTO(fnr = fnr, id = vedtaksId, vedtakStatus = VedtakStatus.LEST)
+            )
+
             sendDoneMelding(fnr, varsletMed!!)
-            return "Leste vedtak $vedtaksId"
+
+            utbetalingRepository.updateLestByFnrAndId(
+                lest = Instant.now(),
+                fnr = fnr,
+                id = vedtaksId
+            )
         }
 
-        if (lestGammeltVedtak == LEST) {
-            sendDoneMelding(fnr, vedtaksId)
-            return "Leste vedtak $vedtaksId"
-        }
-
-        if (lestUtbetaling == ALDRI_SENDT_BRUKERNOTIFIKASJON) {
-            return "Leste vedtak $vedtaksId"
-        }
-
-        return "Vedtak $vedtaksId er allerede lest"
+        return "Leste vedtak $vedtaksId"
     }
 
     private fun sendDoneMelding(fnr: String, id: String) {
@@ -67,12 +91,6 @@ class LesVedtakService(
             return ALLEREDE_LEST to null
         }
 
-        utbetalingRepository.save(
-            utbetalingDbRecord.copy(
-                lest = Instant.now()
-            )
-        )
-
         if (utbetalingDbRecord.brukernotifikasjonSendt == null) {
             return ALDRI_SENDT_BRUKERNOTIFIKASJON to null
         }
@@ -85,8 +103,8 @@ class LesVedtakService(
             return IKKE_FUNNET
         }
 
-        val bleLest = vedtakDAO.lesVedtak(fnr, vedtaksId)
-        if (bleLest) {
+        val skalLeses = vedtakDAO.vedtakErUlest(fnr, vedtaksId)
+        if (skalLeses) {
             return LEST
         }
         return ALLEREDE_LEST

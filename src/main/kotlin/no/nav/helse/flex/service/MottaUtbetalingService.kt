@@ -2,7 +2,10 @@ package no.nav.helse.flex.service
 
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.domene.VedtakStatus
+import no.nav.helse.flex.domene.VedtakStatusDTO
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
+import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -13,6 +16,7 @@ import java.time.Instant
 class MottaUtbetalingService(
     private val utbetalingRepository: UtbetalingRepository,
     private val metrikk: Metrikk,
+    private val vedtakStatusProducer: VedtakStatusKafkaProducer,
 ) {
     val log = logger()
 
@@ -48,6 +52,13 @@ class MottaUtbetalingService(
         )
 
         log.info("Opprettet utbetaling med database id: ${utbetalingDB.id} og utbetaling id ${utbetalingDB.utbetalingId}")
+
+        val id = utbetalingRepository.hentIdHvisAlleVedtak(utbetalingSerialisert.utbetalingId)
+        if (id != null) {
+            vedtakStatusProducer.produserMelding(
+                VedtakStatusDTO(fnr = fnr, id = id, vedtakStatus = VedtakStatus.MOTATT)
+            )
+        }
 
         if (utbetalingSerialisert.automatiskBehandling) {
             metrikk.MOTTATT_AUTOMATISK_VEDTAK.increment()
