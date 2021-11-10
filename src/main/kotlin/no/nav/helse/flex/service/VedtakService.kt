@@ -83,7 +83,7 @@ class VedtakService(
                     fom = vedtakForUtbetaling.minOf { it.fom },
                     tom = vedtakForUtbetaling.maxOf { it.tom },
                     grunnlagForSykepengegrunnlag = vedtaket.grunnlagForSykepengegrunnlag,
-                    grunnlagForSykepengegrunnlagPerArbeidsgiver = vedtaket.grunnlagForSykepengegrunnlagPerArbeidsgiver?.filter { it.key == vedtaket.organisasjonsnummer },
+                    grunnlagForSykepengegrunnlagPerArbeidsgiver = vedtaket.grunnlagForSykepengegrunnlagPerArbeidsgiver,
                     begrensning = vedtaket.begrensning,
                     utbetaling = RSUtbetalingUtbetalt(
                         utbetalingType = utbetalingen.type,
