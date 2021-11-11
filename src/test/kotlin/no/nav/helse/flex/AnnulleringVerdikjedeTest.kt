@@ -62,6 +62,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         event = "eventet",
         forbrukteSykedager = 42,
         gjenståendeSykedager = 3254,
+        foreløpigBeregnetSluttPåSykepenger = null,
         automatiskBehandling = true,
         arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
             mottaker = org,

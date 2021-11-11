@@ -90,6 +90,7 @@ class VedtakService(
                         organisasjonsnummer = utbetalingen.organisasjonsnummer,
                         forbrukteSykedager = utbetalingen.forbrukteSykedager,
                         gjenståendeSykedager = utbetalingen.gjenståendeSykedager,
+                        foreløpigBeregnetSluttPåSykepenger = utbetalingen.foreløpigBeregnetSluttPåSykepenger,
                         automatiskBehandling = utbetalingen.automatiskBehandling,
                         utbetalingsdager = utbetalingen.utbetalingsdager.map { it.tilRsUtbetalingsdag() },
                         utbetalingId = utbetalingen.utbetalingId,

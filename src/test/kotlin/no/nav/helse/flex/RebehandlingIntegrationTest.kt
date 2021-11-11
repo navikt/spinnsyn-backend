@@ -65,6 +65,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
         event = "eventet",
         antallVedtak = 1,
         forbrukteSykedager = 42,
+        foreløpigBeregnetSluttPåSykepenger = null,
         gjenståendeSykedager = 3254,
         automatiskBehandling = true,
         arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
