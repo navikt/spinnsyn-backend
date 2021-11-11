@@ -1,10 +1,12 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.MottaUtbetalingService
 import no.nav.helse.flex.service.MottaVedtakService
 import no.nav.helse.flex.service.RetroMottaVedtakService
 import no.nav.helse.flex.service.VedtakNullstillService
+import no.nav.helse.flex.service.VedtakStatusService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.http.MediaType
@@ -22,8 +24,9 @@ class VedtakTestdataController(
     val mottaVedtakService: MottaVedtakService,
     val tokenValidationContextHolder: TokenValidationContextHolder,
     val mottaUtbetalingService: MottaUtbetalingService,
+    val vedtakStatusService: VedtakStatusService
 ) {
-
+    private val log = logger()
     data class VedtakV2(val vedtak: String, val utbetaling: String?)
 
     @PostMapping(
@@ -51,6 +54,11 @@ class VedtakTestdataController(
                 utbetaling = vedtakV2.utbetaling,
                 opprettet = Instant.now()
             )
+
+            val antall = vedtakStatusService.prosesserUtbetalinger()
+            if (antall == 0) {
+                log.warn("Sendte ikke vedtak status for fnr $fnr")
+            }
         }
 
         return "Vedtak opprettet på $fnr"
