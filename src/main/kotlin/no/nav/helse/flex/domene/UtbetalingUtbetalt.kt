@@ -14,6 +14,7 @@ data class UtbetalingUtbetalt(
     val tom: LocalDate,
     val forbrukteSykedager: Int,
     val antallVedtak: Int?,
+    val foreløpigBeregnetSluttPåSykepenger: LocalDate?,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean,
     val arbeidsgiverOppdrag: OppdragDto,

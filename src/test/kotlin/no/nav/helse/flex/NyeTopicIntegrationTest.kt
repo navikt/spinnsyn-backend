@@ -74,6 +74,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         event = "eventet",
         forbrukteSykedager = 42,
         gjenståendeSykedager = 3254,
+        foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
         automatiskBehandling = true,
         arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
             mottaker = org,
@@ -172,6 +173,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
         vedtak[0].orgnavn `should be equal to` org
+        vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].dato `should be equal to` now
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].type `should be equal to` "AvvistDag"

@@ -96,6 +96,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
         utbetalingId = utbetalingId,
         event = "utbetaling_utbetalt",
         forbrukteSykedager = 42,
+        foreløpigBeregnetSluttPåSykepenger = null,
         antallVedtak = 1,
         gjenståendeSykedager = 3254,
         automatiskBehandling = true,

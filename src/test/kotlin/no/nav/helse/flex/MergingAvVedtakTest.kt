@@ -81,6 +81,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         antallVedtak = 2,
         event = "eventet",
         forbrukteSykedager = 42,
+        foreløpigBeregnetSluttPåSykepenger = null,
         gjenståendeSykedager = 3254,
         automatiskBehandling = true,
         arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
