@@ -29,4 +29,8 @@ class Metrikk(registry: MeterRegistry) {
     val MOTTATT_ANNULLERING_VEDTAK = registry.counter(
         "mottatt_annullering_vedtak_counter"
     )
+
+    val STATUS_MOTATT = registry.counter(
+        "status_motatt_counter"
+    )
 }

@@ -1,0 +1,2 @@
+ALTER TABLE utbetaling
+    ADD COLUMN motatt_publisert TIMESTAMP WITH TIME ZONE NULL;
