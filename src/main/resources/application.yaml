@@ -6,7 +6,7 @@ spring:
   profiles:
     active: default
   flyway:
-    enabled: false
+    enabled: true
   datasource:
     url: "jdbc:postgresql://${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_HOST}:${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PORT}/${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_DATABASE}"
     username: ${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_USERNAME}
