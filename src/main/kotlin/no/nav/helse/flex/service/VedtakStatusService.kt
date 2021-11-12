@@ -31,4 +31,23 @@ class VedtakStatusService(
         }
         return sendt
     }
+
+    fun settMotattPulisertTilNå() {
+        val now = Instant.now()
+        var utbetalingIder = utbetalingRepository.findIdByMotattPublisertIsNull()
+
+        while (utbetalingIder.isNotEmpty()) {
+            for (dbId in utbetalingIder) {
+                utbetalingRepository.run {
+                    findByIdOrNull(dbId)
+                        ?.let {
+                            save(it.copy(motattPublisert = now))
+                        }
+                        ?: throw RuntimeException("Finner ikke utbetaling $dbId")
+                }
+            }
+
+            utbetalingIder = utbetalingRepository.findIdByMotattPublisertIsNull()
+        }
+    }
 }

@@ -26,6 +26,16 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         """
     )
     fun utbetalingerKlarTilVarsling(): List<String>
+
+    @Query(
+        """
+        select id
+        from utbetaling
+        where motatt_publisert is null 
+        limit 1000;
+        """
+    )
+    fun findIdByMotattPublisertIsNull(): List<String>
 }
 
 @Table("utbetaling")
