@@ -16,7 +16,6 @@ class VedtakStatusJob(
     fun run() {
         if (leaderElection.isLeader()) {
             log.info("Setter motatt publisert til nå")
-            vedtakStatusService.settMotattPulisertTilNå()
             log.info("Ferdig med å sette motatt publisert til nå")
         }
     }
