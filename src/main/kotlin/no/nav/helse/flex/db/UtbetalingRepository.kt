@@ -1,6 +1,7 @@
 package no.nav.helse.flex.db
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.jdbc.repository.query.Modifying
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
@@ -10,22 +11,36 @@ import java.time.Instant
 @Repository
 interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
     fun findUtbetalingDbRecordsByFnr(fnr: String): List<UtbetalingDbRecord>
+    fun findUtbetalingDbRecordsByUtbetalingId(utbetalingId: String): UtbetalingDbRecord?
     fun existsByUtbetalingId(utbetalingId: String): Boolean
     fun findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull(): List<UtbetalingDbRecord>
+
     @Query(
         """
-        select id
-        from utbetaling utbetaling
-        inner join (
-            select count(utbetaling_id) as antall, utbetaling_id
-            from vedtak_v2
-            group by utbetaling_id
-        ) vedtak on vedtak.utbetaling_id = utbetaling.utbetaling_id
-        where vedtak.antall = utbetaling.antall_vedtak
-        and motatt_publisert is null;
+        SELECT id
+        FROM utbetaling utbetaling
+        INNER JOIN (
+            SELECT count(utbetaling_id) AS antall, utbetaling_id
+            FROM vedtak_v2
+            GROUP BY utbetaling_id
+        ) vedtak ON vedtak.utbetaling_id = utbetaling.utbetaling_id
+        WHERE vedtak.antall = utbetaling.antall_vedtak
+        AND motatt_publisert IS NULL;
         """
     )
     fun utbetalingerKlarTilVarsling(): List<String>
+
+    @Modifying
+    @Query(
+        """
+        UPDATE utbetaling
+        SET lest = :lest
+        WHERE fnr = :fnr
+        AND id = :id
+        AND lest IS NULL
+        """
+    )
+    fun updateLestByFnrAndId(lest: Instant, fnr: String, id: String): Boolean
 }
 
 @Table("utbetaling")

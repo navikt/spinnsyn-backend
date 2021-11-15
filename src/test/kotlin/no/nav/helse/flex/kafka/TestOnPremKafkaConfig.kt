@@ -19,12 +19,12 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serializer
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
-import java.util.HashMap
 
 @Configuration
 class TestOnPremKafkaConfig(
@@ -123,5 +123,14 @@ class TestOnPremKafkaConfig(
             kafkaAvroSerializer as Serializer<Nokkel>,
             kafkaAvroSerializer as Serializer<Done>
         ).createProducer()
+    }
+
+    @Bean
+    fun statusKafkaConsumer(): Consumer<String, String> {
+        return DefaultKafkaConsumerFactory(
+            testConsumerProps("varsling-consumer"),
+            StringDeserializer(),
+            StringDeserializer(),
+        ).createConsumer()
     }
 }
