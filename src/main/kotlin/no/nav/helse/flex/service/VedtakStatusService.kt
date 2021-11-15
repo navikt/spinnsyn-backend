@@ -1,6 +1,9 @@
 package no.nav.helse.flex.service
 
 import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.domene.VedtakStatus
+import no.nav.helse.flex.domene.VedtakStatusDTO
+import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
 import org.springframework.data.repository.findByIdOrNull
@@ -11,6 +14,7 @@ import java.time.Instant
 class VedtakStatusService(
     private val utbetalingRepository: UtbetalingRepository,
     private val metrikk: Metrikk,
+    private val vedtakStatusKafkaProducer: VedtakStatusKafkaProducer,
 ) {
 
     val log = logger()
@@ -21,7 +25,13 @@ class VedtakStatusService(
         utbetalingerIder.forEach { dbId ->
             val oppdatertUtbetaling = utbetalingRepository.findByIdOrNull(dbId)!!
 
-            // TODO: Legg på vedtak-status topic
+            vedtakStatusKafkaProducer.produserMelding(
+                VedtakStatusDTO(
+                    id = oppdatertUtbetaling.id!!,
+                    fnr = oppdatertUtbetaling.fnr,
+                    vedtakStatus = VedtakStatus.MOTATT
+                )
+            )
 
             utbetalingRepository.save(oppdatertUtbetaling.copy(motattPublisert = Instant.now()))
 

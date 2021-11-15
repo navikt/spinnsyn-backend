@@ -16,7 +16,9 @@ class VedtakStatusJob(
     fun run() {
         if (leaderElection.isLeader()) {
             val antall = vedtakStatusService.prosesserUtbetalinger()
-            log.info("Sendte motatt status for $antall vedtak")
+            if (antall != 0) {
+                log.info("Sendte motatt status for $antall vedtak")
+            }
         }
     }
 }
