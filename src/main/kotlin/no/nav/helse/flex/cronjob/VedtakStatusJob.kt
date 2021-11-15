@@ -12,11 +12,11 @@ class VedtakStatusJob(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 1000L * 60 * 2, fixedDelay = 1000L * 60 * 10)
+    @Scheduled(initialDelay = 1000L * 60 * 2, fixedDelay = 1000L * 60)
     fun run() {
         if (leaderElection.isLeader()) {
-            log.info("Setter motatt publisert til nå")
-            log.info("Ferdig med å sette motatt publisert til nå")
+            val antall = vedtakStatusService.prosesserUtbetalinger()
+            log.info("Sendte motatt status for $antall vedtak")
         }
     }
 }
