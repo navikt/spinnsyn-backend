@@ -54,11 +54,6 @@ class VedtakTestdataController(
                 utbetaling = vedtakV2.utbetaling,
                 opprettet = Instant.now()
             )
-
-            val antall = vedtakStatusService.prosesserUtbetalinger()
-            if (antall == 0) {
-                log.warn("Sendte ikke vedtak status for fnr $fnr")
-            }
         }
 
         return "Vedtak opprettet på $fnr"

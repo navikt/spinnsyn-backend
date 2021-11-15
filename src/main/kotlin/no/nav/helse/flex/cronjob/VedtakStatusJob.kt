@@ -15,10 +15,7 @@ class VedtakStatusJob(
     @Scheduled(initialDelay = 1000L * 60 * 2, fixedDelay = 1000L * 60)
     fun run() {
         if (leaderElection.isLeader()) {
-            val antall = vedtakStatusService.prosesserUtbetalinger()
-            if (antall != 0) {
-                log.info("Sendte motatt status for $antall vedtak")
-            }
+            vedtakStatusService.prosesserUtbetalinger()
         }
     }
 }
