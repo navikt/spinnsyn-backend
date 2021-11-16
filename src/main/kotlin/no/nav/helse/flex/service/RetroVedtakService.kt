@@ -95,20 +95,10 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
                     utbetalingslinjer = arbeidsgiveroppdrag.utbetalingslinjer.map { it.tilRsUtbetalingslinje() }
                 ),
                 utbetalingsdager = emptyList(),
-                utbetalingType = "UTBETALING"
+                utbetalingType = "UTBETALING",
+                personOppdag = null
             )
         )
-    )
-}
-
-private fun RSUtbetalingslinje.tilUtbetalingslinjeDto(): VedtakDto.UtbetalingDto.UtbetalingslinjeDto {
-    return VedtakDto.UtbetalingDto.UtbetalingslinjeDto(
-        beløp = this.dagsats,
-        fom = this.fom,
-        tom = this.tom,
-        grad = this.grad,
-        dagsats = this.dagsatsTransformasjonHjelper,
-        sykedager = this.stønadsdager,
     )
 }
 

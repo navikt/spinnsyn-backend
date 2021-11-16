@@ -1,5 +1,6 @@
 package no.nav.helse.flex.domene
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -14,10 +15,12 @@ data class RSVedtakWrapper(
     val orgnavn: String?,
     val annullert: Boolean = false,
     val revurdert: Boolean = false,
-    val dager: List<RSDag> = emptyList(),
-    val dagligUtbetalingsbelop: Int = 0,
-    val antallDagerMedUtbetaling: Int = 0,
-    val sykepengebelop: Int = 0,
+    val dager: List<RSDag> = emptyList(), // Deprecated
+    val dagerArbeidsgiver: List<RSDag> = emptyList(),
+    val dagerPerson: List<RSDag> = emptyList(),
+    val sykepengebelop: Int = 0, // Deprecated
+    val sykepengebelopArbeidsgiver: Int = 0,
+    val sykepengebelopPerson: Int = 0,
 )
 
 data class RSVedtak(
@@ -39,7 +42,10 @@ data class RSUtbetalingUtbetalt(
     val forbrukteSykedager: Int,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean,
-    val arbeidsgiverOppdrag: RSOppdrag,
+    @JsonIgnore
+    val arbeidsgiverOppdrag: RSOppdrag?,
+    @JsonIgnore
+    val personOppdag: RSOppdrag?,
     val utbetalingsdager: List<RSUtbetalingdag>,
     val foreløpigBeregnetSluttPåSykepenger: LocalDate?,
     val utbetalingType: String,

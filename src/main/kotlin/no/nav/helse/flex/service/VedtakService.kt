@@ -66,9 +66,7 @@ class VedtakService(
             val vedtakForUtbetaling = relaterteVedtak().map { it.vedtak.tilVedtakFattetForEksternDto() }
             val vedtaket = vedtakForUtbetaling.first()
             val utbetalingen = this.utbetaling.tilUtbetalingUtbetalt()
-            if (utbetalingen.arbeidsgiverOppdrag == null) {
-                return null
-            }
+
             return RSVedtakWrapper(
                 id = this.id!!,
                 annullert = annulleringer.annullererVedtak(vedtaket),
@@ -96,11 +94,8 @@ class VedtakService(
                         automatiskBehandling = utbetalingen.automatiskBehandling,
                         utbetalingsdager = utbetalingen.utbetalingsdager.map { it.tilRsUtbetalingsdag() },
                         utbetalingId = utbetalingen.utbetalingId,
-                        arbeidsgiverOppdrag = RSOppdrag(
-                            mottaker = utbetalingen.arbeidsgiverOppdrag.mottaker,
-                            nettoBeløp = utbetalingen.arbeidsgiverOppdrag.nettoBeløp,
-                            utbetalingslinjer = utbetalingen.arbeidsgiverOppdrag.utbetalingslinjer.map { it.tilRsUtbetalingslinje() }
-                        )
+                        arbeidsgiverOppdrag = utbetalingen.arbeidsgiverOppdrag?.tilRsOppdrag(),
+                        personOppdag = utbetalingen.personOppdrag?.tilRsOppdrag()
                     )
                 )
             )
@@ -112,6 +107,12 @@ class VedtakService(
     }
 }
 
+private fun UtbetalingUtbetalt.OppdragDto.tilRsOppdrag(): RSOppdrag = RSOppdrag(
+    mottaker = this.mottaker,
+    nettoBeløp = this.nettoBeløp,
+    utbetalingslinjer = this.utbetalingslinjer.map { it.tilRsUtbetalingslinje() }
+)
+
 private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> {
     return map { rSVedtakWrapper ->
         val fom = rSVedtakWrapper.vedtak.fom
@@ -121,69 +122,84 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             DayOfWeek.SUNDAY
         )
 
-        // Setter opp alle dager i perioden
-        var dager = fom.datesUntil(tom.plusDays(1))
-            .map { dato ->
-                RSDag(
-                    dato = dato,
-                    belop = 0,
-                    grad = 0.0,
-                    dagtype = if (dato.dayOfWeek in helg) "NavHelgDag" else "NavDag",
-                    begrunnelser = emptyList()
-                )
-            }.toList()
-
-        // Oppdaterer dager med beløp og grad
-        rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag.utbetalingslinjer.forEach { linje ->
-            val periode = linje.fom..linje.tom
-            val utbetalingslinjeUtenUtbetaling = linje.stønadsdager == 0
-
-            dager = dager.map OppdaterBelopOgGrad@{ dag ->
-                if (dag.dato in periode && dag.dato.dayOfWeek !in helg) {
-                    if (utbetalingslinjeUtenUtbetaling) {
-                        return@OppdaterBelopOgGrad dag.copy(
-                            belop = 0,
-                            grad = 0.0
-                        )
-                    } else {
-                        return@OppdaterBelopOgGrad dag.copy(
-                            belop = linje.dagsats,
-                            grad = linje.grad
-                        )
-                    }
-                }
-                return@OppdaterBelopOgGrad dag
-            }
-        }
-
-        // Oppdater dager med dagtype og begrunnelser
-        dager = dager.map { dag ->
-            rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager
-                .find { it.dato == dag.dato }
-                ?.let {
-                    dag.copy(
-                        begrunnelser = it.begrunnelser,
-                        dagtype = if (it.type == "NavDag" && dag.grad != 100.0) {
-                            "NavDagDelvisSyk"
-                        } else if (it.type == "NavDag") {
-                            "NavDagSyk"
-                        } else {
-                            it.type
-                        }
+        fun hentDager(oppdragDto: RSOppdrag?): List<RSDag> {
+            // Setter opp alle dager i perioden
+            var dager = fom.datesUntil(tom.plusDays(1))
+                .map { dato ->
+                    RSDag(
+                        dato = dato,
+                        belop = 0,
+                        grad = 0.0,
+                        dagtype = if (dato.dayOfWeek in helg) "NavHelgDag" else "NavDag",
+                        begrunnelser = emptyList()
                     )
+                }.toList()
+
+            // Oppdaterer dager med beløp og grad
+            oppdragDto?.utbetalingslinjer?.forEach { linje ->
+                val periode = linje.fom..linje.tom
+                val utbetalingslinjeUtenUtbetaling = linje.stønadsdager == 0
+
+                dager = dager.map OppdaterBelopOgGrad@{ dag ->
+                    if (dag.dato in periode && dag.dato.dayOfWeek !in helg) {
+                        if (utbetalingslinjeUtenUtbetaling) {
+                            return@OppdaterBelopOgGrad dag.copy(
+                                belop = 0,
+                                grad = 0.0
+                            )
+                        } else {
+                            return@OppdaterBelopOgGrad dag.copy(
+                                belop = linje.dagsats,
+                                grad = linje.grad
+                            )
+                        }
+                    }
+                    return@OppdaterBelopOgGrad dag
                 }
-                ?: dag
+            }
+
+            // Oppdater dager med dagtype og begrunnelser
+            dager = dager
+                .map { dag ->
+                    rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager
+                        .find { it.dato == dag.dato }
+                        ?.let {
+                            dag.copy(
+                                begrunnelser = it.begrunnelser,
+                                dagtype = if (it.type == "NavDag" && dag.grad != 100.0) {
+                                    "NavDagDelvisSyk"
+                                } else if (it.type == "NavDag") {
+                                    "NavDagSyk"
+                                } else {
+                                    it.type
+                                }
+                            )
+                        }
+                        ?: dag
+                }
+                .filter { !((it.dagtype.startsWith("NavDag") && it.belop == 0)) }
+            return dager ?: emptyList()
         }
 
-        // Dager med utbetaling
-        val stønadsdager = dager.filter {
+        // Dager med arbeidsgiverutbetaling
+        val dagerArbeidsgiver = hentDager(rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag)
+
+        val stønadsdagerArbeidsgiver = dagerArbeidsgiver.filter {
+            it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
+        }
+        // Persondager med utbetaling
+        val dagerPerson = hentDager(rSVedtakWrapper.vedtak.utbetaling.personOppdag)
+
+        val stønadsdagerPerson = dagerPerson.filter {
             it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
         }
         rSVedtakWrapper.copy(
-            dager = dager,
-            dagligUtbetalingsbelop = stønadsdager.maxOfOrNull { it.belop } ?: 0,
-            antallDagerMedUtbetaling = stønadsdager.size,
-            sykepengebelop = stønadsdager.sumOf { it.belop },
+            dager = dagerArbeidsgiver, // Deprecated
+            dagerArbeidsgiver = dagerArbeidsgiver,
+            dagerPerson = dagerPerson,
+            sykepengebelop = stønadsdagerArbeidsgiver.sumOf { it.belop }, // Deprecated
+            sykepengebelopArbeidsgiver = stønadsdagerArbeidsgiver.sumOf { it.belop },
+            sykepengebelopPerson = stønadsdagerPerson.sumOf { it.belop },
         )
     }
 }

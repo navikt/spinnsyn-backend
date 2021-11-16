@@ -18,7 +18,7 @@ data class UtbetalingUtbetalt(
     val foreløpigBeregnetSluttPåSykepenger: LocalDate?,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean,
-    val arbeidsgiverOppdrag: OppdragDto?,
+    val arbeidsgiverOppdrag: OppdragDto? = null,
     val personOppdrag: OppdragDto? = null,
     val type: String, // UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING
     val utbetalingsdager: List<UtbetalingdagDto>
