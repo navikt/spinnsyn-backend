@@ -62,11 +62,13 @@ class VedtakService(
             .filter { it.utbetalingId == this.utbetalingId }
             .sortedBy { it.id }
 
-        fun UtbetalingDbRecord.tilRsVedtakWrapper(): RSVedtakWrapper {
+        fun UtbetalingDbRecord.tilRsVedtakWrapper(): RSVedtakWrapper? {
             val vedtakForUtbetaling = relaterteVedtak().map { it.vedtak.tilVedtakFattetForEksternDto() }
             val vedtaket = vedtakForUtbetaling.first()
             val utbetalingen = this.utbetaling.tilUtbetalingUtbetalt()
-
+            if (utbetalingen.arbeidsgiverOppdrag == null) {
+                return null
+            }
             return RSVedtakWrapper(
                 id = this.id!!,
                 annullert = annulleringer.annullererVedtak(vedtaket),
@@ -106,7 +108,7 @@ class VedtakService(
 
         return utbetalinger
             .filter { it.harAlleVedtak() }
-            .map { it.tilRsVedtakWrapper() }
+            .mapNotNull { it.tilRsVedtakWrapper() }
     }
 }
 

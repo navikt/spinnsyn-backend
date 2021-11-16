@@ -13,11 +13,13 @@ data class UtbetalingUtbetalt(
     val fom: LocalDate,
     val tom: LocalDate,
     val forbrukteSykedager: Int,
+    val stønadsdager: Int? = null,
     val antallVedtak: Int?,
     val foreløpigBeregnetSluttPåSykepenger: LocalDate?,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean,
-    val arbeidsgiverOppdrag: OppdragDto,
+    val arbeidsgiverOppdrag: OppdragDto?,
+    val personOppdrag: OppdragDto? = null,
     val type: String, // UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING
     val utbetalingsdager: List<UtbetalingdagDto>
 ) {
