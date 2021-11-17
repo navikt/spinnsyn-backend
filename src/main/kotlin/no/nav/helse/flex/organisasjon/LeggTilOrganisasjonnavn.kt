@@ -47,5 +47,5 @@ private fun List<RSVedtakWrapper>.orgNummere(): Set<String> =
         .toSet()
 
 private fun Map<String, Double>.erstattOrgNummerMedOrgNavn(organisasjoner: Map<String, String>) = mapKeys {
-    organisasjoner[it.key]!!
+    organisasjoner[it.key] ?: "Organisasjonsnummer: ${it.key}"
 }
