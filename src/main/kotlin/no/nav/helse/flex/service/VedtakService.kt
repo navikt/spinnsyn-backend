@@ -33,12 +33,17 @@ class VedtakService(
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
             .leggTilOrgnavn()
+            .erstattOrgNavnMedOrgNrForAlleArbeidsgivere()
 
         return alleVedtak
     }
 
     private fun List<RSVedtakWrapper>.leggTilOrgnavn(): List<RSVedtakWrapper> {
         return leggTilOrganisasjonavn.leggTilOrganisasjonnavn(this)
+    }
+
+    private fun List<RSVedtakWrapper>.erstattOrgNavnMedOrgNrForAlleArbeidsgivere(): List<RSVedtakWrapper> {
+        return leggTilOrganisasjonavn.erstattOrgNummerMedOrgNavn(this)
     }
 
     private fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
