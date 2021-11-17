@@ -43,7 +43,7 @@ class LeggTilOrganisasjonnavn(
 }
 
 private fun List<RSVedtakWrapper>.orgNummere(): Set<String> =
-    flatMap { it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver?.keys!! }
+    flatMap { it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver?.keys ?: emptySet() }
         .toSet()
 
 private fun Map<String, Double>.erstattOrgNummerMedOrgNavn(organisasjoner: Map<String, String>) = mapKeys {
