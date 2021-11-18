@@ -76,7 +76,7 @@ class BrukernotifikasjonService(
                 sendtTidspunkt.toEpochMilli(),
                 utbetalingDbRecord.fnr,
                 id,
-                "Oppgave: Sykepengene dine er beregnet - se resultatet",
+                "Du har fått svar på søknaden om sykepenger - se resultatet",
                 spinnsynFrontendUrl,
                 4,
                 true
