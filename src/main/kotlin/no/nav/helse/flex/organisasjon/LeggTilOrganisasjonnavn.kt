@@ -29,10 +29,15 @@ class LeggTilOrganisasjonnavn(
 
     fun erstattOrgNummerMedOrgNavn(vedtakene: List<RSVedtakWrapper>): List<RSVedtakWrapper> {
         val organisasjoner: Map<String, String> = assosierOrgNummerMedOrgNavn(vedtakene.orgNummere())
+
         return vedtakene.map {
             val oppdatertVedtak = it.vedtak.copy(
                 grunnlagForSykepengegrunnlagPerArbeidsgiver =
-                it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver?.erstattOrgNummerMedOrgNavn(organisasjoner)
+                it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver
+                    ?.filterNot { organisasjon ->
+                        it.vedtak.organisasjonsnummer == organisasjon.key
+                    }
+                    ?.erstattOrgNummerMedOrgNavn(organisasjoner)
             )
             it.copy(vedtak = oppdatertVedtak)
         }

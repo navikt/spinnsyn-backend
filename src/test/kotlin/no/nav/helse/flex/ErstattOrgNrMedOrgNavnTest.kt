@@ -27,7 +27,7 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
             lest = false,
             lestDato = null,
             vedtak = RSVedtak(
-                organisasjonsnummer = "1234",
+                organisasjonsnummer = "5678",
                 fom = LocalDate.now(),
                 tom = LocalDate.now(),
                 dokumenter = emptyList(),
@@ -77,8 +77,7 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
         orgMap[0].vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver `should be equal to`
             mapOf(
                 "Organisasjon nr 1" to 500000.0,
-                "Organisasjonsnummer: 547123456" to 300000.0,
-                "Organisasjonsnummer: 5678" to 100000.0
+                "Organisasjonsnummer: 547123456" to 300000.0
             )
     }
 }
