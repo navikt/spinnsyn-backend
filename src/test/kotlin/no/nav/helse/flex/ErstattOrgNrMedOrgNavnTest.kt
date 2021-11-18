@@ -24,9 +24,9 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
 
         val vedtak = RSVedtakWrapper(
             id = "1",
-            lest= false,
+            lest = false,
             lestDato = null,
-            vedtak= RSVedtak(
+            vedtak = RSVedtak(
                 organisasjonsnummer = "1234",
                 fom = LocalDate.now(),
                 tom = LocalDate.now(),
@@ -51,15 +51,15 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
             ),
             opprettet = LocalDate.now(),
             opprettetTimestamp = Instant.now(),
-            orgnavn= "1234",
-            annullert= false,
-            revurdert= false,
-            dager= emptyList(),
-            dagerArbeidsgiver= emptyList(),
-            dagerPerson= emptyList(),
-            sykepengebelop= 0,
-            sykepengebelopArbeidsgiver= 0,
-            sykepengebelopPerson= 0,
+            orgnavn = "1234",
+            annullert = false,
+            revurdert = false,
+            dager = emptyList(),
+            dagerArbeidsgiver = emptyList(),
+            dagerPerson = emptyList(),
+            sykepengebelop = 0,
+            sykepengebelopArbeidsgiver = 0,
+            sykepengebelopPerson = 0,
         )
 
         val org1 = Organisasjon(
@@ -81,5 +81,4 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
                 "Organisasjonsnummer: 5678" to 100000.0
             )
     }
-
 }
