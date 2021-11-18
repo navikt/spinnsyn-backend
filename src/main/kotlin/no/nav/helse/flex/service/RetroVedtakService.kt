@@ -69,11 +69,11 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
         annullert = this.annullert,
         lest = this.lest,
         lestDato = this.lestDato,
-        orgnavn = this.vedtak.organisasjonsnummer,
+        orgnavn = arbeidsgiveroppdrag.mottaker,
         opprettetTimestamp = this.opprettetTimestamp,
         opprettet = this.opprettet,
         vedtak = RSVedtak(
-            organisasjonsnummer = this.vedtak.organisasjonsnummer,
+            organisasjonsnummer = arbeidsgiveroppdrag.mottaker,
             dokumenter = this.vedtak.dokumenter,
             sykepengegrunnlag = this.vedtak.sykepengegrunnlag,
             inntekt = this.vedtak.månedsinntekt,

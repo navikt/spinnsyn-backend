@@ -12,7 +12,7 @@ data class RSVedtakWrapper(
     val vedtak: RSVedtak,
     val opprettet: LocalDate,
     val opprettetTimestamp: Instant,
-    val orgnavn: String?,
+    val orgnavn: String,
     val annullert: Boolean = false,
     val revurdert: Boolean = false,
     val dager: List<RSDag> = emptyList(), // Deprecated
@@ -24,7 +24,7 @@ data class RSVedtakWrapper(
 )
 
 data class RSVedtak(
-    val organisasjonsnummer: String?,
+    val organisasjonsnummer: String,
     override val fom: LocalDate,
     override val tom: LocalDate,
     val dokumenter: List<Dokument>,

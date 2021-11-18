@@ -21,8 +21,9 @@ class LeggTilOrganisasjonnavn(
             .associate { it.orgnummer to it.navn }
 
         return vedtakene.map {
-            if (orgnummerNavnMap.containsKey(it.vedtak.organisasjonsnummer)) {
-                it.copy(orgnavn = orgnummerNavnMap[it.vedtak.organisasjonsnummer])
+            val orgnavn = orgnummerNavnMap[it.vedtak.organisasjonsnummer]
+            if (orgnavn != null) {
+                it.copy(orgnavn = orgnavn)
             } else {
                 it
             }
