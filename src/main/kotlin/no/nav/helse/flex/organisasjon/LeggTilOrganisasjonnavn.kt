@@ -19,8 +19,9 @@ class LeggTilOrganisasjonnavn(
         val organisasjoner = assosierOrgNummerMedOrgNavn(orgnummerene)
 
         return vedtakene.map {
-            if (organisasjoner.containsKey(it.vedtak.organisasjonsnummer)) {
-                it.copy(orgnavn = organisasjoner[it.vedtak.organisasjonsnummer])
+            val orgnavn = organisasjoner[it.vedtak.organisasjonsnummer]
+            if (orgnavn != null) {
+                it.copy(orgnavn = orgnavn)
             } else {
                 it
             }
