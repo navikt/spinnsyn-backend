@@ -70,6 +70,7 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
         lest = this.lest,
         lestDato = this.lestDato,
         orgnavn = arbeidsgiveroppdrag.mottaker,
+        andreArbeidsgivere = this.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver,
         opprettetTimestamp = this.opprettetTimestamp,
         opprettet = this.opprettet,
         vedtak = RSVedtak(

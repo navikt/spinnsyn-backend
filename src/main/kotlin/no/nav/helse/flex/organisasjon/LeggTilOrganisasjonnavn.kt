@@ -16,12 +16,10 @@ class LeggTilOrganisasjonnavn(
             .mapNotNull { it.vedtak.organisasjonsnummer }
             .toSet()
 
-        val orgnummerNavnMap = organisasjonRepository
-            .findByOrgnummerIn(orgnummerene)
-            .associate { it.orgnummer to it.navn }
+        val organisasjoner = assosierOrgNummerMedOrgNavn(orgnummerene)
 
         return vedtakene.map {
-            val orgnavn = orgnummerNavnMap[it.vedtak.organisasjonsnummer]
+            val orgnavn = organisasjoner[it.vedtak.organisasjonsnummer]
             if (orgnavn != null) {
                 it.copy(orgnavn = orgnavn)
             } else {
@@ -29,4 +27,30 @@ class LeggTilOrganisasjonnavn(
             }
         }
     }
+
+    fun leggTilAndreArbeidsgivere(vedtakene: List<RSVedtakWrapper>): List<RSVedtakWrapper> {
+        val organisasjoner: Map<String, String> = assosierOrgNummerMedOrgNavn(vedtakene.orgNummere())
+
+        return vedtakene.map {
+            it.copy(
+                andreArbeidsgivere =
+                it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver
+                    ?.filterNot { organisasjon ->
+                        it.vedtak.organisasjonsnummer == organisasjon.key
+                    }
+                    ?.leggTilAndreArbeidsgivere(organisasjoner)
+            )
+        }
+    }
+
+    private fun assosierOrgNummerMedOrgNavn(orgnummere: Set<String>) =
+        organisasjonRepository.findByOrgnummerIn(orgnummere).associate { it.orgnummer to it.navn }
+}
+
+private fun List<RSVedtakWrapper>.orgNummere(): Set<String> =
+    flatMap { it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver?.keys ?: emptySet() }
+        .toSet()
+
+private fun Map<String, Double>.leggTilAndreArbeidsgivere(organisasjoner: Map<String, String>) = mapKeys {
+    organisasjoner[it.key] ?: "Organisasjonsnummer: ${it.key}"
 }
