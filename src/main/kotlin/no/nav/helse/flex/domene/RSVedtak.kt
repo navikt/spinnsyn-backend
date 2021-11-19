@@ -21,6 +21,7 @@ data class RSVedtakWrapper(
     val sykepengebelop: Int = 0, // Deprecated
     val sykepengebelopArbeidsgiver: Int = 0,
     val sykepengebelopPerson: Int = 0,
+    val andreArbeidsgivere: Map<String, Double>?,
 )
 
 data class RSVedtak(

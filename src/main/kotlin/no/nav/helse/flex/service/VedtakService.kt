@@ -33,7 +33,7 @@ class VedtakService(
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
             .leggTilOrgnavn()
-            .erstattOrgNavnMedOrgNrForAlleArbeidsgivere()
+            .leggTilArbeidsgivere()
 
         return alleVedtak
     }
@@ -42,8 +42,8 @@ class VedtakService(
         return leggTilOrganisasjonavn.leggTilOrganisasjonnavn(this)
     }
 
-    private fun List<RSVedtakWrapper>.erstattOrgNavnMedOrgNrForAlleArbeidsgivere(): List<RSVedtakWrapper> {
-        return leggTilOrganisasjonavn.erstattOrgNummerMedOrgNavn(this)
+    private fun List<RSVedtakWrapper>.leggTilArbeidsgivere(): List<RSVedtakWrapper> {
+        return leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
     }
 
     private fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
@@ -77,6 +77,7 @@ class VedtakService(
                 annullert = annulleringer.annullererVedtak(vedtaket),
                 lest = this.lest != null,
                 orgnavn = vedtaket.organisasjonsnummer,
+                andreArbeidsgivere = vedtaket.grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 lestDato = this.lest?.atZone(ZoneId.of("Europe/Oslo"))?.toOffsetDateTime(),
                 opprettetTimestamp = this.opprettet,
                 opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),

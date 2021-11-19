@@ -52,6 +52,7 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
             opprettet = LocalDate.now(),
             opprettetTimestamp = Instant.now(),
             orgnavn = "1234",
+            andreArbeidsgivere = mapOf("123456547" to 500000.0, "547123456" to 300000.0, "5678" to 100000.0),
             annullert = false,
             revurdert = false,
             dager = emptyList(),
@@ -73,8 +74,8 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
 
         organisasjonRepository.saveAll(mutableListOf(org1))
 
-        val orgMap = leggTilOrganisasjonnavn.erstattOrgNummerMedOrgNavn(vedtakene = listOf(vedtak))
-        orgMap[0].vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver `should be equal to`
+        val orgMap = leggTilOrganisasjonnavn.leggTilAndreArbeidsgivere(vedtakene = listOf(vedtak))
+        orgMap[0].andreArbeidsgivere `should be equal to`
             mapOf(
                 "Organisasjon nr 1" to 500000.0,
                 "Organisasjonsnummer: 547123456" to 300000.0

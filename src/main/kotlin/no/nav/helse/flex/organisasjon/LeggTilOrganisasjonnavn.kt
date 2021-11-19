@@ -27,19 +27,18 @@ class LeggTilOrganisasjonnavn(
         }
     }
 
-    fun erstattOrgNummerMedOrgNavn(vedtakene: List<RSVedtakWrapper>): List<RSVedtakWrapper> {
+    fun leggTilAndreArbeidsgivere(vedtakene: List<RSVedtakWrapper>): List<RSVedtakWrapper> {
         val organisasjoner: Map<String, String> = assosierOrgNummerMedOrgNavn(vedtakene.orgNummere())
 
         return vedtakene.map {
-            val oppdatertVedtak = it.vedtak.copy(
-                grunnlagForSykepengegrunnlagPerArbeidsgiver =
+            it.copy(
+                andreArbeidsgivere =
                 it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver
                     ?.filterNot { organisasjon ->
                         it.vedtak.organisasjonsnummer == organisasjon.key
                     }
-                    ?.erstattOrgNummerMedOrgNavn(organisasjoner)
+                    ?.leggTilAndreArbeidsgivere(organisasjoner)
             )
-            it.copy(vedtak = oppdatertVedtak)
         }
     }
 
@@ -51,6 +50,6 @@ private fun List<RSVedtakWrapper>.orgNummere(): Set<String> =
     flatMap { it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver?.keys ?: emptySet() }
         .toSet()
 
-private fun Map<String, Double>.erstattOrgNummerMedOrgNavn(organisasjoner: Map<String, String>) = mapKeys {
+private fun Map<String, Double>.leggTilAndreArbeidsgivere(organisasjoner: Map<String, String>) = mapKeys {
     organisasjoner[it.key] ?: "Organisasjonsnummer: ${it.key}"
 }
