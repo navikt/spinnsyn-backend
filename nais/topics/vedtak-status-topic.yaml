@@ -27,6 +27,3 @@ spec:
     - team: flex
       application: spinnsyn-arkivering
       access: read
-    - team: flex
-      application: flexmember
-      access: read
