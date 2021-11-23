@@ -23,6 +23,8 @@ spec:
     initialDelay: 30
     periodSeconds: 5
     timeout: 5
+  tokenx:
+    enabled: true
   kafka:
     pool: nav-prod
   leaderElection: true
