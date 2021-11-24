@@ -6,6 +6,8 @@ import no.nav.helse.flex.service.LesVedtakService
 import no.nav.helse.flex.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,7 +29,7 @@ class VedtakTokenXController(
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun hentVedtak(): List<RSVedtakWrapper> {
-        val fnr = tokenValidationContextHolder.fnrFraIdportenTokenX()
+        val fnr = tokenValidationContextHolder.validerTokenXClaims().fnrFraIdportenTokenX()
         return vedtakService.hentVedtak(fnr)
     }
 
@@ -35,14 +37,30 @@ class VedtakTokenXController(
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
-        val fnr = tokenValidationContextHolder.fnrFraIdportenTokenX()
+        val fnr = tokenValidationContextHolder.validerTokenXClaims().fnrFraIdportenTokenX()
         return lesVedtakService.lesVedtak(fnr, vedtaksId)
     }
 
-    private fun TokenValidationContextHolder.fnrFraIdportenTokenX(): String {
+    private fun TokenValidationContextHolder.validerTokenXClaims(): JwtTokenClaims {
         val context = this.tokenValidationContext
         val claims = context.getClaims("tokenx")
-        log.info("TokenX token: " + context.getJwtToken("tokenx").tokenAsString)
-        return claims.getStringClaim("pid")
+        if (claims.getStringClaim("client_id") != "dev-gcp:flex:spinnsyn-frontend") {
+            throw IkkeTilganTokenXException()
+        }
+        if (claims.getStringClaim("idp") != "https://oidc-ver2.difi.no/idporten-oidc-provider/") {
+            throw IkkeTilganTokenXException()
+        }
+        return claims
+    }
+
+    private fun JwtTokenClaims.fnrFraIdportenTokenX(): String {
+        return this.getStringClaim("pid")
     }
 }
+
+class IkkeTilganTokenXException : AbstractApiError(
+    message = "Ikke tilgang token X TODO tekstne her!!",
+    httpStatus = HttpStatus.FORBIDDEN,
+    reason = "INGEN_TILGANG",
+    loglevel = LogLevel.WARN
+)
