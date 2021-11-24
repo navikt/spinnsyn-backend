@@ -38,7 +38,6 @@ class VedtakLognserviceController(
     }
 }
 
-
 fun TokenValidationContextHolder.fnrFraOIDC(): String {
     val context = this.tokenValidationContext
     return context.getClaims("loginservice").subject

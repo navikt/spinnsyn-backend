@@ -57,6 +57,7 @@ spec:
         - application: flex-intern-gateway
         - application: spinnsyn-frontend-arkivering
         - application: spinnsyn-frontend
+        - application: spinnsyn-frontend-wonderwall
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: dev-fss

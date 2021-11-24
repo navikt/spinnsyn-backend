@@ -1,6 +1,7 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.domene.RSVedtakWrapper
+import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.LesVedtakService
 import no.nav.helse.flex.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -20,6 +21,7 @@ class VedtakTokenXController(
     val tokenValidationContextHolder: TokenValidationContextHolder,
     val lesVedtakService: LesVedtakService
 ) {
+    val log = logger()
 
     @GetMapping("/vedtak", produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
@@ -36,10 +38,11 @@ class VedtakTokenXController(
         val fnr = tokenValidationContextHolder.fnrFraIdportenTokenX()
         return lesVedtakService.lesVedtak(fnr, vedtaksId)
     }
-}
 
-private fun TokenValidationContextHolder.fnrFraIdportenTokenX(): String {
-    val context = this.tokenValidationContext
-    val claims = context.getClaims("tokenx")
-    return claims.getStringClaim("pid")
+    private fun TokenValidationContextHolder.fnrFraIdportenTokenX(): String {
+        val context = this.tokenValidationContext
+        val claims = context.getClaims("tokenx")
+        log.info("TokenX token: " + context.getJwtToken("tokenx").tokenAsString)
+        return claims.getStringClaim("pid")
+    }
 }
