@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 
 @Controller
-@RequestMapping("/api/v2")
-class VedtakController(
+@RequestMapping("/api/v3")
+class VedtakTokenXController(
     val vedtakService: VedtakService,
     val tokenValidationContextHolder: TokenValidationContextHolder,
     val lesVedtakService: LesVedtakService
@@ -23,22 +23,23 @@ class VedtakController(
 
     @GetMapping("/vedtak", produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
-    @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
+    @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun hentVedtak(): List<RSVedtakWrapper> {
-        val fnr = tokenValidationContextHolder.fnrFraOIDC()
+        val fnr = tokenValidationContextHolder.fnrFraIdportenTokenX()
         return vedtakService.hentVedtak(fnr)
     }
 
     @PostMapping(value = ["/vedtak/{vedtaksId}/les"], produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
-    @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
+    @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
-        val fnr = tokenValidationContextHolder.fnrFraOIDC()
+        val fnr = tokenValidationContextHolder.fnrFraIdportenTokenX()
         return lesVedtakService.lesVedtak(fnr, vedtaksId)
     }
 }
 
-fun TokenValidationContextHolder.fnrFraOIDC(): String {
+private fun TokenValidationContextHolder.fnrFraIdportenTokenX(): String {
     val context = this.tokenValidationContext
-    return context.getClaims("loginservice").subject
+    val claims = context.getClaims("tokenx")
+    return claims.getStringClaim("pid")
 }

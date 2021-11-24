@@ -9,7 +9,7 @@ spec:
   image: {{ image }}
   replicas:
     min: 2
-    max: 2
+    max: 3
     cpuThresholdPercentage: 90
   port: 8080
   liveness:
@@ -56,6 +56,7 @@ spec:
         - application: flex-gateway
         - application: flex-intern-gateway
         - application: spinnsyn-frontend-arkivering
+        - application: spinnsyn-frontend
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: prod-fss
