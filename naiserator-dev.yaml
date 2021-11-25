@@ -77,3 +77,7 @@ spec:
       value: https://syfo-tilgangskontroll.dev-fss-pub.nais.io
     - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
       value: dev-fss.teamsykefravr.syfo-tilgangskontroll
+    - name: SPINNSYN_FRONTEND_CLIENT_ID
+      value: dev-gcp:flex:spinnsyn-frontend
+    - name: SPINNSYN_FRONTEND_TOKENX_IDP
+      value: https://oidc-ver2.difi.no/idporten-oidc-provider/

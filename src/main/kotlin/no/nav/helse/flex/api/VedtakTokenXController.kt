@@ -7,6 +7,7 @@ import no.nav.helse.flex.service.VedtakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.stereotype.Controller
@@ -21,7 +22,12 @@ import org.springframework.web.bind.annotation.ResponseBody
 class VedtakTokenXController(
     val vedtakService: VedtakService,
     val tokenValidationContextHolder: TokenValidationContextHolder,
-    val lesVedtakService: LesVedtakService
+    val lesVedtakService: LesVedtakService,
+    @Value("\${SPINNSYN_FRONTEND_CLIENT_ID}")
+    val spinnsynFrontendClientId: String,
+    @Value("\${SPINNSYN_FRONTEND_TOKENX_IDP}")
+    val spinnsynFrontendTokenxIdp: String,
+
 ) {
     val log = logger()
 
@@ -29,7 +35,7 @@ class VedtakTokenXController(
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun hentVedtak(): List<RSVedtakWrapper> {
-        val fnr = tokenValidationContextHolder.validerTokenXClaims().fnrFraIdportenTokenX()
+        val fnr = validerTokenXClaims().fnrFraIdportenTokenX()
         return vedtakService.hentVedtak(fnr)
     }
 
@@ -37,18 +43,21 @@ class VedtakTokenXController(
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
-        val fnr = tokenValidationContextHolder.validerTokenXClaims().fnrFraIdportenTokenX()
+        val fnr = validerTokenXClaims().fnrFraIdportenTokenX()
         return lesVedtakService.lesVedtak(fnr, vedtaksId)
     }
 
-    private fun TokenValidationContextHolder.validerTokenXClaims(): JwtTokenClaims {
-        val context = this.tokenValidationContext
+    private fun validerTokenXClaims(): JwtTokenClaims {
+        val context = tokenValidationContextHolder.tokenValidationContext
         val claims = context.getClaims("tokenx")
-        if (claims.getStringClaim("client_id") != "dev-gcp:flex:spinnsyn-frontend") {
-            throw IkkeTilganTokenXException()
+        val clientId = claims.getStringClaim("client_id")
+        if (clientId != spinnsynFrontendClientId) {
+            throw IngenTilgang("Uventet client id $clientId")
         }
-        if (claims.getStringClaim("idp") != "https://oidc-ver2.difi.no/idporten-oidc-provider/") {
-            throw IkkeTilganTokenXException()
+        val idp = claims.getStringClaim("idp")
+        if (idp != spinnsynFrontendTokenxIdp) {
+            // Sjekker at det var idporten som er IDP for tokenX tokenet
+            throw IngenTilgang("Uventet idp $idp")
         }
         return claims
     }
@@ -58,8 +67,8 @@ class VedtakTokenXController(
     }
 }
 
-class IkkeTilganTokenXException : AbstractApiError(
-    message = "Ikke tilgang token X TODO tekstne her!!",
+private class IngenTilgang(override val message: String) : AbstractApiError(
+    message = message,
     httpStatus = HttpStatus.FORBIDDEN,
     reason = "INGEN_TILGANG",
     loglevel = LogLevel.WARN
