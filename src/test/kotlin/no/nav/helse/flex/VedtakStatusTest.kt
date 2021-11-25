@@ -194,7 +194,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val vedtaksId = vedtaket.id
         vedtaket.lest `should be equal to` false
 
-        lesVedtak(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
 
         val crStatus = statusKafkaConsumer.ventPåRecords(1).first()
         crStatus.key() `should be equal to` vedtaksId
@@ -214,7 +214,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
         val utbetalingFørLesing = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst")!!
 
-        lesVedtak(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
         statusKafkaConsumer.ventPåRecords(0).shouldBeEmpty()
 
         val etter = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst")!!
@@ -297,7 +297,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val vedtaksId = vedtaket.id
         vedtaket.lest `should be equal to` false
 
-        lesVedtak(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
 
         val crStatus = statusKafkaConsumer.ventPåRecords(1).first()
         crStatus.key() `should be equal to` vedtaksId
@@ -396,7 +396,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
     }
 
     private fun hentFrontendVedtak(utbetalingId: String) =
-        hentVedtak(fnr)
+        hentVedtakMedLoginserviceToken(fnr)
             .filter { it.vedtak.utbetaling.utbetalingId == utbetalingId }
             .shouldHaveSize(1)
             .first()

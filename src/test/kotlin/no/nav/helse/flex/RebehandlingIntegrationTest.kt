@@ -103,7 +103,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `finner ikke vedtaket`() {
-        hentVedtak(fnr).shouldBeEmpty()
+        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -146,7 +146,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `finner vedtaket `() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak.first().vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
     }
@@ -190,7 +190,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `finner vedtakene, en er revurdering, det andre er revurdert `() {
-        val vedtak = hentVedtak(fnr).sortedBy { it.opprettetTimestamp }
+        val vedtak = hentVedtakMedLoginserviceToken(fnr).sortedBy { it.opprettetTimestamp }
         vedtak.shouldHaveSize(2)
         vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
         vedtak[0].revurdert.`should be true`()
@@ -255,7 +255,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(10)
     fun `finner vedtakene, to er revurdering, den ene revurderinga er selv blirrrevurdert `() {
-        val vedtak = hentVedtak(fnr).sortedBy { it.opprettetTimestamp }
+        val vedtak = hentVedtakMedLoginserviceToken(fnr).sortedBy { it.opprettetTimestamp }
         vedtak.shouldHaveSize(3)
         vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
         vedtak[0].revurdert.`should be true`()

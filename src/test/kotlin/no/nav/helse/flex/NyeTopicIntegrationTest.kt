@@ -125,7 +125,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `finner ikke vedtaket`() {
-        hentVedtak(fnr).shouldBeEmpty()
+        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -167,8 +167,10 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
-    fun `finner vedtaket i v2`() {
-        val vedtak = hentVedtak(fnr)
+    fun `finner vedtaket i v2 og v3`() {
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
+        val vedtakTokenX = hentVedtakMedTokenXToken(fnr)
+        vedtak `should be equal to` vedtakTokenX
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
@@ -189,7 +191,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
             )
         )
 
-        val vedtakMedNavn = hentVedtak(fnr)
+        val vedtakMedNavn = hentVedtakMedLoginserviceToken(fnr)
         vedtakMedNavn[0].orgnavn `should be equal to` "Barneskolen"
     }
 
@@ -199,7 +201,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 1
 
-        val id = hentVedtak(fnr).first().id
+        val id = hentVedtakMedLoginserviceToken(fnr).first().id
 
         val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
         doneKafkaConsumer.ventPåRecords(antall = 0)
@@ -266,16 +268,16 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `vi leser vedtaket`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
         vedtak.shouldHaveSize(1)
         vedtak[0].lest.`should be false`()
 
         val vedtaksId = vedtak[0].id
 
-        lesVedtak(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
 
-        lesVedtak(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
 
         val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
@@ -319,7 +321,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(9)
     fun `vi finner vedtaket i v2 hvor det nå er annullert`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be true`()
     }

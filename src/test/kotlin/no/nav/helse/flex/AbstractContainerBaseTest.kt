@@ -71,16 +71,27 @@ abstract class AbstractContainerBaseTest {
     @PostConstruct
     fun setupRestServiceServers() {
         if (syfotilgangskontrollMockRestServiceServer == null) {
-            syfotilgangskontrollMockRestServiceServer = MockRestServiceServer.createServer(syfotilgangskontrollRestTemplate)
+            syfotilgangskontrollMockRestServiceServer =
+                MockRestServiceServer.createServer(syfotilgangskontrollRestTemplate)
         }
     }
 
-    fun jwt(fnr: String) = server.token(subject = fnr)
+    fun loginserviceJwt(fnr: String) = server.token(subject = fnr)
 
-    fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
+    fun hentVedtakMedLoginserviceToken(fnr: String): List<RSVedtakWrapper> {
         val json = mockMvc.perform(
             get("/api/v2/vedtak")
-                .header("Authorization", "Bearer ${jwt(fnr)}")
+                .header("Authorization", "Bearer ${loginserviceJwt(fnr)}")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk).andReturn().response.contentAsString
+
+        return objectMapper.readValue(json)
+    }
+
+    fun hentVedtakMedTokenXToken(fnr: String): List<RSVedtakWrapper> {
+        val json = mockMvc.perform(
+            get("/api/v3/vedtak")
+                .header("Authorization", "Bearer ${tokenxToken(fnr)}")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString
 
@@ -108,10 +119,10 @@ abstract class AbstractContainerBaseTest {
         return objectMapper.readValue(json)
     }
 
-    fun lesVedtak(fnr: String, id: String): String {
+    fun lesVedtakMedTokenXToken(fnr: String, id: String): String {
         val json = mockMvc.perform(
-            post("/api/v2/vedtak/$id/les")
-                .header("Authorization", "Bearer ${jwt(fnr)}")
+            post("/api/v3/vedtak/$id/les")
+                .header("Authorization", "Bearer ${tokenxToken(fnr)}")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString
 
@@ -167,6 +178,32 @@ abstract class AbstractContainerBaseTest {
         namedParameterJdbcTemplate.update("DELETE FROM ANNULLERING", MapSqlParameterSource())
         namedParameterJdbcTemplate.update("DELETE FROM VEDTAK", MapSqlParameterSource())
     }
+
+    fun tokenxToken(
+        fnr: String,
+        audience: String = "spinnsyn-backend-client-id",
+        issuerId: String = "tokenx",
+        clientId: String = "spinnsyn-frontend",
+        claims: Map<String, Any> = mapOf(
+            "acr" to "Level4",
+            "idp" to "idporten",
+            "client_id" to clientId,
+            "pid" to fnr,
+        ),
+    ): String {
+
+        return server.issueToken(
+            issuerId,
+            clientId,
+            DefaultOAuth2TokenCallback(
+                issuerId = issuerId,
+                subject = UUID.randomUUID().toString(),
+                audience = listOf(audience),
+                claims = claims,
+                expiry = 3600
+            )
+        ).serialize()
+    }
 }
 
 fun MockOAuth2Server.token(
@@ -175,7 +212,6 @@ fun MockOAuth2Server.token(
     clientId: String = UUID.randomUUID().toString(),
     audience: String = "loginservice-client-id",
     claims: Map<String, Any> = mapOf("acr" to "Level4"),
-
 ): String {
     return this.issueToken(
         issuerId,
