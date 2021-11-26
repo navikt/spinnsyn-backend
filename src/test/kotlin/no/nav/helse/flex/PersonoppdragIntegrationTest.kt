@@ -169,7 +169,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
         vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull() // Jsonignore
-        vedtak[0].vedtak.utbetaling.personOppdag.shouldBeNull() // Jsonignore
+        vedtak[0].vedtak.utbetaling.personOppdrag.shouldBeNull() // Jsonignore
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].dato `should be equal to` now
         vedtak[0].vedtak.utbetaling.utbetalingsdager[0].type `should be equal to` "NavDag"
         vedtak[0].dager.shouldBeEmpty()

@@ -39,7 +39,7 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
                     automatiskBehandling = true,
                     utbetalingsdager = emptyList(),
                     utbetalingType = "",
-                    personOppdag = null,
+                    personOppdrag = null,
                     arbeidsgiverOppdrag = null,
                     foreløpigBeregnetSluttPåSykepenger = null
                 ),
