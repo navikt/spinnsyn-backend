@@ -41,9 +41,9 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_11
+        diskAutoresize: true
         databases:
           - name: spinnsyn-db
-            diskAutoresize: true
   accessPolicy:
     outbound:
       external:
