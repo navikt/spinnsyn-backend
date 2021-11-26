@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
@@ -115,7 +114,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `finner ikke vedtaket`() {
-        hentVedtak(fnr).shouldBeEmpty()
+        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -158,7 +157,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `finner vedtaket i v2`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()

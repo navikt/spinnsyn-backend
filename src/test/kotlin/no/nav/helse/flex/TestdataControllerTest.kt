@@ -121,7 +121,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
         mockMvc.perform(
             post("/api/v1/testdata/vedtak")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer ${jwt(fnr)}")
+                .header("Authorization", "Bearer ${loginserviceJwt(fnr)}")
                 .content(body.serialisertTilString())
         ).andExpect(status().is2xxSuccessful).andReturn()
     }
@@ -129,7 +129,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `vi henter vedtaket`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
@@ -142,7 +142,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
         mockMvc.perform(
             post("/api/v1/testdata/annullering")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer ${jwt(fnr)}")
+                .header("Authorization", "Bearer ${loginserviceJwt(fnr)}")
                 .content(annulleringDto.serialisertTilString())
         ).andExpect(status().is2xxSuccessful).andReturn()
     }
@@ -150,7 +150,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `Vi henter vedtaket som nå er annullert`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
         vedtak shouldHaveSize 1
         vedtak.first().annullert `should be` true
@@ -161,7 +161,7 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     fun `Sletter vedtaket`() {
         mockMvc.perform(
             delete("/api/v1/testdata/vedtak")
-                .header("Authorization", "Bearer ${jwt(fnr)}")
+                .header("Authorization", "Bearer ${loginserviceJwt(fnr)}")
         ).andExpect(status().is2xxSuccessful).andReturn()
 
 //        doneKafkaConsumer.ventPåRecords(antall = 1)
@@ -170,6 +170,6 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `Vi har nå ingen vedtak`() {
-        hentVedtak(fnr) shouldHaveSize 0
+        hentVedtakMedLoginserviceToken(fnr) shouldHaveSize 0
     }
 }

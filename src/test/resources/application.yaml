@@ -35,6 +35,9 @@ no.nav.security.jwt:
     azureator:
       discoveryurl: http://localhost:${mock-oauth2-server.port}/azureator/.well-known/openid-configuration
       accepted_audience: spinnsyn-backend-client-id
+    tokenx:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
+      accepted_audience: spinnsyn-backend-client-id
   client:
     registration:
       onbehalfof-syfotilgangskontroll:
@@ -59,3 +62,7 @@ nais.cluster: test
 KAFKA_TRUSTSTORE_PATH: /
 KAFKA_CREDSTORE_PASSWORD: /
 KAFKA_KEYSTORE_PATH: /
+
+
+SPINNSYN_FRONTEND_CLIENT_ID: spinnsyn-frontend
+SPINNSYN_FRONTEND_TOKENX_IDP: idporten

@@ -129,7 +129,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `finner ikke vedtaket`() {
-        hentVedtak(fnr).shouldBeEmpty()
+        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -178,7 +178,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `finner fortsatt ikke vedtaket`() {
-        hentVedtak(fnr).shouldBeEmpty()
+        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -201,7 +201,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(8)
     fun `finner vedtaket`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
@@ -216,7 +216,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         val antall = brukernotifikasjonService.prosseserUtbetaling()
         antall `should be equal to` 1
 
-        val id = hentVedtak(fnr).first().id
+        val id = hentVedtakMedLoginserviceToken(fnr).first().id
 
         val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
         doneKafkaConsumer.ventPåRecords(antall = 0)
@@ -246,15 +246,15 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(13)
     fun `vi leser vedtaket som ble varslet på utbetaling`() {
-        val vedtak = hentVedtak(fnr)
+        val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
         vedtak.shouldHaveSize(1)
         vedtak[0].lest.`should be false`()
 
         val vedtaksId = vedtak[0].id
 
-        lesVedtak(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
-        lesVedtak(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
 
         val doned = doneKafkaConsumer.ventPåRecords(antall = 1)
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
@@ -274,7 +274,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(14)
     fun `vi bruker varslet med id for å done brukernotifikasjonen`() {
-        val vedtakMedUtbetalingId = hentVedtak(fnr).first()
+        val vedtakMedUtbetalingId = hentVedtakMedLoginserviceToken(fnr).first()
         val vedtakVarselId = vedtakRepository
             .findVedtakDbRecordsByFnr(fnr)
             .filter { it.utbetalingId == vedtakMedUtbetalingId.vedtak.utbetaling.utbetalingId }
@@ -291,8 +291,8 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
                 )
         )
 
-        lesVedtak(fnr, vedtakMedUtbetalingId.id) `should be equal to` "Leste vedtak ${vedtakMedUtbetalingId.id}"
-        lesVedtak(
+        lesVedtakMedTokenXToken(fnr, vedtakMedUtbetalingId.id) `should be equal to` "Leste vedtak ${vedtakMedUtbetalingId.id}"
+        lesVedtakMedTokenXToken(
             fnr,
             vedtakMedUtbetalingId.id
         ) `should be equal to` "Vedtak ${vedtakMedUtbetalingId.id} er allerede lest"

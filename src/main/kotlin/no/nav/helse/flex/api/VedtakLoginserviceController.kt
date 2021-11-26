@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 
 @Controller
 @RequestMapping("/api/v2")
-class VedtakController(
+class VedtakLoginserviceController(
     val vedtakService: VedtakService,
     val tokenValidationContextHolder: TokenValidationContextHolder,
     val lesVedtakService: LesVedtakService
