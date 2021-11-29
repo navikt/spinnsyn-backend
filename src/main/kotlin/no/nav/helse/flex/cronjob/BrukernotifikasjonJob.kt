@@ -15,7 +15,7 @@ class BrukernotifikasjonJob(
     val brukernotifikasjonService: BrukernotifikasjonService
 ) {
     private val log = logger()
-    private val sisteTidForBrukernotifikasjon = ZonedDateTime.of(LocalDate.of(2021, 11, 30).atTime(4, 1), ZoneId.of(ZONE_ID_OSLO))
+    private val sisteTidForBrukernotifikasjon = ZonedDateTime.of(LocalDate.of(2021, 11, 30).atTime(0, 1), ZoneId.of(ZONE_ID_OSLO))
 
     @Scheduled(cron = "0 0/10 * * * ?")
     fun run() {
