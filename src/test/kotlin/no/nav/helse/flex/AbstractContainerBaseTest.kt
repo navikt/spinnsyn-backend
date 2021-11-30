@@ -130,15 +130,15 @@ abstract class AbstractContainerBaseTest {
     @Autowired
     lateinit var doneKafkaConsumer: Consumer<Nokkel, Done>
 
-    @AfterAll
-    fun `Vi leser done kafka topicet og feil hvis noe finnes og slik at subklassetestene leser alt`() {
+    @BeforeAll
+    fun `verifiser at Kafka-topic for Done-meldinger er tomt før alle tester har kjørt`() {
+        doneKafkaConsumer.subscribeHvisIkkeSubscribed(DONE_TOPIC)
+
         doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
     }
 
-    @BeforeAll
-    fun `Vi leser done kafka topicet og feiler om noe eksisterer`() {
-        doneKafkaConsumer.subscribeHvisIkkeSubscribed(DONE_TOPIC)
-
+    @AfterAll
+    fun `verifiser at Kafka-topic for Done-meldinger er tomt etter at alle tester har kjørt`() {
         doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
     }
 

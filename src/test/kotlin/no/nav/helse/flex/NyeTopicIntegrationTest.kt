@@ -42,7 +42,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     final val aktørId = "321"
     final val org = "987123123"
     final val now = LocalDate.now()
-    val utbetalingId = "124542"
+    final val utbetalingId = "124542"
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
@@ -120,7 +120,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(2)
-    fun `finner ikke vedtaket`() {
+    fun `finner ikke brukervedtaket da utbetaling ikke er mottatt`() {
         hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 
@@ -148,7 +148,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
-    fun `finner vedtaket i v2 og v3`() {
+    fun `finner brukervedtaket i v2 og v3`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
         val vedtakTokenX = hentVedtakMedTokenXToken(fnr)
         vedtak `should be equal to` vedtakTokenX
@@ -178,7 +178,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(5)
-    fun `En veileder med obo tilgang kan hente vedtaket`() {
+    fun `veileder med OBO-tilgang kan lese brukervedtaket`() {
 
         val veilederToken = skapAzureJwt()
         mockSyfoTilgangskontroll(true, fnr)
@@ -193,7 +193,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(5)
-    fun `spinnsyn-frontend-arkivering kan hente vedtaket`() {
+    fun `spinnsyn-frontend-arkivering kan hente brukervedtaket`() {
 
         val token = skapAzureJwt(subject = "spinnsyn-frontend-arkivering-client-id")
 
@@ -205,7 +205,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(5)
-    fun `Maskin til maskin apiet trenger tokens`() {
+    fun `maskin-til-maskin API-et trenger tokens for å lese brukervedtaket`() {
         mockMvc.perform(
             get("/api/v1/arkivering/vedtak")
                 .header("Authorization", "Bearer blabla-fake-token")
@@ -222,7 +222,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(6)
-    fun `Oppdaterer utbetaling med varslet-med`() {
+    fun `oppdaterer utbetaling med verdi for feltet varslet_med`() {
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
             .first()
             .let {
@@ -237,7 +237,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(7)
-    fun `vi leser vedtaket`() {
+    fun `bruker leser vedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
         vedtak.shouldHaveSize(1)
@@ -263,7 +263,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(8)
-    fun `Ei annullering mottatt på kafka blir lagret i db`() {
+    fun `en annullering blir mottatt på Kafka blir lagret i db`() {
         kafkaProducer.send(
             ProducerRecord(
                 SPORBAR_TOPIC,
@@ -281,7 +281,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(9)
-    fun `vi finner vedtaket i v2 hvor det nå er annullert`() {
+    fun `finner vedtaket i v2 hvor det nå er annullert`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be true`()
@@ -289,7 +289,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(10)
-    fun `mottar vedtak med null utbetaling id`() {
+    fun `mottar ett vedtak med null som utbetalingId`() {
 
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(1)
 
@@ -309,7 +309,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(11)
-    fun `mottar enda et vedtak med null utbetaling id`() {
+    fun `mottar enda et vedtak med null som utbetalingId`() {
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(2)
 
         kafkaProducer.send(
@@ -328,7 +328,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(12)
-    fun `mottar duplikat av det første vedtaket`() {
+    fun `duplikat av det første vedtaket blir ikke lagret som nytt vedtak`() {
 
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(3)
 
@@ -350,7 +350,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(13)
-    fun `mottar duplikat av den første utbetalingen`() {
+    fun `duplikat av den første utbetalingen blir ikke lagret som ny utbetaling`() {
 
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).shouldHaveSize(1)
 

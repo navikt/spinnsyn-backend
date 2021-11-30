@@ -40,6 +40,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     final val org = "987"
     final val now = LocalDate.now()
     final val utbetalingId = "124542"
+
     val vedtak1 = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
@@ -104,7 +105,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(1)
-    fun `mottar vedtak`() {
+    fun `mottar ett av to vedtak`() {
         kafkaProducer.send(
             ProducerRecord(
                 VEDTAK_TOPIC,
@@ -125,7 +126,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(2)
-    fun `finner ikke vedtaket`() {
+    fun `finner ikke brukervedtaket da utbetaling ikke er mottatt`() {
         hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 
@@ -153,7 +154,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(6)
-    fun `finner fortsatt ikke vedtaket`() {
+    fun `finner fortsatt ikke brukervedtaket da det siste vedtaket mangler`() {
         hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 
@@ -176,7 +177,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(8)
-    fun `finner vedtaket`() {
+    fun `finner merget brukervedtak`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
@@ -188,7 +189,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(9)
-    fun `Oppdaterer utbetaling med varslet-med`() {
+    fun `oppdaterer utbetaling med verdi for feltet varslet_med`() {
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
             .first()
             .let {
@@ -203,7 +204,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(10)
-    fun `vi leser vedtaket som ble varslet på utbetaling`() {
+    fun `bruker leser vedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
         vedtak.shouldHaveSize(1)
@@ -230,7 +231,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(11)
-    fun `vi bruker varslet med id for å done brukernotifikasjonen`() {
+    fun `verdi i varslet_med feltet brukes til Done-melding`() {
         val vedtakMedUtbetalingId = hentVedtakMedLoginserviceToken(fnr).first()
         val vedtakVarselId = vedtakRepository
             .findVedtakDbRecordsByFnr(fnr)
