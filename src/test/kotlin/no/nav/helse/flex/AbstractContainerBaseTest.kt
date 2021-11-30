@@ -106,6 +106,17 @@ abstract class AbstractContainerBaseTest {
         return objectMapper.readValue(json)
     }
 
+    fun hentVedtakSomVeilederOboV4(fnr: String, token: String): List<RSVedtakWrapper> {
+        val json = mockMvc.perform(
+            get("/api/v4/veileder/vedtak")
+                .header("Authorization", "Bearer $token")
+                .header("sykmeldt-fnr", fnr)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk).andReturn().response.contentAsString
+
+        return objectMapper.readValue(json)
+    }
+
     fun hentVedtakSomSpinnsynFrontendArkivering(fnr: String, token: String): List<RSVedtakWrapper> {
         val json = mockMvc.perform(
             get("/api/v1/arkivering/vedtak")
