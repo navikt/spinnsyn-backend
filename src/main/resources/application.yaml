@@ -35,7 +35,6 @@ management:
 
 logging.config: "classpath:logback.xml"
 
-spinnsyn-frontend.url: ${SPINNSYN_FRONTEND_URL}
 syfo-tilgangskontroll.url: ${SYFOTILGANGSKONTROLL_URL}
 nais.cluster: ${NAIS_CLUSTER_NAME}
 

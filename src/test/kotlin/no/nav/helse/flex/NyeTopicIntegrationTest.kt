@@ -6,7 +6,6 @@ import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.Organisasjon
-import no.nav.helse.flex.service.BrukernotifikasjonService
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -36,9 +35,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Autowired
     lateinit var restTemplate: RestTemplate
 
-    @Autowired
-    lateinit var brukernotifikasjonService: BrukernotifikasjonService
-
     @Value("\${on-prem-kafka.username}")
     lateinit var systembruker: String
 
@@ -46,7 +42,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     final val aktørId = "321"
     final val org = "987123123"
     final val now = LocalDate.now()
-    val utbetalingId = "124542"
+    final val utbetalingId = "124542"
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
@@ -124,15 +120,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(2)
-    fun `finner ikke vedtaket`() {
+    fun `finner ikke brukervedtaket da utbetaling ikke er mottatt`() {
         hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
-    }
-
-    @Test
-    @Order(2)
-    fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 0
     }
 
     @Test
@@ -159,15 +148,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
-    fun `finner utbetalingen med query for brukernotifkasjon`() {
-        val utbetaling =
-            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        utbetaling.shouldHaveSize(1)
-    }
-
-    @Test
-    @Order(4)
-    fun `finner vedtaket i v2 og v3`() {
+    fun `finner brukervedtaket i v2 og v3`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
         val vedtakTokenX = hentVedtakMedTokenXToken(fnr)
         vedtak `should be equal to` vedtakTokenX
@@ -196,34 +177,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(4)
-    fun `en brukernotifkasjon går ut når cronjobben kjøres`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 1
-
-        val id = hentVedtakMedLoginserviceToken(fnr).first().id
-
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
-
-        oppgaver.shouldHaveSize(1)
-
-        val nokkel = oppgaver[0].key()
-        nokkel.getSystembruker() shouldBeEqualTo systembruker
-
-        val oppgave = oppgaver[0].value()
-
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har fått svar på søknaden om sykepenger - se resultatet"
-        oppgave.getLink() shouldBeEqualTo "blah"
-        oppgave.getGrupperingsId() shouldBeEqualTo id
-        oppgave.getEksternVarsling() shouldBeEqualTo true
-    }
-
-    @Test
     @Order(5)
-    fun `En veileder med obo tilgang kan hente vedtaket`() {
+    fun `veileder med OBO-tilgang kan lese brukervedtaket`() {
 
         val veilederToken = skapAzureJwt()
         mockSyfoTilgangskontroll(true, fnr)
@@ -238,7 +193,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(5)
-    fun `spinnsyn-frontend-arkivering kan hente vedtaket`() {
+    fun `spinnsyn-frontend-arkivering kan hente brukervedtaket`() {
 
         val token = skapAzureJwt(subject = "spinnsyn-frontend-arkivering-client-id")
 
@@ -250,7 +205,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(5)
-    fun `Maskin til maskin apiet trenger tokens`() {
+    fun `maskin-til-maskin API-et trenger tokens for å lese brukervedtaket`() {
         mockMvc.perform(
             get("/api/v1/arkivering/vedtak")
                 .header("Authorization", "Bearer blabla-fake-token")
@@ -267,7 +222,22 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(6)
-    fun `vi leser vedtaket`() {
+    fun `oppdaterer utbetaling med verdi for feltet varslet_med`() {
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+            .first()
+            .let {
+                utbetalingRepository.save(
+                    it.copy(
+                        brukernotifikasjonSendt = Instant.now(),
+                        varsletMed = it.id
+                    )
+                )
+            }
+    }
+
+    @Test
+    @Order(7)
+    fun `bruker leser vedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
         vedtak.shouldHaveSize(1)
@@ -280,7 +250,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
 
         val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
         dones.shouldHaveSize(1)
 
         val nokkel = dones[0].key()
@@ -293,16 +262,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(7)
-    fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak =
-            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        vedtak.shouldBeEmpty()
-    }
-
-    @Test
     @Order(8)
-    fun `Ei annullering mottatt på kafka blir lagret i db`() {
+    fun `en annullering blir mottatt på Kafka blir lagret i db`() {
         kafkaProducer.send(
             ProducerRecord(
                 SPORBAR_TOPIC,
@@ -320,7 +281,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(9)
-    fun `vi finner vedtaket i v2 hvor det nå er annullert`() {
+    fun `finner vedtaket i v2 hvor det nå er annullert`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be true`()
@@ -328,7 +289,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(10)
-    fun `mottar vedtak med null utbetaling id`() {
+    fun `mottar ett vedtak med null som utbetalingId`() {
 
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(1)
 
@@ -348,7 +309,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(11)
-    fun `mottar enda et vedtak med null utbetaling id`() {
+    fun `mottar enda et vedtak med null som utbetalingId`() {
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(2)
 
         kafkaProducer.send(
@@ -367,7 +328,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(12)
-    fun `mottar duplikat av det første vedtaket`() {
+    fun `duplikat av det første vedtaket blir ikke lagret som nytt vedtak`() {
 
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(3)
 
@@ -389,7 +350,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(13)
-    fun `mottar duplikat av den første utbetalingen`() {
+    fun `duplikat av den første utbetalingen blir ikke lagret som ny utbetaling`() {
 
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).shouldHaveSize(1)
 

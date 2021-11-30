@@ -7,7 +7,6 @@ import no.nav.helse.flex.domene.tilVedtakStatusDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_STATUS_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.service.BrukernotifikasjonService
 import no.nav.helse.flex.service.VedtakStatusService
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeEmpty
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -36,15 +36,13 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
     lateinit var statusKafkaConsumer: Consumer<String, String>
 
     @Autowired
-    lateinit var brukernotifikasjonService: BrukernotifikasjonService
-
-    @Autowired
     lateinit var vedtakStatusService: VedtakStatusService
 
     final val fnr = "1233342"
     final val aktørId = "321"
     final val org = "987"
     final val now = LocalDate.now()
+    final val utbetalingId = "124542"
 
     val vedtak1 = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
@@ -56,7 +54,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         dokumenter = emptyList(),
         inntekt = 0.0,
         sykepengegrunnlag = 0.0,
-        utbetalingId = "34ij98jf",
+        utbetalingId = utbetalingId,
         grunnlagForSykepengegrunnlag = 0.0,
         grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
         begrensning = "VET_IKKE"
@@ -72,7 +70,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         dokumenter = emptyList(),
         inntekt = 0.0,
         sykepengegrunnlag = 0.0,
-        utbetalingId = "34ij98jf",
+        utbetalingId = utbetalingId,
         grunnlagForSykepengegrunnlag = 0.0,
         grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
         begrensning = "VET_IKKE"
@@ -84,7 +82,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         organisasjonsnummer = org,
         fom = now,
         tom = now.plusDays(1),
-        utbetalingId = "34ij98jf",
+        utbetalingId = utbetalingId,
         antallVedtak = 2,
         event = "eventet",
         forbrukteSykedager = 42,
@@ -109,7 +107,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
     )
 
     @BeforeAll
-    fun `Subscribe til og tøm status topic`() {
+    fun `subscribe til- og tøm status topic`() {
         // Prosesserer vedtak og utbetalinger i fra andre tester
         vedtakStatusService.prosesserUtbetalinger()
 
@@ -121,14 +119,14 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
     }
 
     @AfterAll
-    fun `Har konsumert alle meldinger i fra status topic`() {
+    fun `alle meldinger er konsumert fra fra status topic`() {
         statusKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
         vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
     }
 
     @Test
     @Order(100)
-    fun `mottar vedtak først uten at status blir sendt`() {
+    fun `mottar vedtak uten at status blir sendt da utbetaling ikke er mottatt`() {
         kafkaProducer.send(
             ProducerRecord(
                 VEDTAK_TOPIC,
@@ -163,19 +161,24 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst") != null
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+                .firstOrNull {
+                    it.utbetalingId == "VedtakFørst"
+                } != null
         }
     }
 
     @Test
     @Order(102)
-    fun `sender status motatt på kafka`() {
+    fun `sender statusmelding på Kafka etter at utbetaling er mottatt`() {
         vedtakStatusService.prosesserUtbetalinger() `should be equal to` 1
 
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst")
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "VedtakFørst"
+        }
         utbetalingDbRecord.shouldNotBeNull()
 
         val crStatus = kafkameldinger.first()
@@ -189,7 +192,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(103)
-    fun `når bruker henter og leser vedtaket så legges status på kafka`() {
+    fun `sender melding om at bruker har lest vedtaket på Kafka`() {
         val vedtaket = hentFrontendVedtak("VedtakFørst")
         val vedtaksId = vedtaket.id
         vedtaket.lest `should be equal to` false
@@ -207,23 +210,27 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(104)
-    fun `vedtaket leses på nytt og ingenting skjer`() {
+    fun `ny melding sender ikke selv om bruker leser vedtaket på nytt`() {
         val vedtaket = hentFrontendVedtak("VedtakFørst")
         val vedtaksId = vedtaket.id
         vedtaket.lest `should be equal to` true
 
-        val utbetalingFørLesing = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst")!!
+        val utbetalingFørLesing = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "VedtakFørst"
+        }
 
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
         statusKafkaConsumer.ventPåRecords(0).shouldBeEmpty()
 
-        val etter = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst")!!
+        val etter = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "VedtakFørst"
+        }
         utbetalingFørLesing.lest `should be equal to` etter.lest
     }
 
     @Test
     @Order(200)
-    fun `mottar utbetaling først uten at status blir sendt`() {
+    fun `mottar utbetaling uten at status blir sendt da vedtaket ikke er mottatt`() {
         kafkaProducer.send(
             ProducerRecord(
                 UTBETALING_TOPIC,
@@ -237,7 +244,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("UtbetalingFørst") != null
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).firstOrNull {
+                it.utbetalingId == "UtbetalingFørst"
+            } != null
         }
 
         vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
@@ -264,13 +273,15 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(202)
-    fun `vedtak status service sender nå status motatt på kafka`() {
+    fun `sender statusmelding på Kafka etter at vedtaket er mottatt`() {
         vedtakStatusService.prosesserUtbetalinger() `should be equal to` 1
 
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("UtbetalingFørst")
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "UtbetalingFørst"
+        }
         utbetalingDbRecord.shouldNotBeNull()
 
         val crStatus = kafkameldinger.first()
@@ -284,15 +295,22 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(203)
-    fun `brukernotifikasjon blir sendt ut`() {
-        brukernotifikasjonService.prosseserUtbetaling() `should be equal to` 1
-
-        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+    fun `oppdaterer utbetaling med verdi for feltet varslet_med`() {
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+            .first { it.utbetalingId == "UtbetalingFørst" }
+            .let {
+                utbetalingRepository.save(
+                    it.copy(
+                        brukernotifikasjonSendt = Instant.now(),
+                        varsletMed = it.id
+                    )
+                )
+            }
     }
 
     @Test
     @Order(204)
-    fun `bruker leser vedtaket og status legges på kafka`() {
+    fun `bruker leser vedtaket`() {
         val vedtaket = hentFrontendVedtak("UtbetalingFørst")
         val vedtaksId = vedtaket.id
         vedtaket.lest `should be equal to` false
@@ -347,7 +365,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("EnAvTo") != null
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).firstOrNull {
+                it.utbetalingId == "EnAvTo"
+            } != null
         }
 
         vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
@@ -355,7 +375,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(302)
-    fun `mottar siste vedtak`() {
+    fun `mottar det siste vedtaket`() {
         kafkaProducer.send(
             ProducerRecord(
                 VEDTAK_TOPIC,
@@ -376,13 +396,15 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(303)
-    fun `vedtak status service finner nå alle vedtak for utbetalingen`() {
+    fun `prosesserer utbetalinger da alle vedtak er mottatt`() {
         vedtakStatusService.prosesserUtbetalinger() `should be equal to` 1
 
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("EnAvTo")
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "EnAvTo"
+        }
         utbetalingDbRecord.shouldNotBeNull()
         utbetalingDbRecord.antallVedtak `should be equal to` 2
 

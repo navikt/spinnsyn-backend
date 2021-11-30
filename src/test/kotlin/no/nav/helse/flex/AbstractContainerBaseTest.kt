@@ -3,9 +3,7 @@ package no.nav.helse.flex
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.helse.flex.brukernotifkasjon.DONE_TOPIC
-import no.nav.helse.flex.brukernotifkasjon.OPPGAVE_TOPIC
 import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
@@ -130,27 +128,17 @@ abstract class AbstractContainerBaseTest {
     }
 
     @Autowired
-    lateinit var oppgaveKafkaConsumer: Consumer<Nokkel, Oppgave>
-
-    @Autowired
     lateinit var doneKafkaConsumer: Consumer<Nokkel, Done>
 
-    @AfterAll
-    fun `Vi leser oppgave kafka topicet og feil hvis noe finnes og slik at subklassetestene leser alt`() {
-        oppgaveKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
-    }
+    @BeforeAll
+    fun `verifiser at Kafka-topic for Done-meldinger er tomt før alle tester har kjørt`() {
+        doneKafkaConsumer.subscribeHvisIkkeSubscribed(DONE_TOPIC)
 
-    @AfterAll
-    fun `Vi leser done kafka topicet og feil hvis noe finnes og slik at subklassetestene leser alt`() {
         doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
     }
 
-    @BeforeAll
-    fun `Vi leser oppgave og done kafka topicet og feiler om noe eksisterer`() {
-        oppgaveKafkaConsumer.subscribeHvisIkkeSubscribed(OPPGAVE_TOPIC)
-        doneKafkaConsumer.subscribeHvisIkkeSubscribed(DONE_TOPIC)
-
-        oppgaveKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
+    @AfterAll
+    fun `verifiser at Kafka-topic for Done-meldinger er tomt etter at alle tester har kjørt`() {
         doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
     }
 

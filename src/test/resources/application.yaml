@@ -56,7 +56,6 @@ management:
     exposure.include: prometheus
     path-mapping.prometheus: /prometheus
 
-spinnsyn-frontend.url: blah
 syfotilgangskontroll.url: http://syfotilgangskontroll
 nais.cluster: test
 KAFKA_TRUSTSTORE_PATH: /
