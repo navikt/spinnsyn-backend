@@ -4,7 +4,6 @@ import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.service.BrukernotifikasjonService
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -26,9 +25,6 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Autowired
-    lateinit var brukernotifikasjonService: BrukernotifikasjonService
 
     final val fnr = "1233342"
     final val aktørId = "321"
@@ -118,13 +114,6 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(2)
-    fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 0
-    }
-
-    @Test
     @Order(3)
     fun `mottar utbetaling`() {
         kafkaProducer.send(
@@ -144,14 +133,6 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
-    }
-
-    @Test
-    @Order(4)
-    fun `finner utbetalingen med query for brukernotifkasjon`() {
-        val utbetaling =
-            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        utbetaling.shouldHaveSize(1)
     }
 
     @Test

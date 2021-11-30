@@ -7,7 +7,6 @@ import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.service.BrukernotifikasjonService
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should not be null`
@@ -23,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -31,9 +31,6 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
-
-    @Autowired
-    lateinit var brukernotifikasjonService: BrukernotifikasjonService
 
     @Value("\${on-prem-kafka.username}")
     lateinit var systembruker: String
@@ -133,13 +130,6 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(2)
-    fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 0
-    }
-
-    @Test
     @Order(3)
     fun `mottar utbetaling`() {
         kafkaProducer.send(
@@ -159,20 +149,6 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
-    }
-
-    @Test
-    @Order(4)
-    fun `finner utbetalingen med query for brukernotifkasjon`() {
-        val utbetaling = utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        utbetaling.shouldHaveSize(1)
-    }
-
-    @Test
-    @Order(5)
-    fun `ingen brukernotifkasjon går ut før det siste vedtaket er der`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 0
     }
 
     @Test
@@ -211,40 +187,22 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     }
 
     @Test
+    @Order(9)
+    fun `Oppdaterer utbetaling med varslet-med`() {
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+            .first()
+            .let {
+                utbetalingRepository.save(
+                    it.copy(
+                        brukernotifikasjonSendt = Instant.now(),
+                        varsletMed = it.id
+                    )
+                )
+            }
+    }
+
+    @Test
     @Order(10)
-    fun `en brukernotifkasjon går ut når cronjobben kjøres`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 1
-
-        val id = hentVedtakMedLoginserviceToken(fnr).first().id
-
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
-
-        oppgaver.shouldHaveSize(1)
-
-        val nokkel = oppgaver[0].key()
-        nokkel.getSystembruker() shouldBeEqualTo systembruker
-
-        val oppgave = oppgaver[0].value()
-
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har fått svar på søknaden om sykepenger - se resultatet"
-        oppgave.getLink() shouldBeEqualTo "blah"
-        oppgave.getGrupperingsId() shouldBeEqualTo id
-        oppgave.getEksternVarsling() shouldBeEqualTo true
-    }
-
-    @Test
-    @Order(12)
-    fun `finner ikke lengre utebetalingen med query for brukernotifkasjon`() {
-        val vedtak = utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        vedtak.shouldBeEmpty()
-    }
-
-    @Test
-    @Order(13)
     fun `vi leser vedtaket som ble varslet på utbetaling`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
@@ -257,7 +215,6 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
 
         val doned = doneKafkaConsumer.ventPåRecords(antall = 1)
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
         doned.shouldHaveSize(1)
 
         val nokkel = doned[0].key()
@@ -272,7 +229,7 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(14)
+    @Order(11)
     fun `vi bruker varslet med id for å done brukernotifikasjonen`() {
         val vedtakMedUtbetalingId = hentVedtakMedLoginserviceToken(fnr).first()
         val vedtakVarselId = vedtakRepository
@@ -298,7 +255,6 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         ) `should be equal to` "Vedtak ${vedtakMedUtbetalingId.id} er allerede lest"
 
         val doned = doneKafkaConsumer.ventPåRecords(antall = 1)
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
         doned.shouldHaveSize(1)
 
         val nokkel = doned[0].key()

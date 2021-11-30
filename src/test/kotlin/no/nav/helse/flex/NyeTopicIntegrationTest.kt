@@ -6,7 +6,6 @@ import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.Organisasjon
-import no.nav.helse.flex.service.BrukernotifikasjonService
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -35,9 +34,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Autowired
-    lateinit var brukernotifikasjonService: BrukernotifikasjonService
 
     @Value("\${on-prem-kafka.username}")
     lateinit var systembruker: String
@@ -129,13 +125,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(2)
-    fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 0
-    }
-
-    @Test
     @Order(3)
     fun `mottar utbetaling`() {
         kafkaProducer.send(
@@ -155,14 +144,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
-    }
-
-    @Test
-    @Order(4)
-    fun `finner utbetalingen med query for brukernotifkasjon`() {
-        val utbetaling =
-            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        utbetaling.shouldHaveSize(1)
     }
 
     @Test
@@ -193,32 +174,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
         val vedtakMedNavn = hentVedtakMedLoginserviceToken(fnr)
         vedtakMedNavn[0].orgnavn `should be equal to` "Barneskolen"
-    }
-
-    @Test
-    @Order(4)
-    fun `en brukernotifkasjon går ut når cronjobben kjøres`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 1
-
-        val id = hentVedtakMedLoginserviceToken(fnr).first().id
-
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
-
-        oppgaver.shouldHaveSize(1)
-
-        val nokkel = oppgaver[0].key()
-        nokkel.getSystembruker() shouldBeEqualTo systembruker
-
-        val oppgave = oppgaver[0].value()
-
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har fått svar på søknaden om sykepenger - se resultatet"
-        oppgave.getLink() shouldBeEqualTo "blah"
-        oppgave.getGrupperingsId() shouldBeEqualTo id
-        oppgave.getEksternVarsling() shouldBeEqualTo true
     }
 
     @Test
@@ -267,6 +222,21 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(6)
+    fun `Oppdaterer utbetaling med varslet-med`() {
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+            .first()
+            .let {
+                utbetalingRepository.save(
+                    it.copy(
+                        brukernotifikasjonSendt = Instant.now(),
+                        varsletMed = it.id
+                    )
+                )
+            }
+    }
+
+    @Test
+    @Order(7)
     fun `vi leser vedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
@@ -280,7 +250,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
 
         val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
         dones.shouldHaveSize(1)
 
         val nokkel = dones[0].key()
@@ -290,14 +259,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         done.getFodselsnummer() `should be equal to` fnr
 
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first().lest.`should not be null`()
-    }
-
-    @Test
-    @Order(7)
-    fun `finner ikke lengre vedtaket med queryen for brukernotifkasjon`() {
-        val vedtak =
-            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        vedtak.shouldBeEmpty()
     }
 
     @Test

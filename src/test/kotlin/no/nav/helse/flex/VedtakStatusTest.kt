@@ -7,7 +7,6 @@ import no.nav.helse.flex.domene.tilVedtakStatusDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_STATUS_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.service.BrukernotifikasjonService
 import no.nav.helse.flex.service.VedtakStatusService
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeEmpty
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -34,9 +34,6 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var statusKafkaConsumer: Consumer<String, String>
-
-    @Autowired
-    lateinit var brukernotifikasjonService: BrukernotifikasjonService
 
     @Autowired
     lateinit var vedtakStatusService: VedtakStatusService
@@ -163,7 +160,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst") != null
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+                .firstOrNull {
+                    it.utbetalingId == "VedtakFørst"
+                } != null
         }
     }
 
@@ -175,7 +175,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst")
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "VedtakFørst"
+        }
         utbetalingDbRecord.shouldNotBeNull()
 
         val crStatus = kafkameldinger.first()
@@ -212,12 +214,16 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val vedtaksId = vedtaket.id
         vedtaket.lest `should be equal to` true
 
-        val utbetalingFørLesing = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst")!!
+        val utbetalingFørLesing = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "VedtakFørst"
+        }
 
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
         statusKafkaConsumer.ventPåRecords(0).shouldBeEmpty()
 
-        val etter = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("VedtakFørst")!!
+        val etter = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "VedtakFørst"
+        }
         utbetalingFørLesing.lest `should be equal to` etter.lest
     }
 
@@ -237,7 +243,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("UtbetalingFørst") != null
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).firstOrNull {
+                it.utbetalingId == "UtbetalingFørst"
+            } != null
         }
 
         vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
@@ -270,7 +278,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("UtbetalingFørst")
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "UtbetalingFørst"
+        }
         utbetalingDbRecord.shouldNotBeNull()
 
         val crStatus = kafkameldinger.first()
@@ -284,10 +294,17 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(203)
-    fun `brukernotifikasjon blir sendt ut`() {
-        brukernotifikasjonService.prosseserUtbetaling() `should be equal to` 1
-
-        oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+    fun `Oppdaterer utbetaling med varslet-med`() {
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+            .first { it.utbetalingId == "UtbetalingFørst" }
+            .let {
+                utbetalingRepository.save(
+                    it.copy(
+                        brukernotifikasjonSendt = Instant.now(),
+                        varsletMed = it.id
+                    )
+                )
+            }
     }
 
     @Test
@@ -347,7 +364,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("EnAvTo") != null
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).firstOrNull {
+                it.utbetalingId == "EnAvTo"
+            } != null
         }
 
         vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
@@ -382,7 +401,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByUtbetalingId("EnAvTo")
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "EnAvTo"
+        }
         utbetalingDbRecord.shouldNotBeNull()
         utbetalingDbRecord.antallVedtak `should be equal to` 2
 

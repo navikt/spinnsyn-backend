@@ -22,10 +22,6 @@ class Metrikk(registry: MeterRegistry) {
         "vedtak_lest_counter"
     )
 
-    val BRUKERNOTIFIKASJON_SENDT = registry.counter(
-        "brukernotifkasjon_sendt_counter"
-    )
-
     val MOTTATT_ANNULLERING_VEDTAK = registry.counter(
         "mottatt_annullering_vedtak_counter"
     )

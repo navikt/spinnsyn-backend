@@ -112,8 +112,6 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
-
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
@@ -140,7 +138,6 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         await().atMost(5, TimeUnit.SECONDS).until {
             annulleringDAO.finnAnnullering(fnr).isNotEmpty()
         }
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
@@ -210,8 +207,6 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
-
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test

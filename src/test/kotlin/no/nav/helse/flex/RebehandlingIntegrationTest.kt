@@ -3,7 +3,6 @@ package no.nav.helse.flex
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.service.BrukernotifikasjonService
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -27,9 +26,6 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Autowired
-    lateinit var brukernotifikasjonService: BrukernotifikasjonService
 
     @Value("\${on-prem-kafka.username}")
     lateinit var systembruker: String
@@ -107,13 +103,6 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(2)
-    fun `ingen brukernotifkasjon går ut før utbetalinga er der`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 0
-    }
-
-    @Test
     @Order(3)
     fun `mottar utbetaling`() {
         kafkaProducer.send(
@@ -133,14 +122,6 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
         dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
-    }
-
-    @Test
-    @Order(4)
-    fun `finner utbetalingen med query for brukernotifkasjon`() {
-        val utbetaling =
-            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        utbetaling.shouldHaveSize(1)
     }
 
     @Test
@@ -200,24 +181,6 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(7)
-    fun `2 brukernotifkasjoner går ut når cronjobben kjøres`() {
-        val antall = brukernotifikasjonService.prosseserUtbetaling()
-        antall `should be equal to` 2
-
-        oppgaveKafkaConsumer.ventPåRecords(antall = 2)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
-    }
-
-    @Test
-    @Order(8)
-    fun `finner ikke lengre utbetalingen med query for brukernotifkasjon`() {
-        val utbetaling =
-            utbetalingRepository.findByLestIsNullAndBrukernotifikasjonSendtIsNullAndUtbetalingIdIsNotNullAndBrukernotifikasjonUtelattIsNull()
-        utbetaling.shouldBeEmpty()
-    }
-
-    @Test
-    @Order(9)
     fun `mottar en revurdering på revurderinga`() {
         val utbetalingsid = UUID.randomUUID().toString()
         kafkaProducer.send(
@@ -253,7 +216,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(10)
+    @Order(8)
     fun `finner vedtakene, to er revurdering, den ene revurderinga er selv blirrrevurdert `() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr).sortedBy { it.opprettetTimestamp }
         vedtak.shouldHaveSize(3)
