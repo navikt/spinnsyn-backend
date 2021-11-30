@@ -101,7 +101,7 @@ class VedtakService(
                         utbetalingsdager = utbetalingen.utbetalingsdager.map { it.tilRsUtbetalingsdag() },
                         utbetalingId = utbetalingen.utbetalingId,
                         arbeidsgiverOppdrag = utbetalingen.arbeidsgiverOppdrag?.tilRsOppdrag(),
-                        personOppdag = utbetalingen.personOppdrag?.tilRsOppdrag()
+                        personOppdrag = utbetalingen.personOppdrag?.tilRsOppdrag()
                     )
                 )
             )
@@ -194,7 +194,7 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
         }
         // Persondager med utbetaling
-        val dagerPerson = hentDager(rSVedtakWrapper.vedtak.utbetaling.personOppdag)
+        val dagerPerson = hentDager(rSVedtakWrapper.vedtak.utbetaling.personOppdrag)
 
         val stønadsdagerPerson = dagerPerson.filter {
             it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")

@@ -97,7 +97,7 @@ fun RetroRSVedtak.tilRSVedtakWrapper(): RSVedtakWrapper {
                 ),
                 utbetalingsdager = emptyList(),
                 utbetalingType = "UTBETALING",
-                personOppdag = null
+                personOppdrag = null
             )
         )
     )

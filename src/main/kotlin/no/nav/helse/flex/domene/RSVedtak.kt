@@ -46,7 +46,7 @@ data class RSUtbetalingUtbetalt(
     @JsonIgnore
     val arbeidsgiverOppdrag: RSOppdrag?,
     @JsonIgnore
-    val personOppdag: RSOppdrag?,
+    val personOppdrag: RSOppdrag?,
     val utbetalingsdager: List<RSUtbetalingdag>,
     val foreløpigBeregnetSluttPåSykepenger: LocalDate?,
     val utbetalingType: String,
