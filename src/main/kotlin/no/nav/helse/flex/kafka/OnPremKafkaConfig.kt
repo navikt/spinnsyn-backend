@@ -1,7 +1,7 @@
 package no.nav.helse.flex.kafka
 
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
+import io.confluent.kafka.serializers.KafkaAvroSerializerConfig
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
@@ -59,7 +59,7 @@ class OnPremKafkaConfig(
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = DefaultKafkaConsumerFactory(skapKafkaConsumerConfig())
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
-        factory.containerProperties.authorizationExceptionRetryInterval = Duration.ofSeconds(2)
+        factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofSeconds(2))
         factory.setErrorHandler(kafkaErrorHandler)
 
         return factory
@@ -86,7 +86,7 @@ class OnPremKafkaConfig(
                 keySerializer = KafkaAvroSerializer::class.java,
                 valueSerializer = KafkaAvroSerializer::class.java
             ) + mapOf(
-                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to kafkaSchemaRegistryUrl
+                KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG to kafkaSchemaRegistryUrl
             )
         )
 

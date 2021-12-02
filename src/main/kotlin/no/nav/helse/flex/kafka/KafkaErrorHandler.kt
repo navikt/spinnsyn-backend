@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.backoff.ExponentialBackOff
 
 @Component
+@Suppress("DEPRECATION")
 class KafkaErrorHandler : SeekToCurrentErrorHandler(
     null,
     ExponentialBackOff(1000L, 1.5).also {
