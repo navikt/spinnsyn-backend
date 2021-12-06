@@ -60,8 +60,7 @@ class OnPremKafkaConfig(
         factory.consumerFactory = DefaultKafkaConsumerFactory(skapKafkaConsumerConfig())
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofSeconds(2))
-        factory.setErrorHandler(kafkaErrorHandler)
-
+        factory.setCommonErrorHandler(kafkaErrorHandler)
         return factory
     }
 
