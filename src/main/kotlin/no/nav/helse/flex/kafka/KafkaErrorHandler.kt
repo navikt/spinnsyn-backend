@@ -3,7 +3,8 @@ package no.nav.helse.flex.kafka
 import no.nav.helse.flex.logger
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.kafka.listener.*
+import org.springframework.kafka.listener.DefaultErrorHandler
+import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
 import org.springframework.util.backoff.ExponentialBackOff
 

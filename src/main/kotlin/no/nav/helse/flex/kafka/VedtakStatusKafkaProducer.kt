@@ -23,7 +23,7 @@ class VedtakStatusKafkaProducer(
             ).get()
         } catch (e: Throwable) {
             log.error(
-                "Feil ved sending av vedtak status[id=${vedtakStatusDTO.id}] til [topic=$VEDTAK_STATUS_TOPIC].",
+                "Feil ved sending av vedtak status med id: ${vedtakStatusDTO.id} til topic: $VEDTAK_STATUS_TOPIC.",
                 e
             )
             throw e
