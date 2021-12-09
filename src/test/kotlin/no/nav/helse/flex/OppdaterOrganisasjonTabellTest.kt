@@ -48,6 +48,51 @@ class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
     }
 
     @Test
+    fun `Den andre av to like meldinger blir ikke prosessert`() {
+        organisasjonRepository.deleteAll()
+
+        val soknad = SykepengesoknadDTO(
+            fnr = "bla",
+            id = UUID.randomUUID().toString(),
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.NY,
+            fom = LocalDate.now().minusDays(1),
+            tom = LocalDate.now(),
+            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
+            arbeidsgiver = ArbeidsgiverDTO(navn = "Bedriften AS", orgnummer = "123456547")
+        )
+
+        organisasjonRepository.findByOrgnummer(soknad.arbeidsgiver!!.orgnummer!!).shouldBeNull()
+
+        // Send den første søknaden og vent på den.
+        sendSykepengesoknad(soknad)
+        await().atMost(10, TimeUnit.SECONDS).until {
+            organisasjonRepository.findByOrgnummer(soknad.arbeidsgiver!!.orgnummer!!) != null
+        }
+        val org = organisasjonRepository.findByOrgnummer(soknad.arbeidsgiver!!.orgnummer!!)!!
+
+        // Send en lik søknad
+        sendSykepengesoknad(soknad)
+
+        // Sender en tredje søknad som vi kan vente på for å være sikkert på at de to like søknadene blir prosessert.
+        val soknad2 = soknad.copy(
+            id = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                navn = "Bedriften AS Medssfdsdf nytt navn :)",
+                orgnummer = "0002"
+            )
+        )
+        sendSykepengesoknad(soknad2)
+        await().atMost(10, TimeUnit.SECONDS).until {
+            organisasjonRepository.findByOrgnummer(soknad2.arbeidsgiver!!.orgnummer!!) != null
+        }
+
+        // Verifiserer at opdpatert ikke har endret seg for den første søknaden.
+        val org2 = organisasjonRepository.findByOrgnummer(soknad.arbeidsgiver!!.orgnummer!!)!!
+        org2.oppdatert `should be equal to` org.oppdatert
+    }
+
+    @Test
     fun `Oppdaterer organisasjon hvis den finnes fra før`() {
         organisasjonRepository.deleteAll()
 
