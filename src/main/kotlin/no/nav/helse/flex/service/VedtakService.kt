@@ -168,7 +168,7 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             dager = dager
                 .map { dag ->
                     rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager
-                        .find { it.dato == dag.dato }
+                        ?.find { it.dato == dag.dato }
                         ?.let {
                             dag.copy(
                                 begrunnelser = it.begrunnelser,
