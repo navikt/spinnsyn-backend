@@ -158,9 +158,9 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].orgnavn `should be equal to` org
         vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
-        vedtak[0].vedtak.utbetaling.utbetalingsdager[0].dato `should be equal to` now
-        vedtak[0].vedtak.utbetaling.utbetalingsdager[0].type `should be equal to` "AvvistDag"
-        vedtak[0].vedtak.utbetaling.utbetalingsdager[0].begrunnelser[0] `should be equal to` "MinimumSykdomsgrad"
+        vedtak[0].dagerArbeidsgiver[0].dato `should be equal to` now
+        vedtak[0].dagerArbeidsgiver[0].dagtype `should be equal to` "AvvistDag"
+        vedtak[0].dagerArbeidsgiver[0].begrunnelser[0] `should be equal to` "MinimumSykdomsgrad"
 
         organisasjonRepository.save(
             Organisasjon(
