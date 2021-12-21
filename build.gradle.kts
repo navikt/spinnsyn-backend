@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.6.1"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.6.0"
-    kotlin("plugin.spring") version "1.6.0"
+    kotlin("plugin.spring") version "1.6.10"
+    kotlin("jvm") version "1.6.10"
 }
 
 group = "no.nav.helse.flex"
@@ -47,7 +47,7 @@ val testContainersVersion = "1.16.2"
 val logstashLogbackEncoderVersion = "7.0.1"
 val kluentVersion = "1.68"
 val brukernotifikasjonAvroVersion = "2.3.1"
-val confluentVersion = "7.0.0"
+val confluentVersion = "7.0.1"
 val tokenSupportVersion = "1.3.9"
 val syfoKafkaVersion = "2021.07.20-09.39-6be2c52c"
 
