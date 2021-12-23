@@ -1,0 +1,1 @@
+CREATE INDEX utbetaling_arkivert__retro_idx ON vedtak (arkivert);
