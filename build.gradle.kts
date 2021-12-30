@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.6.2"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
     kotlin("plugin.spring") version "1.6.10"
     kotlin("jvm") version "1.6.10"
 }
@@ -18,12 +19,7 @@ buildscript {
     repositories {
         maven("https://plugins.gradle.org/m2/")
     }
-    dependencies {
-        classpath("org.jlleitschuh.gradle:ktlint-gradle:10.2.1")
-    }
 }
-
-apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
 val githubUser: String by project
 val githubPassword: String by project

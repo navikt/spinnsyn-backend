@@ -1,18 +1,14 @@
 package no.nav.helse.flex.db
 
 import no.nav.helse.flex.domene.tilVedtakDto
-import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.OffsetDateTime
-import java.util.UUID
 
-@Transactional
 @Repository
 class VedtakDAO(
     private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
@@ -30,33 +26,6 @@ class VedtakDAO(
         ) { resultSet, _ ->
             resultSet.toVedtak()
         }
-    }
-
-    fun opprettVedtak(id: UUID, vedtak: String, fnr: String, opprettet: Instant): Vedtak {
-        val vedtakJSON = PGobject().also { it.type = "json"; it.value = vedtak }
-        val nå = Timestamp.from(Instant.now())
-
-        namedParameterJdbcTemplate.update(
-            """
-            INSERT INTO VEDTAK(id, fnr, vedtak, opprettet, varslet, revarslet, mottatt_etter_migrering) 
-            VALUES (:id, :fnr, :vedtak, :opprettet, :varslet, :revarslet, true)
-        """,
-            MapSqlParameterSource()
-                .addValue("id", id)
-                .addValue("fnr", fnr)
-                .addValue("vedtak", vedtakJSON)
-                .addValue("opprettet", Timestamp.from(opprettet))
-                .addValue("varslet", nå)
-                .addValue("revarslet", nå)
-        )
-
-        return Vedtak(
-            id = id.toString(),
-            vedtak = vedtak.tilVedtakDto(),
-            lest = false,
-            lestDato = null,
-            opprettet = opprettet
-        )
     }
 
     fun lesVedtak(fnr: String, vedtaksId: String): Boolean {
