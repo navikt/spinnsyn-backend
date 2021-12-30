@@ -14,11 +14,14 @@ import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.amshove.kluent.shouldBeEmpty
 import org.apache.kafka.clients.consumer.Consumer
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.web.client.MockRestServiceServer
@@ -57,6 +60,9 @@ abstract class AbstractContainerBaseTest {
 
     @Autowired
     lateinit var annulleringDAO: AnnulleringDAO
+
+    @Autowired
+    lateinit var jdbcTemplate: JdbcTemplate
 
     @Autowired
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate

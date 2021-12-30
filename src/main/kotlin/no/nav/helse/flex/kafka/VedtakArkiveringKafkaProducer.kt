@@ -1,28 +1,34 @@
 package no.nav.helse.flex.kafka
 
 import no.nav.helse.flex.logger
+import org.apache.kafka.clients.producer.Callback
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.clients.producer.RecordMetadata
 import org.springframework.stereotype.Component
 
 const val VEDTAK_ARKIVERING_TOPIC = "flex.vedtak-arkivering"
 
 @Component
 class VedtakArkiveringKafkaProducer(
-    private val producer: KafkaProducer<String, VedtakArkiveringDTO>
+    private val producer: KafkaProducer<String, ArkiveringDTO>
 ) {
 
     private val log = logger()
 
-    fun produserMelding(vedtakArkiveringDTO: VedtakArkiveringDTO): RecordMetadata {
+    fun produserMelding(arkiveringDTO: ArkiveringDTO) {
+        val callback = Callback { _, exception ->
+            if (exception != null) {
+                log.error("Feil ved produksjon av vedtak for arkivering med id: ${arkiveringDTO.id}", exception)
+            }
+        }
         try {
-            return producer.send(
-                ProducerRecord(VEDTAK_ARKIVERING_TOPIC, vedtakArkiveringDTO.id, vedtakArkiveringDTO)
-            ).get()
+            producer.send(
+                ProducerRecord(VEDTAK_ARKIVERING_TOPIC, arkiveringDTO.id, arkiveringDTO),
+                callback
+            )
         } catch (e: Throwable) {
             log.error(
-                "Feil ved sending av vedtak for arkivering med id: ${vedtakArkiveringDTO.id} til " +
+                "Feil ved sending av vedtak for arkivering med id: ${arkiveringDTO.id} til " +
                     "topic: $VEDTAK_ARKIVERING_TOPIC.",
                 e
             )
@@ -31,7 +37,7 @@ class VedtakArkiveringKafkaProducer(
     }
 }
 
-data class VedtakArkiveringDTO(
+data class ArkiveringDTO(
     val id: String,
     val fnr: String,
 )

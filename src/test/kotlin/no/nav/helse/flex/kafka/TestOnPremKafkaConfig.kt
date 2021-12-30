@@ -111,4 +111,13 @@ class TestOnPremKafkaConfig(
             StringDeserializer(),
         ).createConsumer()
     }
+
+    @Bean
+    fun arkiveringKafkaConsumer(): Consumer<String, String> {
+        return DefaultKafkaConsumerFactory(
+            testConsumerProps("arkivering-consumer"),
+            StringDeserializer(),
+            StringDeserializer(),
+        ).createConsumer()
+    }
 }
