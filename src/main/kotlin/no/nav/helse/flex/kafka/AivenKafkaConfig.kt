@@ -78,7 +78,7 @@ class AivenKafkaConfig(
     }
 
     @Bean
-    fun vedtakArkiveringProducer(): KafkaProducer<String, VedtakArkiveringDTO> {
+    fun vedtakArkiveringProducer(): KafkaProducer<String, ArkiveringDTO> {
         val kafkaConfig = mapOf(
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JacksonKafkaSerializer::class.java,
@@ -86,6 +86,6 @@ class AivenKafkaConfig(
             ProducerConfig.RETRIES_CONFIG to 10,
             ProducerConfig.RETRY_BACKOFF_MS_CONFIG to 100
         ) + commonConfig()
-        return KafkaProducer<String, VedtakArkiveringDTO>(kafkaConfig)
+        return KafkaProducer<String, ArkiveringDTO>(kafkaConfig)
     }
 }
