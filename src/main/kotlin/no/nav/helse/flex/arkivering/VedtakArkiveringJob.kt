@@ -14,6 +14,15 @@ class VedtakArkiveringJob(
 
     val log = logger()
 
+    @Scheduled(initialDelay = 60L, fixedDelay = 60L, timeUnit = TimeUnit.SECONDS)
+    fun testLeader() {
+        if (leaderElection.isLeader()) {
+            log.info("Test: Er leder.")
+        } else {
+            log.info("Test: Er ikke leader.")
+        }
+    }
+
     // @Scheduled(initialDelay = 60L, fixedDelay = 120L, timeUnit = TimeUnit.SECONDS)
     fun arkiverUtbetalinger() {
         if (leaderElection.isLeader()) {
@@ -25,7 +34,7 @@ class VedtakArkiveringJob(
         }
     }
 
-    @Scheduled(initialDelay = 60L, fixedDelay = 120L, timeUnit = TimeUnit.SECONDS)
+    // @Scheduled(initialDelay = 60L, fixedDelay = 120L, timeUnit = TimeUnit.SECONDS)
     fun arkiverRetroVedtak() {
         if (leaderElection.isLeader()) {
             try {
