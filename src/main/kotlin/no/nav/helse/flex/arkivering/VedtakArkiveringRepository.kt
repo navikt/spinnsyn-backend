@@ -18,7 +18,7 @@ class VedtakArkiveringRepository(
         val sql = """
             SELECT id, fnr
             FROM vedtak 
-            WHERE arkivert IS NOT NULL
+            WHERE arkivert IS FALSE
             LIMIT 100
             """
         return jdbcTemplate.query(sql, vedtakRowMapper)
@@ -41,7 +41,7 @@ class VedtakArkiveringRepository(
         val sql = """
             SELECT utbetaling_id AS id, fnr 
             FROM utbetaling 
-            WHERE arkivert IS NOT NULL
+            WHERE arkivert IS FALSE
             LIMIT 100
             """
         return jdbcTemplate.query(sql, vedtakRowMapper)

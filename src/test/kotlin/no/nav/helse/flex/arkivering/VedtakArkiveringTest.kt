@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.postgresql.util.PGobject
@@ -37,6 +38,7 @@ class VedtakArkiveringTest() : AbstractContainerBaseTest() {
     }
 
     @Test
+    @Order(1)
     fun `arkiverer retro vedtak`() {
         opprettRetroVedtak("uuid-1", "fnr-1")
         opprettRetroVedtak("uuid-2", "fnr-1")
@@ -57,6 +59,14 @@ class VedtakArkiveringTest() : AbstractContainerBaseTest() {
     }
 
     @Test
+    @Order(2)
+    fun `skal ikke finne flere retro vedtak`() {
+        vedtakArkiveringJob.arkiverRetroVedtak()
+        await().atMost(5, TimeUnit.SECONDS).until { arkiveringKafkaConsumer.ventPåRecords(0).isEmpty() }
+    }
+
+    @Test
+    @Order(3)
     fun `arkiverer utbetaling`() {
         opprettUtbetaling("uuid-1", "fnr-1")
         opprettUtbetaling("uuid-2", "fnr-1")
@@ -74,6 +84,13 @@ class VedtakArkiveringTest() : AbstractContainerBaseTest() {
         await().atMost(5, TimeUnit.SECONDS).until {
             tellArkiverteUtbetalinger() == 3
         }
+    }
+
+    @Test
+    @Order(4)
+    fun `skal ikke finne flere utbetalinger`() {
+        vedtakArkiveringJob.arkiverUtbetalinger()
+        await().atMost(5, TimeUnit.SECONDS).until { arkiveringKafkaConsumer.ventPåRecords(0).isEmpty() }
     }
 
     private fun <K, V> Consumer<K, V>.lyttPaaTopic(vararg topics: String) {
