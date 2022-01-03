@@ -19,6 +19,13 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: nais/topics/vedtak-status-topic.yaml
           VARS: nais/topics/dev.json
+      - name: Deploy topic vedtak-arkivering to dev-gcp
+        uses: nais/deploy/actions/deploy@master
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: nais/topics/vedtak-arkivering-topic.yaml
+          VARS: nais/topics/dev.json
 
   deploy-topic-to-prod:
     if: github.ref == 'refs/heads/master'
@@ -33,4 +40,11 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: nais/topics/vedtak-status-topic.yaml
+          VARS: nais/topics/prod.json
+      - name: Deploy topic vedtak-arkivering to prod-gcp
+        uses: nais/deploy/actions/deploy@master
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: nais/topics/vedtak-arkivering-topic.yaml
           VARS: nais/topics/prod.json
