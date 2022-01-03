@@ -2,9 +2,7 @@ package no.nav.helse.flex.arkivering
 
 import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.logger
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.util.concurrent.TimeUnit
 
 @Component
 class VedtakArkiveringJob(
@@ -13,15 +11,6 @@ class VedtakArkiveringJob(
 ) {
 
     val log = logger()
-
-    @Scheduled(initialDelay = 60L, fixedDelay = 60L, timeUnit = TimeUnit.SECONDS)
-    fun testLeader() {
-        if (leaderElection.isLeader()) {
-            log.info("Test: Er leder.")
-        } else {
-            log.info("Test: Er ikke leader.")
-        }
-    }
 
     // @Scheduled(initialDelay = 60L, fixedDelay = 120L, timeUnit = TimeUnit.SECONDS)
     fun arkiverUtbetalinger() {

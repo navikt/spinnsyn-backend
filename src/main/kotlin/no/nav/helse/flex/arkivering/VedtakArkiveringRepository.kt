@@ -4,10 +4,8 @@ import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.logger
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
-import java.util.concurrent.TimeUnit
 
 @Repository
 class VedtakArkiveringRepository(
@@ -17,25 +15,6 @@ class VedtakArkiveringRepository(
 ) {
 
     private val log = logger()
-
-    @Scheduled(initialDelay = 30L, fixedDelay = 180L, timeUnit = TimeUnit.SECONDS)
-    fun resetRetroVedtak() {
-        log.info("Kjører reset av arkiverte vedtak.")
-        if (leaderElection.isLeader()) {
-            log.info("Er leder, resetter arkiverte vedtak.")
-            try {
-                val sql = """
-                UPDATE vedtak    
-                SET arkivert = FALSE
-                """
-                jdbcTemplate.update(sql)
-            } catch (e: Exception) {
-                log.error("Feil ved reset av arkiverte retro vedtak: ", e)
-            }
-        } else {
-            log.info("Er ikke leader.")
-        }
-    }
 
     fun hent100RetroVedtak(): List<VedtakArkiveringDTO> {
         val sql = """
