@@ -2,7 +2,9 @@ package no.nav.helse.flex.arkivering
 
 import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.logger
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit
 
 @Component
 class VedtakArkiveringJob(
@@ -23,7 +25,7 @@ class VedtakArkiveringJob(
         }
     }
 
-    // @Scheduled(initialDelay = 60L, fixedDelay = 120L, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(initialDelay = 60L, fixedDelay = 120L, timeUnit = TimeUnit.SECONDS)
     fun arkiverRetroVedtak() {
         if (leaderElection.isLeader()) {
             try {
