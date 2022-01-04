@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-const val ARKIVERING_BATCH_SIZE = 50
+const val ARKIVERING_BATCH_SIZE = 100
 
 @Component
 class VedtakArkiveringJob(
@@ -27,7 +27,7 @@ class VedtakArkiveringJob(
         }
     }
 
-    @Scheduled(initialDelay = 120L, fixedDelay = 180L, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(initialDelay = 120L, fixedDelay = 120L, timeUnit = TimeUnit.SECONDS)
     fun arkiverRetroVedtak() {
         if (leaderElection.isLeader()) {
             try {
