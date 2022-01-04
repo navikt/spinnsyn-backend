@@ -19,5 +19,8 @@ spec:
     retentionHours: -1  # Messages will never be timed out
   acl:
     - team: flex
+      application: spinnsyn-backend
+      access: write
+    - team: flex
       application: spinnsyn-arkivering
       access: read
