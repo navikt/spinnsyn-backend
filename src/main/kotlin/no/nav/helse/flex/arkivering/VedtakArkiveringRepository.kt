@@ -1,27 +1,27 @@
 package no.nav.helse.flex.arkivering
 
 import no.nav.helse.flex.logger
-import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 
 @Repository
 class VedtakArkiveringRepository(
-    private val jdbcTemplate: JdbcTemplate,
     private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
 
     private val log = logger()
 
-    fun hent100RetroVedtak(): List<VedtakArkiveringDTO> {
+    fun hentRetroVedtak(batchSize: Int): List<VedtakArkiveringDTO> {
+        val params = MapSqlParameterSource("batchSize", batchSize)
         val sql = """
             SELECT id, fnr
             FROM vedtak 
             WHERE arkivert IS FALSE
-            LIMIT 100
+            LIMIT :batchSize
             """
-        return jdbcTemplate.query(sql, vedtakRowMapper)
+        return namedParameterJdbcTemplate.query(sql, params, vedtakRowMapper)
     }
 
     fun settRetroVedtakTilArkivert(vedtak: List<String>) {
@@ -37,14 +37,15 @@ class VedtakArkiveringRepository(
         log.info("Satt ${vedtak.size} retro vedtak til arkivert.")
     }
 
-    fun hent100Utbetalinger(): List<VedtakArkiveringDTO> {
+    fun hentUtbetalinger(batchSize: Int): List<VedtakArkiveringDTO> {
+        val params = MapSqlParameterSource("batchSize", batchSize)
         val sql = """
-            SELECT id id, fnr 
-            FROM utbetaling 
+            SELECT id, fnr
+            FROM utbetaling
             WHERE arkivert IS FALSE
-            LIMIT 100
+            LIMIT :batchSize
             """
-        return jdbcTemplate.query(sql, vedtakRowMapper)
+        return namedParameterJdbcTemplate.query(sql, params, vedtakRowMapper)
     }
 
     fun settUtbetalingerTilArkivert(vedtak: List<String>) {

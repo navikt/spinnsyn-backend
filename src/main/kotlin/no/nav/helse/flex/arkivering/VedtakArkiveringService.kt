@@ -13,16 +13,16 @@ class VedtakArkiveringService(
 
     val log = logger()
 
-    fun arkiverUtbetalinger() {
-        val utbetalinger = arkiveringRepository.hent100Utbetalinger()
+    fun arkiverUtbetalinger(batchSize: Int) {
+        val utbetalinger = arkiveringRepository.hentUtbetalinger(batchSize)
         utbetalinger.forEach { kafkaProducer.produserMelding(it.tilArkiveringDto()) }
 
         log.info("Sendt ${utbetalinger.size} utbetalinger til arkivering.")
         arkiveringRepository.settUtbetalingerTilArkivert(utbetalinger.map { it.id }.toList())
     }
 
-    fun arkiverRetroVedtak() {
-        val vedtak = arkiveringRepository.hent100RetroVedtak()
+    fun arkiverRetroVedtak(batchSize: Int) {
+        val vedtak = arkiveringRepository.hentRetroVedtak(batchSize)
         vedtak.forEach { kafkaProducer.produserMelding(it.tilArkiveringDto()) }
 
         log.info("Sendt ${vedtak.size} retro vedtak til arkivering.")
