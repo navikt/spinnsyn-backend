@@ -1,35 +1,16 @@
 package no.nav.helse.flex.arkivering
 
-import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.logger
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
-import java.util.concurrent.TimeUnit
 
 @Repository
 class VedtakArkiveringRepository(
     private val jdbcTemplate: JdbcTemplate,
     private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
-    val leaderElection: LeaderElection,
 ) {
-
-    @Scheduled(initialDelay = 120L, fixedDelay = 3600L, timeUnit = TimeUnit.SECONDS)
-    fun resetRetroVedtak() {
-        if (leaderElection.isLeader()) {
-            try {
-                val sql = """
-                UPDATE utbetaling    
-                SET arkivert = FALSE
-                """
-                jdbcTemplate.update(sql)
-            } catch (e: Exception) {
-                log.error("Feil ved reset av arkiverte retro vedtak: ", e)
-            }
-        }
-    }
 
     private val log = logger()
 
