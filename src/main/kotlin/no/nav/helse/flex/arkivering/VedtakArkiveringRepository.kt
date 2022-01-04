@@ -4,8 +4,10 @@ import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.logger
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
+import java.util.concurrent.TimeUnit
 
 @Repository
 class VedtakArkiveringRepository(
@@ -13,6 +15,21 @@ class VedtakArkiveringRepository(
     private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
     val leaderElection: LeaderElection,
 ) {
+
+    @Scheduled(initialDelay = 120L, fixedDelay = 3600L, timeUnit = TimeUnit.SECONDS)
+    fun resetRetroVedtak() {
+        if (leaderElection.isLeader()) {
+            try {
+                val sql = """
+                UPDATE utbetaling    
+                SET arkivert = FALSE
+                """
+                jdbcTemplate.update(sql)
+            } catch (e: Exception) {
+                log.error("Feil ved reset av arkiverte retro vedtak: ", e)
+            }
+        }
+    }
 
     private val log = logger()
 
@@ -41,7 +58,7 @@ class VedtakArkiveringRepository(
 
     fun hent100Utbetalinger(): List<VedtakArkiveringDTO> {
         val sql = """
-            SELECT utbetaling_id AS id, fnr 
+            SELECT id id, fnr 
             FROM utbetaling 
             WHERE arkivert IS FALSE
             LIMIT 100
@@ -53,7 +70,7 @@ class VedtakArkiveringRepository(
         val sql = """
             UPDATE utbetaling 
             SET arkivert = TRUE 
-            WHERE utbetaling_id = :id
+            WHERE id = :id
             """
 
         val utbetalingerSomArray = vedtak.map { id -> mapOf("id" to id) }.toTypedArray()
