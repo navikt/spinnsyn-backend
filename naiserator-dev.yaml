@@ -68,6 +68,8 @@ spec:
     - secret: spinnsyn-backend-serviceuser
     - configmap: loginservice-idporten
   env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "default,testdatareset"
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: SPINNSYN_FRONTEND_URL

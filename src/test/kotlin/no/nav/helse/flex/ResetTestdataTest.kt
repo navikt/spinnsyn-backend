@@ -1,42 +1,41 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.AnnulleringDto
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
+import no.nav.helse.flex.testdata.TESTDATA_RESET_TOPIC
 import org.amshove.kluent.`should be`
+import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldHaveSize
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.awaitility.Awaitility
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class TestdataControllerTest : AbstractContainerBaseTest() {
+class ResetTestdataTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    lateinit var kafkaProducer: KafkaProducer<String, String>
 
     val fnr = "234232323"
     val fom = LocalDate.now().minusDays(7)
     val tom = LocalDate.now()
     val orgnummer = "123"
     val utbetalingId = "239fj20j3f"
-
-    val annulleringDto = AnnulleringDto(
-        fødselsnummer = fnr,
-        orgnummer = orgnummer,
-        tidsstempel = LocalDateTime.now(),
-        fom = fom,
-        tom = tom
-    )
 
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
@@ -104,38 +103,12 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(3)
-    fun `Oppretter annullering`() {
-        mockMvc.perform(
-            post("/api/v1/testdata/annullering")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer ${loginserviceJwt(fnr)}")
-                .content(annulleringDto.serialisertTilString())
-        ).andExpect(status().is2xxSuccessful).andReturn()
-    }
-
-    @Test
-    @Order(4)
-    fun `Vi henter vedtaket som nå er annullert`() {
-        val vedtak = hentVedtakMedLoginserviceToken(fnr)
-
-        vedtak shouldHaveSize 1
-        vedtak.first().annullert `should be` true
-    }
-
-    @Test
-    @Order(5)
-    fun `Sletter vedtaket`() {
-        mockMvc.perform(
-            delete("/api/v1/testdata/vedtak")
-                .header("Authorization", "Bearer ${loginserviceJwt(fnr)}")
-        ).andExpect(status().is2xxSuccessful).andReturn()
-
-//        doneKafkaConsumer.ventPåRecords(antall = 1)
-    }
-
-    @Test
-    @Order(6)
-    fun `Vi har nå ingen vedtak`() {
-        hentVedtakMedLoginserviceToken(fnr) shouldHaveSize 0
+    fun `Resetter personen via kafka`() {
+        hentVedtakMedLoginserviceToken(fnr).shouldHaveSize(1)
+        kafkaProducer.send(ProducerRecord(TESTDATA_RESET_TOPIC, UUID.randomUUID().toString(), fnr)).get()
+        Awaitility.await().atMost(4, TimeUnit.SECONDS).until {
+            hentVedtakMedLoginserviceToken(fnr).isEmpty()
+        }
+        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
     }
 }
