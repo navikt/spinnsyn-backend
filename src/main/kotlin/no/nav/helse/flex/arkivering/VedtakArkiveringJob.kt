@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-const val ARKIVERING_BATCH_SIZE = 100
+const val ARKIVERING_BATCH_SIZE = 200
 
 @Component
 class VedtakArkiveringJob(
