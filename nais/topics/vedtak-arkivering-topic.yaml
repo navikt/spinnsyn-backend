@@ -13,7 +13,7 @@ spec:
   config:
     cleanupPolicy: delete
     minimumInSyncReplicas: 1
-    partitions: 3
+    partitions: 6
     replication: 3
     retentionBytes: -1  # Messages will never be deleted because of disk space
     retentionHours: -1  # Messages will never be timed out
