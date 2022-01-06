@@ -417,6 +417,52 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         statusDto.vedtakStatus `should be equal to` VedtakStatus.MOTATT
     }
 
+    @Test
+    @Order(400)
+    fun `vedtakWrapper der det er ingen dager hvor NAV har vært innvolvert`() {
+        kafkaProducer.send(
+            ProducerRecord(
+                UTBETALING_TOPIC,
+                null,
+                fnr,
+                utbetaling.copy(
+                    utbetalingId = "IngenAndreDager",
+                    antallVedtak = 1,
+                    utbetalingsdager = listOf(
+                        UtbetalingUtbetalt.UtbetalingdagDto(
+                            dato = now,
+                            type = "NavHelgDag",
+                            begrunnelser = emptyList(),
+                        )
+                    )
+                ).serialisertTilString()
+            )
+        ).get()
+
+        kafkaProducer.send(
+            ProducerRecord(
+                VEDTAK_TOPIC,
+                null,
+                fnr,
+                vedtak1.copy(
+                    utbetalingId = "IngenAndreDager"
+                ).serialisertTilString()
+            )
+        ).get()
+
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
+            vedtakStatusService.prosesserUtbetalinger() == 1
+        }
+
+        statusKafkaConsumer.ventPåRecords(1)
+
+        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+            it.utbetalingId == "IngenAndreDager"
+        }
+        utbetalingDbRecord.motattPublisert.shouldNotBeNull() // TODO: null
+        utbetalingDbRecord.skalVisesTilBruker `should be equal to` null // TODO: false
+    }
+
     private fun hentFrontendVedtak(utbetalingId: String) =
         hentVedtakMedLoginserviceToken(fnr)
             .filter { it.vedtak.utbetaling.utbetalingId == utbetalingId }

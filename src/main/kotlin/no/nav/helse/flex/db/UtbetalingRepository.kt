@@ -15,7 +15,7 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
 
     @Query(
         """
-        SELECT id
+        SELECT id, fnr
         FROM utbetaling utbetaling
         INNER JOIN (
             SELECT count(utbetaling_id) AS antall, utbetaling_id
@@ -23,10 +23,11 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
             GROUP BY utbetaling_id
         ) vedtak ON vedtak.utbetaling_id = utbetaling.utbetaling_id
         WHERE vedtak.antall = utbetaling.antall_vedtak
+        AND skal_vises_til_bruker IS NULL
         AND motatt_publisert IS NULL;
         """
     )
-    fun utbetalingerKlarTilVarsling(): List<String>
+    fun utbetalingerKlarTilVarsling(): List<IdOgFnr>
 
     @Modifying
     @Query(
@@ -39,6 +40,16 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         """
     )
     fun updateLestByFnrAndId(lest: Instant, fnr: String, id: String): Boolean
+
+    @Modifying
+    @Query(
+        """
+        UPDATE utbetaling
+        SET motatt_publisert = :motattPublisert, skal_vises_til_bruker = :skalVisesTilBruker
+        WHERE id = :id
+        """
+    )
+    fun settSkalVisesOgMotattPublisert(motattPublisert: Instant, skalVisesTilBruker: Boolean?, id: String): Boolean
 }
 
 @Table("utbetaling")
@@ -57,4 +68,9 @@ data class UtbetalingDbRecord(
     val varsletMed: String? = null,
     val motattPublisert: Instant? = null,
     val skalVisesTilBruker: Boolean? = null,
+)
+
+data class IdOgFnr(
+    val id: String,
+    val fnr: String,
 )
