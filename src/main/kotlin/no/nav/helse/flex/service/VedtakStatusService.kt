@@ -1,6 +1,7 @@
 package no.nav.helse.flex.service
 
 import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSDag
 import no.nav.helse.flex.domene.VedtakStatus
 import no.nav.helse.flex.domene.VedtakStatusDTO
@@ -13,6 +14,7 @@ import java.time.Instant
 @Service
 class VedtakStatusService(
     private val utbetalingRepository: UtbetalingRepository,
+    private val vedtakRepository: VedtakRepository,
     private val metrikk: Metrikk,
     private val vedtakStatusKafkaProducer: VedtakStatusKafkaProducer,
     private val vedtakService: VedtakService,
@@ -31,36 +33,53 @@ class VedtakStatusService(
     }
 
     fun prosesserUtbetalinger(): Int {
-        val utbetalingerIderOgFnr = utbetalingRepository.utbetalingerKlarTilVarsling()
+        val utbetalinger = utbetalingRepository.utbetalingerKlarTilVarsling()
+        if (utbetalinger.isEmpty()) return 0
+
+        val vedtakGruppert = vedtakRepository
+            .hentVedtakMedUtbetalingId(utbetalinger.map { it.utbetalingId })
+            .groupBy { it }
+            .map { it.key to it.value.size }
+
+        val utbetalingerMedAlleVedtak = utbetalinger.filter { utbetaling ->
+            vedtakGruppert
+                .find {
+                    it.first == utbetaling.utbetalingId &&
+                        it.second == utbetaling.antallVedtak
+                } != null
+        }
+
         var sendt = 0
 
-        utbetalingerIderOgFnr.forEach { (dbId, fnr) ->
-            vedtakService
-                .hentVedtak(fnr)
-                .first { it.id == dbId }
+        utbetalingerMedAlleVedtak.forEach { ut ->
+            val fnr = ut.fnr
+            val id = ut.id
+
+            vedtakService.hentVedtak(fnr)
+                .first { it.id == id }
                 .run {
                     val alleDager = dagerArbeidsgiver + dagerPerson
 
                     // TODO: Sett skalVisesTilBruker til false, og gå videre til neste utbetaling
                     if (alleDager.all(erHelg)) {
-                        log.info("Utbetaling $dbId inneholder bare NavHelgDag")
+                        log.info("Utbetaling $id inneholder bare NavHelgDag")
                     }
 
                     if (alleDager.all(erAgPeriode)) {
-                        log.info("Utbetaling $dbId inneholder bare ArbeidsgiverperiodeDag")
+                        log.info("Utbetaling $id inneholder bare ArbeidsgiverperiodeDag")
                     }
 
                     if (alleDager.all(erArbeid)) {
-                        log.info("Utbetaling $dbId inneholder bare Arbeidsdag")
+                        log.info("Utbetaling $id inneholder bare Arbeidsdag")
                     }
 
                     if (alleDager.ingenAndreDager()) {
-                        log.info("Utbetaling $dbId inneholder bare dager der NAV ikke er innvolvert")
+                        log.info("Utbetaling $id inneholder bare dager der NAV ikke er innvolvert")
                     }
 
                     vedtakStatusKafkaProducer.produserMelding(
                         VedtakStatusDTO(
-                            id = dbId,
+                            id = id,
                             fnr = fnr,
                             vedtakStatus = VedtakStatus.MOTATT
                         )
@@ -68,7 +87,7 @@ class VedtakStatusService(
                     utbetalingRepository.settSkalVisesOgMotattPublisert(
                         motattPublisert = Instant.now(),
                         skalVisesTilBruker = null, // TODO: Sett til true når vi vet at denne skal vises
-                        id = dbId,
+                        id = id,
                     )
 
                     metrikk.STATUS_MOTATT.increment()
