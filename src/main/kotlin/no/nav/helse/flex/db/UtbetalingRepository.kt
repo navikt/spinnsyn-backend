@@ -56,4 +56,5 @@ data class UtbetalingDbRecord(
     val brukernotifikasjonUtelatt: Instant? = null,
     val varsletMed: String? = null,
     val motattPublisert: Instant? = null,
+    val skalVisesTilBruker: Boolean? = null,
 )
