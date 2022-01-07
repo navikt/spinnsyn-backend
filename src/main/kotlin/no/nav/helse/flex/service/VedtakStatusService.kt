@@ -52,8 +52,9 @@ class VedtakStatusService(
         var sendt = 0
 
         utbetalingerMedAlleVedtak.forEach { ut ->
-            val fnr = ut.fnr
             val id = ut.id
+            val fnr = ut.fnr
+            val utbetalingId = ut.utbetalingId
 
             vedtakService.hentVedtak(fnr)
                 .first { it.id == id }
@@ -62,19 +63,19 @@ class VedtakStatusService(
 
                     // TODO: Sett skalVisesTilBruker til false, og gå videre til neste utbetaling
                     if (alleDager.all(erHelg)) {
-                        log.info("Utbetaling $id inneholder bare NavHelgDag")
+                        log.info("Utbetaling $utbetalingId inneholder bare NavHelgDag")
                     }
 
                     if (alleDager.all(erAgPeriode)) {
-                        log.info("Utbetaling $id inneholder bare ArbeidsgiverperiodeDag")
+                        log.info("Utbetaling $utbetalingId inneholder bare ArbeidsgiverperiodeDag")
                     }
 
                     if (alleDager.all(erArbeid)) {
-                        log.info("Utbetaling $id inneholder bare Arbeidsdag")
+                        log.info("Utbetaling $utbetalingId inneholder bare Arbeidsdag")
                     }
 
                     if (alleDager.ingenAndreDager()) {
-                        log.info("Utbetaling $id inneholder bare dager der NAV ikke er innvolvert")
+                        log.info("Utbetaling $utbetalingId inneholder bare dager der NAV ikke er innvolvert")
                     }
 
                     vedtakStatusKafkaProducer.produserMelding(
