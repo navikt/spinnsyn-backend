@@ -53,4 +53,15 @@ class MetrikkTest : AbstractContainerBaseTest() {
         val counter = mottattVedtak.first { !it.startsWith("#") }
         assertThat(counter).isEqualTo("mottatt_vedtak_counter_total 2.0")
     }
+
+    @Test
+    fun `4 - teller og legger til tag`() {
+        metrikk.skalIkkeVises("ikkeSyk").increment()
+
+        val skalIkkeVises = mockMvc.metrikker().filter { it.contains("skal_ikke_vises_counter") }
+        assertThat(skalIkkeVises).hasSize(3)
+
+        val counter = skalIkkeVises.first { !it.startsWith("#") }
+        assertThat(counter).isEqualTo("""skal_ikke_vises_counter_total{grunn="ikkeSyk",} 1.0""")
+    }
 }

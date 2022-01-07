@@ -43,7 +43,7 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         WHERE id = :id
         """
     )
-    fun settSkalVisesOgMotattPublisert(motattPublisert: Instant, skalVisesTilBruker: Boolean?, id: String): Boolean
+    fun settSkalVisesOgMotattPublisert(motattPublisert: Instant?, skalVisesTilBruker: Boolean?, id: String): Boolean
 }
 
 @Table("utbetaling")

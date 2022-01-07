@@ -10,6 +10,7 @@ import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.service.VedtakStatusService
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeEmpty
+import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldHaveSize
 import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.Consumer
@@ -449,16 +450,17 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakStatusService.prosesserUtbetalinger() == 1
+            utbetalingRepository.existsByUtbetalingId("IngenAndreDager") &&
+                vedtakRepository.existsByUtbetalingId("IngenAndreDager")
         }
 
-        statusKafkaConsumer.ventPåRecords(1)
+        vedtakStatusService.prosesserUtbetalinger()
 
         val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
             it.utbetalingId == "IngenAndreDager"
         }
-        utbetalingDbRecord.motattPublisert.shouldNotBeNull() // TODO: null
-        utbetalingDbRecord.skalVisesTilBruker `should be equal to` null // TODO: false
+        utbetalingDbRecord.motattPublisert.shouldBeNull()
+        utbetalingDbRecord.skalVisesTilBruker `should be equal to` false
     }
 
     private fun hentFrontendVedtak(utbetalingId: String) =

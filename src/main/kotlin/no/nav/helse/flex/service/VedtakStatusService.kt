@@ -61,21 +61,28 @@ class VedtakStatusService(
                 .run {
                     val alleDager = dagerArbeidsgiver + dagerPerson
 
-                    // TODO: Sett skalVisesTilBruker til false, og gå videre til neste utbetaling
                     if (alleDager.all(erHelg)) {
                         log.info("Utbetaling $utbetalingId inneholder bare NavHelgDag")
+                        skalIkkeVises(id, "NavHelgDag")
+                        return@run
                     }
 
                     if (alleDager.all(erAgPeriode)) {
                         log.info("Utbetaling $utbetalingId inneholder bare ArbeidsgiverperiodeDag")
+                        skalIkkeVises(id, "ArbeidsgiverperiodeDag")
+                        return@run
                     }
 
                     if (alleDager.all(erArbeid)) {
                         log.info("Utbetaling $utbetalingId inneholder bare Arbeidsdag")
+                        skalIkkeVises(id, "Arbeidsdag")
+                        return@run
                     }
 
                     if (alleDager.ingenAndreDager()) {
                         log.info("Utbetaling $utbetalingId inneholder bare dager der NAV ikke er involvert")
+                        skalIkkeVises(id, "IngenAndreDager")
+                        return@run
                     }
 
                     vedtakStatusKafkaProducer.produserMelding(
@@ -87,7 +94,7 @@ class VedtakStatusService(
                     )
                     utbetalingRepository.settSkalVisesOgMotattPublisert(
                         motattPublisert = Instant.now(),
-                        skalVisesTilBruker = null, // TODO: Sett til true når vi vet at denne skal vises
+                        skalVisesTilBruker = true,
                         id = id,
                     )
 
@@ -96,9 +103,16 @@ class VedtakStatusService(
                 }
         }
 
-        if (sendt != 0) {
-            log.info("Sendte motatt status for $sendt vedtak")
-        }
+        if (sendt != 0) log.info("Sendte motatt status for $sendt vedtak")
         return sendt
+    }
+
+    private fun skalIkkeVises(id: String, grunn: String) {
+        utbetalingRepository.settSkalVisesOgMotattPublisert(
+            skalVisesTilBruker = false,
+            motattPublisert = null,
+            id = id,
+        )
+        metrikk.skalIkkeVises(grunn).increment()
     }
 }

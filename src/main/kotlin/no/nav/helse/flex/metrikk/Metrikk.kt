@@ -1,10 +1,13 @@
 package no.nav.helse.flex.metrikk
 
 import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Tags
 import org.springframework.stereotype.Component
 
 @Component
 class Metrikk(registry: MeterRegistry) {
+
+    val reg = registry
 
     val MOTTATT_VEDTAK = registry.counter(
         "mottatt_vedtak_counter"
@@ -28,5 +31,10 @@ class Metrikk(registry: MeterRegistry) {
 
     val STATUS_MOTATT = registry.counter(
         "status_motatt_counter"
+    )
+
+    fun skalIkkeVises(grunn: String) = reg.counter(
+        "skal_ikke_vises_counter",
+        Tags.of("grunn", grunn)
     )
 }

@@ -10,6 +10,7 @@ import java.time.Instant
 @Repository
 interface VedtakRepository : CrudRepository<VedtakDbRecord, String> {
     fun findVedtakDbRecordsByFnr(fnr: String): List<VedtakDbRecord>
+    fun existsByUtbetalingId(utbetalingId: String): Boolean
 
     @Query(
         """
