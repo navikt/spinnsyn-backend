@@ -13,7 +13,8 @@ spring:
     password: ${NAIS_DATABASE_SPINNSYN_BACKEND_SPINNSYN_DB_PASSWORD}
     hikari:
       minimum-idle: 1
-      maximum-pool-size: 3
+      maximum-pool-size: 5
+      connection-timeout: 60000
 
 on-prem-kafka:
   schema-registry-url: ${KAFKA_SCHEMA_REGISTRY_URL}
