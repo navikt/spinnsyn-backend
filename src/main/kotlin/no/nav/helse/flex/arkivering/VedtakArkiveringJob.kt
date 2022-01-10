@@ -27,7 +27,7 @@ class VedtakArkiveringJob(
         }
     }
 
-    @Scheduled(initialDelay = 120L, fixedDelay = 60L, timeUnit = TimeUnit.SECONDS)
+    //  @Scheduled(initialDelay = 120L, fixedDelay = 60L, timeUnit = TimeUnit.SECONDS)
     fun arkiverRetroVedtak() {
         if (leaderElection.isLeader()) {
             try {
