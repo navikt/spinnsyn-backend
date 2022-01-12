@@ -1,7 +1,5 @@
 package no.nav.helse.flex.service
 
-import no.nav.brukernotifikasjon.schemas.Done
-import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.helse.flex.api.AbstractApiError
 import no.nav.helse.flex.api.LogLevel
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
@@ -29,7 +27,7 @@ class LesVedtakService(
 ) {
 
     fun lesVedtak(fnr: String, vedtaksId: String): String {
-        val (lesUtbetaling, varsletMed) = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
+        val (lesUtbetaling, _) = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
         val lestGammeltVedtak = lesGammeltVedtak(fnr = fnr, vedtaksId = vedtaksId)
 
         if (lestGammeltVedtak == IKKE_FUNNET && lesUtbetaling == IKKE_FUNNET) {
@@ -44,10 +42,6 @@ class LesVedtakService(
             return "Leste vedtak $vedtaksId"
         }
 
-        if (lesUtbetaling == LEST) {
-            sendDoneMelding(fnr, varsletMed!!)
-        }
-
         vedtakStatusProducer.produserMelding(
             VedtakStatusDTO(fnr = fnr, id = vedtaksId, vedtakStatus = VedtakStatus.LEST)
         )
@@ -59,14 +53,6 @@ class LesVedtakService(
         )
 
         return "Leste vedtak $vedtaksId"
-    }
-
-    private fun sendDoneMelding(fnr: String, id: String) {
-        brukernotifikasjonKafkaProdusent.sendDonemelding(
-            Nokkel(serviceuserUsername, id),
-            Done(Instant.now().toEpochMilli(), fnr, id)
-        )
-        metrikk.VEDTAK_LEST.increment()
     }
 
     private fun lesUtbetaling(fnr: String, utbetalingsId: String): Pair<LesResultat, String?> {

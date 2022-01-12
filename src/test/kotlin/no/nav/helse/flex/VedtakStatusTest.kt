@@ -324,8 +324,6 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         statudDto.id `should be equal to` vedtaksId
         statudDto.fnr `should be equal to` fnr
         statudDto.vedtakStatus `should be equal to` VedtakStatus.LEST
-
-        doneKafkaConsumer.ventPåRecords(antall = 1)
     }
 
     @Test
@@ -419,7 +417,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(400)
-    fun `vedtakWrapper der det er ingen dager hvor NAV har vært innvolvert`() {
+    fun `vedtakWrapper der det er ingen dager hvor NAV har vært involvert`() {
         kafkaProducer.send(
             ProducerRecord(
                 UTBETALING_TOPIC,

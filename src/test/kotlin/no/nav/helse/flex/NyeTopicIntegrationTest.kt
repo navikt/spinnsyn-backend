@@ -1,12 +1,23 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.domene.AnnulleringDto
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
+import no.nav.helse.flex.domene.VedtakFattetForEksternDto
+import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
+import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.Organisasjon
-import org.amshove.kluent.*
+import org.amshove.kluent.`should be`
+import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should be false`
+import org.amshove.kluent.`should be true`
+import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.shouldBeEmpty
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -263,15 +274,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
 
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
-
-        val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
-        dones.shouldHaveSize(1)
-
-        val nokkel = dones[0].key()
-        nokkel.getEventId() `should be equal to` vedtaksId
-
-        val done = dones[0].value()
-        done.getFodselsnummer() `should be equal to` fnr
 
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first().lest.`should not be null`()
     }
