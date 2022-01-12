@@ -16,7 +16,7 @@ class DoneUlesteVedtakJob(
 
     val log = logger()
 
-    @Scheduled(initialDelay = 120L, fixedDelay = 10L, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(initialDelay = 120L, fixedDelay = 5L, timeUnit = TimeUnit.SECONDS)
     fun doneUlesteVedtak() {
         if (leaderElection.isLeader()) {
             try {
