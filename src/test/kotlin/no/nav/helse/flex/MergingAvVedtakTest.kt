@@ -215,56 +215,8 @@ class MergingAvVedtakTest : AbstractContainerBaseTest() {
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
 
-        val doned = doneKafkaConsumer.ventPåRecords(antall = 1)
-        doned.shouldHaveSize(1)
-
-        val nokkel = doned[0].key()
-        nokkel.getEventId() `should be equal to` vedtaksId
-
-        val done = doned[0].value()
-        done.getFodselsnummer() `should be equal to` fnr
-
         val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtaksId }
         utbetalingDbRecord.lest.`should not be null`()
         utbetalingDbRecord.varsletMed.`should be equal to`(vedtaksId)
-    }
-
-    @Test
-    @Order(11)
-    fun `verdi i varslet_med feltet brukes til Done-melding`() {
-        val vedtakMedUtbetalingId = hentVedtakMedLoginserviceToken(fnr).first()
-        val vedtakVarselId = vedtakRepository
-            .findVedtakDbRecordsByFnr(fnr)
-            .filter { it.utbetalingId == vedtakMedUtbetalingId.vedtak.utbetaling.utbetalingId }
-            .sortedBy { it.id }
-            .first()
-
-        utbetalingRepository.save(
-            utbetalingRepository
-                .findById(vedtakMedUtbetalingId.id)
-                .get()
-                .copy(
-                    lest = null,
-                    varsletMed = vedtakVarselId.id
-                )
-        )
-
-        lesVedtakMedTokenXToken(fnr, vedtakMedUtbetalingId.id) `should be equal to` "Leste vedtak ${vedtakMedUtbetalingId.id}"
-        lesVedtakMedTokenXToken(
-            fnr,
-            vedtakMedUtbetalingId.id
-        ) `should be equal to` "Vedtak ${vedtakMedUtbetalingId.id} er allerede lest"
-
-        val doned = doneKafkaConsumer.ventPåRecords(antall = 1)
-        doned.shouldHaveSize(1)
-
-        val nokkel = doned[0].key()
-        nokkel.getEventId() `should be equal to` vedtakVarselId.id
-
-        val done = doned[0].value()
-        done.getFodselsnummer() `should be equal to` fnr
-
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtakMedUtbetalingId.id }
-        utbetalingDbRecord.lest.`should not be null`()
     }
 }

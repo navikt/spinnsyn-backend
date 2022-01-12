@@ -75,7 +75,7 @@ class VedtakStatusService(
                     }
 
                     if (alleDager.ingenAndreDager()) {
-                        log.info("Utbetaling $utbetalingId inneholder bare dager der NAV ikke er innvolvert")
+                        log.info("Utbetaling $utbetalingId inneholder bare dager der NAV ikke er involvert")
                     }
 
                     vedtakStatusKafkaProducer.produserMelding(
