@@ -15,6 +15,7 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 5
       connection-timeout: 60000
+      max-lifetime: 600000
 
 on-prem-kafka:
   schema-registry-url: ${KAFKA_SCHEMA_REGISTRY_URL}
