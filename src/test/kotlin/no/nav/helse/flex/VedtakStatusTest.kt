@@ -406,6 +406,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         }
         utbetalingDbRecord.shouldNotBeNull()
         utbetalingDbRecord.antallVedtak `should be equal to` 2
+        utbetalingDbRecord.skalVisesTilBruker `should be equal to` true
 
         val crStatus = kafkameldinger.first()
         crStatus.key() `should be equal to` utbetalingDbRecord.id
@@ -425,12 +426,12 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 utbetaling.copy(
-                    utbetalingId = "IngenAndreDager",
+                    utbetalingId = "Arbeidsgiverperiode",
                     antallVedtak = 1,
                     utbetalingsdager = listOf(
                         UtbetalingUtbetalt.UtbetalingdagDto(
                             dato = now,
-                            type = "NavHelgDag",
+                            type = "ArbeidsgiverperiodeDag",
                             begrunnelser = emptyList(),
                         )
                     )
@@ -444,20 +445,20 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak1.copy(
-                    utbetalingId = "IngenAndreDager"
+                    utbetalingId = "Arbeidsgiverperiode"
                 ).serialisertTilString()
             )
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            utbetalingRepository.existsByUtbetalingId("IngenAndreDager") &&
-                vedtakRepository.existsByUtbetalingId("IngenAndreDager")
+            utbetalingRepository.existsByUtbetalingId("Arbeidsgiverperiode") &&
+                vedtakRepository.existsByUtbetalingId("Arbeidsgiverperiode")
         }
 
         vedtakStatusService.prosesserUtbetalinger()
 
         val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
-            it.utbetalingId == "IngenAndreDager"
+            it.utbetalingId == "Arbeidsgiverperiode"
         }
         utbetalingDbRecord.motattPublisert.shouldBeNull()
         utbetalingDbRecord.skalVisesTilBruker `should be equal to` false
