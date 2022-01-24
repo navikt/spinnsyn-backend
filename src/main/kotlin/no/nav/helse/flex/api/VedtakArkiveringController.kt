@@ -20,9 +20,15 @@ class VedtakArkiveringController(
     @ProtectedWithClaims(issuer = "azureator")
     fun hentVedtak(@RequestHeader fnr: String): List<RSVedtakWrapper> {
         clientIdValidation.validateClientId(
-            NamespaceAndApp(
-                namespace = "flex",
-                app = "spinnsyn-frontend-arkivering"
+            listOf(
+                NamespaceAndApp(
+                    namespace = "flex",
+                    app = "spinnsyn-frontend-arkivering"
+                ),
+                NamespaceAndApp(
+                    namespace = "flex",
+                    app = "spinnsyn-arkivering"
+                ),
             )
         )
 
