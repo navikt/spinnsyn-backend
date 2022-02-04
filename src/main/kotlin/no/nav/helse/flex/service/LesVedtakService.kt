@@ -2,14 +2,14 @@ package no.nav.helse.flex.service
 
 import no.nav.helse.flex.api.AbstractApiError
 import no.nav.helse.flex.api.LogLevel
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
-import no.nav.helse.flex.db.*
+import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.domene.VedtakStatus
 import no.nav.helse.flex.domene.VedtakStatusDTO
 import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
-import no.nav.helse.flex.metrikk.Metrikk
-import no.nav.helse.flex.service.LesVedtakService.LesResultat.*
-import org.springframework.beans.factory.annotation.Value
+import no.nav.helse.flex.service.LesVedtakService.LesResultat.ALDRI_SENDT_BRUKERNOTIFIKASJON
+import no.nav.helse.flex.service.LesVedtakService.LesResultat.ALLEREDE_LEST
+import no.nav.helse.flex.service.LesVedtakService.LesResultat.IKKE_FUNNET
+import no.nav.helse.flex.service.LesVedtakService.LesResultat.LEST
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,28 +18,19 @@ import java.time.Instant
 @Service
 @Transactional
 class LesVedtakService(
-    private val vedtakDAO: VedtakDAO,
-    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
-    private val metrikk: Metrikk,
     private val utbetalingRepository: UtbetalingRepository,
     private val vedtakStatusProducer: VedtakStatusKafkaProducer,
-    @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
 ) {
 
     fun lesVedtak(fnr: String, vedtaksId: String): String {
         val (lesUtbetaling, _) = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
-        val lestGammeltVedtak = lesGammeltVedtak(fnr = fnr, vedtaksId = vedtaksId)
 
-        if (lestGammeltVedtak == IKKE_FUNNET && lesUtbetaling == IKKE_FUNNET) {
+        if (lesUtbetaling == IKKE_FUNNET) {
             throw VedtakIkkeFunnetException(vedtaksId)
         }
 
-        if (lestGammeltVedtak == ALLEREDE_LEST || lesUtbetaling == ALLEREDE_LEST) {
+        if (lesUtbetaling == ALLEREDE_LEST) {
             return "Vedtak $vedtaksId er allerede lest"
-        }
-
-        if (lestGammeltVedtak == LEST) {
-            return "Leste vedtak $vedtaksId"
         }
 
         vedtakStatusProducer.produserMelding(
@@ -70,18 +61,6 @@ class LesVedtakService(
         }
 
         return LEST to utbetalingDbRecord.varsletMed
-    }
-
-    private fun lesGammeltVedtak(fnr: String, vedtaksId: String): LesResultat {
-        if (vedtakDAO.finnVedtak(fnr).none { it.id == vedtaksId }) {
-            return IKKE_FUNNET
-        }
-
-        if (vedtakDAO.lesVedtak(fnr, vedtaksId)) {
-            return LEST
-        }
-
-        return ALLEREDE_LEST
     }
 
     enum class LesResultat {

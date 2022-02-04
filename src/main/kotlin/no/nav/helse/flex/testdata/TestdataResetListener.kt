@@ -22,7 +22,7 @@ class TestdataResetListener(val vedtakNullstillService: VedtakNullstillService) 
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         val fnr = cr.value()
         val antall = vedtakNullstillService.nullstill(fnr)
-        log.info("Slettet $antall vedtak på fnr $fnr - Key ${cr.key()}")
+        log.info("Slettet $antall utbetalinger og tilhørende vedtak tilhørende fnr: $fnr - Key ${cr.key()}.")
         acknowledgment.acknowledge()
     }
 }

@@ -1,52 +1,33 @@
 package no.nav.helse.flex.service
 
-import no.nav.brukernotifikasjon.schemas.Done
-import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
-import no.nav.helse.flex.db.VedtakDAO
 import no.nav.helse.flex.db.VedtakRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.time.Instant
 
 @Service
 class VedtakNullstillService(
-    private val vedtakDAO: VedtakDAO,
     private val annulleringDAO: AnnulleringDAO,
     private val environmentToggles: EnvironmentToggles,
     private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
 
-    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
 ) {
     fun nullstill(fnr: String): Int {
         if (environmentToggles.isProduction()) {
-            throw IllegalStateException("Kan ikke nullstille i produksjon")
+            throw IllegalStateException("Kan ikke nullstille i produksjon.")
         }
-        val vedtak = vedtakDAO.finnVedtak(fnr)
-        vedtak.forEach {
-            if (!it.lest) {
-                // Fjern brukernotifikasjonen
-                brukernotifikasjonKafkaProdusent.sendDonemelding(
-                    Nokkel(serviceuserUsername, it.id),
-                    Done(Instant.now().toEpochMilli(), fnr, it.id)
-                )
-            }
-            vedtakDAO.slettVedtak(vedtakId = it.id, fnr = fnr)
-        }
-
         annulleringDAO.slettAnnulleringer(fnr)
 
-        val vedtakV2 = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
-        vedtakRepository.deleteAll(vedtakV2)
+        val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
+        vedtakRepository.deleteAll(vedtak)
 
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
         utbetalingRepository.deleteAll(utbetalinger)
 
-        return vedtak.size + vedtakV2.size
+        return utbetalinger.size
     }
 }

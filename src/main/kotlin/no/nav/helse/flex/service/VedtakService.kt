@@ -1,7 +1,23 @@
 package no.nav.helse.flex.service
 
-import no.nav.helse.flex.db.*
-import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.db.Annullering
+import no.nav.helse.flex.db.AnnulleringDAO
+import no.nav.helse.flex.db.UtbetalingDbRecord
+import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.db.VedtakDbRecord
+import no.nav.helse.flex.db.VedtakRepository
+import no.nav.helse.flex.domene.PeriodeImpl
+import no.nav.helse.flex.domene.RSDag
+import no.nav.helse.flex.domene.RSOppdrag
+import no.nav.helse.flex.domene.RSUtbetalingUtbetalt
+import no.nav.helse.flex.domene.RSUtbetalingdag
+import no.nav.helse.flex.domene.RSUtbetalingslinje
+import no.nav.helse.flex.domene.RSVedtak
+import no.nav.helse.flex.domene.RSVedtakWrapper
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
+import no.nav.helse.flex.domene.VedtakFattetForEksternDto
+import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
+import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.organisasjon.LeggTilOrganisasjonnavn
 import org.springframework.stereotype.Service
@@ -13,7 +29,6 @@ import java.time.ZoneId
 class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
-    private val retroVedtakService: RetroVedtakService,
     private val annulleringDAO: AnnulleringDAO,
     private val leggTilOrganisasjonavn: LeggTilOrganisasjonnavn,
 ) {
@@ -21,21 +36,11 @@ class VedtakService(
     val log = logger()
 
     fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
-        val retroVedtak = retroVedtakService.hentVedtak(fnr)
-
-        val nyeVedtak = hentVedtakFraNyeTabeller(fnr)
-
-        val alleVedtak = ArrayList<RSVedtakWrapper>()
-            .also {
-                it.addAll(retroVedtak)
-                it.addAll(nyeVedtak)
-            }
+        return finnAlleVedtak(fnr)
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
             .leggTilOrgnavn()
             .leggTilArbeidsgivere()
-
-        return alleVedtak
     }
 
     private fun List<RSVedtakWrapper>.leggTilOrgnavn(): List<RSVedtakWrapper> {
@@ -46,7 +51,7 @@ class VedtakService(
         return leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
     }
 
-    private fun hentVedtakFraNyeTabeller(fnr: String): List<RSVedtakWrapper> {
+    private fun finnAlleVedtak(fnr: String): List<RSVedtakWrapper> {
         val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
