@@ -2,8 +2,7 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.service.LesVedtakService
-import no.nav.helse.flex.service.VedtakService
+import no.nav.helse.flex.service.BrukerVedtak
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
@@ -20,14 +19,13 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 @RequestMapping("/api/v3")
 class VedtakTokenXController(
-    val vedtakService: VedtakService,
+    val vedtakService: BrukerVedtak,
     val tokenValidationContextHolder: TokenValidationContextHolder,
-    val lesVedtakService: LesVedtakService,
+    val brukerVedtak: BrukerVedtak,
     @Value("\${SPINNSYN_FRONTEND_CLIENT_ID}")
     val spinnsynFrontendClientId: String,
     @Value("\${SPINNSYN_FRONTEND_TOKENX_IDP}")
     val spinnsynFrontendTokenxIdp: String,
-
 ) {
     val log = logger()
 
@@ -44,7 +42,7 @@ class VedtakTokenXController(
     @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
         val fnr = validerTokenXClaims().fnrFraIdportenTokenX()
-        return lesVedtakService.lesVedtak(fnr, vedtaksId)
+        return brukerVedtak.lesVedtak(fnr, vedtaksId)
     }
 
     private fun validerTokenXClaims(): JwtTokenClaims {

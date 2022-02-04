@@ -1,10 +1,10 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.service.MottaUtbetalingService
-import no.nav.helse.flex.service.MottaVedtakService
+import no.nav.helse.flex.service.MottaUtbetaling
+import no.nav.helse.flex.service.MottaVedtak
+import no.nav.helse.flex.service.NullstillVedtak
 import no.nav.helse.flex.service.RetroMottaVedtakService
-import no.nav.helse.flex.service.VedtakNullstillService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.http.MediaType
@@ -23,10 +23,10 @@ import java.util.*
 class VedtakTestdataController(
     val retroMottaVedtakService: RetroMottaVedtakService,
     val environmentToggles: EnvironmentToggles,
-    val vedtakNullstillService: VedtakNullstillService,
+    val nullstillVedtak: NullstillVedtak,
     val tokenValidationContextHolder: TokenValidationContextHolder,
-    val mottaVedtakService: MottaVedtakService,
-    val mottaUtbetalingService: MottaUtbetalingService,
+    val mottaVedtak: MottaVedtak,
+    val mottaUtbetaling: MottaUtbetaling,
 ) {
     data class VedtakV2(val vedtak: String, val utbetaling: String?)
 
@@ -43,14 +43,14 @@ class VedtakTestdataController(
         }
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
 
-        mottaVedtakService.mottaVedtak(
+        mottaVedtak.mottaVedtak(
             fnr = fnr,
             vedtak = vedtakV2.vedtak,
             timestamp = Instant.now(),
         )
 
         if (vedtakV2.utbetaling != null) {
-            mottaUtbetalingService.mottaUtbetaling(
+            mottaUtbetaling.mottaUtbetaling(
                 fnr = fnr,
                 utbetaling = vedtakV2.utbetaling,
                 opprettet = Instant.now()
@@ -99,7 +99,7 @@ class VedtakTestdataController(
         }
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
 
-        val antall = vedtakNullstillService.nullstill(fnr)
+        val antall = nullstillVedtak.nullstill(fnr)
         return "Slettet $antall utbetalinger og tilhørende vedtak tilhørende fnr: $fnr."
     }
 }

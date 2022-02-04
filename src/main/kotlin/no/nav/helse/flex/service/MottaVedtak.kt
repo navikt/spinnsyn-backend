@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class MottaVedtakService(
+class MottaVedtak(
     private val vedtakRepository: VedtakRepository,
     private val metrikk: Metrikk,
 ) {

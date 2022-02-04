@@ -1,7 +1,7 @@
 package no.nav.helse.flex.service
 
 import no.nav.helse.flex.domene.RSDag
-import no.nav.helse.flex.service.VedtakStatusService.Companion.sjekkDager
+import no.nav.helse.flex.service.SendVedtakStatus.Companion.sjekkDager
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

@@ -4,7 +4,7 @@ import no.nav.helse.flex.client.SyfoTilgangskontrollOboClient
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation.NamespaceAndApp
 import no.nav.helse.flex.domene.RSVedtakWrapper
-import no.nav.helse.flex.service.VedtakService
+import no.nav.helse.flex.service.BrukerVedtak
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*
 @Controller
 class VedtakVeilederAadV4Controller(
     private val clientIdValidation: ClientIdValidation,
-    private val vedtakService: VedtakService,
+    private val vedtakService: BrukerVedtak,
     private val syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient,
 ) {
 

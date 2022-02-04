@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class VedtakStatusService(
+class SendVedtakStatus(
     private val utbetalingRepository: UtbetalingRepository,
     private val vedtakRepository: VedtakRepository,
     private val metrikk: Metrikk,
     private val vedtakStatusKafkaProducer: VedtakStatusKafkaProducer,
-    private val vedtakService: VedtakService,
+    private val vedtakService: BrukerVedtak,
 ) {
 
     private val log = logger()

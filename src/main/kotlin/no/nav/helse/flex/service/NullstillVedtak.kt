@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
-class VedtakNullstillService(
+class NullstillVedtak(
     private val annulleringDAO: AnnulleringDAO,
     private val environmentToggles: EnvironmentToggles,
     private val vedtakRepository: VedtakRepository,

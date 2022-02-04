@@ -1,7 +1,7 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.service.VedtakNullstillService
+import no.nav.helse.flex.service.NullstillVedtak
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("testdatareset")
-class TestdataResetListener(val vedtakNullstillService: VedtakNullstillService) {
+class TestdataResetListener(val nullstillVedtak: NullstillVedtak) {
 
     val log = logger()
 
@@ -21,7 +21,7 @@ class TestdataResetListener(val vedtakNullstillService: VedtakNullstillService) 
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         val fnr = cr.value()
-        val antall = vedtakNullstillService.nullstill(fnr)
+        val antall = nullstillVedtak.nullstill(fnr)
         log.info("Slettet $antall utbetalinger og tilhørende vedtak tilhørende fnr: $fnr - Key ${cr.key()}.")
         acknowledgment.acknowledge()
     }

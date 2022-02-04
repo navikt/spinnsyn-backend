@@ -1,7 +1,7 @@
 package no.nav.helse.flex.kafka
 
 import no.nav.helse.flex.kafka.ConsumerStoppedEventExt.restart
-import no.nav.helse.flex.service.MottaVedtakService
+import no.nav.helse.flex.service.MottaVedtak
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
@@ -13,7 +13,7 @@ const val VEDTAK_TOPIC = "tbd.vedtak"
 
 @Component
 class VedtakKafkaListener(
-    private val mottaVedtakService: MottaVedtakService
+    private val mottaVedtak: MottaVedtak
 ) {
 
     @KafkaListener(
@@ -21,7 +21,7 @@ class VedtakKafkaListener(
         containerFactory = "aivenKafkaListenerContainerFactory"
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        mottaVedtakService.handterMelding(cr)
+        mottaVedtak.handterMelding(cr)
         acknowledgment.acknowledge()
     }
 
