@@ -27,7 +27,7 @@ import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class MergingAvVedtakTest : AbstractContainerBaseTest() {
+class LesVedtakTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
