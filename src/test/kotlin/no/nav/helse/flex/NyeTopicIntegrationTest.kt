@@ -247,21 +247,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Order(6)
-    fun `oppdaterer utbetaling med verdi for feltet varslet_med`() {
-        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-            .first()
-            .let {
-                utbetalingRepository.save(
-                    it.copy(
-                        brukernotifikasjonSendt = Instant.now(),
-                        varsletMed = it.id
-                    )
-                )
-            }
-    }
-
-    @Test
     @Order(7)
     fun `bruker leser vedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
@@ -298,7 +283,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(9)
-    fun `finner vedtaket i v2 hvor det nå er annullert`() {
+    fun `finner det nå annulerte vedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be true`()
@@ -307,7 +292,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(10)
     fun `mottar ett vedtak med null som utbetalingId`() {
-
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(1)
 
         kafkaProducer.send(
@@ -346,7 +330,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(12)
     fun `duplikat av det første vedtaket blir ikke lagret som nytt vedtak`() {
-
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(3)
 
         kafkaProducer.send(

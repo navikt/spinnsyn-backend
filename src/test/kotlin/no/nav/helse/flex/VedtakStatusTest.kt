@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -296,21 +295,6 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(203)
-    fun `oppdaterer utbetaling med verdi for feltet varslet_med`() {
-        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-            .first { it.utbetalingId == "UtbetalingFørst" }
-            .let {
-                utbetalingRepository.save(
-                    it.copy(
-                        brukernotifikasjonSendt = Instant.now(),
-                        varsletMed = it.id
-                    )
-                )
-            }
-    }
-
-    @Test
-    @Order(204)
     fun `bruker leser vedtaket`() {
         val vedtaket = hentFrontendVedtak("UtbetalingFørst")
         val vedtaksId = vedtaket.id
