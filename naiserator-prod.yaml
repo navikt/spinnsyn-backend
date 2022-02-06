@@ -56,7 +56,6 @@ spec:
         - application: flex-gateway
         - application: flex-intern-gateway
         - application: spinnsyn-frontend-arkivering
-        - application: spinnsyn-arkivering
         - application: spinnsyn-frontend-interne
         - application: spinnsyn-frontend
         - application: syfomodiaperson
