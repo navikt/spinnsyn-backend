@@ -1,9 +1,6 @@
 package no.nav.helse.flex
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.brukernotifikasjon.schemas.Done
-import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.helse.flex.brukernotifkasjon.DONE_TOPIC
 import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
@@ -12,10 +9,7 @@ import no.nav.helse.flex.organisasjon.OrganisasjonRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.amshove.kluent.shouldBeEmpty
-import org.apache.kafka.clients.consumer.Consumer
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -144,24 +138,9 @@ abstract class AbstractContainerBaseTest {
         return json
     }
 
-    @Autowired
-    lateinit var doneKafkaConsumer: Consumer<Nokkel, Done>
-
-    @BeforeAll
-    fun `verifiser at Kafka-topic for Done-meldinger er tomt før alle tester har kjørt`() {
-        doneKafkaConsumer.subscribeHvisIkkeSubscribed(DONE_TOPIC)
-
-        doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
-    }
-
-    @AfterAll
-    fun `verifiser at Kafka-topic for Done-meldinger er tomt etter at alle tester har kjørt`() {
-        doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
-    }
-
     companion object {
         init {
-            PostgreSQLContainer11().also {
+            PostgreSQLContainer("postgres:11.4-alpine").also {
                 it.start()
                 System.setProperty("spring.datasource.url", it.jdbcUrl)
                 System.setProperty("spring.datasource.username", it.username)

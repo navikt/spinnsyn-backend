@@ -1,14 +1,14 @@
 package no.nav.helse.flex.cronjob
 
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.service.VedtakStatusService
+import no.nav.helse.flex.service.SendVedtakStatus
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
 class VedtakStatusJob(
     val leaderElection: LeaderElection,
-    val vedtakStatusService: VedtakStatusService,
+    val vedtakStatusService: SendVedtakStatus,
 ) {
     val log = logger()
 

@@ -1,17 +1,20 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.logger
-import no.nav.helse.flex.service.MottaUtbetalingService
-import no.nav.helse.flex.service.MottaVedtakService
+import no.nav.helse.flex.service.MottaUtbetaling
+import no.nav.helse.flex.service.MottaVedtak
+import no.nav.helse.flex.service.NullstillVedtak
 import no.nav.helse.flex.service.RetroMottaVedtakService
-import no.nav.helse.flex.service.VedtakNullstillService
-import no.nav.helse.flex.service.VedtakStatusService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseBody
 import java.time.Instant
 import java.util.*
 
@@ -20,13 +23,11 @@ import java.util.*
 class VedtakTestdataController(
     val retroMottaVedtakService: RetroMottaVedtakService,
     val environmentToggles: EnvironmentToggles,
-    val vedtakNullstillService: VedtakNullstillService,
-    val mottaVedtakService: MottaVedtakService,
+    val nullstillVedtak: NullstillVedtak,
     val tokenValidationContextHolder: TokenValidationContextHolder,
-    val mottaUtbetalingService: MottaUtbetalingService,
-    val vedtakStatusService: VedtakStatusService
+    val mottaVedtak: MottaVedtak,
+    val mottaUtbetaling: MottaUtbetaling,
 ) {
-    private val log = logger()
     data class VedtakV2(val vedtak: String, val utbetaling: String?)
 
     @PostMapping(
@@ -42,14 +43,14 @@ class VedtakTestdataController(
         }
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
 
-        mottaVedtakService.mottaVedtak(
+        mottaVedtak.mottaVedtak(
             fnr = fnr,
             vedtak = vedtakV2.vedtak,
             timestamp = Instant.now(),
         )
 
         if (vedtakV2.utbetaling != null) {
-            mottaUtbetalingService.mottaUtbetaling(
+            mottaUtbetaling.mottaUtbetaling(
                 fnr = fnr,
                 utbetaling = vedtakV2.utbetaling,
                 opprettet = Instant.now()
@@ -92,14 +93,13 @@ class VedtakTestdataController(
     @DeleteMapping("/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
-
     fun slettVedtak(): String {
         if (environmentToggles.isProduction()) {
             throw IllegalStateException("Dette apiet er ikke på i produksjon")
         }
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
 
-        val antall = vedtakNullstillService.nullstill(fnr)
-        return "Slettet $antall vedtak på $fnr"
+        val antall = nullstillVedtak.nullstill(fnr)
+        return "Slettet $antall utbetalinger og tilhørende vedtak tilhørende fnr: $fnr."
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.helse.flex.kafka
 
 import no.nav.helse.flex.kafka.ConsumerStoppedEventExt.restart
-import no.nav.helse.flex.service.MottaUtbetalingService
+import no.nav.helse.flex.service.MottaUtbetaling
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
@@ -13,7 +13,7 @@ const val UTBETALING_TOPIC = "tbd.utbetaling"
 
 @Component
 class UtbetalingKafkaListener(
-    private val mottaUtbetalingService: MottaUtbetalingService
+    private val mottaUtbetaling: MottaUtbetaling
 ) {
 
     @KafkaListener(
@@ -21,7 +21,7 @@ class UtbetalingKafkaListener(
         containerFactory = "aivenKafkaListenerContainerFactory"
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        mottaUtbetalingService.handterMelding(cr)
+        mottaUtbetaling.handterMelding(cr)
         acknowledgment.acknowledge()
     }
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class MottaUtbetalingService(
+class MottaUtbetaling(
     private val utbetalingRepository: UtbetalingRepository,
     private val metrikk: Metrikk,
 ) {

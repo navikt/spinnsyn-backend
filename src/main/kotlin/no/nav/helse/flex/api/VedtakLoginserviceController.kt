@@ -1,8 +1,7 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.domene.RSVedtakWrapper
-import no.nav.helse.flex.service.LesVedtakService
-import no.nav.helse.flex.service.VedtakService
+import no.nav.helse.flex.service.BrukerVedtak
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -16,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 @RequestMapping("/api/v2")
 class VedtakLoginserviceController(
-    val vedtakService: VedtakService,
+    val vedtakService: BrukerVedtak,
     val tokenValidationContextHolder: TokenValidationContextHolder,
-    val lesVedtakService: LesVedtakService
+    val brukerVedtak: BrukerVedtak
 ) {
 
     @GetMapping("/vedtak", produces = [APPLICATION_JSON_VALUE])
@@ -34,7 +33,7 @@ class VedtakLoginserviceController(
     @ProtectedWithClaims(issuer = "loginservice", claimMap = ["acr=Level4"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
-        return lesVedtakService.lesVedtak(fnr, vedtaksId)
+        return brukerVedtak.lesVedtak(fnr, vedtaksId)
     }
 }
 

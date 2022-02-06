@@ -7,7 +7,7 @@ import no.nav.helse.flex.domene.tilVedtakStatusDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_STATUS_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.service.VedtakStatusService
+import no.nav.helse.flex.service.SendVedtakStatus
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeNull
@@ -37,7 +37,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
     lateinit var statusKafkaConsumer: Consumer<String, String>
 
     @Autowired
-    lateinit var vedtakStatusService: VedtakStatusService
+    lateinit var vedtakStatusService: SendVedtakStatus
 
     final val fnr = "1233342"
     final val aktørId = "321"
