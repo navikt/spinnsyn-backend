@@ -3,7 +3,7 @@ package no.nav.helse.flex.domene
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.objectMapper
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class VedtakDto(
     val fom: LocalDate,
