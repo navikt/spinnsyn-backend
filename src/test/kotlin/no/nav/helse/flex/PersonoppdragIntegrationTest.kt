@@ -1,10 +1,18 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
+import no.nav.helse.flex.domene.VedtakFattetForEksternDto
+import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
+import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import org.amshove.kluent.*
+import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should be false`
+import org.amshove.kluent.shouldBeEmpty
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeNull
+import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -29,15 +37,15 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     final val fnr = "1233342"
     final val aktørId = "321"
     final val org = "987123129"
-    final val now = LocalDate.now()
+    final val ukedag = LocalDate.of(2022, 2, 1)
     val utbetalingId = "168465"
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
         organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        skjæringstidspunkt = now,
+        fom = ukedag,
+        tom = ukedag,
+        skjæringstidspunkt = ukedag,
         dokumenter = emptyList(),
         inntekt = 0.0,
         sykepengegrunnlag = 0.0,
@@ -51,8 +59,8 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         fødselsnummer = fnr,
         aktørId = aktørId,
         organisasjonsnummer = org,
-        fom = now,
-        tom = now,
+        fom = ukedag,
+        tom = ukedag,
         utbetalingId = utbetalingId,
         antallVedtak = 1,
         event = "eventet",
@@ -68,8 +76,8 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
             utbetalingslinjer = listOf(
                 UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto(
                     dagsats = 123,
-                    fom = now,
-                    tom = now,
+                    fom = ukedag,
+                    tom = ukedag,
                     grad = 100.0,
                     stønadsdager = 1,
                     totalbeløp = 123
@@ -79,7 +87,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         type = "UTBETALING",
         utbetalingsdager = listOf(
             UtbetalingdagDto(
-                dato = now,
+                dato = ukedag,
                 type = "NavDag",
                 begrunnelser = emptyList()
             )
@@ -137,7 +145,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(4)
-    fun `finner vedtaket i v2`() {
+    fun `finner vedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
@@ -155,6 +163,6 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].dagerArbeidsgiver.shouldBeEmpty()
         vedtak[0].dagerPerson.shouldHaveSize(1)
         vedtak[0].dagerPerson[0].dagtype `should be equal to` "NavDagSyk"
-        vedtak[0].dagerPerson[0].dato `should be equal to` now
+        vedtak[0].dagerPerson[0].dato `should be equal to` ukedag
     }
 }
