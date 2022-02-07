@@ -8,6 +8,7 @@ metadata:
   annotations:
     dcat.data.nav.no/title: "flex.vedtak-arkivering"
     dcat.data.nav.no/description: "Midlertidig topic for arkivering av uarkiverte vedtak"
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
 spec:
   pool: {{kafkaPool}}
   config:
