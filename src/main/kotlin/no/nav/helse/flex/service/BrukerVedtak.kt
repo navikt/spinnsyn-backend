@@ -25,7 +25,6 @@ import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.organisasjon.LeggTilOrganisasjonnavn
-import no.nav.helse.flex.retro.RetroVedtakService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
@@ -40,7 +39,6 @@ class BrukerVedtak(
     private val annulleringDAO: AnnulleringDAO,
     private val leggTilOrganisasjonavn: LeggTilOrganisasjonnavn,
     private val vedtakStatusProducer: VedtakStatusKafkaProducer,
-    private val retroVedtakService: RetroVedtakService,
 ) {
 
     val log = logger()
@@ -60,20 +58,11 @@ class BrukerVedtak(
     )
 
     fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
-        val retroVedtak = retroVedtakService.hentVedtak(fnr)
-        val nyeVedtak = finnAlleVedtak(fnr)
-
-        val alleVedtak = ArrayList<RSVedtakWrapper>()
-            .also {
-                it.addAll(retroVedtak)
-                it.addAll(nyeVedtak)
-            }
+        return finnAlleVedtak(fnr)
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
             .leggTilOrgnavn()
             .leggTilArbeidsgivere()
-
-        return alleVedtak
     }
 
     fun lesVedtak(fnr: String, vedtaksId: String): String {
