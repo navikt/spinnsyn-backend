@@ -25,10 +25,6 @@ class VedtakArkiveringController(
                     namespace = "flex",
                     app = "spinnsyn-frontend-arkivering"
                 ),
-                NamespaceAndApp(
-                    namespace = "flex",
-                    app = "spinnsyn-arkivering"
-                ),
             )
         )
 
