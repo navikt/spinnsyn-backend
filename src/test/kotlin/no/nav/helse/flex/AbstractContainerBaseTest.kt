@@ -160,7 +160,6 @@ abstract class AbstractContainerBaseTest {
         utbetalingRepository.deleteAll()
         vedtakRepository.deleteAll()
         namedParameterJdbcTemplate.update("DELETE FROM ANNULLERING", MapSqlParameterSource())
-        namedParameterJdbcTemplate.update("DELETE FROM VEDTAK", MapSqlParameterSource())
     }
 
     fun tokenxToken(
