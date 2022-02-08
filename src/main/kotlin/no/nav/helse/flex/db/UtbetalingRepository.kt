@@ -57,9 +57,6 @@ data class UtbetalingDbRecord(
     val utbetalingType: String,
     val antallVedtak: Int,
     val lest: Instant? = null,
-    val brukernotifikasjonSendt: Instant? = null,
-    val brukernotifikasjonUtelatt: Instant? = null,
-    val varsletMed: String? = null,
     val motattPublisert: Instant? = null,
     val skalVisesTilBruker: Boolean? = null,
 )

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -177,7 +176,7 @@ class LesVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(8)
-    fun `finner merget brukervedtak`() {
+    fun `finner brukervedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
@@ -189,21 +188,6 @@ class LesVedtakTest : AbstractContainerBaseTest() {
 
     @Test
     @Order(9)
-    fun `oppdaterer utbetaling med verdi for feltet varslet_med`() {
-        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-            .first()
-            .let {
-                utbetalingRepository.save(
-                    it.copy(
-                        brukernotifikasjonSendt = Instant.now(),
-                        varsletMed = it.id
-                    )
-                )
-            }
-    }
-
-    @Test
-    @Order(10)
     fun `bruker leser vedtaket`() {
         val vedtak = hentVedtakMedLoginserviceToken(fnr)
 
@@ -217,6 +201,5 @@ class LesVedtakTest : AbstractContainerBaseTest() {
 
         val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtaksId }
         utbetalingDbRecord.lest.`should not be null`()
-        utbetalingDbRecord.varsletMed.`should be equal to`(vedtaksId)
     }
 }

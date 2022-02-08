@@ -66,7 +66,7 @@ class BrukerVedtak(
     }
 
     fun lesVedtak(fnr: String, vedtaksId: String): String {
-        val (lesUtbetaling, _) = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
+        val lesUtbetaling = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
 
         if (lesUtbetaling == LesResultat.IKKE_FUNNET) {
             throw VedtakIkkeFunnetException(vedtaksId)
@@ -89,21 +89,17 @@ class BrukerVedtak(
         return "Leste vedtak $vedtaksId"
     }
 
-    private fun lesUtbetaling(fnr: String, utbetalingsId: String): Pair<LesResultat, String?> {
+    private fun lesUtbetaling(fnr: String, utbetalingsId: String): LesResultat {
         val utbetalingDbRecord = utbetalingRepository
             .findUtbetalingDbRecordsByFnr(fnr)
             .find { it.id == utbetalingsId }
-            ?: return LesResultat.IKKE_FUNNET to null
+            ?: return LesResultat.IKKE_FUNNET
 
         if (utbetalingDbRecord.lest != null) {
-            return LesResultat.ALLEREDE_LEST to null
+            return LesResultat.ALLEREDE_LEST
         }
 
-        if (utbetalingDbRecord.brukernotifikasjonSendt == null) {
-            return LesResultat.ALDRI_SENDT_BRUKERNOTIFIKASJON to null
-        }
-
-        return LesResultat.LEST to utbetalingDbRecord.varsletMed
+        return LesResultat.LEST
     }
 
     private fun List<RSVedtakWrapper>.leggTilOrgnavn(): List<RSVedtakWrapper> {
