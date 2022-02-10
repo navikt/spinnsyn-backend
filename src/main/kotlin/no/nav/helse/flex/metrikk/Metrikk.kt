@@ -33,6 +33,10 @@ class Metrikk(registry: MeterRegistry) {
         "status_motatt_counter"
     )
 
+    val SKAL_VISES_TIL_BRUKER = registry.counter(
+        "skal_vises_til_bruker"
+    )
+
     fun skalIkkeVises(grunn: String) = reg.counter(
         "skal_ikke_vises_counter",
         Tags.of("grunn", grunn)
