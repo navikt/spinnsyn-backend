@@ -2,6 +2,7 @@ package no.nav.helse.flex
 
 import no.nav.helse.flex.domene.AnnulleringDto
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
+import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
@@ -76,7 +77,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
             UtbetalingUtbetalt.UtbetalingdagDto(
                 dato = fom,
                 type = "AvvistDag",
-                begrunnelser = listOf("MinimumSykdomsgrad")
+                begrunnelser = listOf(MinimumSykdomsgrad)
             )
         )
     )

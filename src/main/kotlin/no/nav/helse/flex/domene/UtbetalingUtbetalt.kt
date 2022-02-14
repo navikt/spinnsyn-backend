@@ -43,8 +43,22 @@ data class UtbetalingUtbetalt(
     data class UtbetalingdagDto(
         val dato: LocalDate,
         val type: String,
-        val begrunnelser: List<String>,
-    )
+        val begrunnelser: List<Begrunnelse>,
+    ) {
+        @Suppress("unused")
+        enum class Begrunnelse {
+            SykepengedagerOppbrukt,
+            SykepengedagerOppbruktOver67,
+            MinimumInntekt,
+            MinimumInntektOver67,
+            EgenmeldingUtenforArbeidsgiverperiode,
+            MinimumSykdomsgrad,
+            ManglerOpptjening,
+            ManglerMedlemskap,
+            Over70,
+            EtterDødsdato,
+        }
+    }
 }
 
 fun String.tilUtbetalingUtbetalt(): UtbetalingUtbetalt = objectMapper.readValue(this)
