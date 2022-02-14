@@ -326,6 +326,6 @@ private fun UtbetalingUtbetalt.UtbetalingdagDto.tilRsUtbetalingsdag(): RSUtbetal
     return RSUtbetalingdag(
         dato = this.dato,
         type = this.type,
-        begrunnelser = this.begrunnelser
+        begrunnelser = this.begrunnelser.map { it.toString() }
     )
 }

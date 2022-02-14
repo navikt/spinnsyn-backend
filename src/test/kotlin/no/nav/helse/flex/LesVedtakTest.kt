@@ -2,6 +2,7 @@ package no.nav.helse.flex
 
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
+import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
@@ -97,7 +98,7 @@ class LesVedtakTest : AbstractContainerBaseTest() {
             UtbetalingdagDto(
                 dato = now,
                 type = "AvvistDag",
-                begrunnelser = listOf("MinimumSykdomsgrad")
+                begrunnelser = listOf(MinimumSykdomsgrad)
             )
         )
     )
