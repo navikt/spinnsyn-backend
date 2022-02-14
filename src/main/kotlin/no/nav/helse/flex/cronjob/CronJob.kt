@@ -5,6 +5,7 @@ import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit.SECONDS
 
 @Component
 class CronJob(
@@ -14,7 +15,7 @@ class CronJob(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 1000L * 60 * 3, fixedDelay = 1000L)
+    @Scheduled(initialDelay = 60 * 3, fixedDelay = 1, timeUnit = SECONDS)
     fun run(): Int {
         var behandlet = 0
 
