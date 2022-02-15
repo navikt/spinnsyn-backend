@@ -11,7 +11,7 @@ plugins {
 group = "no.nav.helse.flex"
 version = "1.0.0"
 description = "spinnsyn-backend"
-java.sourceCompatibility = JavaVersion.VERSION_16
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 ext["okhttp3.version"] = "4.9.0" // For at token support testen kjører
 
@@ -39,11 +39,11 @@ repositories {
     }
 }
 
-val testContainersVersion = "1.16.2"
+val testContainersVersion = "1.16.3"
 val logstashLogbackEncoderVersion = "7.0.1"
 val kluentVersion = "1.68"
-val tokenSupportVersion = "1.3.9"
-val syfoKafkaVersion = "2021.07.20-09.39-6be2c52c"
+val tokenSupportVersion = "1.3.10"
+val sykepengesoknadKafkaVersion = "2022.02.10-16.07-0892e94a"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
@@ -63,7 +63,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
-    implementation("no.nav.syfo.kafka:felles:$syfoKafkaVersion")
+    implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
 
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -80,7 +80,7 @@ tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "16"
+        jvmTarget = "17"
         if (System.getenv("CI") == "true") {
             kotlinOptions.allWarningsAsErrors = true
         }
