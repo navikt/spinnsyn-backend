@@ -1,7 +1,8 @@
 package no.nav.helse.flex.organisasjon
 
 import no.nav.helse.flex.logger
-import no.nav.syfo.kafka.felles.SykepengesoknadDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -13,7 +14,7 @@ class OrganisasjonOppdatering(
     val log = logger()
 
     fun handterSoknad(soknad: SykepengesoknadDTO) {
-        if (soknad.harArbeidsgiver()) {
+        if (soknad.harArbeidsgiver() && soknad.erIkkeUtgått()) {
             val orgnummer = soknad.arbeidsgiver!!.orgnummer!!
             val navn = soknad.arbeidsgiver!!.navn!!
             val eksisterende = organisasjonRepository.findByOrgnummer(orgnummer)
@@ -60,4 +61,8 @@ class OrganisasjonOppdatering(
 
 private fun SykepengesoknadDTO.harArbeidsgiver(): Boolean {
     return this.arbeidsgiver?.orgnummer?.isNotBlank() ?: false && this.arbeidsgiver?.navn?.isNotBlank() ?: false
+}
+
+private fun SykepengesoknadDTO.erIkkeUtgått(): Boolean {
+    return this.status != SoknadsstatusDTO.UTGAATT
 }

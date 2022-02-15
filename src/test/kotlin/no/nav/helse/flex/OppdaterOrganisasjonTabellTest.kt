@@ -1,7 +1,7 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.kafka.FLEX_SYKEPENGESOKNAD_TOPIC
-import no.nav.syfo.kafka.felles.*
+import no.nav.helse.flex.sykepengesoknad.kafka.*
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeNull
 import org.apache.kafka.clients.producer.Producer
