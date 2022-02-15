@@ -6,6 +6,7 @@ import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.organisasjon.OrganisasjonRepository
+import no.nav.helse.flex.service.SendVedtakStatus
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.web.client.MockRestServiceServer
@@ -56,13 +56,13 @@ abstract class AbstractContainerBaseTest {
     lateinit var annulleringDAO: AnnulleringDAO
 
     @Autowired
-    lateinit var jdbcTemplate: JdbcTemplate
-
-    @Autowired
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
     @Autowired
     lateinit var syfotilgangskontrollRestTemplate: RestTemplate
+
+    @Autowired
+    lateinit var sendVedtakStatus: SendVedtakStatus
 
     var syfotilgangskontrollMockRestServiceServer: MockRestServiceServer? = null
 
@@ -77,6 +77,8 @@ abstract class AbstractContainerBaseTest {
     fun loginserviceJwt(fnr: String) = server.token(subject = fnr)
 
     fun hentVedtakMedLoginserviceToken(fnr: String): List<RSVedtakWrapper> {
+        settUtbetalingKlarTilVisning()
+
         val json = mockMvc.perform(
             get("/api/v2/vedtak")
                 .header("Authorization", "Bearer ${loginserviceJwt(fnr)}")
@@ -87,6 +89,8 @@ abstract class AbstractContainerBaseTest {
     }
 
     fun hentVedtakMedTokenXToken(fnr: String): List<RSVedtakWrapper> {
+        settUtbetalingKlarTilVisning()
+
         val json = mockMvc.perform(
             get("/api/v3/vedtak")
                 .header("Authorization", "Bearer ${tokenxToken(fnr)}")
@@ -97,6 +101,8 @@ abstract class AbstractContainerBaseTest {
     }
 
     fun hentVedtakSomVeilederObo(fnr: String, token: String): List<RSVedtakWrapper> {
+        settUtbetalingKlarTilVisning()
+
         val json = mockMvc.perform(
             get("/api/v3/veileder/vedtak?fnr=$fnr")
                 .header("Authorization", "Bearer $token")
@@ -107,6 +113,8 @@ abstract class AbstractContainerBaseTest {
     }
 
     fun hentVedtakSomVeilederOboV4(fnr: String, token: String): List<RSVedtakWrapper> {
+        settUtbetalingKlarTilVisning()
+
         val json = mockMvc.perform(
             get("/api/v4/veileder/vedtak")
                 .header("Authorization", "Bearer $token")
@@ -118,6 +126,8 @@ abstract class AbstractContainerBaseTest {
     }
 
     fun hentVedtakSomSpinnsynFrontendArkivering(fnr: String, token: String): List<RSVedtakWrapper> {
+        settUtbetalingKlarTilVisning()
+
         val json = mockMvc.perform(
             get("/api/v1/arkivering/vedtak")
                 .header("Authorization", "Bearer $token")
@@ -138,9 +148,13 @@ abstract class AbstractContainerBaseTest {
         return json
     }
 
+    fun settUtbetalingKlarTilVisning() {
+        sendVedtakStatus.prosesserUtbetalinger()
+    }
+
     companion object {
         init {
-            PostgreSQLContainer("postgres:11.4-alpine").also {
+            PostgreSQLContainer11().also {
                 it.start()
                 System.setProperty("spring.datasource.url", it.jdbcUrl)
                 System.setProperty("spring.datasource.username", it.username)

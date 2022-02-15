@@ -1,6 +1,7 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import org.amshove.kluent.*
@@ -34,7 +35,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     final val aktørId = "321"
     final val org = "987"
     final val now = LocalDate.now()
-    val utbetalingId = "124542"
+    final val utbetalingId = "124542"
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
@@ -72,7 +73,13 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
             utbetalingslinjer = emptyList()
         ),
         type = "UTBETALING",
-        utbetalingsdager = emptyList(),
+        utbetalingsdager = listOf(
+            UtbetalingUtbetalt.UtbetalingdagDto(
+                dato = now,
+                type = "AvvistDag",
+                begrunnelser = listOf(MinimumSykdomsgrad)
+            )
+        ),
     )
 
     @Test

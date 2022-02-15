@@ -47,7 +47,6 @@ class BrukerVedtak(
         IKKE_FUNNET,
         LEST,
         ALLEREDE_LEST,
-        ALDRI_SENDT_BRUKERNOTIFIKASJON,
     }
 
     class VedtakIkkeFunnetException(vedtaksId: String) : AbstractApiError(
@@ -57,8 +56,11 @@ class BrukerVedtak(
         loglevel = LogLevel.WARN
     )
 
-    fun hentVedtak(fnr: String): List<RSVedtakWrapper> {
-        return finnAlleVedtak(fnr)
+    fun hentVedtak(
+        fnr: String,
+        hentSomBruker: Boolean = true,
+    ): List<RSVedtakWrapper> {
+        return finnAlleVedtak(fnr, hentSomBruker)
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
             .leggTilOrgnavn()
@@ -110,7 +112,7 @@ class BrukerVedtak(
         return leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
     }
 
-    private fun finnAlleVedtak(fnr: String): List<RSVedtakWrapper> {
+    private fun finnAlleVedtak(fnr: String, hentSomBruker: Boolean): List<RSVedtakWrapper> {
         val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
         val annulleringer = annulleringDAO.finnAnnullering(fnr)
@@ -173,7 +175,7 @@ class BrukerVedtak(
 
         return utbetalinger
             .filter { it.harAlleVedtak() }
-            .filter { it.skalVisesTilBruker != false }
+            .filter { it.skalVisesTilBruker == true || !hentSomBruker }
             .map { it.tilRsVedtakWrapper() }
     }
 }
