@@ -5,6 +5,7 @@ import no.nav.helse.flex.service.MottaUtbetaling
 import no.nav.helse.flex.service.MottaVedtak
 import no.nav.helse.flex.service.NullstillVedtak
 import no.nav.helse.flex.service.RetroMottaVedtakService
+import no.nav.helse.flex.service.SendVedtakStatus
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.http.MediaType
@@ -27,6 +28,7 @@ class VedtakTestdataController(
     val tokenValidationContextHolder: TokenValidationContextHolder,
     val mottaVedtak: MottaVedtak,
     val mottaUtbetaling: MottaUtbetaling,
+    val sendVedtakStatus: SendVedtakStatus,
 ) {
     data class VedtakV2(val vedtak: String, val utbetaling: String?)
 
@@ -56,6 +58,8 @@ class VedtakTestdataController(
                 opprettet = Instant.now()
             )
         }
+
+        sendVedtakStatus.prosesserUtbetalinger()
 
         return "Vedtak opprettet på $fnr"
     }
