@@ -44,27 +44,6 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         """
     )
     fun settSkalVisesOgMotattPublisert(motattPublisert: Instant?, skalVisesTilBruker: Boolean?, id: String): Boolean
-
-    @Query(
-        """
-        SELECT id, utbetaling_id
-        FROM utbetaling
-        WHERE skal_vises_til_bruker IS NULL
-        AND motatt_publisert IS NOT NULL
-        LIMIT 1000;
-        """
-    )
-    fun utbetalingerMedSkalVisesTilBrukerIkkeSatt(): List<IdOgUtbetalingId>
-
-    @Modifying
-    @Query(
-        """
-        UPDATE utbetaling
-        SET skal_vises_til_bruker = true
-        WHERE id = :id
-        """
-    )
-    fun settSkalVises(id: String): Boolean
 }
 
 @Table("utbetaling")
@@ -87,9 +66,4 @@ data class UtbetalingerKlarTilVarsling(
     val utbetalingId: String,
     val antallVedtak: Int,
     val fnr: String,
-)
-
-data class IdOgUtbetalingId(
-    val id: String,
-    val utbetalingId: String,
 )
