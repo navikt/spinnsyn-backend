@@ -38,6 +38,6 @@ class VedtakLoginserviceController(
 }
 
 fun TokenValidationContextHolder.fnrFraOIDC(): String {
-    val context = this.tokenValidationContext
-    return context.getClaims("loginservice").subject
+    val claims = this.tokenValidationContext.getClaims("loginservice")
+    return claims.getStringClaim("pid") ?: claims.subject
 }
