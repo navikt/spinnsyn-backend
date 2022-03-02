@@ -44,6 +44,8 @@ spec:
         diskAutoresize: true
         databases:
           - name: spinnsyn-db
+            users:
+              - name: bigquery-dataprodukt
   accessPolicy:
     outbound:
       external:
