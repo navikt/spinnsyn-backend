@@ -17,6 +17,7 @@ class MottaUtbetaling(
     val log = logger()
 
     fun handterMelding(cr: ConsumerRecord<String, String>) {
+        if (cr.erAnnullering()) return
         mottaUtbetaling(
             fnr = cr.key(),
             utbetaling = cr.value(),
@@ -53,6 +54,12 @@ class MottaUtbetaling(
             metrikk.MOTTATT_AUTOMATISK_VEDTAK.increment()
         } else {
             metrikk.MOTTATT_MANUELT_VEDTAK.increment()
+        }
+    }
+
+    private fun ConsumerRecord<String, String>.erAnnullering(): Boolean {
+        return headers().any { header ->
+            header.key() == "type" && String(header.value()) == "Annullering"
         }
     }
 }
