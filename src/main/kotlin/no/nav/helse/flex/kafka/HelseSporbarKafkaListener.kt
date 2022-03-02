@@ -1,7 +1,7 @@
 package no.nav.helse.flex.kafka
 
 import no.nav.helse.flex.kafka.ConsumerStoppedEventExt.restart
-import no.nav.helse.flex.service.RetroMottaVedtakService
+import no.nav.helse.flex.service.MottakAnnulering
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.annotation.KafkaListener
@@ -13,7 +13,7 @@ const val SPORBAR_TOPIC = "aapen-helse-sporbar"
 
 @Component
 class HelseSporbarKafkaListener(
-    private val retroMottaVedtakService: RetroMottaVedtakService
+    private val mottakAnnulering: MottakAnnulering
 ) {
 
     @KafkaListener(
@@ -21,7 +21,7 @@ class HelseSporbarKafkaListener(
         containerFactory = "onPremKafkaListenerContainerFactory"
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        retroMottaVedtakService.handterMelding(cr)
+        mottakAnnulering.handterMelding(cr)
         acknowledgment.acknowledge()
     }
 
