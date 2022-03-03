@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.util.*
@@ -27,9 +26,6 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Value("\${on-prem-kafka.username}")
-    lateinit var systembruker: String
 
     final val fnr = "1233342"
     final val aktørId = "321"

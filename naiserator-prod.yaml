@@ -50,7 +50,6 @@ spec:
     outbound:
       external:
         - host: login.microsoftonline.com
-        - host: kafka-schema-registry.nais.adeo.no
         - host: syfo-tilgangskontroll.prod-fss-pub.nais.io
         - host: navnob2c.b2clogin.com
     inbound:
@@ -67,15 +66,10 @@ spec:
     application:
       enabled: true
   envFrom:
-    - secret: spinnsyn-backend-serviceuser
     - configmap: loginservice-idporten
   env:
-    - name: KAFKA_BOOTSTRAP_SERVERS_URL
-      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
     - name: SPINNSYN_FRONTEND_URL
       value: "https://www.nav.no/syk/sykepenger"
-    - name: KAFKA_SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais.adeo.no
     - name: SYFOTILGANGSKONTROLL_URL
       value: https://syfo-tilgangskontroll.prod-fss-pub.nais.io
     - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
