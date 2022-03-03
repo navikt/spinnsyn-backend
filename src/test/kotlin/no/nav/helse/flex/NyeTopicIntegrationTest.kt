@@ -99,6 +99,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     val annulleringDto = AnnulleringDto(
         fødselsnummer = fnr,
         orgnummer = org,
+        organisasjonsnummer = null,
         tidsstempel = LocalDateTime.now(),
         fom = now,
         tom = now

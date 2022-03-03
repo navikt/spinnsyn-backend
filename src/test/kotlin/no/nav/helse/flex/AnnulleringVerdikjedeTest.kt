@@ -83,6 +83,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     val annulleringDto = AnnulleringDto(
         fødselsnummer = fnr,
         orgnummer = org,
+        organisasjonsnummer = org,
         tidsstempel = LocalDateTime.now(),
         fom = fom,
         tom = tom

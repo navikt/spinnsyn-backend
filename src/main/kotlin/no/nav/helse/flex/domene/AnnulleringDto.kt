@@ -6,7 +6,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class AnnulleringDto(
-    val orgnummer: String,
+    val orgnummer: String?,
+    val organisasjonsnummer: String?,
     val tidsstempel: LocalDateTime,
     val fødselsnummer: String,
     val fom: LocalDate?,
