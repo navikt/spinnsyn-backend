@@ -14,13 +14,13 @@ import java.util.*
 class MottaUtbetaling(
     private val utbetalingRepository: UtbetalingRepository,
     private val metrikk: Metrikk,
-    private val mottakAnnulering: MottakAnnulering,
+    private val mottaAnnulering: MottaAnnulering,
 ) {
     val log = logger()
 
     fun handterMelding(cr: ConsumerRecord<String, String>) {
         if (cr.erAnnullering()) {
-            mottakAnnulering.mottaAnnullering(
+            mottaAnnulering.mottaAnnullering(
                 id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
                 fnr = cr.key(),
                 annullering = cr.value(),
