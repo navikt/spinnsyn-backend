@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -31,9 +30,6 @@ class LesVedtakTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
-
-    @Value("\${on-prem-kafka.username}")
-    lateinit var systembruker: String
 
     final val fnr = "1233342"
     final val aktørId = "321"

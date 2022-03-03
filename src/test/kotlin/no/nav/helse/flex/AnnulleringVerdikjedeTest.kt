@@ -4,7 +4,6 @@ import no.nav.helse.flex.domene.AnnulleringDto
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
-import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import org.amshove.kluent.shouldBe
@@ -128,7 +127,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     fun `Ei annullering mottatt fra kafka blir lagret i db`() {
         onpremKafkaProducer.send(
             ProducerRecord(
-                SPORBAR_TOPIC,
+                UTBETALING_TOPIC,
                 null,
                 fnr,
                 annulleringDto.serialisertTilString(),
@@ -154,7 +153,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     fun `Ei ny annullering mottatt på kafka blir lagret i db`() {
         onpremKafkaProducer.send(
             ProducerRecord(
-                SPORBAR_TOPIC,
+                UTBETALING_TOPIC,
                 null,
                 fnr,
                 annulleringDto.copy(orgnummer = "456").serialisertTilString(),

@@ -12,13 +12,6 @@ spring:
 
 elector.path: dont_look_for_leader
 
-on-prem-kafka:
-  bootstrap-servers: overskrives i AbstractContainerBaseTest
-  security-protocol: PLAINTEXT
-  username: AzureDiamond
-  password: hunter2
-  auto-offset-reset: earliest
-  schema-registry-url: blah
 
 aiven-kafka:
   auto-offset-reset: earliest

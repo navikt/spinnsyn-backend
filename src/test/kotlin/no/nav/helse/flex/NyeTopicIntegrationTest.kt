@@ -7,7 +7,6 @@ import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
-import no.nav.helse.flex.kafka.SPORBAR_TOPIC
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.Organisasjon
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -46,9 +44,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Value("\${on-prem-kafka.username}")
-    lateinit var systembruker: String
 
     final val fnr = "1233342"
     final val aktørId = "321"
@@ -269,7 +264,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     fun `en annullering blir mottatt på Kafka blir lagret i db`() {
         kafkaProducer.send(
             ProducerRecord(
-                SPORBAR_TOPIC,
+                UTBETALING_TOPIC,
                 null,
                 fnr,
                 annulleringDto.serialisertTilString(),

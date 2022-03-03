@@ -4,7 +4,6 @@ import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,7 +13,6 @@ class NullstillVedtak(
     private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
 
-    @Value("\${on-prem-kafka.username}") private val serviceuserUsername: String,
 ) {
     fun nullstill(fnr: String): Int {
         if (environmentToggles.isProduction()) {

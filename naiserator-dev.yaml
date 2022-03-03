@@ -50,7 +50,6 @@ spec:
     outbound:
       external:
         - host: login.microsoftonline.com
-        - host: kafka-schema-registry.nais-q.adeo.no
         - host: syfo-tilgangskontroll.dev-fss-pub.nais.io
         - host: navtestb2c.b2clogin.com
     inbound:
@@ -67,17 +66,12 @@ spec:
     application:
       enabled: true
   envFrom:
-    - secret: spinnsyn-backend-serviceuser
     - configmap: loginservice-idporten
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "default,testdatareset"
-    - name: KAFKA_BOOTSTRAP_SERVERS_URL
-      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: SPINNSYN_FRONTEND_URL
       value: "https://www-gcp.dev.nav.no/syk/sykepenger"
-    - name: KAFKA_SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais-q.adeo.no
     - name: SYFOTILGANGSKONTROLL_URL
       value: https://syfo-tilgangskontroll.dev-fss-pub.nais.io
     - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID

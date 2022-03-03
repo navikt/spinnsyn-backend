@@ -11,28 +11,27 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
 @Configuration
-class TestOnPremKafkaConfig(
-    private val onPremKafkaConfig: OnPremKafkaConfig,
+class TestKafkaConfig(
+    private val aivenKafkaConfig: AivenKafkaConfig,
 ) {
 
     @Bean
-    fun onpremSoknadKafkaProducer(): KafkaProducer<String, String> {
+    fun producer(): KafkaProducer<String, String> {
         val config = mapOf(
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.ACKS_CONFIG to "all",
             ProducerConfig.RETRIES_CONFIG to 10,
             ProducerConfig.RETRY_BACKOFF_MS_CONFIG to 100
-        ) + onPremKafkaConfig.commonConfig()
+        ) + aivenKafkaConfig.commonConfig()
         return KafkaProducer(config)
     }
-
     fun testConsumerProps(groupId: String) = mapOf(
         ConsumerConfig.GROUP_ID_CONFIG to groupId,
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
         ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1"
-    ) + onPremKafkaConfig.commonConfig()
+    ) + aivenKafkaConfig.commonConfig()
 
     @Bean
     fun statusKafkaConsumer(): Consumer<String, String> {
