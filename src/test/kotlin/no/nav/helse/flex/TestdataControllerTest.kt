@@ -32,7 +32,8 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
 
     val annulleringDto = AnnulleringDto(
         fødselsnummer = fnr,
-        orgnummer = orgnummer,
+        orgnummer = null,
+        organisasjonsnummer = orgnummer,
         tidsstempel = LocalDateTime.now(),
         fom = fom,
         tom = tom
