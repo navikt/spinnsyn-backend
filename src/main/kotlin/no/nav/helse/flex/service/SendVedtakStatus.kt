@@ -79,17 +79,18 @@ class SendVedtakStatus(
                 return@forEach
             }
 
+            utbetalingRepository.settSkalVisesOgMotattPublisert(
+                motattPublisert = Instant.now(),
+                skalVisesTilBruker = true,
+                id = id,
+            )
+
             vedtakStatusKafkaProducer.produserMelding(
                 VedtakStatusDTO(
                     id = id,
                     fnr = fnr,
                     vedtakStatus = VedtakStatus.MOTATT
                 )
-            )
-            utbetalingRepository.settSkalVisesOgMotattPublisert(
-                motattPublisert = Instant.now(),
-                skalVisesTilBruker = true,
-                id = id,
             )
 
             metrikk.STATUS_MOTATT.increment()
