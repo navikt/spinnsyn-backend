@@ -3,8 +3,8 @@ package no.nav.helse.flex.api
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.service.MottaUtbetaling
 import no.nav.helse.flex.service.MottaVedtak
+import no.nav.helse.flex.service.MottakAnnulering
 import no.nav.helse.flex.service.NullstillVedtak
-import no.nav.helse.flex.service.RetroMottaVedtakService
 import no.nav.helse.flex.service.SendVedtakStatus
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
@@ -22,7 +22,7 @@ import java.util.*
 @Controller
 @RequestMapping("/api/v1/testdata")
 class VedtakTestdataController(
-    val retroMottaVedtakService: RetroMottaVedtakService,
+    val mottakAnnulering: MottakAnnulering,
     val environmentToggles: EnvironmentToggles,
     val nullstillVedtak: NullstillVedtak,
     val tokenValidationContextHolder: TokenValidationContextHolder,
@@ -85,7 +85,7 @@ class VedtakTestdataController(
         val fnr = tokenValidationContextHolder.fnrFraOIDC()
 
         val annulleringId = UUID.randomUUID()
-        retroMottaVedtakService.mottaAnnullering(
+        mottakAnnulering.mottaAnnullering(
             id = annulleringId,
             fnr = fnr,
             annullering = annullering,

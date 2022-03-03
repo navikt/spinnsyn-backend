@@ -10,7 +10,7 @@ import java.time.Instant
 import java.util.*
 
 @Service
-class RetroMottaVedtakService(
+class MottakAnnulering(
     private val annulleringDAO: AnnulleringDAO,
     private val metrikk: Metrikk,
 ) {

@@ -8,16 +8,26 @@ import no.nav.helse.flex.metrikk.Metrikk
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.*
 
 @Service
 class MottaUtbetaling(
     private val utbetalingRepository: UtbetalingRepository,
     private val metrikk: Metrikk,
+    private val mottakAnnulering: MottakAnnulering,
 ) {
     val log = logger()
 
     fun handterMelding(cr: ConsumerRecord<String, String>) {
-        if (cr.erAnnullering()) return
+        if (cr.erAnnullering()) {
+            mottakAnnulering.mottaAnnullering(
+                id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
+                fnr = cr.key(),
+                annullering = cr.value(),
+                opprettet = Instant.now()
+            )
+            return
+        }
         mottaUtbetaling(
             fnr = cr.key(),
             utbetaling = cr.value(),
