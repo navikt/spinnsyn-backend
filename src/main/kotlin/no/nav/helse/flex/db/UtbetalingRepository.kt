@@ -11,6 +11,7 @@ import java.time.Instant
 @Repository
 interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
     fun findUtbetalingDbRecordsByFnr(fnr: String): List<UtbetalingDbRecord>
+    fun findByUtbetalingId(utbetalingid: String): UtbetalingDbRecord?
     fun existsByUtbetalingId(utbetalingId: String): Boolean
 
     @Query(
