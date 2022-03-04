@@ -157,6 +157,7 @@ class BrukerVedtak(
                     grunnlagForSykepengegrunnlag = vedtaket.grunnlagForSykepengegrunnlag,
                     grunnlagForSykepengegrunnlagPerArbeidsgiver = vedtaket.grunnlagForSykepengegrunnlagPerArbeidsgiver,
                     begrensning = vedtaket.begrensning,
+                    vedtakFattetTidspunkt = vedtaket.vedtakFattetTidspunkt,
                     utbetaling = RSUtbetalingUtbetalt(
                         utbetalingType = utbetalingen.type,
                         organisasjonsnummer = utbetalingen.organisasjonsnummer,

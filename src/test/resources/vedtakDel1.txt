@@ -21,5 +21,6 @@
     ],
     "inntekt": 18000.0,
     "sykepengegrunnlag": 216000.0,
-    "utbetalingId": "136c79d9-e57e-444a-bad2-140431d4f1d7"
+    "utbetalingId": "136c79d9-e57e-444a-bad2-140431d4f1d7",
+    "vedtakFattetTidspunkt": "2021-07-31"
 }
