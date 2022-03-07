@@ -33,6 +33,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     final val fnr = "983475"
     final val fom = LocalDate.now().minusDays(7)
     final val tom = LocalDate.now()
+    final val vedtakFattetTidspunk = LocalDate.now()
     final val org = "394783764"
     final val utbetalingId = "124542"
     val vedtak = VedtakFattetForEksternDto(
@@ -48,7 +49,8 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         utbetalingId = utbetalingId,
         grunnlagForSykepengegrunnlag = 0.0,
         grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE"
+        begrensning = "VET_IKKE",
+        vedtakFattetTidspunkt = vedtakFattetTidspunk
     )
 
     val utbetaling = UtbetalingUtbetalt(

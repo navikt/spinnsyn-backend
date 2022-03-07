@@ -52,7 +52,8 @@ class TestdataControllerTest : AbstractContainerBaseTest() {
         utbetalingId = utbetalingId,
         grunnlagForSykepengegrunnlag = 0.0,
         grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE"
+        begrensning = "VET_IKKE",
+        vedtakFattetTidspunkt = LocalDate.now()
     )
     val utbetaling = UtbetalingUtbetalt(
         fødselsnummer = fnr,
