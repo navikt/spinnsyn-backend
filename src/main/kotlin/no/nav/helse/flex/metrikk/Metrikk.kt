@@ -21,16 +21,17 @@ class Metrikk(registry: MeterRegistry) {
         "mottatt_automatisk_vedtak_counter"
     )
 
-    val VEDTAK_LEST = registry.counter(
-        "vedtak_lest_counter"
-    )
-
     val MOTTATT_ANNULLERING_VEDTAK = registry.counter(
         "mottatt_annullering_vedtak_counter"
     )
 
     val STATUS_MOTATT = registry.counter(
         "status_motatt_counter"
+    )
+
+    fun vedtaktype(type: String) = reg.counter(
+        "vedtak_type_counter",
+        Tags.of("type", type)
     )
 
     fun skalIkkeVises(grunn: String) = reg.counter(

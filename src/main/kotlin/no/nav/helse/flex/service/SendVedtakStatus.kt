@@ -8,6 +8,7 @@ import no.nav.helse.flex.domene.VedtakStatusDTO
 import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
+import no.nav.helse.flex.vedtaktype.Vedtaktype
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -18,6 +19,7 @@ class SendVedtakStatus(
     private val metrikk: Metrikk,
     private val vedtakStatusKafkaProducer: VedtakStatusKafkaProducer,
     private val vedtakService: BrukerVedtak,
+    private val vedtaktype: Vedtaktype,
 ) {
 
     private val log = logger()
@@ -92,7 +94,14 @@ class SendVedtakStatus(
                 id = id,
             )
 
-            metrikk.STATUS_MOTATT.increment()
+            try {
+                val type = vedtaktype.finnVedtaktype(vedtakWrapper)
+                metrikk.vedtaktype(type).increment()
+                metrikk.STATUS_MOTATT.increment()
+            } catch (e: Exception) {
+                log.info("Feil under telling av metrikker for utbetaling_id $utbetalingId")
+            }
+
             sendt += 1
         }
 
