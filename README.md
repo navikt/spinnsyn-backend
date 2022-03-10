@@ -1,61 +1,33 @@
 # spinnsyn-backend
 
-This project contains the application code and infrastructure for spinnsyn-backend.
+Flex har ansvar for vise vedtak gjort som følge av søknad om sykepenger. Vedtakene blir gjort i saksbehandingssystemet Speil, som er eid av Team Bømlo. Team Flex mottar vedtakene som meldigner på Kafka og lagrer de for visning.
 
-## Technologies used
+## Inkommenda data
+Data input til appen er topicene med utbetalinger, vedtak, annulleringer og sykepengesøknader. 
+Sykepengesøknadene brukers til å lage et map mellom orgnummer og orgnavn for å slippe å gjøre eksternt oppslag.
 
-* Kotlin
-* Spring Boot
-* Gradle
 
-## Getting started
+## Data
+Applikasjonen har en database i GCP.
 
-### Getting github-package-registry packages NAV-IT
+Vedtakene, utbetalingene og annulleringene er personidentifiserbare, det er ingen sletting av disse dataene.
+Det slettes ikke fra tabellen med organisasjonsnummer og organisasjonsnavn.
 
-Some packages used in this repo are uploaded to the Github Package Registry which requires authentication:
+Applikasjonen eier også et topic som forteller status på vedtak, om de er mottatt, lest etc. 
+På topicet finnes også fødselsnummer og dataene er derfor personidentifiserbare.
+Topicet har evig retention
 
-```groovy
-val githubUser: String by project
-val githubPassword: String by project
-repositories {
-    maven {
-        credentials {
-            username = githubUser
-            password = githubPassword
-        }
-        setUrl("https://maven.pkg.github.com/navikt/syfosm-common")
-    }
-}
-```
+# Komme i gang
 
-`githubUser` and `githubPassword` can be put into a separate file `~/.gradle/gradle.properties` with the following content:
+Bygges med gradle. Standard spring boot oppsett.
 
-```sh
-githubUser=x-access-token
-githubPassword=[token]
-```
+---
 
-Replace `[token]` with a personal access token with scope `read:packages`.
+# Henvendelser
 
-Alternatively, the variables can be configured via environment variables:
 
-* `ORG_GRADLE_PROJECT_githubUser`
-* `ORG_GRADLE_PROJECT_githubPassword`
+Spørsmål knyttet til koden eller prosjektet kan stilles til flex@nav.no
 
-or directly on the command line:
+## For NAV-ansatte
 
-```sh
-./gradlew -PgithubUser=x-access-token -PgithubPassword=[token]
-```
-
-### Building the application
-
-#### Compile and package application
-
-To build locally and run the integration tests you can simply run `./gradlew build`.
-
-## Contact
-
-### For NAV employees
-
-We are available at the Slack channel `#flex`.
+Interne henvendelser kan sendes via Slack i kanalen #flex.
