@@ -7,6 +7,9 @@ Data input til appen er topicene med utbetalinger, vedtak, annulleringer og syke
 Sykepengesøknadene brukers til å lage et map mellom orgnummer og orgnavn for å slippe å gjøre eksternt oppslag.
 
 
+
+
+
 ## Data
 Applikasjonen har en database i GCP.
 
