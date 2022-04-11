@@ -23,7 +23,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo $VERSION > VERSION.txt
       - name: Store VERSION for subsequent jobs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: VERSION.txt
           path: VERSION.txt
