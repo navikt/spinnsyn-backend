@@ -46,6 +46,9 @@ spec:
           - name: spinnsyn-db
             users:
               - name: bigquery-dataprodukt
+        maintenance:
+          day: 2
+          hour: 2
   accessPolicy:
     outbound:
       external:
