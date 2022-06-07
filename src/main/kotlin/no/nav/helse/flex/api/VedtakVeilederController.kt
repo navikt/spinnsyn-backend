@@ -12,20 +12,20 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
 @Controller
-class VedtakVeilederAadController(
+class VedtakVeilederController(
     private val clientIdValidation: ClientIdValidation,
     private val vedtakService: BrukerVedtak,
     private val syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient,
 ) {
 
-    @GetMapping("/api/v3/veileder/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/api/v4/veileder/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @ProtectedWithClaims(issuer = "azureator")
-    fun hentVedtak(@RequestParam fnr: String): List<RSVedtakWrapper> {
+    fun hentVedtak(@RequestHeader("sykmeldt-fnr") fnr: String): List<RSVedtakWrapper> {
         clientIdValidation.validateClientId(
             NamespaceAndApp(
-                namespace = "teamsykefravr",
-                app = "syfomodiaperson"
+                namespace = "flex",
+                app = "spinnsyn-frontend-interne"
             )
         )
 

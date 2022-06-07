@@ -63,9 +63,6 @@ spec:
         - application: spinnsyn-frontend-interne
         - application: spinnsyn-frontend
         - application: ditt-sykefravaer
-        - application: syfomodiaperson
-          namespace: teamsykefravr
-          cluster: dev-fss
   azure:
     application:
       enabled: true
