@@ -73,7 +73,7 @@ spec:
     - configmap: loginservice-idporten
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: "default,testdatareset"
+      value: "default,testdata"
     - name: SPINNSYN_FRONTEND_URL
       value: "https://www-gcp.dev.nav.no/syk/sykepenger"
     - name: SYFOTILGANGSKONTROLL_URL
