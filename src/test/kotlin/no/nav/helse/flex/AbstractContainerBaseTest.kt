@@ -100,18 +100,6 @@ abstract class AbstractContainerBaseTest {
         return objectMapper.readValue(json)
     }
 
-    fun hentVedtakSomVeilederObo(fnr: String, token: String): List<RSVedtakWrapper> {
-        settUtbetalingKlarTilVisning()
-
-        val json = mockMvc.perform(
-            get("/api/v3/veileder/vedtak?fnr=$fnr")
-                .header("Authorization", "Bearer $token")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk).andReturn().response.contentAsString
-
-        return objectMapper.readValue(json)
-    }
-
     fun hentVedtakSomVeilederOboV4(fnr: String, token: String): List<RSVedtakWrapper> {
         settUtbetalingKlarTilVisning()
 

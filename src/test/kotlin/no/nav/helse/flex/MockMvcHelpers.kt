@@ -19,5 +19,5 @@ fun AbstractContainerBaseTest.buildAzureClaimSet(
     )
 }
 
-fun AbstractContainerBaseTest.skapAzureJwt(subject: String = "syfomodiaperson-client-id") =
+fun AbstractContainerBaseTest.skapAzureJwt(subject: String = "spinnsyn-frontend-interne-client-id") =
     buildAzureClaimSet(subject = subject)

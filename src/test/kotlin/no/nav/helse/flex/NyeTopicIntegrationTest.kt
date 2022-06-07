@@ -192,7 +192,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         val veilederToken = skapAzureJwt()
         mockSyfoTilgangskontroll(true, fnr)
 
-        val vedtak = hentVedtakSomVeilederObo(fnr, veilederToken)
+        val vedtak = hentVedtakSomVeilederOboV4(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
