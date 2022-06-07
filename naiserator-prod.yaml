@@ -62,6 +62,7 @@ spec:
         - application: spinnsyn-frontend-arkivering
         - application: spinnsyn-frontend-interne
         - application: spinnsyn-frontend
+        - application: ditt-sykefravaer
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: prod-fss
@@ -79,5 +80,7 @@ spec:
       value: prod-fss.teamsykefravr.syfo-tilgangskontroll
     - name: SPINNSYN_FRONTEND_CLIENT_ID
       value: prod-gcp:flex:spinnsyn-frontend
-    - name: SPINNSYN_FRONTEND_TOKENX_IDP
+    - name: DITT_SYKEFRAVAER_CLIENT_ID
+      value: prod-gcp:flex:ditt-sykefravaer
+    - name: TOKENX_IDP_IDPORTEN
       value: https://oidc.difi.no/idporten-oidc-provider/
