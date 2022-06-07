@@ -24,8 +24,10 @@ class VedtakTokenXController(
     val brukerVedtak: BrukerVedtak,
     @Value("\${SPINNSYN_FRONTEND_CLIENT_ID}")
     val spinnsynFrontendClientId: String,
-    @Value("\${SPINNSYN_FRONTEND_TOKENX_IDP}")
-    val spinnsynFrontendTokenxIdp: String,
+    @Value("\${DITT_SYKEFRAVAER_CLIENT_ID}")
+    val dittSykefravaerClientId: String,
+    @Value("\${TOKENX_IDP_IDPORTEN}")
+    val tokenxIdpIdporten: String,
 ) {
     val log = logger()
 
@@ -33,7 +35,7 @@ class VedtakTokenXController(
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun hentVedtak(): List<RSVedtakWrapper> {
-        val fnr = validerTokenXClaims().fnrFraIdportenTokenX()
+        val fnr = validerTokenXClaims(spinnsynFrontendClientId, dittSykefravaerClientId).fnrFraIdportenTokenX()
         return vedtakService.hentVedtak(fnr)
     }
 
@@ -41,19 +43,20 @@ class VedtakTokenXController(
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
-        val fnr = validerTokenXClaims().fnrFraIdportenTokenX()
+        val fnr = validerTokenXClaims(spinnsynFrontendClientId).fnrFraIdportenTokenX()
         return brukerVedtak.lesVedtak(fnr, vedtaksId)
     }
 
-    private fun validerTokenXClaims(): JwtTokenClaims {
+    private fun validerTokenXClaims(vararg allowedClients: String): JwtTokenClaims {
         val context = tokenValidationContextHolder.tokenValidationContext
         val claims = context.getClaims("tokenx")
         val clientId = claims.getStringClaim("client_id")
-        if (clientId != spinnsynFrontendClientId) {
+
+        if (!allowedClients.contains(clientId)) {
             throw IngenTilgang("Uventet client id $clientId")
         }
         val idp = claims.getStringClaim("idp")
-        if (idp != spinnsynFrontendTokenxIdp) {
+        if (idp != tokenxIdpIdporten) {
             // Sjekker at det var idporten som er IDP for tokenX tokenet
             throw IngenTilgang("Uventet idp $idp")
         }
