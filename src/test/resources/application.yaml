@@ -2,7 +2,7 @@ logging.config: "classpath:logback-local.xml"
 
 spring:
   profiles:
-    active: test,testdatareset
+    active: test,testdata
   flyway:
     enabled: true
   datasource:
