@@ -22,9 +22,6 @@ AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:flex:spinnsyn-frontend-arki
 
 no.nav.security.jwt:
   issuer:
-    loginservice:
-      discoveryurl: http://localhost:${mock-oauth2-server.port}/loginservice/.well-known/openid-configuration
-      accepted_audience: loginservice-client-id
     azureator:
       discoveryurl: http://localhost:${mock-oauth2-server.port}/azureator/.well-known/openid-configuration
       accepted_audience: spinnsyn-backend-client-id

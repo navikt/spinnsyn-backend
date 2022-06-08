@@ -130,7 +130,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `finner ikke brukervedtaket da utbetaling ikke er mottatt`() {
-        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
+        hentVedtakMedTokenXToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -158,7 +158,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `finner brukervedtaket i v2 og v3`() {
-        val vedtak = hentVedtakMedLoginserviceToken(fnr)
+        val vedtak = hentVedtakMedTokenXToken(fnr)
         val vedtakTokenX = hentVedtakMedTokenXToken(fnr)
         vedtak `should be equal to` vedtakTokenX
         vedtak.shouldHaveSize(1)
@@ -181,7 +181,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
             )
         )
 
-        val vedtakMedNavn = hentVedtakMedLoginserviceToken(fnr)
+        val vedtakMedNavn = hentVedtakMedTokenXToken(fnr)
         vedtakMedNavn[0].orgnavn `should be equal to` "Barneskolen"
     }
 
@@ -247,7 +247,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(7)
     fun `bruker leser vedtaket`() {
-        val vedtak = hentVedtakMedLoginserviceToken(fnr)
+        val vedtak = hentVedtakMedTokenXToken(fnr)
 
         vedtak.shouldHaveSize(1)
         vedtak[0].lest.`should be false`()
@@ -282,7 +282,7 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(9)
     fun `finner det nå annulerte vedtaket`() {
-        val vedtak = hentVedtakMedLoginserviceToken(fnr)
+        val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be true`()
     }

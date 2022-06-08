@@ -87,7 +87,7 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
     @Test
     @Order(3)
     fun `Kan hente revurderingen`() {
-        val vedtak = hentVedtakMedLoginserviceToken(fnr)
+        val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "REVURDERING"
         vedtak[0].revurdert.`should be false`()

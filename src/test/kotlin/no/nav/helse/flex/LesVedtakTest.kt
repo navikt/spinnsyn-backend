@@ -125,7 +125,7 @@ class LesVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `finner ikke brukervedtaket da utbetaling ikke er mottatt`() {
-        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
+        hentVedtakMedTokenXToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -153,7 +153,7 @@ class LesVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(6)
     fun `finner fortsatt ikke brukervedtaket da det siste vedtaket mangler`() {
-        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
+        hentVedtakMedTokenXToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -176,7 +176,7 @@ class LesVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(8)
     fun `finner brukervedtaket`() {
-        val vedtak = hentVedtakMedLoginserviceToken(fnr)
+        val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
@@ -188,7 +188,7 @@ class LesVedtakTest : AbstractContainerBaseTest() {
     @Test
     @Order(9)
     fun `bruker leser vedtaket`() {
-        val vedtak = hentVedtakMedLoginserviceToken(fnr)
+        val vedtak = hentVedtakMedTokenXToken(fnr)
 
         vedtak.shouldHaveSize(1)
         vedtak[0].lest.`should be false`()
