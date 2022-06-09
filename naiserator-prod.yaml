@@ -58,7 +58,6 @@ spec:
     inbound:
       rules:
         - application: flex-gateway
-        - application: flex-intern-gateway
         - application: spinnsyn-frontend-arkivering
         - application: spinnsyn-frontend-interne
         - application: spinnsyn-frontend
@@ -66,8 +65,6 @@ spec:
   azure:
     application:
       enabled: true
-  envFrom:
-    - configmap: loginservice-idporten
   env:
     - name: SPINNSYN_FRONTEND_URL
       value: "https://www.nav.no/syk/sykepenger"

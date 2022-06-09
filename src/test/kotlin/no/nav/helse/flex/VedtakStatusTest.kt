@@ -452,7 +452,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
     }
 
     private fun hentFrontendVedtak(utbetalingId: String) =
-        hentVedtakMedLoginserviceToken(fnr)
+        hentVedtakMedTokenXToken(fnr)
             .filter { it.vedtak.utbetaling.utbetalingId == utbetalingId }
             .shouldHaveSize(1)
             .first()

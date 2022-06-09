@@ -119,7 +119,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `finner ikke vedtaket`() {
-        hentVedtakMedLoginserviceToken(fnr).shouldBeEmpty()
+        hentVedtakMedTokenXToken(fnr).shouldBeEmpty()
     }
 
     @Test
@@ -147,7 +147,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(4)
     fun `finner vedtaket`() {
-        val vedtak = hentVedtakMedLoginserviceToken(fnr)
+        val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()

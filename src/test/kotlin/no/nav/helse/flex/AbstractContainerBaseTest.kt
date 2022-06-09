@@ -74,20 +74,6 @@ abstract class AbstractContainerBaseTest {
         }
     }
 
-    fun loginserviceJwt(fnr: String) = server.token(subject = fnr)
-
-    fun hentVedtakMedLoginserviceToken(fnr: String): List<RSVedtakWrapper> {
-        settUtbetalingKlarTilVisning()
-
-        val json = mockMvc.perform(
-            get("/api/v2/vedtak")
-                .header("Authorization", "Bearer ${loginserviceJwt(fnr)}")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk).andReturn().response.contentAsString
-
-        return objectMapper.readValue(json)
-    }
-
     fun hentVedtakMedTokenXToken(fnr: String): List<RSVedtakWrapper> {
         settUtbetalingKlarTilVisning()
 
@@ -193,9 +179,9 @@ abstract class AbstractContainerBaseTest {
 
 fun MockOAuth2Server.token(
     subject: String,
-    issuerId: String = "loginservice",
+    issuerId: String,
     clientId: String = UUID.randomUUID().toString(),
-    audience: String = "loginservice-client-id",
+    audience: String,
     claims: Map<String, Any> = mapOf("acr" to "Level4"),
 ): String {
     return this.issueToken(
