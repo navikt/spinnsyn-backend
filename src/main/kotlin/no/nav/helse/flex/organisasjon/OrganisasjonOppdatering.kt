@@ -14,7 +14,7 @@ class OrganisasjonOppdatering(
     val log = logger()
 
     fun handterSoknad(soknad: SykepengesoknadDTO) {
-        if (soknad.harArbeidsgiver() && soknad.erIkkeUtgått()) {
+        if (soknad.harArbeidsgiver() && soknad.erNy()) {
             val orgnummer = soknad.arbeidsgiver!!.orgnummer!!
             val navn = soknad.arbeidsgiver!!.navn!!
             val eksisterende = organisasjonRepository.findByOrgnummer(orgnummer)
@@ -63,6 +63,6 @@ private fun SykepengesoknadDTO.harArbeidsgiver(): Boolean {
     return this.arbeidsgiver?.orgnummer?.isNotBlank() ?: false && this.arbeidsgiver?.navn?.isNotBlank() ?: false
 }
 
-private fun SykepengesoknadDTO.erIkkeUtgått(): Boolean {
-    return this.status != SoknadsstatusDTO.UTGAATT
+private fun SykepengesoknadDTO.erNy(): Boolean {
+    return this.status == SoknadsstatusDTO.NY
 }
