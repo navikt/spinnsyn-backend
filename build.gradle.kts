@@ -2,11 +2,11 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "2.6.7"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("org.springframework.boot") version "2.7.1"
+    id("io.spring.dependency-management") version "1.0.12.RELEASE"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
-    kotlin("plugin.spring") version "1.6.10"
-    kotlin("jvm") version "1.6.10"
+    kotlin("plugin.spring") version "1.7.0"
+    kotlin("jvm") version "1.7.0"
 }
 
 group = "no.nav.helse.flex"
@@ -15,12 +15,6 @@ description = "spinnsyn-backend"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 ext["okhttp3.version"] = "4.9.0" // For at token support testen kjører
-
-buildscript {
-    repositories {
-        maven("https://plugins.gradle.org/m2/")
-    }
-}
 
 val githubUser: String by project
 val githubPassword: String by project
