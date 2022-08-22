@@ -2,14 +2,15 @@
 <configuration>
     <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <provider class="net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider"/>
+            <includeMdcKeyName>x_request_id</includeMdcKeyName>
         </encoder>
     </appender>
-
-    <logger name="no.nav" level="INFO"/>
-    <logger name="org.apache.kafka" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="stdout_json"/>
     </root>
+
+    <logger name="no.nav" level="INFO"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+
 </configuration>
