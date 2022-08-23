@@ -8,8 +8,8 @@ metadata:
 spec:
   image: {{ image }}
   replicas:
-    min: 2
-    max: 2
+    min: {{replicas_min}}
+    max: {{replicas_max}}
     cpuThresholdPercentage: 90
   port: 8080
   liveness:
@@ -26,7 +26,7 @@ spec:
   tokenx:
     enabled: true
   kafka:
-    pool: nav-dev
+    pool: {{kafkaPool}}
   leaderElection: true
   prometheus:
     enabled: true
@@ -53,11 +53,10 @@ spec:
     outbound:
       external:
         - host: login.microsoftonline.com
-        - host: syfo-tilgangskontroll.dev-fss-pub.nais.io
-        - host: navtestb2c.b2clogin.com
+        - host: {{syfotilgangskontrollExternalHost}}
+        - host: {{b2cloginExternalHost}}
     inbound:
       rules:
-        - application: flex-gateway
         - application: spinnsyn-frontend-arkivering
         - application: spinnsyn-frontend-interne
         - application: spinnsyn-frontend
@@ -66,17 +65,7 @@ spec:
     application:
       enabled: true
   env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: "default,testdata"
-    - name: SPINNSYN_FRONTEND_URL
-      value: "https://www-gcp.dev.nav.no/syk/sykepenger"
-    - name: SYFOTILGANGSKONTROLL_URL
-      value: https://syfo-tilgangskontroll.dev-fss-pub.nais.io
-    - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
-      value: dev-fss.teamsykefravr.syfo-tilgangskontroll
-    - name: SPINNSYN_FRONTEND_CLIENT_ID
-      value: dev-gcp:flex:spinnsyn-frontend
-    - name: DITT_SYKEFRAVAER_CLIENT_ID
-      value: dev-gcp:flex:ditt-sykefravaer
-    - name: TOKENX_IDP_IDPORTEN
-      value: https://oidc-ver2.difi.no/idporten-oidc-provider/
+  {{#each env}}
+     - name: {{@key}}
+       value: "{{this}}"
+  {{/each}}
