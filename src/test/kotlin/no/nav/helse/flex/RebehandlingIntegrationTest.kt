@@ -1,7 +1,10 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
+import no.nav.helse.flex.domene.VedtakFattetForEksternDto
+import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
+import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import org.amshove.kluent.*

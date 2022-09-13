@@ -1,6 +1,8 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.domene.RSUtbetalingUtbetalt
+import no.nav.helse.flex.domene.RSVedtak
+import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.organisasjon.LeggTilOrganisasjonnavn
 import no.nav.helse.flex.organisasjon.Organisasjon
 import org.amshove.kluent.`should be equal to`
