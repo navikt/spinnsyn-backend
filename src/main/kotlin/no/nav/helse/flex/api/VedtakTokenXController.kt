@@ -42,9 +42,9 @@ class VedtakTokenXController(
     @PostMapping(value = ["/vedtak/{vedtaksId}/les"], produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
-    fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): String {
+    fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): Map<String, String> {
         val fnr = validerTokenXClaims(spinnsynFrontendClientId).fnrFraIdportenTokenX()
-        return brukerVedtak.lesVedtak(fnr, vedtaksId)
+        return mapOf("status" to brukerVedtak.lesVedtak(fnr, vedtaksId))
     }
 
     private fun validerTokenXClaims(vararg allowedClients: String): JwtTokenClaims {

@@ -119,7 +119,8 @@ abstract class AbstractContainerBaseTest {
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk).andReturn().response.contentAsString
 
-        return json
+        val map: Map<String, String> = objectMapper.readValue(json)
+        return map["status"]!!
     }
 
     fun settUtbetalingKlarTilVisning() {
