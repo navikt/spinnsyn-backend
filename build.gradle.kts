@@ -34,7 +34,7 @@ repositories {
     }
 }
 
-val testContainersVersion = "1.17.3"
+val testContainersVersion = "1.17.4"
 val logstashLogbackEncoderVersion = "7.2"
 val kluentVersion = "1.68"
 val tokenSupportVersion = "2.1.4"
