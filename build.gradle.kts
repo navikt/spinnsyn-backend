@@ -38,7 +38,7 @@ val testContainersVersion = "1.17.5"
 val logstashLogbackEncoderVersion = "7.2"
 val kluentVersion = "1.72"
 val tokenSupportVersion = "2.1.6"
-val sykepengesoknadKafkaVersion = "2022.02.10-16.07-0892e94a"
+val sykepengesoknadKafkaVersion = "2022.10.28-10.24-aa0eced7"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
