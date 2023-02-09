@@ -1,6 +1,7 @@
 package no.nav.helse.flex
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.annotation.PostConstruct
 import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
@@ -28,7 +29,6 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 import java.util.*
-import javax.annotation.PostConstruct
 
 private class PostgreSQLContainer11 : PostgreSQLContainer<PostgreSQLContainer11>("postgres:11.4-alpine")
 
