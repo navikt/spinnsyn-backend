@@ -43,7 +43,7 @@ data class UtbetalingUtbetalt(
     data class UtbetalingdagDto(
         val dato: LocalDate,
         val type: String,
-        val begrunnelser: List<Begrunnelse>,
+        val begrunnelser: List<Begrunnelse>
     ) {
         @Suppress("unused")
         enum class Begrunnelse {
@@ -56,7 +56,7 @@ data class UtbetalingUtbetalt(
             ManglerOpptjening,
             ManglerMedlemskap,
             Over70,
-            EtterDødsdato,
+            EtterDødsdato
         }
     }
 }

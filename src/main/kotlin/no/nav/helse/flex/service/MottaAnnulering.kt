@@ -11,7 +11,7 @@ import java.util.*
 @Service
 class MottaAnnulering(
     private val annulleringDAO: AnnulleringDAO,
-    private val metrikk: Metrikk,
+    private val metrikk: Metrikk
 ) {
     private val log = logger()
 

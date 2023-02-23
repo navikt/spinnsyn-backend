@@ -79,7 +79,7 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 type = "AvvistDag",
                 begrunnelser = listOf(MinimumSykdomsgrad)
             )
-        ),
+        )
     )
 
     @Test

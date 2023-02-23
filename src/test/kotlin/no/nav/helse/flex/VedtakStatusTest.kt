@@ -419,7 +419,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                         UtbetalingUtbetalt.UtbetalingdagDto(
                             dato = now,
                             type = "ArbeidsgiverperiodeDag",
-                            begrunnelser = emptyList(),
+                            begrunnelser = emptyList()
                         )
                     )
                 ).serialisertTilString()

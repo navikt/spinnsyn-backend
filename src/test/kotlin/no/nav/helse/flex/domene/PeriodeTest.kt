@@ -8,7 +8,6 @@ class PeriodeTest {
 
     @Test
     fun `0101 0401 overlapper 0301 0501 og vice versa`() {
-
         val første = ("01.01" to "04.01").periode()
         val andre = ("03.01" to "05.01").periode()
         første.overlapper(andre) shouldBeEqualTo true

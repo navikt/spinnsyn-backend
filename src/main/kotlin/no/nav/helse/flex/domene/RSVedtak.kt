@@ -21,7 +21,7 @@ data class RSVedtakWrapper(
     val sykepengebelop: Int = 0, // Deprecated
     val sykepengebelopArbeidsgiver: Int = 0,
     val sykepengebelopPerson: Int = 0,
-    val andreArbeidsgivere: Map<String, Double>?,
+    val andreArbeidsgivere: Map<String, Double>?
 )
 
 data class RSVedtak(
@@ -51,13 +51,13 @@ data class RSUtbetalingUtbetalt(
     @JsonIgnore
     val utbetalingsdager: List<RSUtbetalingdag>?,
     val foreløpigBeregnetSluttPåSykepenger: LocalDate?,
-    val utbetalingType: String,
+    val utbetalingType: String
 )
 
 data class RSOppdrag(
     val mottaker: String,
     val nettoBeløp: Int,
-    val utbetalingslinjer: List<RSUtbetalingslinje>,
+    val utbetalingslinjer: List<RSUtbetalingslinje>
 )
 
 data class RSUtbetalingslinje(
@@ -73,7 +73,7 @@ data class RSUtbetalingslinje(
 data class RSUtbetalingdag(
     val dato: LocalDate,
     val type: String,
-    val begrunnelser: List<String>,
+    val begrunnelser: List<String>
 )
 
 data class RSDag(
@@ -81,5 +81,5 @@ data class RSDag(
     val belop: Int,
     val grad: Double,
     val dagtype: String,
-    val begrunnelser: List<String>,
+    val begrunnelser: List<String>
 )

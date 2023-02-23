@@ -12,7 +12,7 @@ import java.time.Instant
 @Service
 class MottaVedtak(
     private val vedtakRepository: VedtakRepository,
-    private val metrikk: Metrikk,
+    private val metrikk: Metrikk
 ) {
     val log = logger()
 
@@ -42,7 +42,7 @@ class MottaVedtak(
                 fnr = fnr,
                 vedtak = vedtak,
                 opprettet = Instant.now(),
-                utbetalingId = vedtakSerialisert.utbetalingId,
+                utbetalingId = vedtakSerialisert.utbetalingId
             )
         )
 

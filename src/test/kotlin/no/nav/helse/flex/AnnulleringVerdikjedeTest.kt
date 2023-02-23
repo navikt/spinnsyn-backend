@@ -201,7 +201,7 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
                     organisasjonsnummer = "456",
                     utbetalingId = "$utbetalingId nr2",
                     arbeidsgiverOppdrag = utbetaling.arbeidsgiverOppdrag?.copy(
-                        mottaker = "456",
+                        mottaker = "456"
                     )
                 ).serialisertTilString()
             )

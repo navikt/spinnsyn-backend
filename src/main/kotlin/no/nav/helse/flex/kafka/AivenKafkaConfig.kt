@@ -23,7 +23,7 @@ class AivenKafkaConfig(
     @Value("\${aiven-kafka.auto-offset-reset}") private val kafkaAutoOffsetReset: String,
     @Value("\${aiven-kafka.security-protocol}") private val kafkaSecurityProtocol: String,
     @Value("\${KAFKA_CREDSTORE_PASSWORD}") private val kafkaCredstorePassword: String,
-    @Value("\${KAFKA_KEYSTORE_PATH}") private val kafkaKeystorePath: String,
+    @Value("\${KAFKA_KEYSTORE_PATH}") private val kafkaKeystorePath: String
 ) {
     private val JAVA_KEYSTORE = "JKS"
     private val PKCS12 = "PKCS12"
@@ -41,7 +41,7 @@ class AivenKafkaConfig(
         SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
         SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG to kafkaKeystorePath,
         SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
-        SslConfigs.SSL_KEY_PASSWORD_CONFIG to kafkaCredstorePassword,
+        SslConfigs.SSL_KEY_PASSWORD_CONFIG to kafkaCredstorePassword
     )
 
     @Bean

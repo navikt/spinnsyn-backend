@@ -188,7 +188,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(5)
     fun `veileder med OBO-tilgang kan lese brukervedtaket`() {
-
         val veilederToken = skapAzureJwt()
         mockSyfoTilgangskontroll(true, fnr)
 
@@ -203,7 +202,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(5)
     fun `veileder fra spinnsyn-frontend-interne med OBO-tilgang kan lese brukervedtaket`() {
-
         val veilederToken = skapAzureJwt(subject = "spinnsyn-frontend-interne-client-id")
         mockSyfoTilgangskontroll(true, fnr)
 
@@ -218,7 +216,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(5)
     fun `spinnsyn-frontend-arkivering kan hente brukervedtaket`() {
-
         val token = skapAzureJwt(subject = "spinnsyn-frontend-arkivering-client-id")
 
         val vedtak = hentVedtakSomSpinnsynFrontendArkivering(fnr, token)
@@ -349,7 +346,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Test
     @Order(13)
     fun `duplikat av den første utbetalingen blir ikke lagret som ny utbetaling`() {
-
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).shouldHaveSize(1)
 
         kafkaProducer.send(

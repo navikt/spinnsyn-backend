@@ -63,7 +63,7 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
             dagerPerson = emptyList(),
             sykepengebelop = 0,
             sykepengebelopArbeidsgiver = 0,
-            sykepengebelopPerson = 0,
+            sykepengebelopPerson = 0
         )
 
         val org1 = Organisasjon(

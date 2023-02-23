@@ -4,7 +4,7 @@ indent_style = space
 [*.{kt,kts}]
 indent_size=4
 insert_final_newline=true
-disabled_rules=no-wildcard-imports
+ktlint_disabled_rules=no-wildcard-imports
 
 [*.yaml]
 indent_size = 2

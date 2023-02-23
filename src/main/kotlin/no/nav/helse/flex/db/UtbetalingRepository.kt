@@ -58,12 +58,12 @@ data class UtbetalingDbRecord(
     val antallVedtak: Int,
     val lest: Instant? = null,
     val motattPublisert: Instant? = null,
-    val skalVisesTilBruker: Boolean? = null,
+    val skalVisesTilBruker: Boolean? = null
 )
 
 data class UtbetalingerKlarTilVarsling(
     val id: String,
     val utbetalingId: String,
     val antallVedtak: Int,
-    val fnr: String,
+    val fnr: String
 )

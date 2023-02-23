@@ -11,7 +11,6 @@ class LeggTilOrganisasjonnavn(
     val log = logger()
 
     fun leggTilOrganisasjonnavn(vedtakene: List<RSVedtakWrapper>): List<RSVedtakWrapper> {
-
         val orgnummerene = vedtakene
             .mapNotNull { it.vedtak.organisasjonsnummer }
             .toSet()

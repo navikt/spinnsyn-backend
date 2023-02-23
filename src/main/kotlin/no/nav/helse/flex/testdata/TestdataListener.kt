@@ -20,7 +20,7 @@ class TestdataListener(
     val environmentToggles: EnvironmentToggles,
     val mottaVedtak: MottaVedtak,
     val mottaUtbetaling: MottaUtbetaling,
-    val sendVedtakStatus: SendVedtakStatus,
+    val sendVedtakStatus: SendVedtakStatus
 
 ) {
 
@@ -31,7 +31,7 @@ class TestdataListener(
     @KafkaListener(
         topics = [TESTDATA_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
-        properties = ["auto.offset.reset = latest"],
+        properties = ["auto.offset.reset = latest"]
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         try {
@@ -45,7 +45,7 @@ class TestdataListener(
             mottaVedtak.mottaVedtak(
                 fnr = fnr,
                 vedtak = vedtakV2.vedtak,
-                timestamp = Instant.now(),
+                timestamp = Instant.now()
             )
             log.info("Opprettet vedtak fra testadata for periode på fnr: $fnr")
 

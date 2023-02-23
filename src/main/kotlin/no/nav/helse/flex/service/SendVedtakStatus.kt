@@ -19,7 +19,7 @@ class SendVedtakStatus(
     private val metrikk: Metrikk,
     private val vedtakStatusKafkaProducer: VedtakStatusKafkaProducer,
     private val vedtakService: BrukerVedtak,
-    private val vedtaktype: Vedtaktype,
+    private val vedtaktype: Vedtaktype
 ) {
 
     private val log = logger()
@@ -71,7 +71,7 @@ class SendVedtakStatus(
             val utbetalingId = ut.utbetalingId
             val vedtakWrapper = vedtakService.hentVedtak(
                 fnr = fnr,
-                hentSomBruker = false,
+                hentSomBruker = false
             ).first { it.id == id }
 
             val skalIkkeVisesFordi = sjekkDager(vedtakWrapper.dagerArbeidsgiver + vedtakWrapper.dagerPerson)
@@ -91,7 +91,7 @@ class SendVedtakStatus(
             utbetalingRepository.settSkalVisesOgMotattPublisert(
                 motattPublisert = Instant.now(),
                 skalVisesTilBruker = true,
-                id = id,
+                id = id
             )
 
             try {
@@ -113,7 +113,7 @@ class SendVedtakStatus(
         utbetalingRepository.settSkalVisesOgMotattPublisert(
             skalVisesTilBruker = false,
             motattPublisert = null,
-            id = id,
+            id = id
         )
         metrikk.skalIkkeVises(grunn).increment()
     }

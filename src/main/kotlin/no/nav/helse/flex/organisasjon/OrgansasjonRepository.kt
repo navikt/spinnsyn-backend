@@ -18,5 +18,5 @@ data class Organisasjon(
     val navn: String,
     val opprettet: Instant,
     val oppdatert: Instant,
-    val oppdatertAv: String,
+    val oppdatertAv: String
 )

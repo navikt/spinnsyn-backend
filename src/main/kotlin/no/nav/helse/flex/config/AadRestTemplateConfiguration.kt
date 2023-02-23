@@ -29,7 +29,7 @@ class AadRestTemplateConfiguration {
             registrationName = "onbehalfof-syfotilgangskontroll",
             restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
+            oAuth2AccessTokenService = oAuth2AccessTokenService
         )
 
     private fun downstreamRestTemplate(

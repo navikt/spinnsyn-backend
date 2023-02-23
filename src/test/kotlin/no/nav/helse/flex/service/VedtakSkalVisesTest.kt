@@ -14,7 +14,7 @@ class VedtakSkalVisesTest {
             belop = 0,
             grad = 100.0,
             dagtype = dagtype,
-            begrunnelser = emptyList(),
+            begrunnelser = emptyList()
         )
     ) {
         it.copy(dato = it.dato.plusDays(1))
@@ -31,8 +31,11 @@ class VedtakSkalVisesTest {
         val dager = dagSequence("ArbeidsgiverperiodeDag")
             .take(10)
             .mapIndexed { idx, dag ->
-                if (idx in 2..5) dag.copy(dagtype = "Arbeidsdag")
-                else dag
+                if (idx in 2..5) {
+                    dag.copy(dagtype = "Arbeidsdag")
+                } else {
+                    dag
+                }
             }
             .toList()
 

@@ -33,11 +33,7 @@ class LeaderElection(
         val uriString = UriComponentsBuilder.fromHttpUrl(getHttpPath(electorPath))
             .toUriString()
         val result = plainTextUtf8RestTemplate
-            .exchange(
-                uriString, HttpMethod.GET,
-                null,
-                String::class.java
-            )
+            .exchange(uriString, HttpMethod.GET, null, String::class.java)
         if (result.statusCode != HttpStatus.OK) {
             val message = "Kall mot elector feiler med HTTP-" + result.statusCode
             log.error(message)
@@ -59,5 +55,6 @@ class LeaderElection(
             true -> url
             else -> "http://$url"
         }
+
     private data class Leader(val name: String)
 }

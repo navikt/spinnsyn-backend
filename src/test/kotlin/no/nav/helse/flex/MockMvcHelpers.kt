@@ -7,7 +7,6 @@ fun AbstractContainerBaseTest.buildAzureClaimSet(
     issuer: String = "azureator",
     audience: String = "spinnsyn-backend-client-id"
 ): String {
-
     val claims = HashMap<String, String>()
 
     return server.token(

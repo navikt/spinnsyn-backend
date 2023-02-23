@@ -27,7 +27,7 @@ class VedtakTokenXController(
     @Value("\${DITT_SYKEFRAVAER_CLIENT_ID}")
     val dittSykefravaerClientId: String,
     @Value("\${TOKENX_IDP_IDPORTEN}")
-    val tokenxIdpIdporten: String,
+    val tokenxIdpIdporten: String
 ) {
     val log = logger()
 

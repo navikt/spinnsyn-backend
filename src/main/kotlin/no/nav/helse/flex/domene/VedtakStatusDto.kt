@@ -11,7 +11,7 @@ data class VedtakStatusDTO(
 
 enum class VedtakStatus {
     MOTATT,
-    LEST,
+    LEST
 }
 
 fun String.tilVedtakStatusDto(): VedtakStatusDTO = objectMapper.readValue(this)

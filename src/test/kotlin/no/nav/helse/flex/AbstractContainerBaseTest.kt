@@ -160,10 +160,9 @@ abstract class AbstractContainerBaseTest {
             "acr" to "Level4",
             "idp" to "idporten",
             "client_id" to clientId,
-            "pid" to fnr,
-        ),
+            "pid" to fnr
+        )
     ): String {
-
         return server.issueToken(
             issuerId,
             clientId,
@@ -183,7 +182,7 @@ fun MockOAuth2Server.token(
     issuerId: String,
     clientId: String = UUID.randomUUID().toString(),
     audience: String,
-    claims: Map<String, Any> = mapOf("acr" to "Level4"),
+    claims: Map<String, Any> = mapOf("acr" to "Level4")
 ): String {
     return this.issueToken(
         issuerId,

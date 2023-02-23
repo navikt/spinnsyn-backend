@@ -14,7 +14,7 @@ import java.util.*
 class MottaUtbetaling(
     private val utbetalingRepository: UtbetalingRepository,
     private val metrikk: Metrikk,
-    private val mottaAnnulering: MottaAnnulering,
+    private val mottaAnnulering: MottaAnnulering
 ) {
     val log = logger()
 

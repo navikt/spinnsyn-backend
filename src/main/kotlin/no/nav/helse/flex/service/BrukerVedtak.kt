@@ -38,7 +38,7 @@ class BrukerVedtak(
     private val utbetalingRepository: UtbetalingRepository,
     private val annulleringDAO: AnnulleringDAO,
     private val leggTilOrganisasjonavn: LeggTilOrganisasjonnavn,
-    private val vedtakStatusProducer: VedtakStatusKafkaProducer,
+    private val vedtakStatusProducer: VedtakStatusKafkaProducer
 ) {
 
     val log = logger()
@@ -46,7 +46,7 @@ class BrukerVedtak(
     enum class LesResultat {
         IKKE_FUNNET,
         LEST,
-        ALLEREDE_LEST,
+        ALLEREDE_LEST
     }
 
     class VedtakIkkeFunnetException(vedtaksId: String) : AbstractApiError(
@@ -58,7 +58,7 @@ class BrukerVedtak(
 
     fun hentVedtak(
         fnr: String,
-        hentSomBruker: Boolean = true,
+        hentSomBruker: Boolean = true
     ): List<RSVedtakWrapper> {
         return finnAlleVedtak(fnr, hentSomBruker)
             .leggTilDagerIVedtakPeriode()
@@ -273,17 +273,15 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             dagerPerson = dagerPerson,
             sykepengebelop = stønadsdagerArbeidsgiver.sumOf { it.belop }, // Deprecated
             sykepengebelopArbeidsgiver = stønadsdagerArbeidsgiver.sumOf { it.belop },
-            sykepengebelopPerson = stønadsdagerPerson.sumOf { it.belop },
+            sykepengebelopPerson = stønadsdagerPerson.sumOf { it.belop }
         )
     }
 }
 
 private fun List<RSVedtakWrapper>.markerRevurderte(): List<RSVedtakWrapper> {
-
     val revurderinger = this.filter { it.vedtak.utbetaling.utbetalingType == "REVURDERING" }
 
     return this.map {
-
         val denneErRevurdert = revurderinger
             .filter { revurdering -> revurdering.opprettetTimestamp.isAfter(it.opprettetTimestamp) }
             .filter { revurdering -> revurdering.vedtak.organisasjonsnummer == it.vedtak.organisasjonsnummer }

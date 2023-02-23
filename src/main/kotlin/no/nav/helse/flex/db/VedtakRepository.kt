@@ -29,5 +29,5 @@ data class VedtakDbRecord(
     val fnr: String,
     val vedtak: String,
     val opprettet: Instant,
-    val utbetalingId: String?,
+    val utbetalingId: String?
 )

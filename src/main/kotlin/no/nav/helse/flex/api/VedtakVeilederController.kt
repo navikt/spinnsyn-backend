@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 class VedtakVeilederController(
     private val clientIdValidation: ClientIdValidation,
     private val vedtakService: BrukerVedtak,
-    private val syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient,
+    private val syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient
 ) {
 
     @GetMapping("/api/v4/veileder/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])

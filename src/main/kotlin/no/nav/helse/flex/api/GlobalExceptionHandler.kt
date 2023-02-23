@@ -17,7 +17,6 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(java.lang.Exception::class)
     fun handleException(ex: Exception, request: HttpServletRequest): ResponseEntity<Any> {
-
         return when (ex) {
             is AbstractApiError -> {
                 when (ex.loglevel) {
@@ -50,7 +49,7 @@ abstract class AbstractApiError(
     val httpStatus: HttpStatus,
     val reason: String,
     val loglevel: LogLevel,
-    grunn: Throwable? = null,
+    grunn: Throwable? = null
 ) : RuntimeException(message, grunn)
 
 enum class LogLevel {

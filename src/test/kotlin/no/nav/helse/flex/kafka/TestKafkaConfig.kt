@@ -12,7 +12,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
 @Configuration
 class TestKafkaConfig(
-    private val aivenKafkaConfig: AivenKafkaConfig,
+    private val aivenKafkaConfig: AivenKafkaConfig
 ) {
 
     @Bean
@@ -38,7 +38,7 @@ class TestKafkaConfig(
         return DefaultKafkaConsumerFactory(
             testConsumerProps("varsling-consumer"),
             StringDeserializer(),
-            StringDeserializer(),
+            StringDeserializer()
         ).createConsumer()
     }
 }

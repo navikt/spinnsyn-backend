@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 @Controller
 class VedtakArkiveringController(
     private val clientIdValidation: ClientIdValidation,
-    private val vedtakService: BrukerVedtak,
+    private val vedtakService: BrukerVedtak
 ) {
 
     @GetMapping("/api/v1/arkivering/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -24,7 +24,7 @@ class VedtakArkiveringController(
                 NamespaceAndApp(
                     namespace = "flex",
                     app = "spinnsyn-frontend-arkivering"
-                ),
+                )
             )
         )
 
