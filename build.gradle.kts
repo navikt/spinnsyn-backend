@@ -75,7 +75,9 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "17"
-        kotlinOptions.allWarningsAsErrors = true
+        if (System.getenv("CI") == "true") {
+            kotlinOptions.allWarningsAsErrors = true
+        }
     }
 }
 tasks.withType<Test> {
