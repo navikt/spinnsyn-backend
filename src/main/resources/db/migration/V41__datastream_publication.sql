@@ -1,0 +1,1 @@
+CREATE PUBLICATION spinnsyn_backend_publication for ALL TABLES;
