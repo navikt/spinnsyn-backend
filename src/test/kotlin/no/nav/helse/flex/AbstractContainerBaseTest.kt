@@ -129,17 +129,20 @@ abstract class AbstractContainerBaseTest {
 
     companion object {
         init {
-            PostgreSQLContainer11().also {
-                it.start()
-                System.setProperty("spring.datasource.url", it.jdbcUrl)
-                System.setProperty("spring.datasource.username", it.username)
-                System.setProperty("spring.datasource.password", it.password)
+            PostgreSQLContainer11().apply {
+                // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
+                // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
+                withCommand("postgres", "-c", "wal_level=logical")
+                start()
+                System.setProperty("spring.datasource.url", jdbcUrl)
+                System.setProperty("spring.datasource.username", username)
+                System.setProperty("spring.datasource.password", password)
             }
 
-            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.1.0")).also {
-                it.start()
-                System.setProperty("on-prem-kafka.bootstrap-servers", it.bootstrapServers)
-                System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
+            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.1.0")).apply {
+                start()
+                System.setProperty("on-prem-kafka.bootstrap-servers", bootstrapServers)
+                System.setProperty("KAFKA_BROKERS", bootstrapServers)
             }
         }
     }
