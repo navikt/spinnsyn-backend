@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -31,14 +30,11 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
-    @Autowired
-    lateinit var restTemplate: RestTemplate
-
     final val fnr = "1233342"
     final val aktørId = "321"
     final val org = "987123129"
     final val ukedag = LocalDate.of(2022, 2, 1)
-    val utbetalingId = "168465"
+    final val utbetalingId = "168465"
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
@@ -160,7 +156,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
         vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull() // Jsonignore
         vedtak[0].vedtak.utbetaling.personOppdrag.shouldBeNull() // Jsonignore
-        vedtak[0].dager.shouldBeEmpty()
+        vedtak[0].dager.shouldHaveSize(1)
         vedtak[0].dagerArbeidsgiver.shouldBeEmpty()
         vedtak[0].dagerPerson.shouldHaveSize(1)
         vedtak[0].dagerPerson[0].dagtype `should be equal to` "NavDagSyk"
