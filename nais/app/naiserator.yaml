@@ -65,6 +65,7 @@ spec:
   azure:
     application:
       enabled: true
+      allowAllUsers: true
   env:
   {{#each env}}
      - name: {{@key}}
