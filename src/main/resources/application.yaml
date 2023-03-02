@@ -27,7 +27,6 @@ management:
   endpoints.web:
     base-path: /internal
     exposure.include: health,prometheus
-    path-mapping.prometheus: /prometheus
 
 logging.config: "classpath:logback.xml"
 

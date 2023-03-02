@@ -44,7 +44,6 @@ management:
   endpoints.web:
     base-path: /internal
     exposure.include: prometheus
-    path-mapping.prometheus: /prometheus
 
 syfotilgangskontroll.url: http://syfotilgangskontroll
 nais.cluster: test
