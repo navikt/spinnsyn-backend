@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Duration
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -115,7 +116,7 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         vedtakStatusService.prosesserUtbetalinger()
 
         statusKafkaConsumer.subscribeHvisIkkeSubscribed(VEDTAK_STATUS_TOPIC)
-        var meldinger = statusKafkaConsumer.hentProduserteRecords()
+        var meldinger = statusKafkaConsumer.hentProduserteRecords(Duration.ofMillis(1000))
         while (meldinger.isNotEmpty()) {
             meldinger = statusKafkaConsumer.hentProduserteRecords()
         }

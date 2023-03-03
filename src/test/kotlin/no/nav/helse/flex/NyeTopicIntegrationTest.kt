@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.web.client.RestTemplate
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -41,9 +40,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
-
-    @Autowired
-    lateinit var restTemplate: RestTemplate
 
     final val fnr = "1233342"
     final val aktørId = "321"
@@ -167,9 +163,9 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].orgnavn `should be equal to` org
         vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
-        vedtak[0].dagerArbeidsgiver[0].dato `should be equal to` now
-        vedtak[0].dagerArbeidsgiver[0].dagtype `should be equal to` "AvvistDag"
-        vedtak[0].dagerArbeidsgiver[0].begrunnelser[0] `should be equal to` "MinimumSykdomsgrad"
+        vedtak[0].dager[0].dato `should be equal to` now
+        vedtak[0].dager[0].dagtype `should be equal to` "AvvistDag"
+        vedtak[0].dager[0].begrunnelser[0] `should be equal to` "MinimumSykdomsgrad"
 
         organisasjonRepository.save(
             Organisasjon(

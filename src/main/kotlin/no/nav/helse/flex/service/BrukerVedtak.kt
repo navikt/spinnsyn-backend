@@ -196,7 +196,14 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             DayOfWeek.SUNDAY
         )
 
-        fun hentDager(oppdragDto: List<RSOppdrag?>): List<RSDag> {
+        fun tagRefusjon(type: String): String {
+            if (type == "Refusjon") {
+                return "Refusjon"
+            }
+            return ""
+        }
+
+        fun hentDager(oppdragene: Map<String, RSOppdrag?>): List<RSDag> {
             // Setter opp alle dager i perioden
             var dager = fom.datesUntil(tom.plusDays(1))
                 .map { dato ->
@@ -209,9 +216,9 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
                     )
                 }.toList()
 
-            // Oppdaterer dager med beløp og grad
-            oppdragDto.forEach {
-                it?.utbetalingslinjer?.forEach { linje ->
+            // Oppdaterer dager med beløp, grad og overstyr dagtype som har utbetaling
+            oppdragene.forEach { (type, oppdrag) ->
+                oppdrag?.utbetalingslinjer?.forEach { linje ->
                     val periode = linje.fom..linje.tom
                     val utbetalingslinjeUtenUtbetaling = linje.stønadsdager == 0
 
@@ -225,7 +232,12 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
                             } else {
                                 return@OppdaterBelopOgGrad dag.copy(
                                     belop = linje.dagsats,
-                                    grad = linje.grad
+                                    grad = linje.grad,
+                                    dagtype = if (linje.grad != 100.0) {
+                                        "Nav${tagRefusjon(type)}DelvisSykDag"
+                                    } else {
+                                        "Nav${tagRefusjon(type)}SykDag"
+                                    }
                                 )
                             }
                         }
@@ -242,10 +254,8 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
                         ?.let {
                             dag.copy(
                                 begrunnelser = it.begrunnelser,
-                                dagtype = if (it.type == "NavDag" && dag.grad != 100.0) {
-                                    "NavDagDelvisSyk"
-                                } else if (it.type == "NavDag") {
-                                    "NavDagSyk"
+                                dagtype = if (dag.dagtype.endsWith("SykDag")) {
+                                    dag.dagtype // Vi bruker egne dagtyper for dager hvor det er utbetalt
                                 } else {
                                     it.type
                                 }
@@ -257,24 +267,22 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             return dager ?: emptyList()
         }
 
-        // Dager med arbeidsgiverutbetaling
-        val dagerArbeidsgiver = hentDager(listOf(rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag))
-
-        val stønadsdagerArbeidsgiver = dagerArbeidsgiver.filter {
-            it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
-        }
-        // Persondager med utbetaling
-        val dagerPerson = hentDager(listOf(rSVedtakWrapper.vedtak.utbetaling.personOppdrag))
-
-        val stønadsdagerPerson = dagerPerson.filter {
-            it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
-        }
         // Alle dager
-        val dager = hentDager(listOf(rSVedtakWrapper.vedtak.utbetaling.personOppdrag, rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag))
+        val dager = hentDager(
+            mapOf(
+                "Brukerutbetaling" to rSVedtakWrapper.vedtak.utbetaling.personOppdrag,
+                "Refusjon" to rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag
+            )
+        )
+        val stønadsdagerPerson = dager.filter {
+            it.dagtype in listOf("NavDag", "NavSykDag", "NavDelvisSykDag")
+        }
+        val stønadsdagerArbeidsgiver = dager.filter {
+            it.dagtype in listOf("NavDag", "NavRefusjonSykDag", "NavRefusjonDelvisSykDag")
+        }
+
         rSVedtakWrapper.copy(
             dager = dager,
-            dagerArbeidsgiver = dagerArbeidsgiver, // TODO: fjern
-            dagerPerson = dagerPerson, // TODO: fjern
             sykepengebelop = stønadsdagerArbeidsgiver.sumOf { it.belop }, // Deprecated
             sykepengebelopArbeidsgiver = stønadsdagerArbeidsgiver.sumOf { it.belop },
             sykepengebelopPerson = stønadsdagerPerson.sumOf { it.belop }
