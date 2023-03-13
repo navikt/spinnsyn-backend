@@ -196,7 +196,7 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             DayOfWeek.SUNDAY
         )
 
-        fun hentDager(oppdragDto: List<RSOppdrag?>): List<RSDag> {
+        fun hentDager(oppdragDto: RSOppdrag?): List<RSDag> {
             // Setter opp alle dager i perioden
             var dager = fom.datesUntil(tom.plusDays(1))
                 .map { dato ->
@@ -210,27 +210,25 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
                 }.toList()
 
             // Oppdaterer dager med beløp og grad
-            oppdragDto.forEach {
-                it?.utbetalingslinjer?.forEach { linje ->
-                    val periode = linje.fom..linje.tom
-                    val utbetalingslinjeUtenUtbetaling = linje.stønadsdager == 0
+            oppdragDto?.utbetalingslinjer?.forEach { linje ->
+                val periode = linje.fom..linje.tom
+                val utbetalingslinjeUtenUtbetaling = linje.stønadsdager == 0
 
-                    dager = dager.map OppdaterBelopOgGrad@{ dag ->
-                        if (dag.dato in periode && dag.dato.dayOfWeek !in helg) {
-                            if (utbetalingslinjeUtenUtbetaling) {
-                                return@OppdaterBelopOgGrad dag.copy(
-                                    belop = 0,
-                                    grad = 0.0
-                                )
-                            } else {
-                                return@OppdaterBelopOgGrad dag.copy(
-                                    belop = linje.dagsats,
-                                    grad = linje.grad
-                                )
-                            }
+                dager = dager.map OppdaterBelopOgGrad@{ dag ->
+                    if (dag.dato in periode && dag.dato.dayOfWeek !in helg) {
+                        if (utbetalingslinjeUtenUtbetaling) {
+                            return@OppdaterBelopOgGrad dag.copy(
+                                belop = 0,
+                                grad = 0.0
+                            )
+                        } else {
+                            return@OppdaterBelopOgGrad dag.copy(
+                                belop = linje.dagsats,
+                                grad = linje.grad
+                            )
                         }
-                        return@OppdaterBelopOgGrad dag
                     }
+                    return@OppdaterBelopOgGrad dag
                 }
             }
 
@@ -258,21 +256,19 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
         }
 
         // Dager med arbeidsgiverutbetaling
-        val dagerArbeidsgiver = hentDager(listOf(rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag))
-
+        val dagerArbeidsgiver = hentDager(rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag)
         val stønadsdagerArbeidsgiver = dagerArbeidsgiver.filter {
             it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
         }
-        // Persondager med utbetaling
-        val dagerPerson = hentDager(listOf(rSVedtakWrapper.vedtak.utbetaling.personOppdrag))
 
+        // Persondager med utbetaling
+        val dagerPerson = hentDager(rSVedtakWrapper.vedtak.utbetaling.personOppdrag)
         val stønadsdagerPerson = dagerPerson.filter {
             it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
         }
-        // Alle dager
-        val dager = hentDager(listOf(rSVedtakWrapper.vedtak.utbetaling.personOppdrag, rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag))
+
         rSVedtakWrapper.copy(
-            dager = dager,
+            dager = emptyList(), // Deprecated
             dagerArbeidsgiver = dagerArbeidsgiver,
             dagerPerson = dagerPerson,
             sykepengebelopArbeidsgiver = stønadsdagerArbeidsgiver.sumOf { it.belop },
