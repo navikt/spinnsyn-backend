@@ -148,7 +148,6 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
         vedtak[0].orgnavn `should be equal to` org
-        vedtak[0].sykepengebelop `should be equal to` 0
         vedtak[0].sykepengebelopArbeidsgiver `should be equal to` 0
         vedtak[0].sykepengebelopPerson `should be equal to` 123
 

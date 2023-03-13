@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.client.RestTemplate
 import java.io.File
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
@@ -25,9 +24,6 @@ import java.util.concurrent.TimeUnit
 class UtregningAvRevurdering : AbstractContainerBaseTest() {
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
-
-    @Autowired
-    lateinit var restTemplate: RestTemplate
 
     final val fnr = "14127317470"
 
@@ -102,7 +98,6 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
         vedtak[0].dager[20].dagtype.shouldBeEqualTo("Fridag")
         vedtak[0].dager[20].belop.shouldBeEqualTo(0)
 
-        vedtak[0].sykepengebelop.shouldBeEqualTo(14958)
         vedtak[0].sykepengebelopArbeidsgiver.shouldBeEqualTo(14958)
         vedtak[0].sykepengebelopPerson.shouldBeEqualTo(0)
     }

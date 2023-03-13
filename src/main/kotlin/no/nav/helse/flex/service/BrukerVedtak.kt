@@ -275,7 +275,6 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             dager = dager,
             dagerArbeidsgiver = dagerArbeidsgiver,
             dagerPerson = dagerPerson,
-            sykepengebelop = stønadsdagerArbeidsgiver.sumOf { it.belop }, // Deprecated
             sykepengebelopArbeidsgiver = stønadsdagerArbeidsgiver.sumOf { it.belop },
             sykepengebelopPerson = stønadsdagerPerson.sumOf { it.belop }
         )
