@@ -273,8 +273,8 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
         val dager = hentDager(listOf(rSVedtakWrapper.vedtak.utbetaling.personOppdrag, rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag))
         rSVedtakWrapper.copy(
             dager = dager,
-            dagerArbeidsgiver = dagerArbeidsgiver, // TODO: fjern
-            dagerPerson = dagerPerson, // TODO: fjern
+            dagerArbeidsgiver = dagerArbeidsgiver,
+            dagerPerson = dagerPerson,
             sykepengebelop = stønadsdagerArbeidsgiver.sumOf { it.belop }, // Deprecated
             sykepengebelopArbeidsgiver = stønadsdagerArbeidsgiver.sumOf { it.belop },
             sykepengebelopPerson = stønadsdagerPerson.sumOf { it.belop }
