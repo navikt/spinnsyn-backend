@@ -54,7 +54,6 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
             andreArbeidsgivere = mapOf("123456547" to 500000.0, "547123456" to 300000.0, "5678" to 100000.0),
             annullert = false,
             revurdert = false,
-            dager = emptyList(),
             dagerArbeidsgiver = emptyList(),
             dagerPerson = emptyList(),
             sykepengebelopArbeidsgiver = 0,
