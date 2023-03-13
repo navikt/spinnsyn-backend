@@ -11,7 +11,7 @@ fun <K, V> Consumer<K, V>.subscribeHvisIkkeSubscribed(vararg topics: String) {
     }
 }
 
-fun <K, V> Consumer<K, V>.hentProduserteRecords(duration: Duration = Duration.ofMillis(100)): List<ConsumerRecord<K, V>> =
+fun <K, V> Consumer<K, V>.hentProduserteRecords(duration: Duration = Duration.ofMillis(500)): List<ConsumerRecord<K, V>> =
     this.poll(duration).also { this.commitSync() }.iterator().asSequence().toList()
 
 fun <K, V> Consumer<K, V>.ventPåRecords(

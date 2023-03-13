@@ -155,7 +155,6 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
         vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull() // Jsonignore
         vedtak[0].vedtak.utbetaling.personOppdrag.shouldBeNull() // Jsonignore
-        vedtak[0].dager.shouldHaveSize(1)
         vedtak[0].dagerArbeidsgiver.shouldBeEmpty()
         vedtak[0].dagerPerson.shouldHaveSize(1)
         vedtak[0].dagerPerson[0].dagtype `should be equal to` "NavDagSyk"

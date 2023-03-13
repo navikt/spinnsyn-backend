@@ -90,13 +90,12 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
         vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2021, 7, 1))
         vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2021, 8, 15))
 
-        vedtak[0].dager.size.shouldBeEqualTo(46)
         vedtak[0].dagerArbeidsgiver.size.shouldBeEqualTo(46)
         vedtak[0].dagerPerson.size.shouldBeEqualTo(28) // Inkluderer det som ikke er utbetalinger
-        vedtak[0].dager[19].dagtype.shouldBeEqualTo("NavDagSyk")
-        vedtak[0].dager[19].belop.shouldBeEqualTo(831)
-        vedtak[0].dager[20].dagtype.shouldBeEqualTo("Fridag")
-        vedtak[0].dager[20].belop.shouldBeEqualTo(0)
+        vedtak[0].dagerArbeidsgiver[19].dagtype.shouldBeEqualTo("NavDagSyk")
+        vedtak[0].dagerArbeidsgiver[19].belop.shouldBeEqualTo(831)
+        vedtak[0].dagerArbeidsgiver[20].dagtype.shouldBeEqualTo("Fridag")
+        vedtak[0].dagerArbeidsgiver[20].belop.shouldBeEqualTo(0)
 
         vedtak[0].sykepengebelopArbeidsgiver.shouldBeEqualTo(14958)
         vedtak[0].sykepengebelopPerson.shouldBeEqualTo(0)
