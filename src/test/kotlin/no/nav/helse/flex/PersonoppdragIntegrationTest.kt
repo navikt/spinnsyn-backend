@@ -148,7 +148,6 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
         vedtak[0].orgnavn `should be equal to` org
-        vedtak[0].sykepengebelop `should be equal to` 0
         vedtak[0].sykepengebelopArbeidsgiver `should be equal to` 0
         vedtak[0].sykepengebelopPerson `should be equal to` 123
 
@@ -156,7 +155,6 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
         vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull() // Jsonignore
         vedtak[0].vedtak.utbetaling.personOppdrag.shouldBeNull() // Jsonignore
-        vedtak[0].dager.shouldHaveSize(1)
         vedtak[0].dagerArbeidsgiver.shouldBeEmpty()
         vedtak[0].dagerPerson.shouldHaveSize(1)
         vedtak[0].dagerPerson[0].dagtype `should be equal to` "NavDagSyk"

@@ -6,16 +6,12 @@ import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.organisasjon.LeggTilOrganisasjonnavn
 import no.nav.helse.flex.organisasjon.Organisasjon
 import org.amshove.kluent.`should be equal to`
-import org.apache.kafka.clients.producer.Producer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
 
 class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
-
-    @Autowired
-    lateinit var kafkaProducer: Producer<String, String>
 
     @Autowired
     lateinit var leggTilOrganisasjonnavn: LeggTilOrganisasjonnavn
@@ -61,7 +57,6 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
             dager = emptyList(),
             dagerArbeidsgiver = emptyList(),
             dagerPerson = emptyList(),
-            sykepengebelop = 0,
             sykepengebelopArbeidsgiver = 0,
             sykepengebelopPerson = 0
         )

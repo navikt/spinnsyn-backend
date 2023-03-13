@@ -18,7 +18,6 @@ data class RSVedtakWrapper(
     val dager: List<RSDag> = emptyList(), // Deprecated
     val dagerArbeidsgiver: List<RSDag> = emptyList(),
     val dagerPerson: List<RSDag> = emptyList(),
-    val sykepengebelop: Int = 0, // Deprecated
     val sykepengebelopArbeidsgiver: Int = 0,
     val sykepengebelopPerson: Int = 0,
     val andreArbeidsgivere: Map<String, Double>?
