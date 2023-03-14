@@ -10,7 +10,6 @@ data class RSVedtakWrapper(
     val lest: Boolean,
     val lestDato: OffsetDateTime? = null,
     val vedtak: RSVedtak,
-    val opprettet: LocalDate,
     val opprettetTimestamp: Instant,
     val orgnavn: String,
     val annullert: Boolean = false,

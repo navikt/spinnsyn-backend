@@ -29,7 +29,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 
 @Service
@@ -146,7 +145,6 @@ class BrukerVedtak(
                 andreArbeidsgivere = vedtaket.grunnlagForSykepengegrunnlagPerArbeidsgiver,
                 lestDato = this.lest?.atZone(ZoneId.of("Europe/Oslo"))?.toOffsetDateTime(),
                 opprettetTimestamp = this.opprettet,
-                opprettet = LocalDate.ofInstant(this.opprettet, ZoneId.of("Europe/Oslo")),
                 vedtak = RSVedtak(
                     organisasjonsnummer = vedtaket.organisasjonsnummer,
                     dokumenter = vedtakForUtbetaling.flatMap { it.dokumenter },

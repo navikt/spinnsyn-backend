@@ -8,6 +8,7 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -90,6 +91,7 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
         vedtak[0].revurdert.`should be false`()
         vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2021, 7, 1))
         vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2021, 8, 15))
+        vedtak[0].andreArbeidsgivere.shouldBeNull()
 
         vedtak[0].dagerPerson.shouldBeEmpty()
         vedtak[0].dagerArbeidsgiver.shouldHaveSize(46)
