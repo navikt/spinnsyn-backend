@@ -15,7 +15,6 @@ data class RSVedtakWrapper(
     val orgnavn: String,
     val annullert: Boolean = false,
     val revurdert: Boolean = false,
-    val dager: List<RSDag> = emptyList(), // Deprecated
     val dagerArbeidsgiver: List<RSDag> = emptyList(),
     val dagerPerson: List<RSDag> = emptyList(),
     val sykepengebelopArbeidsgiver: Int = 0,

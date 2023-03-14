@@ -268,7 +268,6 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
         }
 
         rSVedtakWrapper.copy(
-            dager = emptyList(), // Deprecated
             dagerArbeidsgiver = dagerArbeidsgiver,
             dagerPerson = dagerPerson,
             sykepengebelopArbeidsgiver = stønadsdagerArbeidsgiver.sumOf { it.belop },
