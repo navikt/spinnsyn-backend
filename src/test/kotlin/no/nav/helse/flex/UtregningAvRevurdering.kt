@@ -6,6 +6,7 @@ import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
+import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -90,8 +91,8 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
         vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2021, 7, 1))
         vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2021, 8, 15))
 
-        vedtak[0].dagerArbeidsgiver.size.shouldBeEqualTo(46)
-        vedtak[0].dagerPerson.size.shouldBeEqualTo(28) // Inkluderer det som ikke er utbetalinger
+        vedtak[0].dagerPerson.shouldBeEmpty()
+        vedtak[0].dagerArbeidsgiver.shouldHaveSize(46)
         vedtak[0].dagerArbeidsgiver[19].dagtype.shouldBeEqualTo("NavDagSyk")
         vedtak[0].dagerArbeidsgiver[19].belop.shouldBeEqualTo(831)
         vedtak[0].dagerArbeidsgiver[20].dagtype.shouldBeEqualTo("Fridag")

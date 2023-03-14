@@ -233,45 +233,62 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             }
 
             // Oppdater dager med dagtype og begrunnelser
-            dager = dager
-                .map { dag ->
-                    rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager
-                        ?.find { it.dato == dag.dato }
-                        ?.let {
-                            dag.copy(
-                                begrunnelser = it.begrunnelser,
-                                dagtype = if (it.type == "NavDag" && dag.grad != 100.0) {
-                                    "NavDagDelvisSyk"
-                                } else if (it.type == "NavDag") {
-                                    "NavDagSyk"
-                                } else {
-                                    it.type
-                                }
-                            )
-                        }
-                        ?: dag
-                }
-                .filter { !((it.dagtype.startsWith("NavDag") && it.belop == 0)) }
-            return dager ?: emptyList()
+            dager = dager.map { dag ->
+                rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager
+                    ?.find { it.dato == dag.dato }
+                    ?.let {
+                        dag.copy(
+                            begrunnelser = it.begrunnelser,
+                            dagtype = if (it.type == "NavDag" && dag.grad != 100.0) {
+                                "NavDagDelvisSyk"
+                            } else if (it.type == "NavDag") {
+                                "NavDagSyk"
+                            } else {
+                                it.type
+                            }
+                        )
+                    }
+                    ?: dag
+            }
+
+            val sisteUtbetalteDag = dager.indexOfLast { it.belop > 0 }
+            if (sisteUtbetalteDag == -1) {
+                return dager // Ingen dager med utbetaling
+            }
+
+            val annenUtbetalingISlutten = dager.subList(sisteUtbetalteDag, dager.size).indexOfFirst { it.belop == 0 && it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }
+            if (annenUtbetalingISlutten > -1) {
+                dager = dager.subList(0, annenUtbetalingISlutten).toList() // Ligger en person/refusjon utbetaling senere så vi stanser visningen her
+            }
+
+            val forsteUtbetalteDag = dager.indexOfFirst { it.belop > 0 }
+            val annenUtbetalingIStarten = dager.subList(0, forsteUtbetalteDag).indexOfLast { it.belop == 0 && it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }
+            if (annenUtbetalingIStarten > -1) {
+                dager = dager.subList(forsteUtbetalteDag, dager.size).toList() // Ligger en person/refusjon utbetaling tidligere så vi starter visningen her
+            }
+
+            return dager
         }
 
-        // Dager med arbeidsgiverutbetaling
-        val dagerArbeidsgiver = hentDager(rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag)
-        val stønadsdagerArbeidsgiver = dagerArbeidsgiver.filter {
-            it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
-        }
+        var dagerArbeidsgiver = hentDager(rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag)
+        val sykepengebelopArbeidsgiver = dagerArbeidsgiver.filter { it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }.sumOf { it.belop }
 
-        // Persondager med utbetaling
-        val dagerPerson = hentDager(rSVedtakWrapper.vedtak.utbetaling.personOppdrag)
-        val stønadsdagerPerson = dagerPerson.filter {
-            it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
+        var dagerPerson = hentDager(rSVedtakWrapper.vedtak.utbetaling.personOppdrag)
+        val sykepengebelopPerson = dagerPerson.filter { it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }.sumOf { it.belop }
+
+        if (sykepengebelopPerson == 0 && sykepengebelopArbeidsgiver == 0) {
+            dagerArbeidsgiver = emptyList() // Helt avvist vedtak vises bare i dagerPerson
+        } else if (sykepengebelopPerson == 0) {
+            dagerPerson = emptyList() // Refusjonutbetaling
+        } else if (sykepengebelopArbeidsgiver == 0) {
+            dagerArbeidsgiver = emptyList() // Brukerutbetaling
         }
 
         rSVedtakWrapper.copy(
             dagerArbeidsgiver = dagerArbeidsgiver,
             dagerPerson = dagerPerson,
-            sykepengebelopArbeidsgiver = stønadsdagerArbeidsgiver.sumOf { it.belop },
-            sykepengebelopPerson = stønadsdagerPerson.sumOf { it.belop }
+            sykepengebelopArbeidsgiver = sykepengebelopArbeidsgiver,
+            sykepengebelopPerson = sykepengebelopPerson
         )
     }
 }
