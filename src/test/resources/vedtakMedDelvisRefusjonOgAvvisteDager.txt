@@ -1,0 +1,31 @@
+{
+"fødselsnummer": "04868197728",
+"aktørId": "2096267827246",
+"organisasjonsnummer": "967170232",
+"fom": "2023-02-01",
+"tom": "2023-02-28",
+"skjæringstidspunkt": "2023-01-01",
+"dokumenter": [
+  {
+    "dokumentId": "049ad55f-c234-40fa-ad03-2dfe43e7c591",
+    "type": "Søknad"
+  },
+  {
+    "dokumentId": "274703d2-11d1-4b1a-8b06-341fe93ded29",
+    "type": "Inntektsmelding"
+  },
+  {
+    "dokumentId": "e23fd00e-3633-47b2-8dba-ad2e0a2a8810",
+    "type": "Sykmelding"
+  }
+],
+"inntekt": 32000.0,
+"sykepengegrunnlag": 384000.0,
+"grunnlagForSykepengegrunnlag": 384000.0,
+"grunnlagForSykepengegrunnlagPerArbeidsgiver": {
+  "967170232": 384000.0
+},
+"begrensning": "ER_IKKE_6G_BEGRENSET",
+"utbetalingId": "f2bbfe43-da56-4fff-9792-ae33e2a75aee",
+"vedtakFattetTidspunkt": "2023-03-20T11:12:47.739811157"
+}

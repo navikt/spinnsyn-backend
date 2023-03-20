@@ -256,7 +256,7 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
 
             val annenUtbetalingISlutten = dager.subList(sisteUtbetalteDag, dager.size).indexOfFirst { it.belop == 0 && it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }
             if (annenUtbetalingISlutten > -1) {
-                dager = dager.subList(0, annenUtbetalingISlutten).toList() // Ligger en person/refusjon utbetaling senere så vi stanser visningen her
+                dager = dager.subList(0, sisteUtbetalteDag + annenUtbetalingISlutten).toList() // Ligger en person/refusjon utbetaling senere så vi stanser visningen her
             }
 
             val forsteUtbetalteDag = dager.indexOfFirst { it.belop > 0 }
