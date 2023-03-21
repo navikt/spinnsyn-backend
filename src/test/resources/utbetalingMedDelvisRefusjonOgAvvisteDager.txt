@@ -1,0 +1,368 @@
+{
+"event": "utbetaling_utbetalt",
+"utbetalingId": "f2bbfe43-da56-4fff-9792-ae33e2a75aee",
+"korrelasjonsId": "0ebc9b23-e957-4ebc-9bd3-f1e329b9d027",
+"fødselsnummer": "04868197728",
+"aktørId": "2096267827246",
+"organisasjonsnummer": "967170232",
+"fom": "2023-01-01",
+"tom": "2023-02-28",
+"forbrukteSykedager": 26,
+"gjenståendeSykedager": 222,
+"stønadsdager": 26,
+"automatiskBehandling": false,
+"arbeidsgiverOppdrag": {
+  "mottaker": "967170232",
+  "fagområde": "SPREF",
+  "fagsystemId": "5JHFSRB2VRFS7IHT6EK5DRBUIQ",
+  "nettoBeløp": 4844,
+  "stønadsdager": 18,
+  "fom": "2023-01-17",
+  "tom": "2023-02-09",
+  "utbetalingslinjer": [
+    {
+      "fom": "2023-01-17",
+      "tom": "2023-01-31",
+      "dagsats": 1477,
+      "totalbeløp": 16247,
+      "grad": 100.0,
+      "stønadsdager": 11
+    },
+    {
+      "fom": "2023-02-01",
+      "tom": "2023-02-09",
+      "dagsats": 692,
+      "totalbeløp": 4844,
+      "grad": 100.0,
+      "stønadsdager": 7
+    }
+  ]
+},
+"personOppdrag": {
+  "mottaker": "04868197728",
+  "fagområde": "SP",
+  "fagsystemId": "IVXR36Y2Z5HUFKZRFRGKVSOKWI",
+  "nettoBeløp": 17311,
+  "stønadsdager": 15,
+  "fom": "2023-02-01",
+  "tom": "2023-02-21",
+  "utbetalingslinjer": [
+    {
+      "fom": "2023-02-01",
+      "tom": "2023-02-09",
+      "dagsats": 785,
+      "totalbeløp": 5495,
+      "grad": 100.0,
+      "stønadsdager": 7
+    },
+    {
+      "fom": "2023-02-10",
+      "tom": "2023-02-21",
+      "dagsats": 1477,
+      "totalbeløp": 11816,
+      "grad": 100.0,
+      "stønadsdager": 8
+    }
+  ]
+},
+"type": "UTBETALING",
+"utbetalingsdager": [
+  {
+    "dato": "2023-01-01",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-02",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-03",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-04",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-05",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-06",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-07",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-08",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-09",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-10",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-11",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-12",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-13",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-14",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-15",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-16",
+    "type": "ArbeidsgiverperiodeDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-17",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-18",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-19",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-20",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-21",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-22",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-23",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-24",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-25",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-26",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-27",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-28",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-29",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-30",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-01-31",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-01",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-02",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-03",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-04",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-05",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-06",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-07",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-08",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-09",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-10",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-11",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-12",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-13",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-14",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-15",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-16",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-17",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-18",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-19",
+    "type": "NavHelgDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-20",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-21",
+    "type": "NavDag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-22",
+    "type": "Feriedag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-23",
+    "type": "Feriedag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-24",
+    "type": "Feriedag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-25",
+    "type": "Feriedag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-26",
+    "type": "Feriedag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-27",
+    "type": "Feriedag",
+    "begrunnelser": []
+  },
+  {
+    "dato": "2023-02-28",
+    "type": "Feriedag",
+    "begrunnelser": []
+  }
+],
+"antallVedtak": 1,
+"foreløpigBeregnetSluttPåSykepenger": "2024-01-04"
+}

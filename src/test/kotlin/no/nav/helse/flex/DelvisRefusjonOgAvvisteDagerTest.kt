@@ -5,10 +5,7 @@ import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -23,15 +20,14 @@ import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class UtregningAvRevurdering : AbstractContainerBaseTest() {
+class DelvisRefusjonOgAvvisteDagerTest : AbstractContainerBaseTest() {
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
-    final val fnr = "14127317470"
+    final val fnr = "04868197728"
 
-    val vedtak1 = File("src/test/resources/vedtakDel1.txt").readText()
-    val vedtak2 = File("src/test/resources/vedtakDel2.txt").readText()
-    val utbetaling = File("src/test/resources/utbetaling.txt").readText()
+    val vedtak = File("src/test/resources/vedtakMedDelvisRefusjonOgAvvisteDager.txt").readText()
+    val utbetaling = File("src/test/resources/utbetalingMedDelvisRefusjonOgAvvisteDager.txt").readText()
 
     @Test
     @Order(1)
@@ -51,7 +47,7 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
 
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first()
         dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("REVURDERING")
+        dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
     }
 
     @Test
@@ -62,15 +58,7 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak1
-            )
-        ).get()
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak2
+                vedtak
             )
         ).get()
 
@@ -84,23 +72,23 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
 
     @Test
     @Order(3)
-    fun `Kan hente revurderingen`() {
+    fun `Arbeidsgiver og persondager avkortes riktig`() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
-        vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "REVURDERING"
-        vedtak[0].revurdert.`should be false`()
-        vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2021, 7, 1))
-        vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2021, 8, 15))
-        vedtak[0].andreArbeidsgivere.shouldBeNull()
+        vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
+        vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2023, 2, 1))
+        vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2023, 2, 28))
 
-        vedtak[0].dagerPerson.shouldBeEmpty()
-        vedtak[0].dagerArbeidsgiver.shouldHaveSize(46)
-        vedtak[0].dagerArbeidsgiver[19].dagtype.shouldBeEqualTo("NavDagSyk")
-        vedtak[0].dagerArbeidsgiver[19].belop.shouldBeEqualTo(831)
-        vedtak[0].dagerArbeidsgiver[20].dagtype.shouldBeEqualTo("Fridag")
-        vedtak[0].dagerArbeidsgiver[20].belop.shouldBeEqualTo(0)
+        vedtak[0].sykepengebelopPerson.shouldBeEqualTo(17311)
+        vedtak[0].dagerPerson.shouldHaveSize(28)
 
-        vedtak[0].sykepengebelopArbeidsgiver.shouldBeEqualTo(14958)
-        vedtak[0].sykepengebelopPerson.shouldBeEqualTo(0)
+        vedtak[0].sykepengebelopArbeidsgiver.shouldBeEqualTo(4844)
+        vedtak[0].dagerArbeidsgiver.shouldHaveSize(9)
+        vedtak[0].dagerArbeidsgiver[0].dagtype.shouldBeEqualTo("NavDagSyk")
+        vedtak[0].dagerArbeidsgiver[0].belop.shouldBeEqualTo(692)
+        vedtak[0].dagerArbeidsgiver[3].dagtype.shouldBeEqualTo("NavHelgDag")
+        vedtak[0].dagerArbeidsgiver[3].belop.shouldBeEqualTo(0)
+        vedtak[0].dagerArbeidsgiver[8].dagtype.shouldBeEqualTo("NavDagSyk")
+        vedtak[0].dagerArbeidsgiver[8].belop.shouldBeEqualTo(692)
     }
 }

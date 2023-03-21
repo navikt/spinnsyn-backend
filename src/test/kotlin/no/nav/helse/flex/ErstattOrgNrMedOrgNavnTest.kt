@@ -48,7 +48,6 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
                 sykepengegrunnlag = null,
                 vedtakFattetTidspunkt = LocalDate.now()
             ),
-            opprettet = LocalDate.now(),
             opprettetTimestamp = Instant.now(),
             orgnavn = "1234",
             andreArbeidsgivere = mapOf("123456547" to 500000.0, "547123456" to 300000.0, "5678" to 100000.0),
