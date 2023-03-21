@@ -193,11 +193,14 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             DayOfWeek.SATURDAY,
             DayOfWeek.SUNDAY
         )
+        val bomloDagerMedBetaling = listOf(
+            "NavDag",
+            "ArbeidsgiverperiodeDagNav"
+        )
         val dagtyperMedUtbetaling = listOf(
             "NavDag",
             "NavDagSyk",
-            "NavDagDelvisSyk",
-            "ArbeidsgiverperiodeDagNav"
+            "NavDagDelvisSyk"
         )
 
         fun hentDager(oppdragDto: RSOppdrag?): List<RSDag> {
@@ -243,9 +246,9 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
                     ?.let {
                         dag.copy(
                             begrunnelser = it.begrunnelser,
-                            dagtype = if (it.type == "NavDag" && dag.grad != 100.0) {
+                            dagtype = if (it.type in bomloDagerMedBetaling && dag.grad != 100.0) {
                                 "NavDagDelvisSyk"
-                            } else if (it.type == "NavDag") {
+                            } else if (it.type in bomloDagerMedBetaling) {
                                 "NavDagSyk"
                             } else {
                                 it.type

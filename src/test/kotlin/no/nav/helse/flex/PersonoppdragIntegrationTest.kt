@@ -165,7 +165,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].dagerArbeidsgiver.shouldBeEmpty()
 
         vedtak[0].dagerPerson.shouldHaveSize(2)
-        vedtak[0].dagerPerson[0].dagtype `should be equal to` "ArbeidsgiverperiodeDagNav"
+        vedtak[0].dagerPerson[0].dagtype `should be equal to` "NavDagSyk"
         vedtak[0].dagerPerson[0].dato `should be equal to` fom
         vedtak[0].dagerPerson[1].dagtype `should be equal to` "NavDagSyk"
         vedtak[0].dagerPerson[1].dato `should be equal to` tom
