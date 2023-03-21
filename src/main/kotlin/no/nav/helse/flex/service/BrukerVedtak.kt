@@ -193,6 +193,12 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             DayOfWeek.SATURDAY,
             DayOfWeek.SUNDAY
         )
+        val dagtyperMedUtbetaling = listOf(
+            "NavDag",
+            "NavDagSyk",
+            "NavDagDelvisSyk",
+            "ArbeidsgiverperiodeDagNav"
+        )
 
         fun hentDager(oppdragDto: RSOppdrag?): List<RSDag> {
             // Setter opp alle dager i perioden
@@ -254,13 +260,13 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
                 return dager // Ingen dager med utbetaling
             }
 
-            val annenUtbetalingISlutten = dager.subList(sisteUtbetalteDag, dager.size).indexOfFirst { it.belop == 0 && it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }
+            val annenUtbetalingISlutten = dager.subList(sisteUtbetalteDag, dager.size).indexOfFirst { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
             if (annenUtbetalingISlutten > -1) {
                 dager = dager.subList(0, sisteUtbetalteDag + annenUtbetalingISlutten).toList() // Ligger en person/refusjon utbetaling senere så vi stanser visningen her
             }
 
             val forsteUtbetalteDag = dager.indexOfFirst { it.belop > 0 }
-            val annenUtbetalingIStarten = dager.subList(0, forsteUtbetalteDag).indexOfLast { it.belop == 0 && it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }
+            val annenUtbetalingIStarten = dager.subList(0, forsteUtbetalteDag).indexOfLast { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
             if (annenUtbetalingIStarten > -1) {
                 dager = dager.subList(forsteUtbetalteDag, dager.size).toList() // Ligger en person/refusjon utbetaling tidligere så vi starter visningen her
             }
@@ -269,10 +275,10 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
         }
 
         var dagerArbeidsgiver = hentDager(rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag)
-        val sykepengebelopArbeidsgiver = dagerArbeidsgiver.filter { it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }.sumOf { it.belop }
+        val sykepengebelopArbeidsgiver = dagerArbeidsgiver.filter { it.dagtype in dagtyperMedUtbetaling }.sumOf { it.belop }
 
         var dagerPerson = hentDager(rSVedtakWrapper.vedtak.utbetaling.personOppdrag)
-        val sykepengebelopPerson = dagerPerson.filter { it.dagtype in listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk") }.sumOf { it.belop }
+        val sykepengebelopPerson = dagerPerson.filter { it.dagtype in dagtyperMedUtbetaling }.sumOf { it.belop }
 
         if (sykepengebelopPerson == 0 && sykepengebelopArbeidsgiver == 0) {
             dagerArbeidsgiver = emptyList() // Helt avvist vedtak vises bare i dagerPerson
