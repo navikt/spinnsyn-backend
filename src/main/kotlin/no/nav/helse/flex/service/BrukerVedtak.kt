@@ -186,22 +186,23 @@ private fun UtbetalingUtbetalt.OppdragDto.tilRsOppdrag(): RSOppdrag = RSOppdrag(
 )
 
 private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> {
+    val helg = listOf(
+        DayOfWeek.SATURDAY,
+        DayOfWeek.SUNDAY
+    )
+    val bomloDagerMedBetaling = listOf(
+        "NavDag",
+        "ArbeidsgiverperiodeDagNav"
+    )
+    val dagtyperMedUtbetaling = listOf(
+        "NavDag",
+        "NavDagSyk",
+        "NavDagDelvisSyk"
+    )
+
     return map { rSVedtakWrapper ->
         val fom = rSVedtakWrapper.vedtak.fom
         val tom = rSVedtakWrapper.vedtak.tom
-        val helg = listOf(
-            DayOfWeek.SATURDAY,
-            DayOfWeek.SUNDAY
-        )
-        val bomloDagerMedBetaling = listOf(
-            "NavDag",
-            "ArbeidsgiverperiodeDagNav"
-        )
-        val dagtyperMedUtbetaling = listOf(
-            "NavDag",
-            "NavDagSyk",
-            "NavDagDelvisSyk"
-        )
 
         fun hentDager(oppdragDto: RSOppdrag?): List<RSDag> {
             // Setter opp alle dager i perioden
