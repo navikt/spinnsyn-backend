@@ -33,15 +33,16 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     final val fnr = "1233342"
     final val aktørId = "321"
     final val org = "987123129"
-    final val ukedag = LocalDate.of(2022, 2, 1)
+    final val fom = LocalDate.of(2022, 2, 1)
+    final val tom = fom.plusDays(1)
     final val utbetalingId = "168465"
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = aktørId,
         organisasjonsnummer = org,
-        fom = ukedag,
-        tom = ukedag,
-        skjæringstidspunkt = ukedag,
+        fom = fom,
+        tom = tom,
+        skjæringstidspunkt = fom,
         dokumenter = emptyList(),
         inntekt = 0.0,
         sykepengegrunnlag = 0.0,
@@ -56,8 +57,8 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         fødselsnummer = fnr,
         aktørId = aktørId,
         organisasjonsnummer = org,
-        fom = ukedag,
-        tom = ukedag,
+        fom = fom,
+        tom = tom,
         utbetalingId = utbetalingId,
         antallVedtak = 1,
         event = "eventet",
@@ -69,22 +70,27 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
             mottaker = org,
             fagområde = "SP",
             fagsystemId = "1234",
-            nettoBeløp = 123,
+            nettoBeløp = 246,
             utbetalingslinjer = listOf(
                 UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto(
                     dagsats = 123,
-                    fom = ukedag,
-                    tom = ukedag,
+                    fom = fom,
+                    tom = tom,
                     grad = 100.0,
-                    stønadsdager = 1,
-                    totalbeløp = 123
+                    stønadsdager = 2,
+                    totalbeløp = 246
                 )
             )
         ),
         type = "UTBETALING",
         utbetalingsdager = listOf(
             UtbetalingdagDto(
-                dato = ukedag,
+                dato = fom,
+                type = "ArbeidsgiverperiodeDagNav",
+                begrunnelser = emptyList()
+            ),
+            UtbetalingdagDto(
+                dato = tom,
                 type = "NavDag",
                 begrunnelser = emptyList()
             )
@@ -149,15 +155,19 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         vedtak[0].lest.`should be false`()
         vedtak[0].orgnavn `should be equal to` org
         vedtak[0].sykepengebelopArbeidsgiver `should be equal to` 0
-        vedtak[0].sykepengebelopPerson `should be equal to` 123
+        vedtak[0].sykepengebelopPerson `should be equal to` 246
 
         vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
         vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull() // Jsonignore
         vedtak[0].vedtak.utbetaling.personOppdrag.shouldBeNull() // Jsonignore
+
         vedtak[0].dagerArbeidsgiver.shouldBeEmpty()
-        vedtak[0].dagerPerson.shouldHaveSize(1)
+
+        vedtak[0].dagerPerson.shouldHaveSize(2)
         vedtak[0].dagerPerson[0].dagtype `should be equal to` "NavDagSyk"
-        vedtak[0].dagerPerson[0].dato `should be equal to` ukedag
+        vedtak[0].dagerPerson[0].dato `should be equal to` fom
+        vedtak[0].dagerPerson[1].dagtype `should be equal to` "NavDagSyk"
+        vedtak[0].dagerPerson[1].dato `should be equal to` tom
     }
 }
