@@ -86,7 +86,7 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
         utbetalingsdager = listOf(
             UtbetalingdagDto(
                 dato = fom,
-                type = "ArbeidsgiverperiodeDagNav",
+                type = "ArbeidsgiverperiodeDag",
                 begrunnelser = emptyList()
             ),
             UtbetalingdagDto(
