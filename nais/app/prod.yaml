@@ -2,8 +2,8 @@ db_tier: db-custom-1-3840
 kafkaPool: nav-prod
 replicas_min: 2
 replicas_max: 3
-syfotilgangskontrollExternalHost: syfo-tilgangskontroll.prod-fss-pub.nais.io
-b2cloginExternalHost: navnob2c.b2clogin.com
+external-host:
+  - syfo-tilgangskontroll.prod-fss-pub.nais.io
 env:
   SYFOTILGANGSKONTROLL_URL: https://syfo-tilgangskontroll.prod-fss-pub.nais.io
   SYFOTILGANGSKONTROLL_AAD_CLIENT_ID: prod-fss.teamsykefravr.syfo-tilgangskontroll
