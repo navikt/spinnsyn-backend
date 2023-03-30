@@ -53,9 +53,9 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: login.microsoftonline.com
-        - host: {{syfotilgangskontrollExternalHost}}
-        - host: {{b2cloginExternalHost}}
+  {{#each external-host}}
+        - host: {{this}}
+  {{/each}}
     inbound:
       rules:
         - application: spinnsyn-frontend-arkivering
