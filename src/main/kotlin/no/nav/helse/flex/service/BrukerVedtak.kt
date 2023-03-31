@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 
 @Service
@@ -186,103 +187,15 @@ private fun UtbetalingUtbetalt.OppdragDto.tilRsOppdrag(): RSOppdrag = RSOppdrag(
 )
 
 private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> {
-    val helg = listOf(
-        DayOfWeek.SATURDAY,
-        DayOfWeek.SUNDAY
-    )
-    val bomloDagerMedBetaling = listOf(
-        "NavDag",
-        "ArbeidsgiverperiodeDagNav"
-    )
-    val dagtyperMedUtbetaling = listOf(
-        "NavDag",
-        "NavDagSyk",
-        "NavDagDelvisSyk"
-    )
-
     return map { rSVedtakWrapper ->
         val fom = rSVedtakWrapper.vedtak.fom
         val tom = rSVedtakWrapper.vedtak.tom
 
-        fun hentDager(oppdragDto: RSOppdrag?): List<RSDag> {
-            // Setter opp alle dager i perioden
-            var dager = fom.datesUntil(tom.plusDays(1))
-                .map { dato ->
-                    RSDag(
-                        dato = dato,
-                        belop = 0,
-                        grad = 0.0,
-                        dagtype = if (dato.dayOfWeek in helg) "NavHelgDag" else "NavDag",
-                        begrunnelser = emptyList()
-                    )
-                }.toList()
+        var dagerArbeidsgiver = hentDager(fom, tom, rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag, rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager)
+        val sykepengebelopArbeidsgiver = dagerArbeidsgiver.sumOf { it.belop }
 
-            // Oppdaterer dager med beløp og grad
-            oppdragDto?.utbetalingslinjer?.forEach { linje ->
-                val periode = linje.fom..linje.tom
-                val utbetalingslinjeUtenUtbetaling = linje.stønadsdager == 0
-
-                dager = dager.map OppdaterBelopOgGrad@{ dag ->
-                    if (dag.dato in periode && dag.dato.dayOfWeek !in helg) {
-                        if (utbetalingslinjeUtenUtbetaling) {
-                            return@OppdaterBelopOgGrad dag.copy(
-                                belop = 0,
-                                grad = 0.0
-                            )
-                        } else {
-                            return@OppdaterBelopOgGrad dag.copy(
-                                belop = linje.dagsats,
-                                grad = linje.grad
-                            )
-                        }
-                    }
-                    return@OppdaterBelopOgGrad dag
-                }
-            }
-
-            // Oppdater dager med dagtype og begrunnelser
-            dager = dager.map { dag ->
-                rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager
-                    ?.find { it.dato == dag.dato }
-                    ?.let {
-                        dag.copy(
-                            begrunnelser = it.begrunnelser,
-                            dagtype = if (it.type in bomloDagerMedBetaling && dag.grad != 100.0) {
-                                "NavDagDelvisSyk"
-                            } else if (it.type in bomloDagerMedBetaling) {
-                                "NavDagSyk"
-                            } else {
-                                it.type
-                            }
-                        )
-                    }
-                    ?: dag
-            }
-
-            val sisteUtbetalteDag = dager.indexOfLast { it.belop > 0 }
-            if (sisteUtbetalteDag == -1) {
-                return dager // Ingen dager med utbetaling
-            }
-
-            val annenUtbetalingISlutten = dager.subList(sisteUtbetalteDag, dager.size).indexOfFirst { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
-            if (annenUtbetalingISlutten > -1) {
-                dager = dager.subList(0, sisteUtbetalteDag + annenUtbetalingISlutten).toList() // Ligger en person/refusjon utbetaling senere så vi stanser visningen her
-            }
-
-            val forsteUtbetalteDag = dager.indexOfFirst { it.belop > 0 }
-            val annenUtbetalingIStarten = dager.subList(0, forsteUtbetalteDag).indexOfLast { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
-            if (annenUtbetalingIStarten > -1) {
-                dager = dager.subList(forsteUtbetalteDag, dager.size).toList() // Ligger en person/refusjon utbetaling tidligere så vi starter visningen her
-            }
-
-            return dager
-        }
-
-        var dagerArbeidsgiver = hentDager(rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag)
-        val sykepengebelopArbeidsgiver = dagerArbeidsgiver.filter { it.dagtype in dagtyperMedUtbetaling }.sumOf { it.belop }
-
-        var dagerPerson = hentDager(rSVedtakWrapper.vedtak.utbetaling.personOppdrag)
-        val sykepengebelopPerson = dagerPerson.filter { it.dagtype in dagtyperMedUtbetaling }.sumOf { it.belop }
+        var dagerPerson = hentDager(fom, tom, rSVedtakWrapper.vedtak.utbetaling.personOppdrag, rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager)
+        val sykepengebelopPerson = dagerPerson.sumOf { it.belop }
 
         if (sykepengebelopPerson == 0 && sykepengebelopArbeidsgiver == 0) {
             dagerArbeidsgiver = emptyList() // Helt avvist vedtak vises bare i dagerPerson
@@ -299,6 +212,79 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             sykepengebelopPerson = sykepengebelopPerson
         )
     }
+}
+
+private val dagtyperMedUtbetaling = listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
+private val helg = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+private fun hentDager(fom: LocalDate, tom: LocalDate, oppdragDto: RSOppdrag?, utbetalingsdager: List<RSUtbetalingdag>?): List<RSDag> {
+    // Setter opp alle dager i perioden
+    var dager = fom.datesUntil(tom.plusDays(1))
+        .map { dato ->
+            RSDag(
+                dato = dato,
+                belop = 0,
+                grad = 0.0,
+                dagtype = if (dato.dayOfWeek in helg) "NavHelgDag" else "NavDag",
+                begrunnelser = emptyList()
+            )
+        }
+        // Oppdaterer ukedager med beløp
+        .map { dag ->
+            val overlappendeLinjer = oppdragDto?.utbetalingslinjer
+                ?.takeUnless { dag.dato.dayOfWeek in helg } // endrer bare ukedager
+                ?.filter { linje -> linje.overlapperMed(dag.dato) } // alle linje som overlapper
+                ?: emptyList()
+
+            overlappendeLinjer.fold(dag) { dagen, linjen ->
+                val utbetalingslinjeUtenUtbetaling = linjen.stønadsdager == 0
+                dagen.copy(
+                    belop = if (utbetalingslinjeUtenUtbetaling) 0 else linjen.dagsats,
+                    grad = if (utbetalingslinjeUtenUtbetaling) 0.0 else linjen.grad
+                )
+            }
+        }
+        // Oppdaterer dager med dagtype og begrunnelser
+        .map { dag ->
+            utbetalingsdager
+                ?.firstOrNull { it.dato == dag.dato }
+                ?.let { utbetalingsdagen ->
+                    dag.copy(
+                        begrunnelser = utbetalingsdagen.begrunnelser,
+                        dagtype = when (utbetalingsdagen.type) {
+                            "NavDag" -> when {
+                                dag.grad < 100 -> "NavDagDelvisSyk"
+                                else -> "NavDagSyk"
+                            }
+                            "ArbeidsgiverperiodeDag" -> when {
+                                dag.belop == 0 -> "ArbeidsgiverperiodeDag"
+                                // nav utbetaler enten arbeidsgiver eller person
+                                dag.grad < 100 -> "NavDagDelvisSyk"
+                                else -> "NavDagSyk"
+                            }
+                            else -> utbetalingsdagen.type
+                        }
+                    )
+                } ?: dag
+        }
+        .toList()
+
+    val sisteUtbetalteDag = dager.indexOfLast { it.belop > 0 }
+    if (sisteUtbetalteDag == -1) {
+        return dager // Ingen dager med utbetaling
+    }
+
+    val annenUtbetalingISlutten = dager.subList(sisteUtbetalteDag, dager.size).indexOfFirst { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
+    if (annenUtbetalingISlutten > -1) {
+        dager = dager.subList(0, sisteUtbetalteDag + annenUtbetalingISlutten).toList() // Ligger en person/refusjon utbetaling senere så vi stanser visningen her
+    }
+
+    val forsteUtbetalteDag = dager.indexOfFirst { it.belop > 0 }
+    val annenUtbetalingIStarten = dager.subList(0, forsteUtbetalteDag).indexOfLast { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
+    if (annenUtbetalingIStarten > -1) {
+        dager = dager.subList(forsteUtbetalteDag, dager.size).toList() // Ligger en person/refusjon utbetaling tidligere så vi starter visningen her
+    }
+
+    return dager
 }
 
 private fun List<RSVedtakWrapper>.markerRevurderte(): List<RSVedtakWrapper> {
