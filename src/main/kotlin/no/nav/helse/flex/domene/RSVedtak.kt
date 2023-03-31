@@ -66,7 +66,7 @@ data class RSUtbetalingslinje(
     val grad: Double,
     val stønadsdager: Int
 ) {
-    fun overlapperMed(dato: LocalDate) = fom <= dato && tom >= dato
+    fun overlapperMed(dato: LocalDate) = dato in fom..tom
 }
 
 data class RSUtbetalingdag(
