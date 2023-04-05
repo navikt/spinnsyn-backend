@@ -302,4 +302,70 @@ class HentDagerTest {
             )
         )
     }
+
+    @Test
+    fun `Arbeidsgiverperiode overtas av NAV og første dag er i helga`() {
+        val søndag = mandag.minusDays(1)
+
+        hentDager(
+            fom = søndag.plusDays(0),
+            tom = søndag.plusDays(17),
+            oppdragDto = RSOppdrag(
+                mottaker = "12345678",
+                nettoBeløp = 1300,
+                utbetalingslinjer = listOf(
+                    RSUtbetalingslinje(
+                        fom = søndag.plusDays(1),
+                        tom = søndag.plusDays(17),
+                        dagsats = 100,
+                        dagsatsTransformasjonHjelper = 100,
+                        totalbeløp = 1300,
+                        grad = 100.0,
+                        stønadsdager = 13
+                    )
+                )
+            ),
+            utbetalingsdager = listOf(
+                RSUtbetalingdag(søndag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(16), "NavDag", emptyList()),
+                RSUtbetalingdag(søndag.plusDays(17), "NavDag", emptyList())
+            )
+        ).shouldBeEqualTo(
+            listOf(
+                RSDag(søndag.plusDays(0), 0, 0.0, "NavHelgDag", emptyList()),
+                RSDag(søndag.plusDays(1), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(2), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(3), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(4), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(5), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(6), 0, 0.0, "NavHelgDag", emptyList()),
+                RSDag(søndag.plusDays(7), 0, 0.0, "NavHelgDag", emptyList()),
+                RSDag(søndag.plusDays(8), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(9), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(10), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(11), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(12), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(13), 0, 0.0, "NavHelgDag", emptyList()),
+                RSDag(søndag.plusDays(14), 0, 0.0, "NavHelgDag", emptyList()),
+                RSDag(søndag.plusDays(15), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList())
+            )
+        )
+    }
 }
