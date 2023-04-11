@@ -31,6 +31,7 @@ import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.streams.asSequence
 
 @Service
 class BrukerVedtak(
@@ -216,9 +217,10 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
 
 private val dagtyperMedUtbetaling = listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
 private val helg = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
-private fun hentDager(fom: LocalDate, tom: LocalDate, oppdragDto: RSOppdrag?, utbetalingsdager: List<RSUtbetalingdag>?): List<RSDag> {
+internal fun hentDager(fom: LocalDate, tom: LocalDate, oppdragDto: RSOppdrag?, utbetalingsdager: List<RSUtbetalingdag>?): List<RSDag> {
     // Setter opp alle dager i perioden
     var dager = fom.datesUntil(tom.plusDays(1))
+        .asSequence()
         .map { dato ->
             RSDag(
                 dato = dato,
@@ -228,11 +230,10 @@ private fun hentDager(fom: LocalDate, tom: LocalDate, oppdragDto: RSOppdrag?, ut
                 begrunnelser = emptyList()
             )
         }
-        // Oppdaterer ukedager med beløp
+        // Oppdaterer med beløp
         .map { dag ->
             val overlappendeLinjer = oppdragDto?.utbetalingslinjer
-                ?.takeUnless { dag.dato.dayOfWeek in helg } // endrer bare ukedager
-                ?.filter { linje -> linje.overlapperMed(dag.dato) } // alle linje som overlapper
+                ?.filter { linje -> linje.overlapperMed(dag.dato) } // alle linjer som overlapper
                 ?: emptyList()
 
             overlappendeLinjer.fold(dag) { dagen, linjen ->
@@ -243,30 +244,48 @@ private fun hentDager(fom: LocalDate, tom: LocalDate, oppdragDto: RSOppdrag?, ut
                 )
             }
         }
+        // Slår sammen med dager fra bømlo
+        .associateWith { dag -> utbetalingsdager?.find { it.dato == dag.dato } }
         // Oppdaterer dager med dagtype og begrunnelser
-        .map { dag ->
-            utbetalingsdager
-                ?.firstOrNull { it.dato == dag.dato }
-                ?.let { utbetalingsdagen ->
-                    dag.copy(
-                        begrunnelser = utbetalingsdagen.begrunnelser,
-                        dagtype = when (utbetalingsdagen.type) {
-                            "NavDag" -> when {
-                                dag.grad < 100 -> "NavDagDelvisSyk"
-                                else -> "NavDagSyk"
-                            }
-                            "ArbeidsgiverperiodeDag" -> when {
-                                dag.belop == 0 -> "ArbeidsgiverperiodeDag"
-                                // nav utbetaler enten arbeidsgiver eller person
-                                dag.grad < 100 -> "NavDagDelvisSyk"
-                                else -> "NavDagSyk"
-                            }
-                            else -> utbetalingsdagen.type
+        .map { (dag, utbetalingsdagen) ->
+            when (utbetalingsdagen) {
+                null -> dag
+                else -> dag.copy(
+                    begrunnelser = utbetalingsdagen.begrunnelser,
+                    dagtype = when (utbetalingsdagen.type) {
+                        "NavDag" -> when {
+                            dag.grad < 100 -> "NavDagDelvisSyk"
+                            else -> "NavDagSyk"
                         }
-                    )
-                } ?: dag
+                        "ArbeidsgiverperiodeDag" -> when {
+                            dag.belop == 0 -> "ArbeidsgiverperiodeDag"
+                            dag.dato.dayOfWeek in helg -> "NavHelgDag" // NAV betaler ikke arbeidsgiverperiode i helg
+                            dag.grad < 100 -> "NavDagDelvisSyk" // Vises som gradert syk
+                            else -> "NavDagSyk" // Vises som 100% syk
+                        }
+                        else -> utbetalingsdagen.type
+                    },
+                    belop = if (dag.dato.dayOfWeek in helg) 0 else dag.belop,
+                    grad = if (dag.dato.dayOfWeek in helg) 0.0 else dag.grad
+                )
+            }
         }
         .toList()
+
+    val sisteArbeidsgiverperiodeDag = dager.lastOrNull { it.dagtype == "ArbeidsgiverperiodeDag" }
+    if (sisteArbeidsgiverperiodeDag?.dato?.dayOfWeek == DayOfWeek.SUNDAY) {
+        val overtagelseMandag = utbetalingsdager?.find { it.dato == sisteArbeidsgiverperiodeDag.dato.plusDays(1) }
+        if (overtagelseMandag?.type == "ArbeidsgiverperiodeDag") {
+            // Dersom nav overtar på mandag så skal ikke helgen før vises som arbeidsgiverperiode
+            dager = dager.map { dag ->
+                when (dag.dato) {
+                    overtagelseMandag.dato.minusDays(2) -> dag.copy(dagtype = "NavHelgDag")
+                    overtagelseMandag.dato.minusDays(1) -> dag.copy(dagtype = "NavHelgDag")
+                    else -> dag
+                }
+            }
+        }
+    }
 
     val sisteUtbetalteDag = dager.indexOfLast { it.belop > 0 }
     if (sisteUtbetalteDag == -1) {
