@@ -28,8 +28,8 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         """
         UPDATE utbetaling
         SET lest = :lest
-        WHERE fnr = :fnr
-        AND id = :id
+        WHERE id = :id
+        AND fnr = :fnr
         AND lest IS NULL
         """
     )
