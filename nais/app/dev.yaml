@@ -2,6 +2,8 @@ db_tier: db-f1-micro
 kafkaPool: nav-dev
 replicas_min: 2
 replicas_max: 2
+cpu: 400m
+memory: 600Mi
 external-host:
   - syfo-tilgangskontroll.dev-fss-pub.nais.io
 env:
