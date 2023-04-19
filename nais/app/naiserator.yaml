@@ -29,10 +29,10 @@ spec:
     path: /internal/prometheus
   resources:
     limits:
-      memory: 1Gi
+      memory: {{memory}}
     requests:
-      cpu: 400m
-      memory: 768Mi
+      cpu: {{cpu}}
+      memory: {{memory}}
   gcp:
     sqlInstances:
       - type: POSTGRES_11
