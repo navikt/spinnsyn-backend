@@ -1,6 +1,6 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.client.SyfoTilgangskontrollOboClient.Companion.NAV_PERSONIDENT_HEADER
+import no.nav.helse.flex.client.syfotilgangskontroll.SyfoTilgangskontrollOboClient.Companion.NAV_PERSONIDENT_HEADER
 import org.springframework.http.MediaType
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo

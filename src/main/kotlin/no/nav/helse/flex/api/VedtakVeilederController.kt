@@ -1,6 +1,6 @@
 package no.nav.helse.flex.api
 
-import no.nav.helse.flex.client.SyfoTilgangskontrollOboClient
+import no.nav.helse.flex.client.syfotilgangskontroll.SyfoTilgangskontrollOboClient
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation.NamespaceAndApp
 import no.nav.helse.flex.domene.RSVedtakWrapper

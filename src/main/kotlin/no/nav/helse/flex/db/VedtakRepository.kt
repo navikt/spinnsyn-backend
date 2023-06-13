@@ -14,6 +14,15 @@ interface VedtakRepository : CrudRepository<VedtakDbRecord, String> {
 
     @Query(
         """
+            SELECT *
+            FROM vedtak_v2
+            WHERE fnr in (:identer)
+        """
+    )
+    fun findVedtakDbRecordsByIdenter(identer: List<String>): List<VedtakDbRecord>
+
+    @Query(
+        """
         SELECT utbetaling_id
         FROM vedtak_v2
         WHERE utbetaling_id in (:utbetalingIder)

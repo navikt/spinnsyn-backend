@@ -35,6 +35,7 @@ import kotlin.streams.asSequence
 
 @Service
 class BrukerVedtak(
+    private val identService: IdentService,
     private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
     private val annulleringDAO: AnnulleringDAO,
@@ -61,7 +62,8 @@ class BrukerVedtak(
         fnr: String,
         hentSomBruker: Boolean = true
     ): List<RSVedtakWrapper> {
-        return finnAlleVedtak(fnr, hentSomBruker)
+        val identer = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnr)
+        return finnAlleVedtak(identer.alle(), hentSomBruker)
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
             .leggTilOrgnavn()
@@ -113,10 +115,10 @@ class BrukerVedtak(
         return leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
     }
 
-    private fun finnAlleVedtak(fnr: String, hentSomBruker: Boolean): List<RSVedtakWrapper> {
-        val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
-        val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-        val annulleringer = annulleringDAO.finnAnnullering(fnr)
+    private fun finnAlleVedtak(fnr: List<String>, hentSomBruker: Boolean): List<RSVedtakWrapper> {
+        val vedtak = vedtakRepository.findVedtakDbRecordsByIdenter(fnr)
+        val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByIdent(fnr)
+        val annulleringer = annulleringDAO.finnAnnulleringMedIdent(fnr)
 
         val eksisterendeUtbetalingIder = utbetalinger
             .filter { it.utbetalingType == "UTBETALING" || it.utbetalingType == "REVURDERING" }

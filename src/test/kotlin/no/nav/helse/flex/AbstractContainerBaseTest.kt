@@ -11,6 +11,7 @@ import no.nav.helse.flex.service.SendVedtakStatus
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -65,6 +66,11 @@ abstract class AbstractContainerBaseTest {
     lateinit var sendVedtakStatus: SendVedtakStatus
 
     var syfotilgangskontrollMockRestServiceServer: MockRestServiceServer? = null
+
+    var pdlMockWebserver = MockWebServer().apply {
+        System.setProperty("pdl.api.url", "http://localhost:$port")
+        dispatcher = PdlMockDispatcher
+    }
 
     @PostConstruct
     fun setupRestServiceServers() {
@@ -125,6 +131,13 @@ abstract class AbstractContainerBaseTest {
 
     fun settUtbetalingKlarTilVisning() {
         sendVedtakStatus.prosesserUtbetalinger()
+    }
+
+    fun settOppPdl() {
+        pdlMockWebserver = MockWebServer().apply {
+            System.setProperty("pdl.api.url", "http://localhost:$port")
+            dispatcher = PdlMockDispatcher
+        }
     }
 
     companion object {

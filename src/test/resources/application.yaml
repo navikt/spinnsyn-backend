@@ -11,7 +11,7 @@ spring:
       maximum-pool-size: 3
 
 elector.path: dont_look_for_leader
-
+pdl.api.url: "http://pdl-api.pdl"
 
 aiven-kafka:
   auto-offset-reset: earliest
@@ -30,6 +30,14 @@ no.nav.security.jwt:
       accepted_audience: spinnsyn-backend-client-id
   client:
     registration:
+      pdl-api-client-credentials:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
+        grant-type: client_credentials
+        scope: pdl-api
+        authentication:
+          client-id: client-id
+          client-secret: secretzz
+          client-auth-method: client_secret_basic
       onbehalfof-syfotilgangskontroll:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer

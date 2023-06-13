@@ -33,6 +33,20 @@ class AnnulleringDAO(
         }
     }
 
+    fun finnAnnulleringMedIdent(fnr: List<String>): List<Annullering> {
+        return namedParameterJdbcTemplate.query(
+            """
+            SELECT id, fnr, annullering, opprettet
+            FROM annullering
+            WHERE fnr in (:fnr)
+            """,
+            MapSqlParameterSource()
+                .addValue("fnr", fnr)
+        ) { resultSet, _ ->
+            resultSet.toAnnullering()
+        }
+    }
+
     fun opprettAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant) {
         val annulleringJSON = PGobject().also { it.type = "json"; it.value = annullering }
 
