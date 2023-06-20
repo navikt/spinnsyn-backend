@@ -41,4 +41,13 @@ class TestKafkaConfig(
             StringDeserializer()
         ).createConsumer()
     }
+
+    @Bean
+    fun vedtakKafkaConsumer(): Consumer<String, String> {
+        return DefaultKafkaConsumerFactory(
+            testConsumerProps("spinnsyn-consumer"),
+            StringDeserializer(),
+            StringDeserializer()
+        ).createConsumer()
+    }
 }
