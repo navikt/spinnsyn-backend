@@ -30,6 +30,8 @@ management:
 
 logging.config: "classpath:logback.xml"
 
+pdl.api.url: ${PDL_BASE_URL}
+
 syfo-tilgangskontroll.url: ${SYFOTILGANGSKONTROLL_URL}
 nais.cluster: ${NAIS_CLUSTER_NAME}
 
