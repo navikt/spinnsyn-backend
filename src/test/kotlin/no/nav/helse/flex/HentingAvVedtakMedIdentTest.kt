@@ -77,7 +77,6 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
     @Test
     @Order(2)
     fun `vedtak som er lagret med forskjellige fødselsnummer merkeres som lest`() {
-
         val vedtakNr2iLista = hentVedtakMedTokenXToken(fnr1)[1].id
 
         lesVedtakMedTokenXToken(fnr1, vedtakNr2iLista)
