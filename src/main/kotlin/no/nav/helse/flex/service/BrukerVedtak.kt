@@ -95,8 +95,9 @@ class BrukerVedtak(
     }
 
     private fun lesUtbetaling(fnr: String, utbetalingsId: String): LesResultat {
+        val identer = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnr)
         val utbetalingDbRecord = utbetalingRepository
-            .findUtbetalingDbRecordsByFnr(fnr)
+            .findUtbetalingDbRecordsByIdent(identer.alle())
             .find { it.id == utbetalingsId }
             ?: return LesResultat.IKKE_FUNNET
 
