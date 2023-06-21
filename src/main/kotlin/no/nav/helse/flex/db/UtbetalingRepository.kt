@@ -38,11 +38,11 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         UPDATE utbetaling
         SET lest = :lest
         WHERE id = :id
-        AND fnr = :fnr
+        AND fnr in (:identer)
         AND lest IS NULL
         """
     )
-    fun updateLestByFnrAndId(lest: Instant, fnr: String, id: String): Boolean
+    fun updateLestByIdentAndId(lest: Instant, identer: List<String>, id: String): Boolean
 
     @Modifying
     @Query(

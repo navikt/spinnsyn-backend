@@ -8,16 +8,21 @@ import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.service.IdentService
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldHaveSize
+import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility
+import org.junit.jupiter.api.MethodOrderer
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @SpringBootTest(classes = [Application::class])
+@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
 
     @Autowired
@@ -47,6 +52,7 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
     val utbetaling3 = lagUtbetaling(fnr3, org, fom.plusDays(2), tom.plusDays(2), utbetalingId3)
 
     @Test
+    @Order(1)
     fun `tre vedtak som er lagret med forskjellige fødselsnummere tilhører samme person`() {
         vedtak1.leggPaKafka()
         vedtak2.leggPaKafka()
@@ -66,6 +72,27 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
         val vedtakFraService1 = hentVedtakMedTokenXToken(fnr1)
 
         vedtakFraService1.size `should be equal to` 3
+    }
+
+    @Test
+    @Order(2)
+    fun `vedtak som er lagret med forskjellige fødselsnummer merkeres som lest`() {
+        vedtak1.leggPaKafka()
+        vedtak2.leggPaKafka()
+        vedtak3.leggPaKafka()
+
+        utbetaling1.leggPaKafka()
+        utbetaling2.leggPaKafka()
+        utbetaling3.leggPaKafka()
+
+
+        val vedtakNr2iLista = hentVedtakMedTokenXToken(fnr1)[1].id
+
+        lesVedtakMedTokenXToken(fnr1, vedtakNr2iLista)
+
+        val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByIdent(listOf(fnr1, fnr2, fnr3)).sortedBy { it.fnr }
+        utbetalinger[1].lest.shouldNotBeNull()
+
     }
 
     private fun lagVedtak(fnr: String, aktørId: String, org: String, dato: LocalDate, utbetalingId: String): VedtakFattetForEksternDto {
