@@ -85,14 +85,12 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
         utbetaling2.leggPaKafka()
         utbetaling3.leggPaKafka()
 
-
         val vedtakNr2iLista = hentVedtakMedTokenXToken(fnr1)[1].id
 
         lesVedtakMedTokenXToken(fnr1, vedtakNr2iLista)
 
         val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByIdent(listOf(fnr1, fnr2, fnr3)).sortedBy { it.fnr }
         utbetalinger[1].lest.shouldNotBeNull()
-
     }
 
     private fun lagVedtak(fnr: String, aktørId: String, org: String, dato: LocalDate, utbetalingId: String): VedtakFattetForEksternDto {
