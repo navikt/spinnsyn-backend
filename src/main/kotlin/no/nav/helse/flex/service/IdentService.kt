@@ -5,7 +5,6 @@ import no.nav.helse.flex.client.pdl.FOLKEREGISTERIDENT
 import no.nav.helse.flex.client.pdl.PdlClient
 import no.nav.helse.flex.client.pdl.PdlIdent
 import no.nav.helse.flex.client.pdl.ResponseData
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 import java.io.Serializable
 
@@ -16,7 +15,6 @@ class IdentService(private val pdlClient: PdlClient) {
         return this.filter { it.gruppe == FOLKEREGISTERIDENT }.map { it.ident }
     }
 
-    @Cacheable("flex-folkeregister-identer-med-historikk")
     fun hentFolkeregisterIdenterMedHistorikkForFnr(fnr: String): FolkeregisterIdenter {
         val identer = pdlClient.hentIdenterMedHistorikk(fnr)
         return FolkeregisterIdenter(
