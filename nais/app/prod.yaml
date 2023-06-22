@@ -4,7 +4,11 @@ replicas_min: 2
 replicas_max: 3
 cpu: 600m
 memory: 800Mi
+external-host:
+  - pdl-api.prod-fss-pub.nais.io
 env:
+  PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
+  PDL_API_AAD_CLIENT_ID: prod-fss.pdl.pdl-api
   SYFOTILGANGSKONTROLL_URL: http://syfo-tilgangskontroll.teamsykefravr
   SYFOTILGANGSKONTROLL_AAD_CLIENT_ID: prod-gcp.teamsykefravr.syfo-tilgangskontroll
   SPINNSYN_FRONTEND_CLIENT_ID: prod-gcp:flex:spinnsyn-frontend

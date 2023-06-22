@@ -6,12 +6,16 @@ import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSVedtakWrapper
+import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.OrganisasjonRepository
 import no.nav.helse.flex.service.SendVedtakStatus
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import okhttp3.mockwebserver.MockWebServer
+import org.apache.kafka.clients.consumer.Consumer
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -29,6 +33,7 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 import java.util.*
+import kotlin.concurrent.thread
 
 private class PostgreSQLContainer11 : PostgreSQLContainer<PostgreSQLContainer11>("postgres:11.4-alpine")
 
@@ -63,6 +68,9 @@ abstract class AbstractContainerBaseTest {
 
     @Autowired
     lateinit var sendVedtakStatus: SendVedtakStatus
+
+    @Autowired
+    lateinit var vedtakKafkaConsumer: Consumer<String, String>
 
     var syfotilgangskontrollMockRestServiceServer: MockRestServiceServer? = null
 
@@ -128,22 +136,37 @@ abstract class AbstractContainerBaseTest {
     }
 
     companion object {
+
+        val pdlMockWebserver: MockWebServer
+
         init {
-            PostgreSQLContainer11().apply {
-                // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
-                // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
-                withCommand("postgres", "-c", "wal_level=logical")
-                start()
-                System.setProperty("spring.datasource.url", jdbcUrl)
-                System.setProperty("spring.datasource.username", username)
-                System.setProperty("spring.datasource.password", password)
+            val threads = mutableListOf<Thread>()
+            thread {
+                PostgreSQLContainer11().apply {
+                    // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
+                    // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
+                    withCommand("postgres", "-c", "wal_level=logical")
+                    start()
+                    System.setProperty("spring.datasource.url", jdbcUrl)
+                    System.setProperty("spring.datasource.username", username)
+                    System.setProperty("spring.datasource.password", password)
+                }
+            }.also { threads.add(it) }
+
+            thread {
+                KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.1.0")).apply {
+                    start()
+                    System.setProperty("on-prem-kafka.bootstrap-servers", bootstrapServers)
+                    System.setProperty("KAFKA_BROKERS", bootstrapServers)
+                }
+            }.also { threads.add(it) }
+
+            pdlMockWebserver = MockWebServer().apply {
+                System.setProperty("pdl.api.url", "http://localhost:$port")
+                dispatcher = PdlMockDispatcher
             }
 
-            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.1.0")).apply {
-                start()
-                System.setProperty("on-prem-kafka.bootstrap-servers", bootstrapServers)
-                System.setProperty("KAFKA_BROKERS", bootstrapServers)
-            }
+            threads.forEach { it.join() }
         }
     }
 
@@ -152,6 +175,11 @@ abstract class AbstractContainerBaseTest {
         utbetalingRepository.deleteAll()
         vedtakRepository.deleteAll()
         namedParameterJdbcTemplate.update("DELETE FROM ANNULLERING", MapSqlParameterSource())
+    }
+
+    @BeforeAll
+    fun `Vi subscriber til kafka topicet før testene kjører`() {
+        vedtakKafkaConsumer.subscribeHvisIkkeSubscribed(VEDTAK_TOPIC)
     }
 
     fun tokenxToken(

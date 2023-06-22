@@ -54,6 +54,10 @@ spec:
       rules:
         - application: syfo-tilgangskontroll
           namespace: teamsykefravr
+      external:
+    {{#each external-host}}
+        - host: {{this}}
+    {{/each}}
     inbound:
       rules:
         - application: spinnsyn-frontend-arkivering

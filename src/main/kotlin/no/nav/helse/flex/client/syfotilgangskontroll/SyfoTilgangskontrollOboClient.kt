@@ -1,4 +1,4 @@
-package no.nav.helse.flex.client
+package no.nav.helse.flex.client.syfotilgangskontroll
 
 import no.nav.helse.flex.logger
 import org.springframework.beans.factory.annotation.Value

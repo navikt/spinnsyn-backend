@@ -35,6 +35,7 @@ import kotlin.streams.asSequence
 
 @Service
 class BrukerVedtak(
+    private val identService: IdentService,
     private val vedtakRepository: VedtakRepository,
     private val utbetalingRepository: UtbetalingRepository,
     private val annulleringDAO: AnnulleringDAO,
@@ -61,7 +62,8 @@ class BrukerVedtak(
         fnr: String,
         hentSomBruker: Boolean = true
     ): List<RSVedtakWrapper> {
-        return finnAlleVedtak(fnr, hentSomBruker)
+        val identer = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnr)
+        return finnAlleVedtak(identer.alle(), hentSomBruker)
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
             .leggTilOrgnavn()
@@ -69,7 +71,8 @@ class BrukerVedtak(
     }
 
     fun lesVedtak(fnr: String, vedtaksId: String): String {
-        val lesUtbetaling = lesUtbetaling(fnr = fnr, utbetalingsId = vedtaksId)
+        val identer = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnr)
+        val lesUtbetaling = lesUtbetaling(identer = identer.alle(), utbetalingsId = vedtaksId)
 
         if (lesUtbetaling == LesResultat.IKKE_FUNNET) {
             throw VedtakIkkeFunnetException(vedtaksId)
@@ -83,18 +86,18 @@ class BrukerVedtak(
             VedtakStatusDTO(fnr = fnr, id = vedtaksId, vedtakStatus = VedtakStatus.LEST)
         )
 
-        utbetalingRepository.updateLestByFnrAndId(
+        utbetalingRepository.updateLestByIdentAndId(
             lest = Instant.now(),
-            fnr = fnr,
+            identer = identer.alle(),
             id = vedtaksId
         )
 
         return "Leste vedtak $vedtaksId"
     }
 
-    private fun lesUtbetaling(fnr: String, utbetalingsId: String): LesResultat {
+    private fun lesUtbetaling(identer: List<String>, utbetalingsId: String): LesResultat {
         val utbetalingDbRecord = utbetalingRepository
-            .findUtbetalingDbRecordsByFnr(fnr)
+            .findUtbetalingDbRecordsByIdent(identer)
             .find { it.id == utbetalingsId }
             ?: return LesResultat.IKKE_FUNNET
 
@@ -113,10 +116,10 @@ class BrukerVedtak(
         return leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
     }
 
-    private fun finnAlleVedtak(fnr: String, hentSomBruker: Boolean): List<RSVedtakWrapper> {
-        val vedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
-        val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-        val annulleringer = annulleringDAO.finnAnnullering(fnr)
+    private fun finnAlleVedtak(identer: List<String>, hentSomBruker: Boolean): List<RSVedtakWrapper> {
+        val vedtak = vedtakRepository.findVedtakDbRecordsByIdenter(identer)
+        val utbetalinger = utbetalingRepository.findUtbetalingDbRecordsByIdent(identer)
+        val annulleringer = annulleringDAO.finnAnnulleringMedIdent(identer)
 
         val eksisterendeUtbetalingIder = utbetalinger
             .filter { it.utbetalingType == "UTBETALING" || it.utbetalingType == "REVURDERING" }
