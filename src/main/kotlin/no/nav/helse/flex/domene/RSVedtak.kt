@@ -1,6 +1,7 @@
 package no.nav.helse.flex.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -33,7 +34,7 @@ data class RSVedtak(
     val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>?,
     val begrensning: String?, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
     val vedtakFattetTidspunkt: LocalDate?,
-    val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?,
+    val sykepengegrunnlagsfakta: JsonNode?,
     val begrunnelser: List<Begrunnelse>?
 ) : Periode
 
