@@ -32,7 +32,9 @@ data class RSVedtak(
     val grunnlagForSykepengegrunnlag: Double?,
     val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>?,
     val begrensning: String?, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
-    val vedtakFattetTidspunkt: LocalDate?
+    val vedtakFattetTidspunkt: LocalDate?,
+    val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?,
+    val begrunnelser: List<Begrunnelse>?
 ) : Periode
 
 data class RSUtbetalingUtbetalt(
