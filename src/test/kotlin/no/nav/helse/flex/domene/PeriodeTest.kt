@@ -35,7 +35,6 @@ class PeriodeTest {
         første.overlapper(andre) shouldBeEqualTo true
         andre.overlapper(første) shouldBeEqualTo true
     }
-
 }
 
 fun Pair<String, String>.periode(): Periode {
