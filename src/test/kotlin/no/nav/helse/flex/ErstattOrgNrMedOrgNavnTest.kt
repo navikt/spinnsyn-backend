@@ -46,7 +46,9 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
                 grunnlagForSykepengegrunnlag = null,
                 inntekt = null,
                 sykepengegrunnlag = null,
-                vedtakFattetTidspunkt = LocalDate.now()
+                vedtakFattetTidspunkt = LocalDate.now(),
+                begrunnelser = null,
+                sykepengegrunnlagsfakta = null
             ),
             opprettetTimestamp = Instant.now(),
             orgnavn = "1234",

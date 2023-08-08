@@ -1,5 +1,6 @@
 package no.nav.helse.flex.domene
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.objectMapper
 import java.time.LocalDate
@@ -18,7 +19,15 @@ data class VedtakFattetForEksternDto(
     val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>?,
     val begrensning: String?, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
     val utbetalingId: String?,
-    val vedtakFattetTidspunkt: LocalDate?
+    val vedtakFattetTidspunkt: LocalDate?,
+    val sykepengegrunnlagsfakta: JsonNode? = null,
+    val begrunnelser: List<Begrunnelse>? = null
+)
+
+data class Begrunnelse(
+    val årsak: String,
+    val begrunnelse: String,
+    val perioder: List<PeriodeImpl>
 )
 
 fun String.tilVedtakFattetForEksternDto(): VedtakFattetForEksternDto = objectMapper.readValue(this)
