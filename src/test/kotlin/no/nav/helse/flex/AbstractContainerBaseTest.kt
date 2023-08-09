@@ -188,7 +188,7 @@ abstract class AbstractContainerBaseTest {
         issuerId: String = "tokenx",
         clientId: String = "spinnsyn-frontend",
         claims: Map<String, Any> = mapOf(
-            "acr" to "Level4",
+            "acr" to "idporten-loa-high",
             "idp" to "idporten",
             "client_id" to clientId,
             "pid" to fnr
@@ -209,11 +209,12 @@ abstract class AbstractContainerBaseTest {
 }
 
 fun MockOAuth2Server.token(
+    acrClaim: String = "idporten-loa-high",
     subject: String,
     issuerId: String,
     clientId: String = UUID.randomUUID().toString(),
     audience: String,
-    claims: Map<String, Any> = mapOf("acr" to "Level4")
+    claims: Map<String, Any> = mapOf("acr" to acrClaim)
 ): String {
     return this.issueToken(
         issuerId,
