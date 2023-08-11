@@ -16,6 +16,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -122,6 +123,7 @@ class LesVedtakTest : AbstractContainerBaseTest() {
         hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak1.utbetalingId)
     }
 
+
     @Test
     @Order(2)
     fun `finner ikke brukervedtaket da utbetaling ikke er mottatt`() {
@@ -201,4 +203,38 @@ class LesVedtakTest : AbstractContainerBaseTest() {
         val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtaksId }
         utbetalingDbRecord.lest.`should not be null`()
     }
+
+
+
+    @Test
+    @Order(10)
+    fun `tester at henting av vedtak fungerer med gammelt acr claim`() {
+
+        val response = testAuthVedtakMedTokenXToken(fnr, "Level4")
+        assertThat(response).isEqualTo("200")
+
+
+    }
+
+    @Test
+    @Order(11)
+    fun `tester at henting av vedtak fungerer med nytt acr claim`() {
+
+        val response = testAuthVedtakMedTokenXToken(fnr, "idporten-loa-high")
+        assertThat(response).isEqualTo("200")
+
+
+    }
+
+    @Test
+    @Order(12)
+    fun `tester at henting av vedtak ikke fungerer med tilfeldig valgt acr claim`() {
+        // whoops, denne virker, burde ikke virke
+        val response = testAuthVedtakMedTokenXToken(fnr, "doNotLetMeIn")
+        assertThat(response).isEqualTo("401")
+
+
+    }
+
+
 }
