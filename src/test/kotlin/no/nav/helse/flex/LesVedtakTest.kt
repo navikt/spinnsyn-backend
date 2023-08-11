@@ -123,7 +123,6 @@ class LesVedtakTest : AbstractContainerBaseTest() {
         hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak1.utbetalingId)
     }
 
-
     @Test
     @Order(2)
     fun `finner ikke brukervedtaket da utbetaling ikke er mottatt`() {
@@ -204,26 +203,18 @@ class LesVedtakTest : AbstractContainerBaseTest() {
         utbetalingDbRecord.lest.`should not be null`()
     }
 
-
-
     @Test
     @Order(10)
     fun `tester at henting av vedtak fungerer med gammelt acr claim`() {
-
         val response = testAuthVedtakMedTokenXToken(fnr, "Level4")
         assertThat(response).isEqualTo("200")
-
-
     }
 
     @Test
     @Order(11)
     fun `tester at henting av vedtak fungerer med nytt acr claim`() {
-
         val response = testAuthVedtakMedTokenXToken(fnr, "idporten-loa-high")
         assertThat(response).isEqualTo("200")
-
-
     }
 
     @Test
@@ -232,9 +223,5 @@ class LesVedtakTest : AbstractContainerBaseTest() {
         // whoops, denne virker, burde ikke virke
         val response = testAuthVedtakMedTokenXToken(fnr, "doNotLetMeIn")
         assertThat(response).isEqualTo("401")
-
-
     }
-
-
 }
