@@ -95,13 +95,12 @@ abstract class AbstractContainerBaseTest {
     }
 
     fun testAuthVedtakMedTokenXToken(fnr: String, acrClaim: String): String {
-        settUtbetalingKlarTilVisning()
 
         val responseCode = mockMvc.perform(
             get("/api/v3/vedtak")
-                .header("Authorization", "Bearer ${tokenxToken(fnr)}")
+                .header("Authorization", "Bearer ${tokenxToken(fnr, acrClaim)}")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk).andReturn().response.status
+        ).andReturn().response.status
 
         return responseCode.toString()
     }
