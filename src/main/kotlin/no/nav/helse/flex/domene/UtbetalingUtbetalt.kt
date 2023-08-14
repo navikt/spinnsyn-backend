@@ -56,7 +56,14 @@ data class UtbetalingUtbetalt(
             ManglerOpptjening,
             ManglerMedlemskap,
             Over70,
-            EtterDødsdato
+            EtterDødsdato,
+            AndreYtelserAap,
+            AndreYtelserDagpenger,
+            AndreYtelserForeldrepenger,
+            AndreYtelserOmsorgspenger,
+            AndreYtelserOpplaringspenger,
+            AndreYtelserPleiepenger,
+            AndreYtelserSvangerskapspenger
         }
     }
 }
