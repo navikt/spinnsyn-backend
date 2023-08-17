@@ -62,8 +62,13 @@ class SkjonnsfastsettelseTest : AbstractContainerBaseTest() {
         ).serialisertTilString().tilJsonNode(),
         begrunnelser = listOf(
             Begrunnelse(
-                årsak = "SkjønnsfastsattSykepengegrunnlag",
+                type = "SkjønnsfastsattSykepengegrunnlagFritekst",
                 begrunnelse = "Begrunnelse fra saksbehandler",
+                perioder = emptyList()
+            ),
+            Begrunnelse(
+                type = "SkjønnsfastsattSykepengegrunnlagMal",
+                begrunnelse = "Mal fra speil\nNy linje",
                 perioder = emptyList()
             )
         )
@@ -150,7 +155,7 @@ class SkjonnsfastsettelseTest : AbstractContainerBaseTest() {
         vedtak.shouldHaveSize(1)
         vedtak[0].lest.`should be false`()
         vedtak[0].vedtak.begrunnelser!!.first().begrunnelse shouldBeEqualTo "Begrunnelse fra saksbehandler"
-        vedtak[0].vedtak.begrunnelser!!.first().årsak shouldBeEqualTo "SkjønnsfastsattSykepengegrunnlag"
+        vedtak[0].vedtak.begrunnelser!!.first().type shouldBeEqualTo "SkjønnsfastsattSykepengegrunnlagFritekst"
 
         val etterSkjønn = vedtak[0].vedtak.sykepengegrunnlagsfakta!!.tilEtterSkjønn()
         etterSkjønn.avviksprosent shouldBeEqualTo 27.0

@@ -25,7 +25,7 @@ data class VedtakFattetForEksternDto(
 )
 
 data class Begrunnelse(
-    val årsak: String,
+    val type: String,
     val begrunnelse: String,
     val perioder: List<PeriodeImpl>
 )
