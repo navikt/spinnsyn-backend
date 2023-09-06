@@ -54,12 +54,7 @@ class VedtakTokenXController(
 
         if (!allowedClients.contains(clientId)) {
             throw IngenTilgang("Uventet client id $clientId")
-        }/*
-        val idp = claims.getStringClaim("idp")
-        if (idp != tokenxIdpIdporten) {
-            // Sjekker at det var idporten som er IDP for tokenX tokenet
-            throw IngenTilgang("Uventet idp $idp")
-        }*/
+        }
         return claims
     }
 
