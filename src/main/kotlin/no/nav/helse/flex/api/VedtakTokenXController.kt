@@ -33,7 +33,7 @@ class VedtakTokenXController(
 
     @GetMapping("/vedtak", produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
-    @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
+    @ProtectedWithClaims(issuer = "tokenx", combineWithOr = true, claimMap = ["acr=Level4", "acr=idporten-loa-high"])
     fun hentVedtak(): List<RSVedtakWrapper> {
         val fnr = validerTokenXClaims(spinnsynFrontendClientId, dittSykefravaerClientId).fnrFraIdportenTokenX()
         return vedtakService.hentVedtak(fnr)
@@ -41,7 +41,7 @@ class VedtakTokenXController(
 
     @PostMapping(value = ["/vedtak/{vedtaksId}/les"], produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
-    @ProtectedWithClaims(issuer = "tokenx", claimMap = ["acr=Level4"])
+    @ProtectedWithClaims(issuer = "tokenx", combineWithOr = true, claimMap = ["acr=Level4", "acr=idporten-loa-high"])
     fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): Map<String, String> {
         val fnr = validerTokenXClaims(spinnsynFrontendClientId).fnrFraIdportenTokenX()
         return mapOf("status" to brukerVedtak.lesVedtak(fnr, vedtaksId))
@@ -54,11 +54,6 @@ class VedtakTokenXController(
 
         if (!allowedClients.contains(clientId)) {
             throw IngenTilgang("Uventet client id $clientId")
-        }
-        val idp = claims.getStringClaim("idp")
-        if (idp != tokenxIdpIdporten) {
-            // Sjekker at det var idporten som er IDP for tokenX tokenet
-            throw IngenTilgang("Uventet idp $idp")
         }
         return claims
     }

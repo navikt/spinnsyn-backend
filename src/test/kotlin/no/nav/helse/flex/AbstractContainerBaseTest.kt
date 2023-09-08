@@ -94,6 +94,16 @@ abstract class AbstractContainerBaseTest {
         return objectMapper.readValue(json)
     }
 
+    fun authMedSpesifiktAcrClaim(fnr: String, acrClaim: String): String {
+        val responseCode = mockMvc.perform(
+            get("/api/v3/vedtak")
+                .header("Authorization", "Bearer ${tokenxToken(fnr, acrClaim)}")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn().response.status
+
+        return responseCode.toString()
+    }
+
     fun hentVedtakSomVeilederOboV4(fnr: String, token: String): List<RSVedtakWrapper> {
         settUtbetalingKlarTilVisning()
 
@@ -184,11 +194,12 @@ abstract class AbstractContainerBaseTest {
 
     fun tokenxToken(
         fnr: String,
+        acrClaim: String = "idporten-loa-high",
         audience: String = "spinnsyn-backend-client-id",
         issuerId: String = "tokenx",
         clientId: String = "spinnsyn-frontend",
         claims: Map<String, Any> = mapOf(
-            "acr" to "Level4",
+            "acr" to acrClaim,
             "idp" to "idporten",
             "client_id" to clientId,
             "pid" to fnr
@@ -209,11 +220,12 @@ abstract class AbstractContainerBaseTest {
 }
 
 fun MockOAuth2Server.token(
+    acrClaim: String = "Level4",
     subject: String,
     issuerId: String,
     clientId: String = UUID.randomUUID().toString(),
     audience: String,
-    claims: Map<String, Any> = mapOf("acr" to "Level4")
+    claims: Map<String, Any> = mapOf("acr" to acrClaim)
 ): String {
     return this.issueToken(
         issuerId,
