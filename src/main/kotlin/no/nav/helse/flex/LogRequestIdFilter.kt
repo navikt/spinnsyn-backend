@@ -22,7 +22,7 @@ class LogRequestIdFilter : HttpFilter() {
             }
             filterChain.doFilter(request, response)
         } finally {
-            MDC.remove(X_REQUEST_ID_HEADER)
+            MDC.remove(X_REQUEST_ID_MDC_MARKER)
         }
     }
 }
