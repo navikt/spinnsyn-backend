@@ -18,8 +18,6 @@ ext["okhttp3.version"] = "4.9.3" // Token-support tester trenger Mockwebserver.
 
 repositories {
     mavenCentral()
-    maven(url = "https://packages.confluent.io/maven/")
-    maven(url = "https://jitpack.io")
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
