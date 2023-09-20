@@ -164,7 +164,7 @@ abstract class AbstractContainerBaseTest {
             }.also { threads.add(it) }
 
             thread {
-                KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.1.0")).apply {
+                KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.1")).apply {
                     start()
                     System.setProperty("on-prem-kafka.bootstrap-servers", bootstrapServers)
                     System.setProperty("KAFKA_BROKERS", bootstrapServers)
