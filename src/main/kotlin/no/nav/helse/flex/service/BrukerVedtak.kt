@@ -66,6 +66,7 @@ class BrukerVedtak(
         return finnAlleVedtak(identer.alle(), hentSomBruker)
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
+            .map { it.fjernArbeidIkkeGjenopptattDager() }
             .leggTilOrgnavn()
             .leggTilArbeidsgivere()
     }
