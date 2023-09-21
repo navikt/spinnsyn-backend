@@ -163,6 +163,7 @@ class BrukerVedtak(
                     vedtakFattetTidspunkt = vedtaket.vedtakFattetTidspunkt,
                     sykepengegrunnlagsfakta = vedtaket.sykepengegrunnlagsfakta,
                     begrunnelser = vedtaket.begrunnelser,
+                    tags = vedtaket.tags,
                     utbetaling = RSUtbetalingUtbetalt(
                         utbetalingType = utbetalingen.type,
                         organisasjonsnummer = utbetalingen.organisasjonsnummer,

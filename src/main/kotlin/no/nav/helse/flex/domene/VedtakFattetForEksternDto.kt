@@ -21,7 +21,8 @@ data class VedtakFattetForEksternDto(
     val utbetalingId: String?,
     val vedtakFattetTidspunkt: LocalDate?,
     val sykepengegrunnlagsfakta: JsonNode? = null,
-    val begrunnelser: List<Begrunnelse>? = null
+    val begrunnelser: List<Begrunnelse>? = null,
+    val tags: List<String>? = null
 )
 
 data class Begrunnelse(
