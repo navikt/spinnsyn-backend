@@ -66,6 +66,7 @@ class BrukerVedtak(
         return finnAlleVedtak(identer.alle(), hentSomBruker)
             .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
+            .map { it.fjernArbeidIkkeGjenopptattDager() }
             .leggTilOrgnavn()
             .leggTilArbeidsgivere()
     }
@@ -163,6 +164,7 @@ class BrukerVedtak(
                     vedtakFattetTidspunkt = vedtaket.vedtakFattetTidspunkt,
                     sykepengegrunnlagsfakta = vedtaket.sykepengegrunnlagsfakta,
                     begrunnelser = vedtaket.begrunnelser,
+                    tags = vedtaket.tags,
                     utbetaling = RSUtbetalingUtbetalt(
                         utbetalingType = utbetalingen.type,
                         organisasjonsnummer = utbetalingen.organisasjonsnummer,

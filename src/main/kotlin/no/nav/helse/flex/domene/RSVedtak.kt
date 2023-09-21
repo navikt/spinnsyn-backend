@@ -35,7 +35,8 @@ data class RSVedtak(
     val begrensning: String?, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
     val vedtakFattetTidspunkt: LocalDate?,
     val sykepengegrunnlagsfakta: JsonNode?,
-    val begrunnelser: List<Begrunnelse>?
+    val begrunnelser: List<Begrunnelse>?,
+    val tags: List<String>?
 ) : Periode
 
 data class RSUtbetalingUtbetalt(
