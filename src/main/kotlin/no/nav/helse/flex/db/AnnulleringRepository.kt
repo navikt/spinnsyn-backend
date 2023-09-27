@@ -22,7 +22,7 @@ class AnnulleringDAO(
     fun finnAnnullering(fnr: String): List<Annullering> {
         return namedParameterJdbcTemplate.query(
             """
-            SELECT id, fnr, annullering, opprettet
+            SELECT id, fnr, annullering, opprettet, kilde
             FROM annullering
             WHERE fnr = :fnr
             """,
@@ -36,7 +36,7 @@ class AnnulleringDAO(
     fun finnAnnulleringMedIdent(fnr: List<String>): List<Annullering> {
         return namedParameterJdbcTemplate.query(
             """
-            SELECT id, fnr, annullering, opprettet
+            SELECT id, fnr, annullering, opprettet, kilde
             FROM annullering
             WHERE fnr in (:fnr)
             """,
@@ -47,19 +47,20 @@ class AnnulleringDAO(
         }
     }
 
-    fun opprettAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant) {
+    fun opprettAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant, kilde: String) {
         val annulleringJSON = PGobject().also { it.type = "json"; it.value = annullering }
 
         namedParameterJdbcTemplate.update(
             """
-            INSERT INTO ANNULLERING(id, fnr, annullering, opprettet)
-            VALUES (:id, :fnr, :annullering, :opprettet)
+            INSERT INTO ANNULLERING(id, fnr, annullering, opprettet, kilde)
+            VALUES (:id, :fnr, :annullering, :opprettet, :kilde)
         """,
             MapSqlParameterSource()
                 .addValue("id", id)
                 .addValue("fnr", fnr)
                 .addValue("annullering", annulleringJSON)
                 .addValue("opprettet", Timestamp.from(opprettet))
+                .addValue("kilde", kilde)
         )
     }
 
@@ -79,7 +80,8 @@ data class Annullering(
     val id: String,
     val fnr: String,
     val annullering: AnnulleringDto,
-    val opprettet: Instant
+    val opprettet: Instant,
+    val kilde: String
 )
 
 private fun ResultSet.toAnnullering(): Annullering =
@@ -87,5 +89,6 @@ private fun ResultSet.toAnnullering(): Annullering =
         id = getString("id"),
         fnr = getString("fnr"),
         annullering = getString("annullering").tilAnnulleringDto(),
-        opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant()
+        opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant(),
+        kilde = getString("kilde")
     )

@@ -9,6 +9,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -58,7 +59,8 @@ class DelvisRefusjonOgAvvisteDagerTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak
+                vedtak,
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 

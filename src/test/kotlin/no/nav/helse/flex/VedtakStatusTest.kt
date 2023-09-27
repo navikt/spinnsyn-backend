@@ -17,6 +17,7 @@ import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -137,7 +138,8 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 fnr,
                 vedtak1.copy(
                     utbetalingId = "VedtakFørst"
-                ).serialisertTilString()
+                ).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -265,7 +267,8 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 fnr,
                 vedtak1.copy(
                     utbetalingId = "UtbetalingFørst"
-                ).serialisertTilString()
+                ).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -324,7 +327,8 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 fnr,
                 vedtak1.copy(
                     utbetalingId = "EnAvTo"
-                ).serialisertTilString()
+                ).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -369,7 +373,8 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 fnr,
                 vedtak2.copy(
                     utbetalingId = "EnAvTo"
-                ).serialisertTilString()
+                ).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -433,7 +438,8 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 fnr,
                 vedtak1.copy(
                     utbetalingId = "Arbeidsgiverperiode"
-                ).serialisertTilString()
+                ).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 

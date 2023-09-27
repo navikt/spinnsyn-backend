@@ -8,4 +8,5 @@ class EnvironmentToggles(
     @Value("\${nais.cluster}") private val naisCluster: String
 ) {
     fun isProduction() = "prod-gcp" == naisCluster
+    fun isDevGcp() = "dev-gcp" == naisCluster
 }

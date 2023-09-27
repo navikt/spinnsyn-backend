@@ -11,6 +11,7 @@ import org.amshove.kluent.shouldHaveSize
 import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -110,7 +111,8 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 this.fødselsnummer,
-                this.serialisertTilString()
+                this.serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
