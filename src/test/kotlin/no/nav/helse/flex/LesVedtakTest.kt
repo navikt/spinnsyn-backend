@@ -16,6 +16,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.MethodOrderer
@@ -110,7 +111,8 @@ class LesVedtakTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak1.serialisertTilString()
+                vedtak1.serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -165,7 +167,8 @@ class LesVedtakTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak2.serialisertTilString()
+                vedtak2.serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 

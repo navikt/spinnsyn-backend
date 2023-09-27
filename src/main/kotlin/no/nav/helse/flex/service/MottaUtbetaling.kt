@@ -1,5 +1,6 @@
 package no.nav.helse.flex.service
 
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
@@ -14,17 +15,20 @@ import java.util.*
 class MottaUtbetaling(
     private val utbetalingRepository: UtbetalingRepository,
     private val metrikk: Metrikk,
-    private val mottaAnnulering: MottaAnnulering
+    private val mottaAnnulering: MottaAnnulering,
+    private val environmentToggles: EnvironmentToggles
 ) {
     val log = logger()
 
     fun handterMelding(cr: ConsumerRecord<String, String>) {
         if (cr.erAnnullering()) {
+            if (environmentToggles.isDevGcp()) return
             mottaAnnulering.mottaAnnullering(
                 id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
                 fnr = cr.key(),
                 annullering = cr.value(),
-                opprettet = Instant.now()
+                opprettet = Instant.now(),
+                kilde = cr.topic()
             )
             return
         }

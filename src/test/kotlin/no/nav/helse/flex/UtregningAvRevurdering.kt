@@ -12,6 +12,7 @@ import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -62,7 +63,8 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak1
+                vedtak1,
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
         kafkaProducer.send(
@@ -70,7 +72,8 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak2
+                vedtak2,
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 

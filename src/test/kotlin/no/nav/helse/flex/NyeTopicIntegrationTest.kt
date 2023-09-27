@@ -108,7 +108,9 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak.serialisertTilString()
+                vedtak.serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
+
             )
         ).get()
 
@@ -290,7 +292,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak.copy(utbetalingId = null).serialisertTilString()
+                vedtak.copy(utbetalingId = null).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -309,7 +312,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak.copy(utbetalingId = null).copy(fom = LocalDate.now().minusDays(5)).serialisertTilString()
+                vedtak.copy(utbetalingId = null).copy(fom = LocalDate.now().minusDays(5)).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -328,7 +332,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak.serialisertTilString()
+                vedtak.serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 

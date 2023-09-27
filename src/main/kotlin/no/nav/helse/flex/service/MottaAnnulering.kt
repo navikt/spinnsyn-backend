@@ -15,7 +15,7 @@ class MottaAnnulering(
 ) {
     private val log = logger()
 
-    fun mottaAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant) {
+    fun mottaAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant, kilde: String) {
         val annulleringSerialisert = try {
             annullering.tilAnnulleringDto()
         } catch (e: Exception) {
@@ -37,7 +37,8 @@ class MottaAnnulering(
             id = id,
             fnr = fnr,
             annullering = annullering,
-            opprettet = opprettet
+            opprettet = opprettet,
+            kilde = kilde
         )
 
         metrikk.MOTTATT_ANNULLERING_VEDTAK.increment()

@@ -10,6 +10,7 @@ import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -90,7 +91,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak.serialisertTilString()
+                vedtak.serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -148,7 +150,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString()
+                vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 
@@ -195,7 +198,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 VEDTAK_TOPIC,
                 null,
                 fnr,
-                vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString()
+                vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
             )
         ).get()
 

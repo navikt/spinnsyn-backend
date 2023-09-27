@@ -1,6 +1,5 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.AnnulleringDto
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
@@ -22,7 +21,7 @@ import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
+class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
 
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
@@ -33,6 +32,13 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     final val vedtakFattetTidspunk = LocalDate.now()
     final val org = "394783764"
     final val utbetalingId = "124542"
+
+    data class VedtakAnnullertDto(
+        val organisasjonsnummer: String?,
+        val fødselsnummer: String,
+        val fom: LocalDate?,
+        val tom: LocalDate?
+    )
     val vedtak = VedtakFattetForEksternDto(
         fødselsnummer = fnr,
         aktørId = fnr,
@@ -79,9 +85,8 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
             )
         )
     )
-    val annulleringDto = AnnulleringDto(
+    val vedtakAnnullertDto = VedtakAnnullertDto(
         fødselsnummer = fnr,
-        orgnummer = org,
         organisasjonsnummer = org,
         fom = fom,
         tom = tom
@@ -127,18 +132,18 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     fun `Ei annullering mottatt fra kafka blir lagret i db`() {
         kafkaProducer.send(
             ProducerRecord(
-                UTBETALING_TOPIC,
+                VEDTAK_TOPIC,
                 null,
                 fnr,
-                annulleringDto.serialisertTilString(),
-                listOf(RecordHeader("type", "Annullering".toByteArray()))
+                vedtakAnnullertDto.serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray()))
             )
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             annulleringDAO.finnAnnullering(fnr).isNotEmpty()
         }
-        annulleringDAO.finnAnnullering(fnr).first().kilde `should be equal to` UTBETALING_TOPIC
+        annulleringDAO.finnAnnullering(fnr).first().kilde `should be equal to` VEDTAK_TOPIC
     }
 
     @Test
@@ -154,11 +159,11 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
     fun `Ei ny annullering mottatt på kafka blir lagret i db`() {
         kafkaProducer.send(
             ProducerRecord(
-                UTBETALING_TOPIC,
+                VEDTAK_TOPIC,
                 null,
                 fnr,
-                annulleringDto.copy(orgnummer = "456").serialisertTilString(),
-                listOf(RecordHeader("type", "Annullering".toByteArray()))
+                vedtakAnnullertDto.copy(organisasjonsnummer = "456").serialisertTilString(),
+                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray()))
             )
         ).get()
 
