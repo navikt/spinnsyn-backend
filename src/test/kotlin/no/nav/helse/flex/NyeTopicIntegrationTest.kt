@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
@@ -97,7 +96,6 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
         fødselsnummer = fnr,
         orgnummer = org,
         organisasjonsnummer = null,
-        tidsstempel = LocalDateTime.now(),
         fom = now,
         tom = now
     )

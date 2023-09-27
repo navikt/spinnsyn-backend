@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
@@ -86,7 +85,6 @@ class AnnulleringVerdikjedeTest : AbstractContainerBaseTest() {
         fødselsnummer = fnr,
         orgnummer = org,
         organisasjonsnummer = org,
-        tidsstempel = LocalDateTime.now(),
         fom = fom,
         tom = tom
     )
