@@ -1,6 +1,5 @@
 package no.nav.helse.flex.service
 
-import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
@@ -9,27 +8,16 @@ import no.nav.helse.flex.metrikk.Metrikk
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.util.*
 
 @Service
 class MottaUtbetaling(
     private val utbetalingRepository: UtbetalingRepository,
-    private val metrikk: Metrikk,
-    private val mottaAnnulering: MottaAnnulering,
-    private val environmentToggles: EnvironmentToggles
+    private val metrikk: Metrikk
 ) {
     val log = logger()
 
     fun handterMelding(cr: ConsumerRecord<String, String>) {
         if (cr.erAnnullering()) {
-            if (environmentToggles.isDevGcp()) return
-            mottaAnnulering.mottaAnnullering(
-                id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
-                fnr = cr.key(),
-                annullering = cr.value(),
-                opprettet = Instant.now(),
-                kilde = cr.topic()
-            )
             return
         }
         mottaUtbetaling(
