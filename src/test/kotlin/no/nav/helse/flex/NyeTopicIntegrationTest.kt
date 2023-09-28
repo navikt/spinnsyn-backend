@@ -261,11 +261,11 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     fun `en annullering blir mottatt på Kafka blir lagret i db`() {
         kafkaProducer.send(
             ProducerRecord(
-                UTBETALING_TOPIC,
+                VEDTAK_TOPIC,
                 null,
                 fnr,
                 annulleringDto.serialisertTilString(),
-                listOf(RecordHeader("type", "Annullering".toByteArray()))
+                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray()))
             )
         ).get()
 
