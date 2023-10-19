@@ -64,6 +64,9 @@ spec:
         - application: spinnsyn-frontend-interne
         - application: spinnsyn-frontend
         - application: ditt-sykefravaer
+        {{#if flex-openapi-docs-ui}}
+        - application: flex-openapi-docs-ui
+        {{/if}}
   azure:
     application:
       enabled: true
