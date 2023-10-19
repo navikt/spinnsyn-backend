@@ -1,5 +1,6 @@
 package no.nav.helse.flex.api
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak
@@ -18,7 +19,8 @@ import org.springframework.web.bind.annotation.ResponseBody
 
 @Controller
 @RequestMapping("/api/v3")
-class VedtakTokenXController(
+@Tag(name = "sykepengevedtak", description = "Operasjoner for å hente og lese sykepengevedtak")
+class VedtakBrukerController(
     val vedtakService: BrukerVedtak,
     val tokenValidationContextHolder: TokenValidationContextHolder,
     val brukerVedtak: BrukerVedtak,
