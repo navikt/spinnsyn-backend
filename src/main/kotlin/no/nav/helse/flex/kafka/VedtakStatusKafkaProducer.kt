@@ -22,10 +22,12 @@ class VedtakStatusKafkaProducer(
                 ProducerRecord(VEDTAK_STATUS_TOPIC, vedtakStatusDTO.id, vedtakStatusDTO)
             ).get()
         } catch (e: Throwable) {
-            log.error(
-                "Feil ved sending av vedtak status med id: ${vedtakStatusDTO.id} til topic: $VEDTAK_STATUS_TOPIC.",
-                e
-            )
+            if (vedtakStatusDTO.id.matches("^[a-zA-Z0-9-]+$".toRegex())) {
+                log.error(
+                    "Feil ved sending av vedtak status med id: ${vedtakStatusDTO.id} til topic: $VEDTAK_STATUS_TOPIC.",
+                    e
+                )
+            }
             throw e
         }
     }

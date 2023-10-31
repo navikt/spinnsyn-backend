@@ -105,7 +105,6 @@ class SendVedtakStatus(
             sendt += 1
         }
 
-        if (sendt != 0) log.info("Sendte motatt status for $sendt vedtak")
         return sendt
     }
 
