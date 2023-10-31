@@ -17,14 +17,15 @@ class VedtakStatusKafkaProducer(
     private val log = logger()
 
     fun produserMelding(vedtakStatusDTO: VedtakStatusDTO): RecordMetadata {
+        val vedtakId = vedtakStatusDTO.id
         try {
             return producer.send(
-                ProducerRecord(VEDTAK_STATUS_TOPIC, vedtakStatusDTO.id, vedtakStatusDTO)
+                ProducerRecord(VEDTAK_STATUS_TOPIC, vedtakId, vedtakStatusDTO)
             ).get()
         } catch (e: Throwable) {
-            if (vedtakStatusDTO.id.matches("^[a-zA-Z0-9-]+$".toRegex())) {
+            if (vedtakId.matches("^[a-zA-Z0-9-]+$".toRegex())) {
                 log.error(
-                    "Feil ved sending av vedtak status med id: ${vedtakStatusDTO.id} til topic: $VEDTAK_STATUS_TOPIC.",
+                    "Feil ved sending av vedtak status med id: $vedtakId til topic: $VEDTAK_STATUS_TOPIC.",
                     e
                 )
             }
