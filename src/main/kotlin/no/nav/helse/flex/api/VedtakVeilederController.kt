@@ -1,7 +1,7 @@
 package no.nav.helse.flex.api
 
 import io.swagger.v3.oas.annotations.Hidden
-import no.nav.helse.flex.client.syfotilgangskontroll.SyfoTilgangskontrollOboClient
+import no.nav.helse.flex.client.istilgangskontroll.IstilgangskontrollOboClient
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation.NamespaceAndApp
 import no.nav.helse.flex.domene.RSVedtakWrapper
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 class VedtakVeilederController(
     private val clientIdValidation: ClientIdValidation,
     private val vedtakService: BrukerVedtak,
-    private val syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient
+    private val istilgangskontrollClient: IstilgangskontrollOboClient
 ) {
 
     @GetMapping("/api/v4/veileder/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -31,7 +31,7 @@ class VedtakVeilederController(
             )
         )
 
-        if (!syfoTilgangskontrollClient.sjekkTilgangVeileder(fnr)) {
+        if (!istilgangskontrollClient.sjekkTilgangVeileder(fnr)) {
             throw IkkeTilgangException()
         }
         return vedtakService.hentVedtak(fnr)

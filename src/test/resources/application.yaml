@@ -38,10 +38,10 @@ no.nav.security.jwt:
           client-id: client-id
           client-secret: secretzz
           client-auth-method: client_secret_basic
-      onbehalfof-syfotilgangskontroll:
+      onbehalfof-istilgangskontroll:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: syfotilgangskontroll-client
+        scope: istilgangskontroll-client
         authentication:
           client-id: client-id
           client-secret: secretzz
@@ -53,7 +53,7 @@ management:
     base-path: /internal
     exposure.include: prometheus
 
-syfotilgangskontroll.url: http://syfotilgangskontroll
+istilgangskontroll.url: http://istilgangskontroll
 nais.cluster: test
 KAFKA_TRUSTSTORE_PATH: /
 KAFKA_CREDSTORE_PASSWORD: /
