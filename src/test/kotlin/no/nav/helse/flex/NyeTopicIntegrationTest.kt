@@ -187,28 +187,28 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     @Order(5)
     fun `veileder med OBO-tilgang kan lese brukervedtaket`() {
         val veilederToken = skapAzureJwt()
-        mockSyfoTilgangskontroll(true, fnr)
+        mockIstilgangskontroll(true, fnr)
 
         val vedtak = hentVedtakSomVeilederOboV4(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
-        syfotilgangskontrollMockRestServiceServer?.verify()
-        syfotilgangskontrollMockRestServiceServer?.reset()
+        istilgangskontrollMockRestServiceServer?.verify()
+        istilgangskontrollMockRestServiceServer?.reset()
     }
 
     @Test
     @Order(5)
     fun `veileder fra spinnsyn-frontend-interne med OBO-tilgang kan lese brukervedtaket`() {
         val veilederToken = skapAzureJwt(subject = "spinnsyn-frontend-interne-client-id")
-        mockSyfoTilgangskontroll(true, fnr)
+        mockIstilgangskontroll(true, fnr)
 
         val vedtak = hentVedtakSomVeilederOboV4(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
         vedtak.first().lest `should be` false
-        syfotilgangskontrollMockRestServiceServer?.verify()
-        syfotilgangskontrollMockRestServiceServer?.reset()
+        istilgangskontrollMockRestServiceServer?.verify()
+        istilgangskontrollMockRestServiceServer?.reset()
     }
 
     @Test

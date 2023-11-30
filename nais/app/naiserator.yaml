@@ -54,7 +54,7 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: syfo-tilgangskontroll
+        - application: istilgangskontroll
           namespace: teamsykefravr
       external:
     {{#each external-host}}

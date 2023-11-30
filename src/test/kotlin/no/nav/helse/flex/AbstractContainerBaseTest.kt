@@ -64,7 +64,7 @@ abstract class AbstractContainerBaseTest {
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
     @Autowired
-    lateinit var syfotilgangskontrollRestTemplate: RestTemplate
+    lateinit var istilgangskontrollRestTemplate: RestTemplate
 
     @Autowired
     lateinit var sendVedtakStatus: SendVedtakStatus
@@ -72,13 +72,13 @@ abstract class AbstractContainerBaseTest {
     @Autowired
     lateinit var vedtakKafkaConsumer: Consumer<String, String>
 
-    var syfotilgangskontrollMockRestServiceServer: MockRestServiceServer? = null
+    var istilgangskontrollMockRestServiceServer: MockRestServiceServer? = null
 
     @PostConstruct
     fun setupRestServiceServers() {
-        if (syfotilgangskontrollMockRestServiceServer == null) {
-            syfotilgangskontrollMockRestServiceServer =
-                MockRestServiceServer.createServer(syfotilgangskontrollRestTemplate)
+        if (istilgangskontrollMockRestServiceServer == null) {
+            istilgangskontrollMockRestServiceServer =
+                MockRestServiceServer.createServer(istilgangskontrollRestTemplate)
         }
     }
 
