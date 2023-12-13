@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-const val TEMA = "Tema"
-const val TEMA_SYK = "SYK"
-const val IDENT = "ident"
+private const val TEMA = "Tema"
+private const val TEMA_SYK = "SYK"
+private const val IDENT = "ident"
 
 @Component
 class PdlClient(
