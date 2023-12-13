@@ -8,6 +8,7 @@ import java.time.Instant
 @Repository
 interface OrganisasjonRepository : CrudRepository<Organisasjon, String> {
     fun findByOrgnummer(orgnummer: String): Organisasjon?
+
     fun findByOrgnummerIn(orgnummere: Set<String>): List<Organisasjon>
 }
 
@@ -18,5 +19,5 @@ data class Organisasjon(
     val navn: String,
     val opprettet: Instant,
     val oppdatert: Instant,
-    val oppdatertAv: String
+    val oppdatertAv: String,
 )

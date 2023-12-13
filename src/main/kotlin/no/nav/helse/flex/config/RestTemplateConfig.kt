@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets
 
 @Configuration
 class RestTemplateConfig {
-
     @Bean
     fun restTemplate(): RestTemplate {
         return RestTemplateBuilder().build()

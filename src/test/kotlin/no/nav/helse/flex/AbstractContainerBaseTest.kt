@@ -85,57 +85,74 @@ abstract class AbstractContainerBaseTest {
     fun hentVedtakMedTokenXToken(fnr: String): List<RSVedtakWrapper> {
         settUtbetalingKlarTilVisning()
 
-        val json = mockMvc.perform(
-            get("/api/v3/vedtak")
-                .header("Authorization", "Bearer ${tokenxToken(fnr)}")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk).andReturn().response.contentAsString
+        val json =
+            mockMvc.perform(
+                get("/api/v3/vedtak")
+                    .header("Authorization", "Bearer ${tokenxToken(fnr)}")
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andExpect(status().isOk).andReturn().response.contentAsString
 
         return objectMapper.readValue(json)
     }
 
-    fun authMedSpesifiktAcrClaim(fnr: String, acrClaim: String): String {
-        val responseCode = mockMvc.perform(
-            get("/api/v3/vedtak")
-                .header("Authorization", "Bearer ${tokenxToken(fnr, acrClaim)}")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andReturn().response.status
+    fun authMedSpesifiktAcrClaim(
+        fnr: String,
+        acrClaim: String,
+    ): String {
+        val responseCode =
+            mockMvc.perform(
+                get("/api/v3/vedtak")
+                    .header("Authorization", "Bearer ${tokenxToken(fnr, acrClaim)}")
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andReturn().response.status
 
         return responseCode.toString()
     }
 
-    fun hentVedtakSomVeilederOboV4(fnr: String, token: String): List<RSVedtakWrapper> {
+    fun hentVedtakSomVeilederOboV4(
+        fnr: String,
+        token: String,
+    ): List<RSVedtakWrapper> {
         settUtbetalingKlarTilVisning()
 
-        val json = mockMvc.perform(
-            get("/api/v4/veileder/vedtak")
-                .header("Authorization", "Bearer $token")
-                .header("sykmeldt-fnr", fnr)
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk).andReturn().response.contentAsString
+        val json =
+            mockMvc.perform(
+                get("/api/v4/veileder/vedtak")
+                    .header("Authorization", "Bearer $token")
+                    .header("sykmeldt-fnr", fnr)
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andExpect(status().isOk).andReturn().response.contentAsString
 
         return objectMapper.readValue(json)
     }
 
-    fun hentVedtakSomSpinnsynFrontendArkivering(fnr: String, token: String): List<RSVedtakWrapper> {
+    fun hentVedtakSomSpinnsynFrontendArkivering(
+        fnr: String,
+        token: String,
+    ): List<RSVedtakWrapper> {
         settUtbetalingKlarTilVisning()
 
-        val json = mockMvc.perform(
-            get("/api/v1/arkivering/vedtak")
-                .header("Authorization", "Bearer $token")
-                .header("fnr", fnr)
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk).andReturn().response.contentAsString
+        val json =
+            mockMvc.perform(
+                get("/api/v1/arkivering/vedtak")
+                    .header("Authorization", "Bearer $token")
+                    .header("fnr", fnr)
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andExpect(status().isOk).andReturn().response.contentAsString
 
         return objectMapper.readValue(json)
     }
 
-    fun lesVedtakMedTokenXToken(fnr: String, id: String): String {
-        val json = mockMvc.perform(
-            post("/api/v3/vedtak/$id/les")
-                .header("Authorization", "Bearer ${tokenxToken(fnr)}")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk).andReturn().response.contentAsString
+    fun lesVedtakMedTokenXToken(
+        fnr: String,
+        id: String,
+    ): String {
+        val json =
+            mockMvc.perform(
+                post("/api/v3/vedtak/$id/les")
+                    .header("Authorization", "Bearer ${tokenxToken(fnr)}")
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andExpect(status().isOk).andReturn().response.contentAsString
 
         val map: Map<String, String> = objectMapper.readValue(json)
         return map["status"]!!
@@ -146,7 +163,6 @@ abstract class AbstractContainerBaseTest {
     }
 
     companion object {
-
         val pdlMockWebserver: MockWebServer
 
         init {
@@ -171,10 +187,11 @@ abstract class AbstractContainerBaseTest {
                 }
             }.also { threads.add(it) }
 
-            pdlMockWebserver = MockWebServer().apply {
-                System.setProperty("pdl.api.url", "http://localhost:$port")
-                dispatcher = PdlMockDispatcher
-            }
+            pdlMockWebserver =
+                MockWebServer().apply {
+                    System.setProperty("pdl.api.url", "http://localhost:$port")
+                    dispatcher = PdlMockDispatcher
+                }
 
             threads.forEach { it.join() }
         }
@@ -198,12 +215,13 @@ abstract class AbstractContainerBaseTest {
         audience: String = "spinnsyn-backend-client-id",
         issuerId: String = "tokenx",
         clientId: String = "spinnsyn-frontend",
-        claims: Map<String, Any> = mapOf(
-            "acr" to acrClaim,
-            "idp" to "idporten",
-            "client_id" to clientId,
-            "pid" to fnr
-        )
+        claims: Map<String, Any> =
+            mapOf(
+                "acr" to acrClaim,
+                "idp" to "idporten",
+                "client_id" to clientId,
+                "pid" to fnr,
+            ),
     ): String {
         return server.issueToken(
             issuerId,
@@ -213,8 +231,8 @@ abstract class AbstractContainerBaseTest {
                 subject = UUID.randomUUID().toString(),
                 audience = listOf(audience),
                 claims = claims,
-                expiry = 3600
-            )
+                expiry = 3600,
+            ),
         ).serialize()
     }
 }
@@ -225,7 +243,7 @@ fun MockOAuth2Server.token(
     issuerId: String,
     clientId: String = UUID.randomUUID().toString(),
     audience: String,
-    claims: Map<String, Any> = mapOf("acr" to acrClaim)
+    claims: Map<String, Any> = mapOf("acr" to acrClaim),
 ): String {
     return this.issueToken(
         issuerId,
@@ -235,7 +253,7 @@ fun MockOAuth2Server.token(
             subject = subject,
             audience = listOf(audience),
             claims = claims,
-            expiry = 3600
-        )
+            expiry = 3600,
+        ),
     ).serialize()
 }

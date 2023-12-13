@@ -19,19 +19,20 @@ class SendVedtakStatus(
     private val metrikk: Metrikk,
     private val vedtakStatusKafkaProducer: VedtakStatusKafkaProducer,
     private val vedtakService: BrukerVedtak,
-    private val vedtaktype: Vedtaktype
+    private val vedtaktype: Vedtaktype,
 ) {
-
     private val log = logger()
 
     companion object {
         private val erAgPeriode = { dag: RSDag -> dag.dagtype == "ArbeidsgiverperiodeDag" }
         private val erArbeid = { dag: RSDag -> dag.dagtype == "Arbeidsdag" }
-        private fun List<RSDag>.erAgPeriodeMedArbeid() = all { dag ->
-            listOf(erAgPeriode, erArbeid).any { predicate ->
-                predicate(dag)
-            }
-        }.and(erAgPeriode(last()))
+
+        private fun List<RSDag>.erAgPeriodeMedArbeid() =
+            all { dag ->
+                listOf(erAgPeriode, erArbeid).any { predicate ->
+                    predicate(dag)
+                }
+            }.and(erAgPeriode(last()))
 
         fun sjekkDager(dager: List<RSDag>): String {
             if (dager.all(erAgPeriode)) {
@@ -50,18 +51,20 @@ class SendVedtakStatus(
         val utbetalinger = utbetalingRepository.utbetalingerKlarTilVarsling()
         if (utbetalinger.isEmpty()) return 0
 
-        val vedtakGruppert = vedtakRepository
-            .hentVedtakMedUtbetalingId(utbetalinger.map { it.utbetalingId })
-            .groupBy { it }
-            .map { it.key to it.value.size }
+        val vedtakGruppert =
+            vedtakRepository
+                .hentVedtakMedUtbetalingId(utbetalinger.map { it.utbetalingId })
+                .groupBy { it }
+                .map { it.key to it.value.size }
 
-        val utbetalingerMedAlleVedtak = utbetalinger.filter { utbetaling ->
-            vedtakGruppert
-                .find {
-                    it.first == utbetaling.utbetalingId &&
-                        it.second == utbetaling.antallVedtak
-                } != null
-        }
+        val utbetalingerMedAlleVedtak =
+            utbetalinger.filter { utbetaling ->
+                vedtakGruppert
+                    .find {
+                        it.first == utbetaling.utbetalingId &&
+                            it.second == utbetaling.antallVedtak
+                    } != null
+            }
 
         var sendt = 0
 
@@ -69,10 +72,11 @@ class SendVedtakStatus(
             val id = ut.id
             val fnr = ut.fnr
             val utbetalingId = ut.utbetalingId
-            val vedtakWrapper = vedtakService.hentVedtak(
-                fnr = fnr,
-                hentSomBruker = false
-            ).first { it.id == id }
+            val vedtakWrapper =
+                vedtakService.hentVedtak(
+                    fnr = fnr,
+                    hentSomBruker = false,
+                ).first { it.id == id }
 
             val skalIkkeVisesFordi = sjekkDager(vedtakWrapper.dagerArbeidsgiver + vedtakWrapper.dagerPerson)
             if (skalIkkeVisesFordi.isNotBlank()) {
@@ -85,19 +89,19 @@ class SendVedtakStatus(
                 VedtakStatusDTO(
                     id = id,
                     fnr = fnr,
-                    vedtakStatus = VedtakStatus.MOTATT
-                )
+                    vedtakStatus = VedtakStatus.MOTATT,
+                ),
             )
             utbetalingRepository.settSkalVisesOgMotattPublisert(
                 motattPublisert = Instant.now(),
                 skalVisesTilBruker = true,
-                id = id
+                id = id,
             )
 
             try {
                 val type = vedtaktype.finnVedtaktype(vedtakWrapper)
                 metrikk.vedtaktype(type).increment()
-                metrikk.STATUS_MOTATT.increment()
+                metrikk.statusMotattCounter.increment()
             } catch (e: Exception) {
                 log.info("Feil under telling av metrikker for utbetaling_id $utbetalingId")
             }
@@ -108,11 +112,14 @@ class SendVedtakStatus(
         return sendt
     }
 
-    private fun skalIkkeVises(id: String, grunn: String) {
+    private fun skalIkkeVises(
+        id: String,
+        grunn: String,
+    ) {
         utbetalingRepository.settSkalVisesOgMotattPublisert(
             skalVisesTilBruker = false,
             motattPublisert = null,
-            id = id
+            id = id,
         )
         metrikk.skalIkkeVises(grunn).increment()
     }

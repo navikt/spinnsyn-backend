@@ -6,12 +6,12 @@ import no.nav.helse.flex.objectMapper
 data class VedtakStatusDTO(
     val id: String,
     val fnr: String,
-    val vedtakStatus: VedtakStatus
+    val vedtakStatus: VedtakStatus,
 )
 
 enum class VedtakStatus {
     MOTATT,
-    LEST
+    LEST,
 }
 
 fun String.tilVedtakStatusDto(): VedtakStatusDTO = objectMapper.readValue(this)

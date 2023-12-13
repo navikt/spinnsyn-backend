@@ -16,13 +16,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @TestMethodOrder(MethodOrderer.MethodName::class)
 @AutoConfigureObservability
 class MetrikkTest : AbstractContainerBaseTest() {
-
     @Autowired
     private lateinit var metrikk: Metrikk
 
-    fun MockMvc.metrikker(): List<String> = this
-        .perform(get("/internal/prometheus"))
-        .andExpect(status().isOk).andReturn().response.contentAsString.split("\n")
+    fun MockMvc.metrikker(): List<String> =
+        this
+            .perform(get("/internal/prometheus"))
+            .andExpect(status().isOk).andReturn().response.contentAsString.split("\n")
 
     @Test
     fun `1 - initielle metrikker`() {
@@ -36,7 +36,7 @@ class MetrikkTest : AbstractContainerBaseTest() {
 
     @Test
     fun `2 - teller mottatt vedtak`() {
-        metrikk.MOTTATT_VEDTAK.increment()
+        metrikk.mottattVedtakCounter.increment()
         val mottattVedtak = mockMvc.metrikker().filter { it.contains("mottatt_vedtak_counter") }
         assertThat(mottattVedtak).hasSize(3)
 
@@ -46,7 +46,7 @@ class MetrikkTest : AbstractContainerBaseTest() {
 
     @Test
     fun `3 - teller enda et mottatt vedtak`() {
-        metrikk.MOTTATT_VEDTAK.increment()
+        metrikk.mottattVedtakCounter.increment()
         val mottattVedtak = mockMvc.metrikker().filter { it.contains("mottatt_vedtak_counter") }
         assertThat(mottattVedtak).hasSize(3)
 

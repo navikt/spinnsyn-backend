@@ -11,8 +11,7 @@ class NullstillVedtak(
     private val annulleringDAO: AnnulleringDAO,
     private val environmentToggles: EnvironmentToggles,
     private val vedtakRepository: VedtakRepository,
-    private val utbetalingRepository: UtbetalingRepository
-
+    private val utbetalingRepository: UtbetalingRepository,
 ) {
     fun nullstill(fnr: String): Int {
         if (environmentToggles.isProduction()) {

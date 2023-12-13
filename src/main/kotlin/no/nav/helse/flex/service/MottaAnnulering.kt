@@ -11,16 +11,23 @@ import java.util.*
 @Service
 class MottaAnnulering(
     private val annulleringDAO: AnnulleringDAO,
-    private val metrikk: Metrikk
+    private val metrikk: Metrikk,
 ) {
     private val log = logger()
 
-    fun mottaAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant, kilde: String) {
-        val annulleringSerialisert = try {
-            annullering.tilAnnulleringDto()
-        } catch (e: Exception) {
-            throw RuntimeException("Kunne ikke deserialisere annulering", e)
-        }
+    fun mottaAnnullering(
+        id: UUID,
+        fnr: String,
+        annullering: String,
+        opprettet: Instant,
+        kilde: String,
+    ) {
+        val annulleringSerialisert =
+            try {
+                annullering.tilAnnulleringDto()
+            } catch (e: Exception) {
+                throw RuntimeException("Kunne ikke deserialisere annulering", e)
+            }
 
         annulleringDAO.finnAnnullering(fnr)
             .firstOrNull { it.annullering == annulleringSerialisert }
@@ -38,10 +45,10 @@ class MottaAnnulering(
             fnr = fnr,
             annullering = annullering,
             opprettet = opprettet,
-            kilde = kilde
+            kilde = kilde,
         )
 
-        metrikk.MOTTATT_ANNULLERING_VEDTAK.increment()
+        metrikk.mottattAnnulleringVedtakCounter.increment()
 
         log.info("Opprettet annullering med spinnsyn databaseid $id")
     }

@@ -14,7 +14,7 @@ import java.util.*
 class MottaVedtak(
     private val vedtakRepository: VedtakRepository,
     private val metrikk: Metrikk,
-    private val mottaAnnulering: MottaAnnulering
+    private val mottaAnnulering: MottaAnnulering,
 ) {
     val log = logger()
 
@@ -24,7 +24,7 @@ class MottaVedtak(
                 mottaVedtak(
                     fnr = cr.key(),
                     vedtak = cr.value(),
-                    timestamp = Instant.ofEpochMilli(cr.timestamp())
+                    timestamp = Instant.ofEpochMilli(cr.timestamp()),
                 )
             }
 
@@ -34,7 +34,7 @@ class MottaVedtak(
                     fnr = cr.key(),
                     annullering = cr.value(),
                     opprettet = Instant.now(),
-                    kilde = cr.topic()
+                    kilde = cr.topic(),
                 )
             }
 
@@ -44,12 +44,17 @@ class MottaVedtak(
         }
     }
 
-    fun mottaVedtak(fnr: String, vedtak: String, timestamp: Instant) {
-        val vedtakSerialisert = try {
-            vedtak.tilVedtakFattetForEksternDto()
-        } catch (e: Exception) {
-            throw RuntimeException("Kunne ikke deserialisere vedtak", e)
-        }
+    fun mottaVedtak(
+        fnr: String,
+        vedtak: String,
+        timestamp: Instant,
+    ) {
+        val vedtakSerialisert =
+            try {
+                vedtak.tilVedtakFattetForEksternDto()
+            } catch (e: Exception) {
+                throw RuntimeException("Kunne ikke deserialisere vedtak", e)
+            }
 
         val eksisterendeVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr)
         if (eksisterendeVedtak.any { it.vedtak == vedtak }) {
@@ -57,18 +62,19 @@ class MottaVedtak(
             return
         }
 
-        val vedtakDB = vedtakRepository.save(
-            VedtakDbRecord(
-                fnr = fnr,
-                vedtak = vedtak,
-                opprettet = Instant.now(),
-                utbetalingId = vedtakSerialisert.utbetalingId
+        val vedtakDB =
+            vedtakRepository.save(
+                VedtakDbRecord(
+                    fnr = fnr,
+                    vedtak = vedtak,
+                    opprettet = Instant.now(),
+                    utbetalingId = vedtakSerialisert.utbetalingId,
+                ),
             )
-        )
 
         log.info("Opprettet vedtak med database id: ${vedtakDB.id} for utbetaling id ${vedtakDB.utbetalingId}")
 
-        metrikk.MOTTATT_VEDTAK.increment()
+        metrikk.mottattVedtakCounter.increment()
     }
 
     private fun ConsumerRecord<String, String>.erVedtakFattet(): Boolean {

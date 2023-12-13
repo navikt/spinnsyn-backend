@@ -10,14 +10,16 @@ const val UTBETALING_TOPIC = "tbd.utbetaling"
 
 @Component
 class UtbetalingKafkaListener(
-    private val mottaUtbetaling: MottaUtbetaling
+    private val mottaUtbetaling: MottaUtbetaling,
 ) {
-
     @KafkaListener(
         topics = [UTBETALING_TOPIC],
-        containerFactory = "aivenKafkaListenerContainerFactory"
+        containerFactory = "aivenKafkaListenerContainerFactory",
     )
-    fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+    fun listen(
+        cr: ConsumerRecord<String, String>,
+        acknowledgment: Acknowledgment,
+    ) {
         mottaUtbetaling.handterMelding(cr)
         acknowledgment.acknowledge()
     }

@@ -5,7 +5,7 @@ import java.util.*
 fun AbstractContainerBaseTest.buildAzureClaimSet(
     subject: String,
     issuer: String = "azureator",
-    audience: String = "spinnsyn-backend-client-id"
+    audience: String = "spinnsyn-backend-client-id",
 ): String {
     val claims = HashMap<String, String>()
 
@@ -14,9 +14,8 @@ fun AbstractContainerBaseTest.buildAzureClaimSet(
         issuerId = issuer,
         clientId = subject,
         audience = audience,
-        claims = claims
+        claims = claims,
     )
 }
 
-fun AbstractContainerBaseTest.skapAzureJwt(subject: String = "spinnsyn-frontend-interne-client-id") =
-    buildAzureClaimSet(subject = subject)
+fun AbstractContainerBaseTest.skapAzureJwt(subject: String = "spinnsyn-frontend-interne-client-id") = buildAzureClaimSet(subject = subject)

@@ -3,7 +3,6 @@ package no.nav.helse.flex.domene
 import java.time.LocalDate
 
 interface Periode {
-
     val fom: LocalDate
     val tom: LocalDate
 

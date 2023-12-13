@@ -10,14 +10,16 @@ const val VEDTAK_TOPIC = "tbd.vedtak"
 
 @Component
 class VedtakKafkaListener(
-    private val mottaVedtak: MottaVedtak
+    private val mottaVedtak: MottaVedtak,
 ) {
-
     @KafkaListener(
         topics = [VEDTAK_TOPIC],
-        containerFactory = "aivenKafkaListenerContainerFactory"
+        containerFactory = "aivenKafkaListenerContainerFactory",
     )
-    fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+    fun listen(
+        cr: ConsumerRecord<String, String>,
+        acknowledgment: Acknowledgment,
+    ) {
         mottaVedtak.handterMelding(cr)
         acknowledgment.acknowledge()
     }

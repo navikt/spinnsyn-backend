@@ -19,7 +19,7 @@ data class RSVedtakWrapper(
     val dagerPerson: List<RSDag> = emptyList(),
     val sykepengebelopArbeidsgiver: Int = 0,
     val sykepengebelopPerson: Int = 0,
-    val andreArbeidsgivere: Map<String, Double>?
+    val andreArbeidsgivere: Map<String, Double>?,
 )
 
 data class RSVedtak(
@@ -32,11 +32,12 @@ data class RSVedtak(
     val utbetaling: RSUtbetalingUtbetalt,
     val grunnlagForSykepengegrunnlag: Double?,
     val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>?,
-    val begrensning: String?, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
+    // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
+    val begrensning: String?,
     val vedtakFattetTidspunkt: LocalDate?,
     val sykepengegrunnlagsfakta: JsonNode?,
     val begrunnelser: List<Begrunnelse>?,
-    val tags: List<String>?
+    val tags: List<String>?,
 ) : Periode
 
 data class RSUtbetalingUtbetalt(
@@ -52,13 +53,13 @@ data class RSUtbetalingUtbetalt(
     @JsonIgnore
     val utbetalingsdager: List<RSUtbetalingdag>?,
     val foreløpigBeregnetSluttPåSykepenger: LocalDate?,
-    val utbetalingType: String
+    val utbetalingType: String,
 )
 
 data class RSOppdrag(
     val mottaker: String,
     val nettoBeløp: Int,
-    val utbetalingslinjer: List<RSUtbetalingslinje>
+    val utbetalingslinjer: List<RSUtbetalingslinje>,
 )
 
 data class RSUtbetalingslinje(
@@ -68,7 +69,7 @@ data class RSUtbetalingslinje(
     val dagsatsTransformasjonHjelper: Int,
     val totalbeløp: Int,
     val grad: Double,
-    val stønadsdager: Int
+    val stønadsdager: Int,
 ) {
     fun overlapperMed(dato: LocalDate) = dato in fom..tom
 }
@@ -76,7 +77,7 @@ data class RSUtbetalingslinje(
 data class RSUtbetalingdag(
     val dato: LocalDate,
     val type: String,
-    val begrunnelser: List<String>
+    val begrunnelser: List<String>,
 )
 
 data class RSDag(
@@ -84,5 +85,5 @@ data class RSDag(
     val belop: Int,
     val grad: Double,
     val dagtype: String,
-    val begrunnelser: List<String>
+    val begrunnelser: List<String>,
 )

@@ -20,10 +20,8 @@ class TestdataListener(
     val environmentToggles: EnvironmentToggles,
     val mottaVedtak: MottaVedtak,
     val mottaUtbetaling: MottaUtbetaling,
-    val sendVedtakStatus: SendVedtakStatus
-
+    val sendVedtakStatus: SendVedtakStatus,
 ) {
-
     val log = logger()
 
     data class VedtakV2(val vedtak: String, val utbetaling: String?)
@@ -31,9 +29,12 @@ class TestdataListener(
     @KafkaListener(
         topics = [TESTDATA_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
-        properties = ["auto.offset.reset = latest"]
+        properties = ["auto.offset.reset = latest"],
     )
-    fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+    fun listen(
+        cr: ConsumerRecord<String, String>,
+        acknowledgment: Acknowledgment,
+    ) {
         try {
             val fnr = cr.key()
             val vedtakV2: VedtakV2 = objectMapper.readValue(cr.value())
@@ -45,7 +46,7 @@ class TestdataListener(
             mottaVedtak.mottaVedtak(
                 fnr = fnr,
                 vedtak = vedtakV2.vedtak,
-                timestamp = Instant.now()
+                timestamp = Instant.now(),
             )
             log.info("Opprettet vedtak fra testadata for periode på fnr: $fnr")
 
@@ -53,7 +54,7 @@ class TestdataListener(
                 mottaUtbetaling.mottaUtbetaling(
                     fnr = fnr,
                     utbetaling = vedtakV2.utbetaling,
-                    opprettet = Instant.now()
+                    opprettet = Instant.now(),
                 )
                 log.info("Opprettet utbetaling fra testadata for periode på fnr: $fnr")
             }

@@ -16,9 +16,8 @@ import java.util.*
 @Transactional
 @Repository
 class AnnulleringDAO(
-    private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+    private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
-
     fun finnAnnullering(fnr: String): List<Annullering> {
         return namedParameterJdbcTemplate.query(
             """
@@ -27,7 +26,7 @@ class AnnulleringDAO(
             WHERE fnr = :fnr
             """,
             MapSqlParameterSource()
-                .addValue("fnr", fnr)
+                .addValue("fnr", fnr),
         ) { resultSet, _ ->
             resultSet.toAnnullering()
         }
@@ -41,14 +40,24 @@ class AnnulleringDAO(
             WHERE fnr in (:fnr)
             """,
             MapSqlParameterSource()
-                .addValue("fnr", fnr)
+                .addValue("fnr", fnr),
         ) { resultSet, _ ->
             resultSet.toAnnullering()
         }
     }
 
-    fun opprettAnnullering(id: UUID, fnr: String, annullering: String, opprettet: Instant, kilde: String) {
-        val annulleringJSON = PGobject().also { it.type = "json"; it.value = annullering }
+    fun opprettAnnullering(
+        id: UUID,
+        fnr: String,
+        annullering: String,
+        opprettet: Instant,
+        kilde: String,
+    ) {
+        val annulleringJSON =
+            PGobject().also {
+                it.type = "json"
+                it.value = annullering
+            }
 
         namedParameterJdbcTemplate.update(
             """
@@ -60,7 +69,7 @@ class AnnulleringDAO(
                 .addValue("fnr", fnr)
                 .addValue("annullering", annulleringJSON)
                 .addValue("opprettet", Timestamp.from(opprettet))
-                .addValue("kilde", kilde)
+                .addValue("kilde", kilde),
         )
     }
 
@@ -71,7 +80,7 @@ class AnnulleringDAO(
                 WHERE fnr = :fnr;
             """,
             MapSqlParameterSource()
-                .addValue("fnr", fnr)
+                .addValue("fnr", fnr),
         )
     }
 }
@@ -81,7 +90,7 @@ data class Annullering(
     val fnr: String,
     val annullering: AnnulleringDto,
     val opprettet: Instant,
-    val kilde: String
+    val kilde: String,
 )
 
 private fun ResultSet.toAnnullering(): Annullering =
@@ -90,5 +99,5 @@ private fun ResultSet.toAnnullering(): Annullering =
         fnr = getString("fnr"),
         annullering = getString("annullering").tilAnnulleringDto(),
         opprettet = getObject("opprettet", OffsetDateTime::class.java).toInstant(),
-        kilde = getString("kilde")
+        kilde = getString("kilde"),
     )

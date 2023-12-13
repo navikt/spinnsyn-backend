@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
-
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
@@ -37,60 +36,66 @@ class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
         val organisasjonsnummer: String?,
         val fødselsnummer: String,
         val fom: LocalDate?,
-        val tom: LocalDate?
-    )
-    val vedtak = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = fnr,
-        organisasjonsnummer = org,
-        fom = fom,
-        tom = tom,
-        skjæringstidspunkt = fom,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = vedtakFattetTidspunk
+        val tom: LocalDate?,
     )
 
-    val utbetaling = UtbetalingUtbetalt(
-        fødselsnummer = fnr,
-        aktørId = fnr,
-        organisasjonsnummer = org,
-        fom = fom,
-        tom = tom,
-        utbetalingId = utbetalingId,
-        antallVedtak = 1,
-        event = "eventet",
-        forbrukteSykedager = 42,
-        gjenståendeSykedager = 3254,
-        foreløpigBeregnetSluttPåSykepenger = null,
-        automatiskBehandling = true,
-        arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
-            mottaker = org,
-            fagområde = "SP",
-            fagsystemId = "1234",
-            nettoBeløp = 123,
-            utbetalingslinjer = emptyList()
-        ),
-        type = "UTBETALING",
-        utbetalingsdager = listOf(
-            UtbetalingUtbetalt.UtbetalingdagDto(
-                dato = fom,
-                type = "AvvistDag",
-                begrunnelser = listOf(MinimumSykdomsgrad)
-            )
+    val vedtak =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = fnr,
+            organisasjonsnummer = org,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = fom,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = vedtakFattetTidspunk,
         )
-    )
-    val vedtakAnnullertDto = VedtakAnnullertDto(
-        fødselsnummer = fnr,
-        organisasjonsnummer = org,
-        fom = fom,
-        tom = tom
-    )
+
+    val utbetaling =
+        UtbetalingUtbetalt(
+            fødselsnummer = fnr,
+            aktørId = fnr,
+            organisasjonsnummer = org,
+            fom = fom,
+            tom = tom,
+            utbetalingId = utbetalingId,
+            antallVedtak = 1,
+            event = "eventet",
+            forbrukteSykedager = 42,
+            gjenståendeSykedager = 3254,
+            foreløpigBeregnetSluttPåSykepenger = null,
+            automatiskBehandling = true,
+            arbeidsgiverOppdrag =
+                UtbetalingUtbetalt.OppdragDto(
+                    mottaker = org,
+                    fagområde = "SP",
+                    fagsystemId = "1234",
+                    nettoBeløp = 123,
+                    utbetalingslinjer = emptyList(),
+                ),
+            type = "UTBETALING",
+            utbetalingsdager =
+                listOf(
+                    UtbetalingUtbetalt.UtbetalingdagDto(
+                        dato = fom,
+                        type = "AvvistDag",
+                        begrunnelser = listOf(MinimumSykdomsgrad),
+                    ),
+                ),
+        )
+    val vedtakAnnullertDto =
+        VedtakAnnullertDto(
+            fødselsnummer = fnr,
+            organisasjonsnummer = org,
+            fom = fom,
+            tom = tom,
+        )
 
     @Test
     @Order(2)
@@ -101,8 +106,8 @@ class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         kafkaProducer.send(
@@ -110,8 +115,8 @@ class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling.serialisertTilString()
-            )
+                utbetaling.serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -136,8 +141,8 @@ class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtakAnnullertDto.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -163,8 +168,8 @@ class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtakAnnullertDto.copy(organisasjonsnummer = "456").serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -190,11 +195,10 @@ class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
                 fnr,
                 vedtak.copy(
                     organisasjonsnummer = "456",
-                    utbetalingId = "$utbetalingId nr2"
+                    utbetalingId = "$utbetalingId nr2",
                 ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         kafkaProducer.send(
@@ -205,11 +209,12 @@ class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
                 utbetaling.copy(
                     organisasjonsnummer = "456",
                     utbetalingId = "$utbetalingId nr2",
-                    arbeidsgiverOppdrag = utbetaling.arbeidsgiverOppdrag?.copy(
-                        mottaker = "456"
-                    )
-                ).serialisertTilString()
-            )
+                    arbeidsgiverOppdrag =
+                        utbetaling.arbeidsgiverOppdrag?.copy(
+                            mottaker = "456",
+                        ),
+                ).serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {

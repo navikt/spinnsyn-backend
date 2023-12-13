@@ -14,17 +14,18 @@ data class VedtakDto(
     val sykepengegrunnlag: Double? = null,
     val grunnlagForSykepengegrunnlag: Double? = null,
     val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>? = null,
-    val begrensning: String? = null, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
+    // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
+    val begrensning: String? = null,
     val månedsinntekt: Double? = null,
     val organisasjonsnummer: String? = null,
     val utbetalinger: List<UtbetalingDto> = emptyList(),
-    val dokumenter: List<Dokument> = emptyList()
+    val dokumenter: List<Dokument> = emptyList(),
 ) {
     data class UtbetalingDto(
         val mottaker: String,
         val fagområde: String,
         val totalbeløp: Int,
-        val utbetalingslinjer: List<UtbetalingslinjeDto> = emptyList()
+        val utbetalingslinjer: List<UtbetalingslinjeDto> = emptyList(),
     ) {
         data class UtbetalingslinjeDto(
             val fom: LocalDate,
@@ -32,14 +33,16 @@ data class VedtakDto(
             val dagsats: Int,
             val beløp: Int,
             val grad: Double,
-            val sykedager: Int
+            val sykedager: Int,
         )
     }
 }
 
 data class Dokument(val dokumentId: UUID, val type: Type) {
     enum class Type {
-        Sykmelding, Søknad, Inntektsmelding
+        Sykmelding,
+        Søknad,
+        Inntektsmelding,
     }
 }
 

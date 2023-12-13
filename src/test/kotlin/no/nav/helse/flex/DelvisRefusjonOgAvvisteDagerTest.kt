@@ -38,8 +38,8 @@ class DelvisRefusjonOgAvvisteDagerTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling
-            )
+                utbetaling,
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -60,8 +60,8 @@ class DelvisRefusjonOgAvvisteDagerTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak,
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {

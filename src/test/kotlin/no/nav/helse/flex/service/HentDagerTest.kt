@@ -17,18 +17,19 @@ class HentDagerTest {
             fom = mandag.plusDays(0),
             tom = mandag.plusDays(9),
             oppdragDto = null,
-            utbetalingsdager = listOf(
-                RSUtbetalingdag(mandag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList())
-            )
+            utbetalingsdager =
+                listOf(
+                    RSUtbetalingdag(mandag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
+                ),
         ).shouldBeEqualTo(
             listOf(
                 RSDag(mandag.plusDays(0), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
@@ -40,8 +41,8 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(6), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(7), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(8), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
-                RSDag(mandag.plusDays(9), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList())
-            )
+                RSDag(mandag.plusDays(9), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
+            ),
         )
     }
 
@@ -50,41 +51,44 @@ class HentDagerTest {
         hentDager(
             fom = mandag.plusDays(0),
             tom = mandag.plusDays(17),
-            oppdragDto = RSOppdrag(
-                mottaker = "12345678",
-                nettoBeløp = 200,
-                utbetalingslinjer = listOf(
-                    RSUtbetalingslinje(
-                        fom = mandag.plusDays(16),
-                        tom = mandag.plusDays(17),
-                        dagsats = 100,
-                        dagsatsTransformasjonHjelper = 100,
-                        totalbeløp = 200,
-                        grad = 100.0,
-                        stønadsdager = 2
-                    )
-                )
-            ),
-            utbetalingsdager = listOf(
-                RSUtbetalingdag(mandag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(16), "NavDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(17), "NavDag", emptyList())
-            )
+            oppdragDto =
+                RSOppdrag(
+                    mottaker = "12345678",
+                    nettoBeløp = 200,
+                    utbetalingslinjer =
+                        listOf(
+                            RSUtbetalingslinje(
+                                fom = mandag.plusDays(16),
+                                tom = mandag.plusDays(17),
+                                dagsats = 100,
+                                dagsatsTransformasjonHjelper = 100,
+                                totalbeløp = 200,
+                                grad = 100.0,
+                                stønadsdager = 2,
+                            ),
+                        ),
+                ),
+            utbetalingsdager =
+                listOf(
+                    RSUtbetalingdag(mandag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(16), "NavDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(17), "NavDag", emptyList()),
+                ),
         ).shouldBeEqualTo(
             listOf(
                 RSDag(mandag.plusDays(0), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
@@ -104,8 +108,8 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(14), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(15), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList())
-            )
+                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+            ),
         )
     }
 
@@ -114,41 +118,44 @@ class HentDagerTest {
         hentDager(
             fom = mandag.plusDays(0),
             tom = mandag.plusDays(17),
-            oppdragDto = RSOppdrag(
-                mottaker = "12345678",
-                nettoBeløp = 800,
-                utbetalingslinjer = listOf(
-                    RSUtbetalingslinje(
-                        fom = mandag.plusDays(10),
-                        tom = mandag.plusDays(17),
-                        dagsats = 100,
-                        dagsatsTransformasjonHjelper = 100,
-                        totalbeløp = 800,
-                        grad = 100.0,
-                        stønadsdager = 8
-                    )
-                )
-            ),
-            utbetalingsdager = listOf(
-                RSUtbetalingdag(mandag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(16), "NavDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(17), "NavDag", emptyList())
-            )
+            oppdragDto =
+                RSOppdrag(
+                    mottaker = "12345678",
+                    nettoBeløp = 800,
+                    utbetalingslinjer =
+                        listOf(
+                            RSUtbetalingslinje(
+                                fom = mandag.plusDays(10),
+                                tom = mandag.plusDays(17),
+                                dagsats = 100,
+                                dagsatsTransformasjonHjelper = 100,
+                                totalbeløp = 800,
+                                grad = 100.0,
+                                stønadsdager = 8,
+                            ),
+                        ),
+                ),
+            utbetalingsdager =
+                listOf(
+                    RSUtbetalingdag(mandag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(16), "NavDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(17), "NavDag", emptyList()),
+                ),
         ).shouldBeEqualTo(
             listOf(
                 RSDag(mandag.plusDays(0), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
@@ -168,8 +175,8 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(14), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(mandag.plusDays(15), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList())
-            )
+                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+            ),
         )
     }
 
@@ -178,41 +185,44 @@ class HentDagerTest {
         hentDager(
             fom = mandag.plusDays(0),
             tom = mandag.plusDays(17),
-            oppdragDto = RSOppdrag(
-                mottaker = "12345678",
-                nettoBeløp = 900,
-                utbetalingslinjer = listOf(
-                    RSUtbetalingslinje(
-                        fom = mandag.plusDays(7),
-                        tom = mandag.plusDays(17),
-                        dagsats = 100,
-                        dagsatsTransformasjonHjelper = 100,
-                        totalbeløp = 900,
-                        grad = 100.0,
-                        stønadsdager = 9
-                    )
-                )
-            ),
-            utbetalingsdager = listOf(
-                RSUtbetalingdag(mandag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(16), "NavDag", emptyList()),
-                RSUtbetalingdag(mandag.plusDays(17), "NavDag", emptyList())
-            )
+            oppdragDto =
+                RSOppdrag(
+                    mottaker = "12345678",
+                    nettoBeløp = 900,
+                    utbetalingslinjer =
+                        listOf(
+                            RSUtbetalingslinje(
+                                fom = mandag.plusDays(7),
+                                tom = mandag.plusDays(17),
+                                dagsats = 100,
+                                dagsatsTransformasjonHjelper = 100,
+                                totalbeløp = 900,
+                                grad = 100.0,
+                                stønadsdager = 9,
+                            ),
+                        ),
+                ),
+            utbetalingsdager =
+                listOf(
+                    RSUtbetalingdag(mandag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(16), "NavDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(17), "NavDag", emptyList()),
+                ),
         ).shouldBeEqualTo(
             listOf(
                 RSDag(mandag.plusDays(0), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
@@ -232,8 +242,8 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(14), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(mandag.plusDays(15), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList())
-            )
+                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+            ),
         )
     }
 
@@ -244,41 +254,44 @@ class HentDagerTest {
         hentDager(
             fom = søndag.minusDays(15),
             tom = søndag.plusDays(2),
-            oppdragDto = RSOppdrag(
-                mottaker = "12345678",
-                nettoBeløp = 200,
-                utbetalingslinjer = listOf(
-                    RSUtbetalingslinje(
-                        fom = søndag.plusDays(1),
-                        tom = søndag.plusDays(2),
-                        dagsats = 100,
-                        dagsatsTransformasjonHjelper = 100,
-                        totalbeløp = 200,
-                        grad = 100.0,
-                        stønadsdager = 2
-                    )
-                )
-            ),
-            utbetalingsdager = listOf(
-                RSUtbetalingdag(søndag.minusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.minusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(1), "NavDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(2), "NavDag", emptyList())
-            )
+            oppdragDto =
+                RSOppdrag(
+                    mottaker = "12345678",
+                    nettoBeløp = 200,
+                    utbetalingslinjer =
+                        listOf(
+                            RSUtbetalingslinje(
+                                fom = søndag.plusDays(1),
+                                tom = søndag.plusDays(2),
+                                dagsats = 100,
+                                dagsatsTransformasjonHjelper = 100,
+                                totalbeløp = 200,
+                                grad = 100.0,
+                                stønadsdager = 2,
+                            ),
+                        ),
+                ),
+            utbetalingsdager =
+                listOf(
+                    RSUtbetalingdag(søndag.minusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.minusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(1), "NavDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(2), "NavDag", emptyList()),
+                ),
         ).shouldBeEqualTo(
             listOf(
                 RSDag(søndag.minusDays(15), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
@@ -298,8 +311,8 @@ class HentDagerTest {
                 RSDag(søndag.minusDays(1), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(søndag.minusDays(0), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(søndag.plusDays(1), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(2), 100, 100.0, "NavDagSyk", emptyList())
-            )
+                RSDag(søndag.plusDays(2), 100, 100.0, "NavDagSyk", emptyList()),
+            ),
         )
     }
 
@@ -310,41 +323,44 @@ class HentDagerTest {
         hentDager(
             fom = søndag.plusDays(0),
             tom = søndag.plusDays(17),
-            oppdragDto = RSOppdrag(
-                mottaker = "12345678",
-                nettoBeløp = 1300,
-                utbetalingslinjer = listOf(
-                    RSUtbetalingslinje(
-                        fom = søndag.plusDays(1),
-                        tom = søndag.plusDays(17),
-                        dagsats = 100,
-                        dagsatsTransformasjonHjelper = 100,
-                        totalbeløp = 1300,
-                        grad = 100.0,
-                        stønadsdager = 13
-                    )
-                )
-            ),
-            utbetalingsdager = listOf(
-                RSUtbetalingdag(søndag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(16), "NavDag", emptyList()),
-                RSUtbetalingdag(søndag.plusDays(17), "NavDag", emptyList())
-            )
+            oppdragDto =
+                RSOppdrag(
+                    mottaker = "12345678",
+                    nettoBeløp = 1300,
+                    utbetalingslinjer =
+                        listOf(
+                            RSUtbetalingslinje(
+                                fom = søndag.plusDays(1),
+                                tom = søndag.plusDays(17),
+                                dagsats = 100,
+                                dagsatsTransformasjonHjelper = 100,
+                                totalbeløp = 1300,
+                                grad = 100.0,
+                                stønadsdager = 13,
+                            ),
+                        ),
+                ),
+            utbetalingsdager =
+                listOf(
+                    RSUtbetalingdag(søndag.plusDays(0), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(1), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(2), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(3), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(4), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(5), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(6), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(7), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(8), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(9), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(10), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(11), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(12), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(13), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(14), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(15), "ArbeidsgiverperiodeDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(16), "NavDag", emptyList()),
+                    RSUtbetalingdag(søndag.plusDays(17), "NavDag", emptyList()),
+                ),
         ).shouldBeEqualTo(
             listOf(
                 RSDag(søndag.plusDays(0), 0, 0.0, "NavHelgDag", emptyList()),
@@ -364,8 +380,8 @@ class HentDagerTest {
                 RSDag(søndag.plusDays(14), 0, 0.0, "NavHelgDag", emptyList()),
                 RSDag(søndag.plusDays(15), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(søndag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList())
-            )
+                RSDag(søndag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+            ),
         )
     }
 }

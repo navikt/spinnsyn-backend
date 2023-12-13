@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
-
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
@@ -45,60 +44,65 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
     final val org = "987123123"
     final val now = LocalDate.now()
     final val utbetalingId = "124542"
-    val vedtak = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        skjæringstidspunkt = now,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = LocalDate.now()
-    )
-
-    val utbetaling = UtbetalingUtbetalt(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        utbetalingId = utbetalingId,
-        antallVedtak = 1,
-        event = "eventet",
-        forbrukteSykedager = 42,
-        gjenståendeSykedager = 3254,
-        foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
-        automatiskBehandling = true,
-        arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
-            mottaker = org,
-            fagområde = "SP",
-            fagsystemId = "1234",
-            nettoBeløp = 123,
-            utbetalingslinjer = emptyList()
-        ),
-        type = "UTBETALING",
-        utbetalingsdager = listOf(
-            UtbetalingdagDto(
-                dato = now,
-                type = "AvvistDag",
-                begrunnelser = listOf(MinimumSykdomsgrad)
-            )
+    val vedtak =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now,
+            skjæringstidspunkt = now,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = LocalDate.now(),
         )
-    )
 
-    val annulleringDto = AnnulleringDto(
-        fødselsnummer = fnr,
-        orgnummer = org,
-        organisasjonsnummer = null,
-        fom = now,
-        tom = now
-    )
+    val utbetaling =
+        UtbetalingUtbetalt(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now,
+            utbetalingId = utbetalingId,
+            antallVedtak = 1,
+            event = "eventet",
+            forbrukteSykedager = 42,
+            gjenståendeSykedager = 3254,
+            foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
+            automatiskBehandling = true,
+            arbeidsgiverOppdrag =
+                UtbetalingUtbetalt.OppdragDto(
+                    mottaker = org,
+                    fagområde = "SP",
+                    fagsystemId = "1234",
+                    nettoBeløp = 123,
+                    utbetalingslinjer = emptyList(),
+                ),
+            type = "UTBETALING",
+            utbetalingsdager =
+                listOf(
+                    UtbetalingdagDto(
+                        dato = now,
+                        type = "AvvistDag",
+                        begrunnelser = listOf(MinimumSykdomsgrad),
+                    ),
+                ),
+        )
+
+    val annulleringDto =
+        AnnulleringDto(
+            fødselsnummer = fnr,
+            orgnummer = org,
+            organisasjonsnummer = null,
+            fom = now,
+            tom = now,
+        )
 
     @Test
     @Order(1)
@@ -109,9 +113,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -137,8 +140,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling.serialisertTilString()
-            )
+                utbetaling.serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -175,8 +178,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 orgnummer = org,
                 oppdatert = Instant.now(),
                 opprettet = Instant.now(),
-                oppdatertAv = "bla"
-            )
+                oppdatertAv = "bla",
+            ),
         )
 
         val vedtakMedNavn = hentVedtakMedTokenXToken(fnr)
@@ -229,13 +232,13 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
             get("/api/v1/arkivering/vedtak")
                 .header("Authorization", "Bearer blabla-fake-token")
                 .header("fnr", fnr)
-                .contentType(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON),
         ).andExpect(status().isUnauthorized)
 
         mockMvc.perform(
             get("/api/v1/arkivering/vedtak")
                 .header("fnr", fnr)
-                .contentType(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON),
         ).andExpect(status().isUnauthorized)
     }
 
@@ -265,8 +268,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 annulleringDto.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -293,8 +296,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.copy(utbetalingId = null).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -313,8 +316,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.copy(utbetalingId = null).copy(fom = LocalDate.now().minusDays(5)).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -333,8 +336,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().during(2, TimeUnit.SECONDS).until {
@@ -354,8 +357,8 @@ class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling.serialisertTilString()
-            )
+                utbetaling.serialisertTilString(),
+            ),
         ).get()
 
         await().during(5, TimeUnit.SECONDS).until {

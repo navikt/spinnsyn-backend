@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
-
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
@@ -36,52 +35,56 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
     final val org = "987"
     final val now = LocalDate.now()
     final val utbetalingId = "124542"
-    val vedtak = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        skjæringstidspunkt = now,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = LocalDate.now()
-    )
-
-    val utbetaling = UtbetalingUtbetalt(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        utbetalingId = utbetalingId,
-        event = "eventet",
-        antallVedtak = 1,
-        forbrukteSykedager = 42,
-        foreløpigBeregnetSluttPåSykepenger = null,
-        gjenståendeSykedager = 3254,
-        automatiskBehandling = true,
-        arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
-            mottaker = org,
-            fagområde = "SP",
-            fagsystemId = "1234",
-            nettoBeløp = 123,
-            utbetalingslinjer = emptyList()
-        ),
-        type = "UTBETALING",
-        utbetalingsdager = listOf(
-            UtbetalingUtbetalt.UtbetalingdagDto(
-                dato = now,
-                type = "AvvistDag",
-                begrunnelser = listOf(MinimumSykdomsgrad)
-            )
+    val vedtak =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now,
+            skjæringstidspunkt = now,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = LocalDate.now(),
         )
-    )
+
+    val utbetaling =
+        UtbetalingUtbetalt(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now,
+            utbetalingId = utbetalingId,
+            event = "eventet",
+            antallVedtak = 1,
+            forbrukteSykedager = 42,
+            foreløpigBeregnetSluttPåSykepenger = null,
+            gjenståendeSykedager = 3254,
+            automatiskBehandling = true,
+            arbeidsgiverOppdrag =
+                UtbetalingUtbetalt.OppdragDto(
+                    mottaker = org,
+                    fagområde = "SP",
+                    fagsystemId = "1234",
+                    nettoBeløp = 123,
+                    utbetalingslinjer = emptyList(),
+                ),
+            type = "UTBETALING",
+            utbetalingsdager =
+                listOf(
+                    UtbetalingUtbetalt.UtbetalingdagDto(
+                        dato = now,
+                        type = "AvvistDag",
+                        begrunnelser = listOf(MinimumSykdomsgrad),
+                    ),
+                ),
+        )
 
     @Test
     @Order(1)
@@ -92,8 +95,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -119,8 +122,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling.serialisertTilString()
-            )
+                utbetaling.serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -151,8 +154,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         kafkaProducer.send(
@@ -162,8 +165,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 fnr,
                 utbetaling
                     .copy(utbetalingId = utbetalingsid, type = "REVURDERING")
-                    .serialisertTilString()
-            )
+                    .serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -199,8 +202,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         kafkaProducer.send(
@@ -210,8 +213,8 @@ class RebehandlingIntegrationTest : AbstractContainerBaseTest() {
                 fnr,
                 utbetaling
                     .copy(utbetalingId = utbetalingsid, type = "REVURDERING")
-                    .serialisertTilString()
-            )
+                    .serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {

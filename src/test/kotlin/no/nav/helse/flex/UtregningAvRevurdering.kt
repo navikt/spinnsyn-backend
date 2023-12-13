@@ -42,8 +42,8 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling
-            )
+                utbetaling,
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -64,8 +64,8 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak1,
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
         kafkaProducer.send(
             ProducerRecord(
@@ -73,8 +73,8 @@ class UtregningAvRevurdering : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak2,
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {

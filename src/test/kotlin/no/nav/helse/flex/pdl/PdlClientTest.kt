@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class PdlClientTest : AbstractContainerBaseTest() {
-
     @Autowired
     private lateinit var pdlClient: PdlClient
 
