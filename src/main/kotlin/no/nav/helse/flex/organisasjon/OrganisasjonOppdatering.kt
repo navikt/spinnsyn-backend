@@ -9,7 +9,7 @@ import java.time.Instant
 
 @Component
 class OrganisasjonOppdatering(
-    private val organisasjonRepository: OrganisasjonRepository
+    private val organisasjonRepository: OrganisasjonRepository,
 ) {
     val log = logger()
 
@@ -27,21 +27,21 @@ class OrganisasjonOppdatering(
                         navn = navn,
                         oppdatert = Instant.now(),
                         opprettet = Instant.now(),
-                        oppdatertAv = soknad.id
-                    )
+                        oppdatertAv = soknad.id,
+                    ),
                 )
             } else {
                 if (eksisterende.navn != navn) {
                     log.info(
                         "Endrer navn på organisasjon med orgnummer: $orgnummer fra: ${eksisterende.navn} til: $navn. " +
-                            "Opprinnelig kilde: ${eksisterende.oppdatertAv}. Ny kilde: ${soknad.id}"
+                            "Opprinnelig kilde: ${eksisterende.oppdatertAv}. Ny kilde: ${soknad.id}",
                     )
                     lagreOrganisasjon(
                         eksisterende.copy(
                             navn = navn,
                             oppdatertAv = soknad.id,
-                            oppdatert = Instant.now()
-                        )
+                            oppdatert = Instant.now(),
+                        ),
                     )
                 }
             }

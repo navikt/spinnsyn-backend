@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
-
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
@@ -37,96 +36,101 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
     final val fom = LocalDate.of(2022, 2, 1)
     final val tom = fom.plusDays(7)
     final val utbetalingId = "168465"
-    val vedtak = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = fom,
-        tom = tom,
-        skjæringstidspunkt = fom,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = LocalDate.now()
-    )
-
-    val utbetaling = UtbetalingUtbetalt(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = fom,
-        tom = tom,
-        utbetalingId = utbetalingId,
-        antallVedtak = 1,
-        event = "eventet",
-        forbrukteSykedager = 2,
-        gjenståendeSykedager = 3254,
-        foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
-        automatiskBehandling = true,
-        personOppdrag = UtbetalingUtbetalt.OppdragDto(
-            mottaker = org,
-            fagområde = "SP",
-            fagsystemId = "1234",
-            nettoBeløp = 738,
-            utbetalingslinjer = listOf(
-                UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto(
-                    dagsats = 123,
-                    fom = fom,
-                    tom = tom,
-                    grad = 100.0,
-                    stønadsdager = 6,
-                    totalbeløp = 738
-                )
-            )
-        ),
-        type = "UTBETALING",
-        utbetalingsdager = listOf(
-            UtbetalingdagDto(
-                dato = fom,
-                type = "ArbeidsgiverperiodeDag",
-                begrunnelser = emptyList()
-            ),
-            UtbetalingdagDto(
-                dato = fom.plusDays(1),
-                type = "ArbeidsgiverperiodeDag",
-                begrunnelser = emptyList()
-            ),
-            UtbetalingdagDto(
-                dato = fom.plusDays(2),
-                type = "ArbeidsgiverperiodeDag",
-                begrunnelser = emptyList()
-            ),
-            UtbetalingdagDto(
-                dato = fom.plusDays(3),
-                type = "ArbeidsgiverperiodeDag",
-                begrunnelser = emptyList()
-            ),
-            UtbetalingdagDto(
-                dato = fom.plusDays(4),
-                type = "ArbeidsgiverperiodeDag",
-                begrunnelser = emptyList()
-            ),
-            UtbetalingdagDto(
-                dato = fom.plusDays(5),
-                type = "ArbeidsgiverperiodeDag",
-                begrunnelser = emptyList()
-            ),
-            UtbetalingdagDto(
-                dato = fom.plusDays(6),
-                type = "NavDag",
-                begrunnelser = emptyList()
-            ),
-            UtbetalingdagDto(
-                dato = fom.plusDays(7),
-                type = "NavDag",
-                begrunnelser = emptyList()
-            )
+    val vedtak =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = fom,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = LocalDate.now(),
         )
-    )
+
+    val utbetaling =
+        UtbetalingUtbetalt(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = fom,
+            tom = tom,
+            utbetalingId = utbetalingId,
+            antallVedtak = 1,
+            event = "eventet",
+            forbrukteSykedager = 2,
+            gjenståendeSykedager = 3254,
+            foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
+            automatiskBehandling = true,
+            personOppdrag =
+                UtbetalingUtbetalt.OppdragDto(
+                    mottaker = org,
+                    fagområde = "SP",
+                    fagsystemId = "1234",
+                    nettoBeløp = 738,
+                    utbetalingslinjer =
+                        listOf(
+                            UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto(
+                                dagsats = 123,
+                                fom = fom,
+                                tom = tom,
+                                grad = 100.0,
+                                stønadsdager = 6,
+                                totalbeløp = 738,
+                            ),
+                        ),
+                ),
+            type = "UTBETALING",
+            utbetalingsdager =
+                listOf(
+                    UtbetalingdagDto(
+                        dato = fom,
+                        type = "ArbeidsgiverperiodeDag",
+                        begrunnelser = emptyList(),
+                    ),
+                    UtbetalingdagDto(
+                        dato = fom.plusDays(1),
+                        type = "ArbeidsgiverperiodeDag",
+                        begrunnelser = emptyList(),
+                    ),
+                    UtbetalingdagDto(
+                        dato = fom.plusDays(2),
+                        type = "ArbeidsgiverperiodeDag",
+                        begrunnelser = emptyList(),
+                    ),
+                    UtbetalingdagDto(
+                        dato = fom.plusDays(3),
+                        type = "ArbeidsgiverperiodeDag",
+                        begrunnelser = emptyList(),
+                    ),
+                    UtbetalingdagDto(
+                        dato = fom.plusDays(4),
+                        type = "ArbeidsgiverperiodeDag",
+                        begrunnelser = emptyList(),
+                    ),
+                    UtbetalingdagDto(
+                        dato = fom.plusDays(5),
+                        type = "ArbeidsgiverperiodeDag",
+                        begrunnelser = emptyList(),
+                    ),
+                    UtbetalingdagDto(
+                        dato = fom.plusDays(6),
+                        type = "NavDag",
+                        begrunnelser = emptyList(),
+                    ),
+                    UtbetalingdagDto(
+                        dato = fom.plusDays(7),
+                        type = "NavDag",
+                        begrunnelser = emptyList(),
+                    ),
+                ),
+        )
 
     @Test
     @Order(1)
@@ -137,8 +141,8 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -164,8 +168,8 @@ class PersonoppdragIntegrationTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling.serialisertTilString()
-            )
+                utbetaling.serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {

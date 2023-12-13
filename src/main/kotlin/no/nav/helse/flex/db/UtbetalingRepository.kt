@@ -17,9 +17,10 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         SELECT *
         FROM utbetaling
         WHERE fnr in (:identer)
-        """
+        """,
     )
     fun findUtbetalingDbRecordsByIdent(identer: List<String>): List<UtbetalingDbRecord>
+
     fun existsByUtbetalingId(utbetalingId: String): Boolean
 
     @Query(
@@ -28,7 +29,7 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         FROM utbetaling
         WHERE skal_vises_til_bruker IS NULL
         AND motatt_publisert IS NULL;
-        """
+        """,
     )
     fun utbetalingerKlarTilVarsling(): List<UtbetalingerKlarTilVarsling>
 
@@ -40,9 +41,13 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         WHERE id = :id
         AND fnr in (:identer)
         AND lest IS NULL
-        """
+        """,
     )
-    fun updateLestByIdentAndId(lest: Instant, identer: List<String>, id: String): Boolean
+    fun updateLestByIdentAndId(
+        lest: Instant,
+        identer: List<String>,
+        id: String,
+    ): Boolean
 
     @Modifying
     @Query(
@@ -50,9 +55,13 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         UPDATE utbetaling
         SET motatt_publisert = :motattPublisert, skal_vises_til_bruker = :skalVisesTilBruker
         WHERE id = :id
-        """
+        """,
     )
-    fun settSkalVisesOgMotattPublisert(motattPublisert: Instant?, skalVisesTilBruker: Boolean?, id: String): Boolean
+    fun settSkalVisesOgMotattPublisert(
+        motattPublisert: Instant?,
+        skalVisesTilBruker: Boolean?,
+        id: String,
+    ): Boolean
 }
 
 @Table("utbetaling")
@@ -67,12 +76,12 @@ data class UtbetalingDbRecord(
     val antallVedtak: Int,
     val lest: Instant? = null,
     val motattPublisert: Instant? = null,
-    val skalVisesTilBruker: Boolean? = null
+    val skalVisesTilBruker: Boolean? = null,
 )
 
 data class UtbetalingerKlarTilVarsling(
     val id: String,
     val utbetalingId: String,
     val antallVedtak: Int,
-    val fnr: String
+    val fnr: String,
 )

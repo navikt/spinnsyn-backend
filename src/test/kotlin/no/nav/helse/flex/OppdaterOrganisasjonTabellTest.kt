@@ -14,7 +14,6 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
-
     @Autowired
     lateinit var kafkaProducer: Producer<String, String>
 
@@ -22,16 +21,17 @@ class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
     fun `Oppretter ny organisasjon hvis den ikke finnes fra før`() {
         organisasjonRepository.deleteAll()
 
-        val soknad = SykepengesoknadDTO(
-            fnr = "bla",
-            id = UUID.randomUUID().toString(),
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.NY,
-            fom = LocalDate.now().minusDays(1),
-            tom = LocalDate.now(),
-            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
-            arbeidsgiver = ArbeidsgiverDTO(navn = "Bedriften AS", orgnummer = "123456547")
-        )
+        val soknad =
+            SykepengesoknadDTO(
+                fnr = "bla",
+                id = UUID.randomUUID().toString(),
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                status = SoknadsstatusDTO.NY,
+                fom = LocalDate.now().minusDays(1),
+                tom = LocalDate.now(),
+                arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
+                arbeidsgiver = ArbeidsgiverDTO(navn = "Bedriften AS", orgnummer = "123456547"),
+            )
 
         organisasjonRepository.findByOrgnummer(soknad.arbeidsgiver!!.orgnummer!!).shouldBeNull()
 
@@ -51,16 +51,17 @@ class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
     fun `Den andre av to like meldinger blir ikke prosessert`() {
         organisasjonRepository.deleteAll()
 
-        val soknad = SykepengesoknadDTO(
-            fnr = "bla",
-            id = UUID.randomUUID().toString(),
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.NY,
-            fom = LocalDate.now().minusDays(1),
-            tom = LocalDate.now(),
-            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
-            arbeidsgiver = ArbeidsgiverDTO(navn = "Bedriften AS", orgnummer = "123456547")
-        )
+        val soknad =
+            SykepengesoknadDTO(
+                fnr = "bla",
+                id = UUID.randomUUID().toString(),
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                status = SoknadsstatusDTO.NY,
+                fom = LocalDate.now().minusDays(1),
+                tom = LocalDate.now(),
+                arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
+                arbeidsgiver = ArbeidsgiverDTO(navn = "Bedriften AS", orgnummer = "123456547"),
+            )
 
         organisasjonRepository.findByOrgnummer(soknad.arbeidsgiver!!.orgnummer!!).shouldBeNull()
 
@@ -75,13 +76,15 @@ class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
         sendSykepengesoknad(soknad)
 
         // Sender en tredje søknad som vi kan vente på for å være sikkert på at de to like søknadene blir prosessert.
-        val soknad2 = soknad.copy(
-            id = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                navn = "Bedriften AS Medssfdsdf nytt navn :)",
-                orgnummer = "0002"
+        val soknad2 =
+            soknad.copy(
+                id = UUID.randomUUID().toString(),
+                arbeidsgiver =
+                    ArbeidsgiverDTO(
+                        navn = "Bedriften AS Medssfdsdf nytt navn :)",
+                        orgnummer = "0002",
+                    ),
             )
-        )
         sendSykepengesoknad(soknad2)
         await().atMost(10, TimeUnit.SECONDS).until {
             organisasjonRepository.findByOrgnummer(soknad2.arbeidsgiver!!.orgnummer!!) != null
@@ -96,16 +99,17 @@ class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
     fun `Oppdaterer organisasjon hvis den finnes fra før`() {
         organisasjonRepository.deleteAll()
 
-        val soknad = SykepengesoknadDTO(
-            fnr = "bla",
-            id = UUID.randomUUID().toString(),
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.NY,
-            fom = LocalDate.now().minusDays(1),
-            tom = LocalDate.now(),
-            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
-            arbeidsgiver = ArbeidsgiverDTO(navn = "Bedriften AS", orgnummer = "1234534")
-        )
+        val soknad =
+            SykepengesoknadDTO(
+                fnr = "bla",
+                id = UUID.randomUUID().toString(),
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                status = SoknadsstatusDTO.NY,
+                fom = LocalDate.now().minusDays(1),
+                tom = LocalDate.now(),
+                arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
+                arbeidsgiver = ArbeidsgiverDTO(navn = "Bedriften AS", orgnummer = "1234534"),
+            )
 
         organisasjonRepository.findByOrgnummer(soknad.arbeidsgiver!!.orgnummer!!).shouldBeNull()
 
@@ -118,13 +122,15 @@ class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
         val org = organisasjonRepository.findByOrgnummer(soknad.arbeidsgiver!!.orgnummer!!)!!
         org.navn `should be equal to` soknad.arbeidsgiver!!.navn!!
 
-        val soknad2 = soknad.copy(
-            id = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                navn = "Bedriften AS Med nytt navn :)",
-                orgnummer = "1234534"
+        val soknad2 =
+            soknad.copy(
+                id = UUID.randomUUID().toString(),
+                arbeidsgiver =
+                    ArbeidsgiverDTO(
+                        navn = "Bedriften AS Med nytt navn :)",
+                        orgnummer = "1234534",
+                    ),
             )
-        )
         sendSykepengesoknad(soknad2)
 
         await().atMost(10, TimeUnit.SECONDS).until {
@@ -142,8 +148,8 @@ class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
                 FLEX_SYKEPENGESOKNAD_TOPIC,
                 null,
                 soknad.id,
-                soknad.serialisertTilString()
-            )
+                soknad.serialisertTilString(),
+            ),
         ).get()
     }
 }

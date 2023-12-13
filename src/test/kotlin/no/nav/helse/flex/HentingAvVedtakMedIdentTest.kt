@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit
 @SpringBootTest(classes = [Application::class])
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
-
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
@@ -86,7 +85,13 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
         utbetalinger[1].lest.shouldNotBeNull()
     }
 
-    private fun lagVedtak(fnr: String, aktørId: String, org: String, dato: LocalDate, utbetalingId: String): VedtakFattetForEksternDto {
+    private fun lagVedtak(
+        fnr: String,
+        aktørId: String,
+        org: String,
+        dato: LocalDate,
+        utbetalingId: String,
+    ): VedtakFattetForEksternDto {
         return VedtakFattetForEksternDto(
             fødselsnummer = fnr,
             aktørId = aktørId,
@@ -101,7 +106,7 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
             grunnlagForSykepengegrunnlag = 0.0,
             grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
             begrensning = "VET_IKKE",
-            vedtakFattetTidspunkt = LocalDate.now()
+            vedtakFattetTidspunkt = LocalDate.now(),
         )
     }
 
@@ -112,8 +117,8 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
                 null,
                 this.fødselsnummer,
                 this.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(this.fødselsnummer).isNotEmpty()
@@ -126,14 +131,21 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 this.fødselsnummer,
-                this.serialisertTilString()
-            )
+                this.serialisertTilString(),
+            ),
         ).get()
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(this.fødselsnummer).isNotEmpty()
         }
     }
-    private fun lagUtbetaling(fnr: String, org: String, fom: LocalDate, tom: LocalDate, utbetalingId: String): UtbetalingUtbetalt {
+
+    private fun lagUtbetaling(
+        fnr: String,
+        org: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        utbetalingId: String,
+    ): UtbetalingUtbetalt {
         return UtbetalingUtbetalt(
             fødselsnummer = fnr,
             aktørId = fnr,
@@ -147,21 +159,23 @@ class HentingAvVedtakMedIdentTest : AbstractContainerBaseTest() {
             gjenståendeSykedager = 3254,
             foreløpigBeregnetSluttPåSykepenger = null,
             automatiskBehandling = true,
-            arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
-                mottaker = org,
-                fagområde = "SP",
-                fagsystemId = "1234",
-                nettoBeløp = 123,
-                utbetalingslinjer = emptyList()
-            ),
+            arbeidsgiverOppdrag =
+                UtbetalingUtbetalt.OppdragDto(
+                    mottaker = org,
+                    fagområde = "SP",
+                    fagsystemId = "1234",
+                    nettoBeløp = 123,
+                    utbetalingslinjer = emptyList(),
+                ),
             type = "UTBETALING",
-            utbetalingsdager = listOf(
-                UtbetalingUtbetalt.UtbetalingdagDto(
-                    dato = fom,
-                    type = "AvvistDag",
-                    begrunnelser = listOf(UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad)
-                )
-            )
+            utbetalingsdager =
+                listOf(
+                    UtbetalingUtbetalt.UtbetalingdagDto(
+                        dato = fom,
+                        type = "AvvistDag",
+                        begrunnelser = listOf(UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad),
+                    ),
+                ),
         )
     }
 }

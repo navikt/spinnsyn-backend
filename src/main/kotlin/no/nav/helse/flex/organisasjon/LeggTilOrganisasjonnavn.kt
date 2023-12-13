@@ -6,14 +6,15 @@ import org.springframework.stereotype.Component
 
 @Component
 class LeggTilOrganisasjonnavn(
-    private val organisasjonRepository: OrganisasjonRepository
+    private val organisasjonRepository: OrganisasjonRepository,
 ) {
     val log = logger()
 
     fun leggTilOrganisasjonnavn(vedtakene: List<RSVedtakWrapper>): List<RSVedtakWrapper> {
-        val orgnummerene = vedtakene
-            .mapNotNull { it.vedtak.organisasjonsnummer }
-            .toSet()
+        val orgnummerene =
+            vedtakene
+                .mapNotNull { it.vedtak.organisasjonsnummer }
+                .toSet()
 
         val organisasjoner = assosierOrgNummerMedOrgNavn(orgnummerene)
 
@@ -33,11 +34,11 @@ class LeggTilOrganisasjonnavn(
         return vedtakene.map {
             it.copy(
                 andreArbeidsgivere =
-                it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver
-                    ?.filterNot { organisasjon ->
-                        it.vedtak.organisasjonsnummer == organisasjon.key
-                    }
-                    ?.leggTilAndreArbeidsgivere(organisasjoner)
+                    it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver
+                        ?.filterNot { organisasjon ->
+                            it.vedtak.organisasjonsnummer == organisasjon.key
+                        }
+                        ?.leggTilAndreArbeidsgivere(organisasjoner),
             )
         }
     }
@@ -50,6 +51,7 @@ private fun List<RSVedtakWrapper>.orgNummere(): Set<String> =
     flatMap { it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver?.keys ?: emptySet() }
         .toSet()
 
-private fun Map<String, Double>.leggTilAndreArbeidsgivere(organisasjoner: Map<String, String>) = mapKeys {
-    organisasjoner[it.key] ?: "Organisasjonsnummer: ${it.key}"
-}
+private fun Map<String, Double>.leggTilAndreArbeidsgivere(organisasjoner: Map<String, String>) =
+    mapKeys {
+        organisasjoner[it.key] ?: "Organisasjonsnummer: ${it.key}"
+    }

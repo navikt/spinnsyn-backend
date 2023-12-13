@@ -29,7 +29,7 @@ class VedtakBrukerController(
     @Value("\${DITT_SYKEFRAVAER_CLIENT_ID}")
     val dittSykefravaerClientId: String,
     @Value("\${TOKENX_IDP_IDPORTEN}")
-    val tokenxIdpIdporten: String
+    val tokenxIdpIdporten: String,
 ) {
     val log = logger()
 
@@ -44,7 +44,9 @@ class VedtakBrukerController(
     @PostMapping(value = ["/vedtak/{vedtaksId}/les"], produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", combineWithOr = true, claimMap = ["acr=Level4", "acr=idporten-loa-high"])
-    fun lesVedtak(@PathVariable("vedtaksId") vedtaksId: String): Map<String, String> {
+    fun lesVedtak(
+        @PathVariable("vedtaksId") vedtaksId: String,
+    ): Map<String, String> {
         val fnr = validerTokenXClaims(spinnsynFrontendClientId).fnrFraIdportenTokenX()
         return mapOf("status" to brukerVedtak.lesVedtak(fnr, vedtaksId))
     }
@@ -69,5 +71,5 @@ private class IngenTilgang(override val message: String) : AbstractApiError(
     message = message,
     httpStatus = HttpStatus.FORBIDDEN,
     reason = "INGEN_TILGANG",
-    loglevel = LogLevel.WARN
+    loglevel = LogLevel.WARN,
 )

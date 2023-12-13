@@ -17,18 +17,19 @@ data class VedtakFattetForEksternDto(
     val sykepengegrunnlag: Double,
     val grunnlagForSykepengegrunnlag: Double,
     val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>?,
-    val begrensning: String?, // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
+    // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
+    val begrensning: String?,
     val utbetalingId: String?,
     val vedtakFattetTidspunkt: LocalDate?,
     val sykepengegrunnlagsfakta: JsonNode? = null,
     val begrunnelser: List<Begrunnelse>? = null,
-    val tags: List<String>? = null
+    val tags: List<String>? = null,
 )
 
 data class Begrunnelse(
     val type: String,
     val begrunnelse: String,
-    val perioder: List<PeriodeImpl>
+    val perioder: List<PeriodeImpl>,
 )
 
 fun String.tilVedtakFattetForEksternDto(): VedtakFattetForEksternDto = objectMapper.readValue(this)

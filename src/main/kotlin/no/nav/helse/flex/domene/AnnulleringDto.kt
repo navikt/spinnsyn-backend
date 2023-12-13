@@ -9,7 +9,7 @@ data class AnnulleringDto(
     val organisasjonsnummer: String?,
     val fødselsnummer: String,
     val fom: LocalDate?,
-    val tom: LocalDate?
+    val tom: LocalDate?,
 )
 
 fun String.tilAnnulleringDto(): AnnulleringDto = objectMapper.readValue(this)

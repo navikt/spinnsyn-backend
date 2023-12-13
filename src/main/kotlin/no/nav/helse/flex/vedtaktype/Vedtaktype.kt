@@ -21,9 +21,7 @@ class Vedtaktype {
 
     private fun RSVedtakWrapper.erAnnullert() = this.annullert
 
-    fun finnVedtaktype(
-        v: RSVedtakWrapper
-    ): String {
+    fun finnVedtaktype(v: RSVedtakWrapper): String {
         if (v.erHeltAvvist()) return "HELT_AVVIST".medSuffiks(v)
 
         if (v.erKombinasjonutbetaling() && v.erDelvisAvvist()) return "KOMBINASJON_DELVIS_AVVIST".medSuffiks(v)

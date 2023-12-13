@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class LesVedtakTest : AbstractContainerBaseTest() {
-
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
@@ -39,69 +38,74 @@ class LesVedtakTest : AbstractContainerBaseTest() {
     final val now = LocalDate.now()
     final val utbetalingId = "124542"
 
-    val vedtak1 = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        skjæringstidspunkt = now,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = LocalDate.now()
-    )
-
-    val vedtak2 = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now.plusDays(1),
-        tom = now.plusDays(5),
-        skjæringstidspunkt = now,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = LocalDate.now()
-    )
-
-    val utbetaling = UtbetalingUtbetalt(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now.plusDays(1),
-        utbetalingId = utbetalingId,
-        antallVedtak = 2,
-        event = "eventet",
-        forbrukteSykedager = 42,
-        foreløpigBeregnetSluttPåSykepenger = null,
-        gjenståendeSykedager = 3254,
-        automatiskBehandling = true,
-        arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
-            mottaker = org,
-            fagområde = "SP",
-            fagsystemId = "1234",
-            nettoBeløp = 123,
-            utbetalingslinjer = emptyList()
-        ),
-        type = "UTBETALING",
-        utbetalingsdager = listOf(
-            UtbetalingdagDto(
-                dato = now,
-                type = "AvvistDag",
-                begrunnelser = listOf(MinimumSykdomsgrad)
-            )
+    val vedtak1 =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now,
+            skjæringstidspunkt = now,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = LocalDate.now(),
         )
-    )
+
+    val vedtak2 =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now.plusDays(1),
+            tom = now.plusDays(5),
+            skjæringstidspunkt = now,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = LocalDate.now(),
+        )
+
+    val utbetaling =
+        UtbetalingUtbetalt(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now.plusDays(1),
+            utbetalingId = utbetalingId,
+            antallVedtak = 2,
+            event = "eventet",
+            forbrukteSykedager = 42,
+            foreløpigBeregnetSluttPåSykepenger = null,
+            gjenståendeSykedager = 3254,
+            automatiskBehandling = true,
+            arbeidsgiverOppdrag =
+                UtbetalingUtbetalt.OppdragDto(
+                    mottaker = org,
+                    fagområde = "SP",
+                    fagsystemId = "1234",
+                    nettoBeløp = 123,
+                    utbetalingslinjer = emptyList(),
+                ),
+            type = "UTBETALING",
+            utbetalingsdager =
+                listOf(
+                    UtbetalingdagDto(
+                        dato = now,
+                        type = "AvvistDag",
+                        begrunnelser = listOf(MinimumSykdomsgrad),
+                    ),
+                ),
+        )
 
     @Test
     @Order(1)
@@ -112,8 +116,8 @@ class LesVedtakTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak1.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -139,8 +143,8 @@ class LesVedtakTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling.serialisertTilString()
-            )
+                utbetaling.serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -168,8 +172,8 @@ class LesVedtakTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak2.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {

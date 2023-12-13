@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class PeriodeTest {
-
     @Test
     fun `0101 0401 overlapper 0301 0501 og vice versa`() {
         val første = ("01.01" to "04.01").periode()

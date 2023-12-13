@@ -20,15 +20,16 @@ data class UtbetalingUtbetalt(
     val automatiskBehandling: Boolean,
     val arbeidsgiverOppdrag: OppdragDto? = null,
     val personOppdrag: OppdragDto? = null,
-    val type: String, // UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING
-    val utbetalingsdager: List<UtbetalingdagDto>
+    // UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING
+    val type: String,
+    val utbetalingsdager: List<UtbetalingdagDto>,
 ) {
     data class OppdragDto(
         val mottaker: String,
         val fagområde: String,
         val fagsystemId: String,
         val nettoBeløp: Int,
-        val utbetalingslinjer: List<UtbetalingslinjeDto>
+        val utbetalingslinjer: List<UtbetalingslinjeDto>,
     ) {
         data class UtbetalingslinjeDto(
             val fom: LocalDate,
@@ -36,14 +37,14 @@ data class UtbetalingUtbetalt(
             val dagsats: Int,
             val totalbeløp: Int,
             val grad: Double,
-            val stønadsdager: Int
+            val stønadsdager: Int,
         )
     }
 
     data class UtbetalingdagDto(
         val dato: LocalDate,
         val type: String,
-        val begrunnelser: List<Begrunnelse>
+        val begrunnelser: List<Begrunnelse>,
     ) {
         @Suppress("unused")
         enum class Begrunnelse {
@@ -63,7 +64,7 @@ data class UtbetalingUtbetalt(
             AndreYtelserOmsorgspenger,
             AndreYtelserOpplaringspenger,
             AndreYtelserPleiepenger,
-            AndreYtelserSvangerskapspenger
+            AndreYtelserSvangerskapspenger,
         }
     }
 }

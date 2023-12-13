@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 
 @ControllerAdvice
 class GlobalExceptionHandler {
-
     private val log = logger()
 
     @ExceptionHandler(java.lang.Exception::class)
-    fun handleException(ex: Exception, request: HttpServletRequest): ResponseEntity<Any> {
+    fun handleException(
+        ex: Exception,
+        request: HttpServletRequest,
+    ): ResponseEntity<Any> {
         return when (ex) {
             is AbstractApiError -> {
                 when (ex.loglevel) {
@@ -39,8 +41,7 @@ class GlobalExceptionHandler {
     }
 }
 
-private fun skapResponseEntity(status: HttpStatus): ResponseEntity<Any> =
-    ResponseEntity(ApiError(status.reasonPhrase), status)
+private fun skapResponseEntity(status: HttpStatus): ResponseEntity<Any> = ResponseEntity(ApiError(status.reasonPhrase), status)
 
 private data class ApiError(val reason: String)
 
@@ -49,9 +50,11 @@ abstract class AbstractApiError(
     val httpStatus: HttpStatus,
     val reason: String,
     val loglevel: LogLevel,
-    grunn: Throwable? = null
+    grunn: Throwable? = null,
 ) : RuntimeException(message, grunn)
 
 enum class LogLevel {
-    WARN, ERROR, OFF
+    WARN,
+    ERROR,
+    OFF,
 }

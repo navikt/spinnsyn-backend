@@ -46,69 +46,74 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
     final val now = LocalDate.now()
     final val utbetalingId = "124542"
 
-    val vedtak1 = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        skjæringstidspunkt = now,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = LocalDate.now()
-    )
-
-    val vedtak2 = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now.plusDays(1),
-        tom = now.plusDays(5),
-        skjæringstidspunkt = now,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = LocalDate.now()
-    )
-
-    val utbetaling = UtbetalingUtbetalt(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now.plusDays(1),
-        utbetalingId = utbetalingId,
-        antallVedtak = 2,
-        event = "eventet",
-        forbrukteSykedager = 42,
-        gjenståendeSykedager = 254,
-        foreløpigBeregnetSluttPåSykepenger = now.plusDays(256),
-        automatiskBehandling = true,
-        arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
-            mottaker = org,
-            fagområde = "SP",
-            fagsystemId = "1234",
-            nettoBeløp = 123,
-            utbetalingslinjer = emptyList()
-        ),
-        type = "UTBETALING",
-        utbetalingsdager = listOf(
-            UtbetalingUtbetalt.UtbetalingdagDto(
-                dato = now,
-                type = "AvvistDag",
-                begrunnelser = listOf(MinimumSykdomsgrad)
-            )
+    val vedtak1 =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now,
+            skjæringstidspunkt = now,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = LocalDate.now(),
         )
-    )
+
+    val vedtak2 =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now.plusDays(1),
+            tom = now.plusDays(5),
+            skjæringstidspunkt = now,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = LocalDate.now(),
+        )
+
+    val utbetaling =
+        UtbetalingUtbetalt(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now.plusDays(1),
+            utbetalingId = utbetalingId,
+            antallVedtak = 2,
+            event = "eventet",
+            forbrukteSykedager = 42,
+            gjenståendeSykedager = 254,
+            foreløpigBeregnetSluttPåSykepenger = now.plusDays(256),
+            automatiskBehandling = true,
+            arbeidsgiverOppdrag =
+                UtbetalingUtbetalt.OppdragDto(
+                    mottaker = org,
+                    fagområde = "SP",
+                    fagsystemId = "1234",
+                    nettoBeløp = 123,
+                    utbetalingslinjer = emptyList(),
+                ),
+            type = "UTBETALING",
+            utbetalingsdager =
+                listOf(
+                    UtbetalingUtbetalt.UtbetalingdagDto(
+                        dato = now,
+                        type = "AvvistDag",
+                        begrunnelser = listOf(MinimumSykdomsgrad),
+                    ),
+                ),
+        )
 
     @BeforeAll
     fun `subscribe til- og tøm status topic`() {
@@ -137,10 +142,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak1.copy(
-                    utbetalingId = "VedtakFørst"
+                    utbetalingId = "VedtakFørst",
                 ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -160,9 +165,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 fnr,
                 utbetaling.copy(
                     antallVedtak = 1,
-                    utbetalingId = "VedtakFørst"
-                ).serialisertTilString()
-            )
+                    utbetalingId = "VedtakFørst",
+                ).serialisertTilString(),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -181,9 +186,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
-            it.utbetalingId == "VedtakFørst"
-        }
+        val utbetalingDbRecord =
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+                it.utbetalingId == "VedtakFørst"
+            }
         utbetalingDbRecord.shouldNotBeNull()
 
         val crStatus = kafkameldinger.first()
@@ -220,16 +226,18 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val vedtaksId = vedtaket.id
         vedtaket.lest `should be equal to` true
 
-        val utbetalingFørLesing = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
-            it.utbetalingId == "VedtakFørst"
-        }
+        val utbetalingFørLesing =
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+                it.utbetalingId == "VedtakFørst"
+            }
 
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
         statusKafkaConsumer.ventPåRecords(0).shouldBeEmpty()
 
-        val etter = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
-            it.utbetalingId == "VedtakFørst"
-        }
+        val etter =
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+                it.utbetalingId == "VedtakFørst"
+            }
         utbetalingFørLesing.lest `should be equal to` etter.lest
     }
 
@@ -243,9 +251,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 fnr,
                 utbetaling.copy(
                     antallVedtak = 1,
-                    utbetalingId = "UtbetalingFørst"
-                ).serialisertTilString()
-            )
+                    utbetalingId = "UtbetalingFørst",
+                ).serialisertTilString(),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -266,10 +274,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak1.copy(
-                    utbetalingId = "UtbetalingFørst"
+                    utbetalingId = "UtbetalingFørst",
                 ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -285,9 +293,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
-            it.utbetalingId == "UtbetalingFørst"
-        }
+        val utbetalingDbRecord =
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+                it.utbetalingId == "UtbetalingFørst"
+            }
         utbetalingDbRecord.shouldNotBeNull()
 
         val crStatus = kafkameldinger.first()
@@ -326,10 +335,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak1.copy(
-                    utbetalingId = "EnAvTo"
+                    utbetalingId = "EnAvTo",
                 ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -349,9 +358,9 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 fnr,
                 utbetaling.copy(
                     utbetalingId = "EnAvTo",
-                    antallVedtak = 2
-                ).serialisertTilString()
-            )
+                    antallVedtak = 2,
+                ).serialisertTilString(),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -372,10 +381,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak2.copy(
-                    utbetalingId = "EnAvTo"
+                    utbetalingId = "EnAvTo",
                 ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -393,9 +402,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
-            it.utbetalingId == "EnAvTo"
-        }
+        val utbetalingDbRecord =
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+                it.utbetalingId == "EnAvTo"
+            }
         utbetalingDbRecord.shouldNotBeNull()
         utbetalingDbRecord.antallVedtak `should be equal to` 2
         utbetalingDbRecord.skalVisesTilBruker `should be equal to` true
@@ -420,15 +430,16 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 utbetaling.copy(
                     utbetalingId = "Arbeidsgiverperiode",
                     antallVedtak = 1,
-                    utbetalingsdager = listOf(
-                        UtbetalingUtbetalt.UtbetalingdagDto(
-                            dato = now,
-                            type = "ArbeidsgiverperiodeDag",
-                            begrunnelser = emptyList()
-                        )
-                    )
-                ).serialisertTilString()
-            )
+                    utbetalingsdager =
+                        listOf(
+                            UtbetalingUtbetalt.UtbetalingdagDto(
+                                dato = now,
+                                type = "ArbeidsgiverperiodeDag",
+                                begrunnelser = emptyList(),
+                            ),
+                        ),
+                ).serialisertTilString(),
+            ),
         ).get()
 
         kafkaProducer.send(
@@ -437,10 +448,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak1.copy(
-                    utbetalingId = "Arbeidsgiverperiode"
+                    utbetalingId = "Arbeidsgiverperiode",
                 ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
@@ -450,9 +461,10 @@ class VedtakStatusTest : AbstractContainerBaseTest() {
 
         vedtakStatusService.prosesserUtbetalinger()
 
-        val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
-            it.utbetalingId == "Arbeidsgiverperiode"
-        }
+        val utbetalingDbRecord =
+            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
+                it.utbetalingId == "Arbeidsgiverperiode"
+            }
         utbetalingDbRecord.motattPublisert.shouldBeNull()
         utbetalingDbRecord.skalVisesTilBruker `should be equal to` false
     }

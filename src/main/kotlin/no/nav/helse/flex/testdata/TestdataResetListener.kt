@@ -11,15 +11,17 @@ import org.springframework.stereotype.Component
 @Component
 @Profile("testdata")
 class TestdataResetListener(val nullstillVedtak: NullstillVedtak) {
-
     val log = logger()
 
     @KafkaListener(
         topics = [TESTDATA_RESET_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
-        properties = ["auto.offset.reset = latest"]
+        properties = ["auto.offset.reset = latest"],
     )
-    fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+    fun listen(
+        cr: ConsumerRecord<String, String>,
+        acknowledgment: Acknowledgment,
+    ) {
         val fnr = cr.value()
         val antall = nullstillVedtak.nullstill(fnr)
         log.info("Slettet $antall utbetalinger og tilhørende vedtak tilhørende fnr: $fnr - Key ${cr.key()}.")

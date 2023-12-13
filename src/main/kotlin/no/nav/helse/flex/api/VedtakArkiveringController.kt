@@ -14,20 +14,21 @@ import org.springframework.web.bind.annotation.*
 @Hidden
 class VedtakArkiveringController(
     private val clientIdValidation: ClientIdValidation,
-    private val vedtakService: BrukerVedtak
+    private val vedtakService: BrukerVedtak,
 ) {
-
     @GetMapping("/api/v1/arkivering/vedtak", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @ProtectedWithClaims(issuer = "azureator")
-    fun hentVedtak(@RequestHeader fnr: String): List<RSVedtakWrapper> {
+    fun hentVedtak(
+        @RequestHeader fnr: String,
+    ): List<RSVedtakWrapper> {
         clientIdValidation.validateClientId(
             listOf(
                 NamespaceAndApp(
                     namespace = "flex",
-                    app = "spinnsyn-frontend-arkivering"
-                )
-            )
+                    app = "spinnsyn-frontend-arkivering",
+                ),
+            ),
         )
 
         return vedtakService.hentVedtak(fnr)

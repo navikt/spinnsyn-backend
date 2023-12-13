@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class VedtakStatusJob(
     val leaderElection: LeaderElection,
-    val vedtakStatusService: SendVedtakStatus
+    val vedtakStatusService: SendVedtakStatus,
 ) {
     val log = logger()
 

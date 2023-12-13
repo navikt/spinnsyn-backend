@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class SkjonnsfastsettelseTest : AbstractContainerBaseTest() {
-
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
@@ -36,75 +35,80 @@ class SkjonnsfastsettelseTest : AbstractContainerBaseTest() {
     final val org = "987123123"
     final val now = LocalDate.now()
     final val utbetalingId = "124542"
-    val vedtak = VedtakFattetForEksternDto(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        skjæringstidspunkt = now,
-        dokumenter = emptyList(),
-        inntekt = 0.0,
-        sykepengegrunnlag = 0.0,
-        utbetalingId = utbetalingId,
-        grunnlagForSykepengegrunnlag = 0.0,
-        grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
-        begrensning = "VET_IKKE",
-        vedtakFattetTidspunkt = LocalDate.now(),
-        sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.EtterSkjønn(
-            fastsatt = "EtterSkjønn",
-            skjønnsfastsatt = 12343.00,
-            arbeidsgivere = emptyList(),
-            omregnetÅrsinntekt = 123123.02,
-            innrapportertÅrsinntekt = 900.0,
-            avviksprosent = 27.0,
-            `6G` = 668862.0,
-            tags = emptyList()
-        ).serialisertTilString().tilJsonNode(),
-        begrunnelser = listOf(
-            Begrunnelse(
-                type = "SkjønnsfastsattSykepengegrunnlagFritekst",
-                begrunnelse = "Begrunnelse fra saksbehandler",
-                perioder = emptyList()
-            ),
-            Begrunnelse(
-                type = "SkjønnsfastsattSykepengegrunnlagMal",
-                begrunnelse = "Mal fra speil\nNy linje",
-                perioder = emptyList()
-            )
+    val vedtak =
+        VedtakFattetForEksternDto(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now,
+            skjæringstidspunkt = now,
+            dokumenter = emptyList(),
+            inntekt = 0.0,
+            sykepengegrunnlag = 0.0,
+            utbetalingId = utbetalingId,
+            grunnlagForSykepengegrunnlag = 0.0,
+            grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
+            begrensning = "VET_IKKE",
+            vedtakFattetTidspunkt = LocalDate.now(),
+            sykepengegrunnlagsfakta =
+                Sykepengegrunnlagsfakta.EtterSkjønn(
+                    fastsatt = "EtterSkjønn",
+                    skjønnsfastsatt = 12343.00,
+                    arbeidsgivere = emptyList(),
+                    omregnetÅrsinntekt = 123123.02,
+                    innrapportertÅrsinntekt = 900.0,
+                    avviksprosent = 27.0,
+                    `6G` = 668862.0,
+                    tags = emptyList(),
+                ).serialisertTilString().tilJsonNode(),
+            begrunnelser =
+                listOf(
+                    Begrunnelse(
+                        type = "SkjønnsfastsattSykepengegrunnlagFritekst",
+                        begrunnelse = "Begrunnelse fra saksbehandler",
+                        perioder = emptyList(),
+                    ),
+                    Begrunnelse(
+                        type = "SkjønnsfastsattSykepengegrunnlagMal",
+                        begrunnelse = "Mal fra speil\nNy linje",
+                        perioder = emptyList(),
+                    ),
+                ),
         )
-    )
 
-    val utbetaling = UtbetalingUtbetalt(
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        organisasjonsnummer = org,
-        fom = now,
-        tom = now,
-        utbetalingId = utbetalingId,
-        antallVedtak = 1,
-        event = "eventet",
-        forbrukteSykedager = 42,
-        gjenståendeSykedager = 3254,
-        foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
-        automatiskBehandling = true,
-
-        arbeidsgiverOppdrag = UtbetalingUtbetalt.OppdragDto(
-            mottaker = org,
-            fagområde = "SP",
-            fagsystemId = "1234",
-            nettoBeløp = 123,
-            utbetalingslinjer = emptyList()
-        ),
-        type = "UTBETALING",
-        utbetalingsdager = listOf(
-            UtbetalingdagDto(
-                dato = now,
-                type = "AvvistDag",
-                begrunnelser = listOf(MinimumSykdomsgrad)
-            )
+    val utbetaling =
+        UtbetalingUtbetalt(
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            organisasjonsnummer = org,
+            fom = now,
+            tom = now,
+            utbetalingId = utbetalingId,
+            antallVedtak = 1,
+            event = "eventet",
+            forbrukteSykedager = 42,
+            gjenståendeSykedager = 3254,
+            foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
+            automatiskBehandling = true,
+            arbeidsgiverOppdrag =
+                UtbetalingUtbetalt.OppdragDto(
+                    mottaker = org,
+                    fagområde = "SP",
+                    fagsystemId = "1234",
+                    nettoBeløp = 123,
+                    utbetalingslinjer = emptyList(),
+                ),
+            type = "UTBETALING",
+            utbetalingsdager =
+                listOf(
+                    UtbetalingdagDto(
+                        dato = now,
+                        type = "AvvistDag",
+                        begrunnelser = listOf(MinimumSykdomsgrad),
+                    ),
+                ),
         )
-    )
 
     @Test
     @Order(1)
@@ -115,8 +119,8 @@ class SkjonnsfastsettelseTest : AbstractContainerBaseTest() {
                 null,
                 fnr,
                 vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray()))
-            )
+                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -136,8 +140,8 @@ class SkjonnsfastsettelseTest : AbstractContainerBaseTest() {
                 UTBETALING_TOPIC,
                 null,
                 fnr,
-                utbetaling.serialisertTilString()
-            )
+                utbetaling.serialisertTilString(),
+            ),
         ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
@@ -175,12 +179,12 @@ fun JsonNode.tilEtterSkjønn(): Sykepengegrunnlagsfakta.EtterSkjønn = objectMap
 sealed class Sykepengegrunnlagsfakta {
     data class IInfotrygd(
         val fastsatt: String,
-        val omregnetÅrsinntekt: Double
+        val omregnetÅrsinntekt: Double,
     ) : Sykepengegrunnlagsfakta()
 
     data class EtterHovedregel(
         val fastsatt: String,
-        val arbeidsgivere: List<Arbeidsgiver>
+        val arbeidsgivere: List<Arbeidsgiver>,
     ) : Sykepengegrunnlagsfakta()
 
     data class EtterSkjønn(
@@ -191,19 +195,19 @@ sealed class Sykepengegrunnlagsfakta {
         val innrapportertÅrsinntekt: Double,
         val avviksprosent: Double,
         val `6G`: Double,
-        val tags: List<String>
+        val tags: List<String>,
     ) : Sykepengegrunnlagsfakta()
 }
 
 data class Arbeidsgiver(
     val arbeidsgiver: String,
-    val omregnetÅrsinntekt: Double
+    val omregnetÅrsinntekt: Double,
 )
 
 data class ArbeidsgiverMedSkjønn(
     val arbeidsgiver: String,
     val omregnetÅrsinntekt: Double,
-    val skjønnsfastsatt: Double
+    val skjønnsfastsatt: Double,
 )
 
 fun String.tilJsonNode(): JsonNode {

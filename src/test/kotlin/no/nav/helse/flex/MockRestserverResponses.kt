@@ -9,7 +9,7 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 
 fun AbstractContainerBaseTest.mockIstilgangskontroll(
     tilgang: Boolean,
-    fnr: String
+    fnr: String,
 ) {
     istilgangskontrollMockRestServiceServer!!
         .expect(requestTo("http://istilgangskontroll/api/tilgang/navident/person"))
@@ -18,12 +18,12 @@ fun AbstractContainerBaseTest.mockIstilgangskontroll(
             if (tilgang) {
                 withSuccess(
                     objectMapper.writeValueAsBytes(
-                        "Har tilgang"
+                        "Har tilgang",
                     ),
-                    MediaType.APPLICATION_JSON
+                    MediaType.APPLICATION_JSON,
                 )
             } else {
                 withUnauthorizedRequest()
-            }
+            },
         )
 }
