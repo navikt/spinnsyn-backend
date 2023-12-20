@@ -15,4 +15,3 @@ env:
   ISTILGANGSKONTROLL_AAD_CLIENT_ID: dev-gcp.teamsykefravr.istilgangskontroll
   SPINNSYN_FRONTEND_CLIENT_ID: dev-gcp:flex:spinnsyn-frontend
   DITT_SYKEFRAVAER_CLIENT_ID: dev-gcp:flex:ditt-sykefravaer
-  TOKENX_IDP_IDPORTEN: https://oidc-ver2.difi.no/idporten-oidc-provider/
