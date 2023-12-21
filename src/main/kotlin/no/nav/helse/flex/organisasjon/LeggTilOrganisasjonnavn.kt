@@ -39,6 +39,7 @@ class LeggTilOrganisasjonnavn(
                             it.vedtak.organisasjonsnummer == organisasjon.key
                         }
                         ?.leggTilAndreArbeidsgivere(organisasjoner),
+                organisasjoner = organisasjoner,
             )
         }
     }

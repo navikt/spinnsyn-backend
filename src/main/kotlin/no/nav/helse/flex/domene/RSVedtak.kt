@@ -20,6 +20,7 @@ data class RSVedtakWrapper(
     val sykepengebelopArbeidsgiver: Int = 0,
     val sykepengebelopPerson: Int = 0,
     val andreArbeidsgivere: Map<String, Double>?,
+    val organisasjoner: Map<String, String> = emptyMap(),
 )
 
 data class RSVedtak(
