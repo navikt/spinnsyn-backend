@@ -33,5 +33,10 @@ class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
                 "Organisasjon nr 1" to 500000.0,
                 "Organisasjonsnummer: 547123456" to 300000.0,
             )
+
+        orgMap[0].organisasjoner `should be equal to`
+            mapOf(
+                "123456547" to "Organisasjon nr 1",
+            )
     }
 }
