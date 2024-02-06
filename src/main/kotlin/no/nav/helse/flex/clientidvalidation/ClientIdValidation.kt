@@ -36,17 +36,13 @@ class ClientIdValidation(
     }
 
     private fun TokenValidationContextHolder.hentAzpClaim(): String {
-        try {
-            return this.tokenValidationContext.getJwtToken("azureator").jwtTokenClaims.getStringClaim("azp")!!
-        } catch (e: Exception) {
-            log.error("Fant ikke azp claim!", e)
-            throw UkjentClientException("ukjent feil", e)
-        }
+        return this.getTokenValidationContext().getJwtToken("azureator")?.jwtTokenClaims?.getStringClaim("azp")
+            ?: throw UkjentClientException("Fant ikke azp claim!")
     }
+}
 
-    private fun List<String>.ikkeInneholder(s: String): Boolean {
-        return !this.contains(s)
-    }
+private fun List<String>.ikkeInneholder(s: String): Boolean {
+    return !this.contains(s)
 }
 
 class UkjentClientException(message: String, grunn: Throwable? = null) : AbstractApiError(
