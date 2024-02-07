@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
+import java.util.UUID
 
 @Controller
 @RequestMapping("/api/v3")
@@ -43,10 +44,10 @@ class VedtakBrukerController(
     @ResponseBody
     @ProtectedWithClaims(issuer = "tokenx", combineWithOr = true, claimMap = ["acr=Level4", "acr=idporten-loa-high"])
     fun lesVedtak(
-        @PathVariable("vedtaksId") vedtaksId: String,
+        @PathVariable("vedtaksId") vedtaksId: UUID,
     ): Map<String, String> {
         val fnr = validerTokenXClaims(spinnsynFrontendClientId).fnrFraIdportenTokenX()
-        return mapOf("status" to brukerVedtak.lesVedtak(fnr, vedtaksId))
+        return mapOf("status" to brukerVedtak.lesVedtak(fnr, vedtaksId.toString()))
     }
 
     private fun validerTokenXClaims(vararg allowedClients: String): JwtTokenClaims {
