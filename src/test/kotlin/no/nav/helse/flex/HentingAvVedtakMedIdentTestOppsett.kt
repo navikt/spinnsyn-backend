@@ -1,5 +1,5 @@
-import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.Application
+import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
