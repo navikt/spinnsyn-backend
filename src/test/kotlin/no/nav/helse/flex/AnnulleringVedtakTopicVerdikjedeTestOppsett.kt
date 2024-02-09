@@ -21,7 +21,7 @@ import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class AnnulleringVedtakTopicVerdikjedeTest : AbstractContainerBaseTest() {
+class AnnulleringVedtakTopicVerdikjedeTestOppsett : FellesTestOppsett() {
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 

@@ -1,13 +1,13 @@
 package no.nav.helse.flex.pdl
 
-import no.nav.helse.flex.AbstractContainerBaseTest
+import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.client.pdl.PdlClient
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldStartWith
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class PdlClientTest : AbstractContainerBaseTest() {
+class PdlClientTestOppsett : FellesTestOppsett() {
     @Autowired
     private lateinit var pdlClient: PdlClient
 

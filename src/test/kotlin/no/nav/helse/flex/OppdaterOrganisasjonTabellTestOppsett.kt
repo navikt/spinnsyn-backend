@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class OppdaterOrganisasjonTabellTest : AbstractContainerBaseTest() {
+class OppdaterOrganisasjonTabellTestOppsett : FellesTestOppsett() {
     @Autowired
     lateinit var kafkaProducer: Producer<String, String>
 
