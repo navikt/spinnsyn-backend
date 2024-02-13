@@ -35,13 +35,13 @@ import org.testcontainers.utility.DockerImageName
 import java.util.*
 import kotlin.concurrent.thread
 
-private class PostgreSQLContainer11 : PostgreSQLContainer<PostgreSQLContainer11>("postgres:11.4-alpine")
+private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnableMockOAuth2Server
 @SpringBootTest
 @AutoConfigureMockMvc
-abstract class AbstractContainerBaseTest {
+abstract class FellesTestOppsett {
     @Autowired
     lateinit var mockMvc: MockMvc
 
@@ -168,7 +168,7 @@ abstract class AbstractContainerBaseTest {
         init {
             val threads = mutableListOf<Thread>()
             thread {
-                PostgreSQLContainer11().apply {
+                PostgreSQLContainer14().apply {
                     // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
                     // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
                     withCommand("postgres", "-c", "wal_level=logical")
@@ -180,7 +180,7 @@ abstract class AbstractContainerBaseTest {
             }.also { threads.add(it) }
 
             thread {
-                KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.1")).apply {
+                KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.3")).apply {
                     start()
                     System.setProperty("on-prem-kafka.bootstrap-servers", bootstrapServers)
                     System.setProperty("KAFKA_BROKERS", bootstrapServers)
@@ -201,7 +201,7 @@ abstract class AbstractContainerBaseTest {
     fun opprydning() {
         utbetalingRepository.deleteAll()
         vedtakRepository.deleteAll()
-        namedParameterJdbcTemplate.update("DELETE FROM ANNULLERING", MapSqlParameterSource())
+        namedParameterJdbcTemplate.update("DELETE FROM annullering", MapSqlParameterSource())
     }
 
     @BeforeAll

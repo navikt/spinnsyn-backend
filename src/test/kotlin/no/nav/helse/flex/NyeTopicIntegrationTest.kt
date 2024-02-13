@@ -35,7 +35,7 @@ import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class NyeTopicIntegrationTest : AbstractContainerBaseTest() {
+class NyeTopicIntegrationTest : FellesTestOppsett() {
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
