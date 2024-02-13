@@ -1,6 +1,6 @@
 package no.nav.helse.flex.metrikk
 
-import no.nav.helse.flex.FellesTestOppsett
+import no.nav.helse.flex.AbstractContainerBaseTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @DirtiesContext
 @TestMethodOrder(MethodOrderer.MethodName::class)
 @AutoConfigureObservability
-class MetrikkTestOppsett : FellesTestOppsett() {
+class MetrikkTest : AbstractContainerBaseTest() {
     @Autowired
     private lateinit var metrikk: Metrikk
 

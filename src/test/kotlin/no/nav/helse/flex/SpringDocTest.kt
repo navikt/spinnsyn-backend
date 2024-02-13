@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
-class SpringDocTestOppsett : FellesTestOppsett() {
+class SpringDocTest : AbstractContainerBaseTest() {
     @Test
     fun `har springdoc`() {
         val response =

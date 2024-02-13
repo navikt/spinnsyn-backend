@@ -7,7 +7,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.test.web.client.response.MockRestResponseCreators.withUnauthorizedRequest
 
-fun FellesTestOppsett.mockIstilgangskontroll(
+fun AbstractContainerBaseTest.mockIstilgangskontroll(
     tilgang: Boolean,
     fnr: String,
 ) {

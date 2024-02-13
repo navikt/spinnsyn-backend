@@ -41,7 +41,7 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @EnableMockOAuth2Server
 @SpringBootTest
 @AutoConfigureMockMvc
-abstract class FellesTestOppsett {
+abstract class AbstractContainerBaseTest {
     @Autowired
     lateinit var mockMvc: MockMvc
 

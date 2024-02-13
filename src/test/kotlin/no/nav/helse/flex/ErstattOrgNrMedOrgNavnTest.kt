@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 
-class ErstattOrgNrMedOrgNavnTestOppsett : FellesTestOppsett() {
+class ErstattOrgNrMedOrgNavnTest : AbstractContainerBaseTest() {
     @Autowired
     lateinit var leggTilOrganisasjonnavn: LeggTilOrganisasjonnavn
 

@@ -2,7 +2,7 @@ package no.nav.helse.flex
 
 import java.util.*
 
-fun FellesTestOppsett.buildAzureClaimSet(
+fun AbstractContainerBaseTest.buildAzureClaimSet(
     subject: String,
     issuer: String = "azureator",
     audience: String = "spinnsyn-backend-client-id",
@@ -18,4 +18,4 @@ fun FellesTestOppsett.buildAzureClaimSet(
     )
 }
 
-fun FellesTestOppsett.skapAzureJwt(subject: String = "spinnsyn-frontend-interne-client-id") = buildAzureClaimSet(subject = subject)
+fun AbstractContainerBaseTest.skapAzureJwt(subject: String = "spinnsyn-frontend-interne-client-id") = buildAzureClaimSet(subject = subject)

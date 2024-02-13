@@ -21,7 +21,7 @@ import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class DelvisRefusjonOgAvvisteDagerTestOppsett : FellesTestOppsett() {
+class DelvisRefusjonOgAvvisteDagerTest : AbstractContainerBaseTest() {
     @Autowired
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
