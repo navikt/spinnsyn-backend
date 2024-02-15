@@ -27,7 +27,7 @@ val testContainersVersion = "1.19.4"
 val logstashLogbackEncoderVersion = "7.4"
 val kluentVersion = "1.73"
 val tokenSupportVersion = "4.1.3"
-val sykepengesoknadKafkaVersion = "2024.01.31-08.02-ce296b0f"
+val sykepengesoknadKafkaVersion = "2024.02.14-18.01-3523e4c2"
 val springDocOpenApiVersion = "2.3.0"
 
 dependencies {
