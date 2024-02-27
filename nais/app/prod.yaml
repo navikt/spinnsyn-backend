@@ -1,4 +1,5 @@
 db_tier: db-custom-1-3840
+db_type: POSTGRES_11
 kafkaPool: nav-prod
 replicas_min: 2
 replicas_max: 3
