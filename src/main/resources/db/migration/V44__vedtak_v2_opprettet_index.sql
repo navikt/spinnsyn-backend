@@ -1,0 +1,1 @@
+CREATE INDEX vedtak_v2_opprettet_idx ON vedtak_v2 (opprettet);
