@@ -26,7 +26,7 @@ repositories {
 val testContainersVersion = "1.19.7"
 val logstashLogbackEncoderVersion = "7.4"
 val kluentVersion = "1.73"
-val tokenSupportVersion = "4.1.3"
+val tokenSupportVersion = "4.1.4"
 val sykepengesoknadKafkaVersion = "2024.02.19-15.43-44d781d3"
 val springDocOpenApiVersion = "2.4.0"
 
