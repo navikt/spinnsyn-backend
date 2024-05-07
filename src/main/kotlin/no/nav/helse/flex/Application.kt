@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
 @EnableKafka
-@EnableJwtTokenValidation(ignore = ["org.springdoc"])
+@EnableJwtTokenValidation
 @EnableScheduling
 class Application
 

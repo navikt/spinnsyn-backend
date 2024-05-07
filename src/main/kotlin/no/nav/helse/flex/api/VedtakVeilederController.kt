@@ -1,6 +1,5 @@
 package no.nav.helse.flex.api
 
-import io.swagger.v3.oas.annotations.Hidden
 import no.nav.helse.flex.client.istilgangskontroll.IstilgangskontrollOboClient
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation.NamespaceAndApp
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
 @Controller
-@Hidden
 class VedtakVeilederController(
     private val clientIdValidation: ClientIdValidation,
     private val vedtakService: BrukerVedtak,
