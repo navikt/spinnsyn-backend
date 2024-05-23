@@ -205,8 +205,6 @@ class BrukerVedtak(
 
 private fun UtbetalingUtbetalt.OppdragDto.tilRsOppdrag(): RSOppdrag =
     RSOppdrag(
-        mottaker = this.mottaker,
-        nettoBeløp = this.nettoBeløp,
         utbetalingslinjer = this.utbetalingslinjer.map { it.tilRsUtbetalingslinje() },
     )
 
@@ -393,7 +391,6 @@ private fun UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto.tilRsUtbetalingsli
         totalbeløp = totalbeløp,
         grad = grad,
         stønadsdager = stønadsdager,
-        dagsatsTransformasjonHjelper = dagsats,
     )
 }
 

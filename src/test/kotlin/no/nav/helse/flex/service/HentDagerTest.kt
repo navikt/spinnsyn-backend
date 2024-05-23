@@ -53,15 +53,12 @@ class HentDagerTest {
             tom = mandag.plusDays(17),
             oppdragDto =
                 RSOppdrag(
-                    mottaker = "12345678",
-                    nettoBeløp = 200,
                     utbetalingslinjer =
                         listOf(
                             RSUtbetalingslinje(
                                 fom = mandag.plusDays(16),
                                 tom = mandag.plusDays(17),
                                 dagsats = 100,
-                                dagsatsTransformasjonHjelper = 100,
                                 totalbeløp = 200,
                                 grad = 100.0,
                                 stønadsdager = 2,
@@ -120,15 +117,12 @@ class HentDagerTest {
             tom = mandag.plusDays(17),
             oppdragDto =
                 RSOppdrag(
-                    mottaker = "12345678",
-                    nettoBeløp = 800,
                     utbetalingslinjer =
                         listOf(
                             RSUtbetalingslinje(
                                 fom = mandag.plusDays(10),
                                 tom = mandag.plusDays(17),
                                 dagsats = 100,
-                                dagsatsTransformasjonHjelper = 100,
                                 totalbeløp = 800,
                                 grad = 100.0,
                                 stønadsdager = 8,
@@ -187,15 +181,12 @@ class HentDagerTest {
             tom = mandag.plusDays(17),
             oppdragDto =
                 RSOppdrag(
-                    mottaker = "12345678",
-                    nettoBeløp = 900,
                     utbetalingslinjer =
                         listOf(
                             RSUtbetalingslinje(
                                 fom = mandag.plusDays(7),
                                 tom = mandag.plusDays(17),
                                 dagsats = 100,
-                                dagsatsTransformasjonHjelper = 100,
                                 totalbeløp = 900,
                                 grad = 100.0,
                                 stønadsdager = 9,
@@ -256,15 +247,12 @@ class HentDagerTest {
             tom = søndag.plusDays(2),
             oppdragDto =
                 RSOppdrag(
-                    mottaker = "12345678",
-                    nettoBeløp = 200,
                     utbetalingslinjer =
                         listOf(
                             RSUtbetalingslinje(
                                 fom = søndag.plusDays(1),
                                 tom = søndag.plusDays(2),
                                 dagsats = 100,
-                                dagsatsTransformasjonHjelper = 100,
                                 totalbeløp = 200,
                                 grad = 100.0,
                                 stønadsdager = 2,
@@ -325,15 +313,12 @@ class HentDagerTest {
             tom = søndag.plusDays(17),
             oppdragDto =
                 RSOppdrag(
-                    mottaker = "12345678",
-                    nettoBeløp = 1300,
                     utbetalingslinjer =
                         listOf(
                             RSUtbetalingslinje(
                                 fom = søndag.plusDays(1),
                                 tom = søndag.plusDays(17),
                                 dagsats = 100,
-                                dagsatsTransformasjonHjelper = 100,
                                 totalbeløp = 1300,
                                 grad = 100.0,
                                 stønadsdager = 13,
