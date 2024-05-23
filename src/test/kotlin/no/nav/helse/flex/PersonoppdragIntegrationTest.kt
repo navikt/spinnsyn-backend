@@ -7,12 +7,7 @@ import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.shouldBeEmpty
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldHaveSize
+import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -195,8 +190,9 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
 
         vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
-        vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull() // Jsonignore
-        vedtak[0].vedtak.utbetaling.personOppdrag.shouldBeNull() // Jsonignore
+        vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull()
+        vedtak[0].vedtak.utbetaling.personOppdrag.shouldNotBeNull()
+        vedtak[0].vedtak.utbetaling.personOppdrag!!.utbetalingslinjer.shouldHaveSize(1)
 
         vedtak[0].dagerArbeidsgiver.shouldBeEmpty()
 

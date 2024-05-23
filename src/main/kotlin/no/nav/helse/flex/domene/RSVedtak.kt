@@ -1,6 +1,5 @@
 package no.nav.helse.flex.domene
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.Instant
 import java.time.LocalDate
@@ -47,19 +46,14 @@ data class RSUtbetalingUtbetalt(
     val forbrukteSykedager: Int,
     val gjenståendeSykedager: Int,
     val automatiskBehandling: Boolean,
-    @JsonIgnore
     val arbeidsgiverOppdrag: RSOppdrag?,
-    @JsonIgnore
     val personOppdrag: RSOppdrag?,
-    @JsonIgnore
     val utbetalingsdager: List<RSUtbetalingdag>?,
     val foreløpigBeregnetSluttPåSykepenger: LocalDate?,
     val utbetalingType: String,
 )
 
 data class RSOppdrag(
-    val mottaker: String,
-    val nettoBeløp: Int,
     val utbetalingslinjer: List<RSUtbetalingslinje>,
 )
 
@@ -67,7 +61,6 @@ data class RSUtbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
     val dagsats: Int,
-    val dagsatsTransformasjonHjelper: Int,
     val totalbeløp: Int,
     val grad: Double,
     val stønadsdager: Int,
