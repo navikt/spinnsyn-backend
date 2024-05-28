@@ -6,7 +6,6 @@ import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
-import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldHaveSize
@@ -95,15 +94,5 @@ class UtregningAvRevurdering : FellesTestOppsett() {
         vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2021, 7, 1))
         vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2021, 8, 15))
         vedtak[0].andreArbeidsgivere.shouldBeNull()
-
-        vedtak[0].dagerPerson.shouldBeEmpty()
-        vedtak[0].dagerArbeidsgiver.shouldHaveSize(46)
-        vedtak[0].dagerArbeidsgiver[19].dagtype.shouldBeEqualTo("NavDagSyk")
-        vedtak[0].dagerArbeidsgiver[19].belop.shouldBeEqualTo(831)
-        vedtak[0].dagerArbeidsgiver[20].dagtype.shouldBeEqualTo("Fridag")
-        vedtak[0].dagerArbeidsgiver[20].belop.shouldBeEqualTo(0)
-
-        vedtak[0].sykepengebelopArbeidsgiver.shouldBeEqualTo(14958)
-        vedtak[0].sykepengebelopPerson.shouldBeEqualTo(0)
     }
 }

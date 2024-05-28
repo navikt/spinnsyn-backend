@@ -1,6 +1,6 @@
 package no.nav.helse.flex.service
 
-import no.nav.helse.flex.domene.RSDag
+import no.nav.helse.flex.domene.RSUtbetalingdag
 import no.nav.helse.flex.service.SendVedtakStatus.Companion.sjekkDager
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
@@ -9,11 +9,9 @@ import java.time.LocalDate
 class VedtakSkalVisesTest {
     private fun dagSequence(dagtype: String) =
         generateSequence(
-            RSDag(
+            RSUtbetalingdag(
                 dato = LocalDate.of(2022, 1, 3),
-                belop = 0,
-                grad = 100.0,
-                dagtype = dagtype,
+                type = dagtype,
                 begrunnelser = emptyList(),
             ),
         ) {
@@ -33,7 +31,7 @@ class VedtakSkalVisesTest {
                 .take(10)
                 .mapIndexed { idx, dag ->
                     if (idx in 2..5) {
-                        dag.copy(dagtype = "Arbeidsdag")
+                        dag.copy(type = "Arbeidsdag")
                     } else {
                         dag
                     }

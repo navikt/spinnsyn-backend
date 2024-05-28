@@ -3,12 +3,12 @@ package no.nav.helse.flex.service
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSDag
+import no.nav.helse.flex.domene.RSUtbetalingdag
 import no.nav.helse.flex.domene.VedtakStatus
 import no.nav.helse.flex.domene.VedtakStatusDTO
 import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.metrikk.Metrikk
-import no.nav.helse.flex.vedtaktype.Vedtaktype
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -19,22 +19,24 @@ class SendVedtakStatus(
     private val metrikk: Metrikk,
     private val vedtakStatusKafkaProducer: VedtakStatusKafkaProducer,
     private val vedtakService: BrukerVedtak,
-    private val vedtaktype: Vedtaktype,
 ) {
     private val log = logger()
 
     companion object {
-        private val erAgPeriode = { dag: RSDag -> dag.dagtype == "ArbeidsgiverperiodeDag" }
-        private val erArbeid = { dag: RSDag -> dag.dagtype == "Arbeidsdag" }
+        private val erAgPeriode = { dag: RSUtbetalingdag -> dag.type == "ArbeidsgiverperiodeDag" }
+        private val erArbeid = { dag: RSUtbetalingdag -> dag.type == "Arbeidsdag" }
 
-        private fun List<RSDag>.erAgPeriodeMedArbeid() =
+        private fun List<RSUtbetalingdag>.erAgPeriodeMedArbeid() =
             all { dag ->
                 listOf(erAgPeriode, erArbeid).any { predicate ->
                     predicate(dag)
                 }
             }.and(erAgPeriode(last()))
 
-        fun sjekkDager(dager: List<RSDag>): String {
+        fun sjekkDager(dager: List<RSUtbetalingdag>?): String {
+            if(dager == null || dager.isEmpty()) {
+                return "Ingen dager"
+            }
             if (dager.all(erAgPeriode)) {
                 return "ArbeidsgiverperiodeDag"
             }
@@ -78,7 +80,7 @@ class SendVedtakStatus(
                     hentSomBruker = false,
                 ).first { it.id == id }
 
-            val skalIkkeVisesFordi = sjekkDager(vedtakWrapper.dagerArbeidsgiver + vedtakWrapper.dagerPerson)
+            val skalIkkeVisesFordi =  sjekkDager(vedtakWrapper.vedtak.utbetaling.utbetalingsdager)
             if (skalIkkeVisesFordi.isNotBlank()) {
                 log.info("Utbetaling $utbetalingId inneholder bare $skalIkkeVisesFordi og vises ikke til bruker")
                 skalIkkeVises(id, skalIkkeVisesFordi)
@@ -99,8 +101,6 @@ class SendVedtakStatus(
             )
 
             try {
-                val type = vedtaktype.finnVedtaktype(vedtakWrapper)
-                metrikk.vedtaktype(type).increment()
                 metrikk.statusMotattCounter.increment()
             } catch (e: Exception) {
                 log.info("Feil under telling av metrikker for utbetaling_id $utbetalingId")

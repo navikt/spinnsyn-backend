@@ -14,10 +14,6 @@ data class RSVedtakWrapper(
     val orgnavn: String,
     val annullert: Boolean = false,
     val revurdert: Boolean = false,
-    val dagerArbeidsgiver: List<RSDag> = emptyList(),
-    val dagerPerson: List<RSDag> = emptyList(),
-    val sykepengebelopArbeidsgiver: Int = 0,
-    val sykepengebelopPerson: Int = 0,
     val andreArbeidsgivere: Map<String, Double>?,
     val organisasjoner: Map<String, String> = emptyMap(),
 )

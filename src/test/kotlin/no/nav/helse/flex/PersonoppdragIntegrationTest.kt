@@ -185,33 +185,11 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
         vedtak[0].annullert.`should be false`()
         vedtak[0].lest.`should be false`()
         vedtak[0].orgnavn `should be equal to` org
-        vedtak[0].sykepengebelopArbeidsgiver `should be equal to` 0
-        vedtak[0].sykepengebelopPerson `should be equal to` 738
 
         vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
         vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull()
         vedtak[0].vedtak.utbetaling.personOppdrag.shouldNotBeNull()
         vedtak[0].vedtak.utbetaling.personOppdrag!!.utbetalingslinjer.shouldHaveSize(1)
-
-        vedtak[0].dagerArbeidsgiver.shouldBeEmpty()
-
-        vedtak[0].dagerPerson.shouldHaveSize(8)
-        vedtak[0].dagerPerson[0].dagtype `should be equal to` "NavDagSyk"
-        vedtak[0].dagerPerson[0].dato `should be equal to` fom
-        vedtak[0].dagerPerson[1].dagtype `should be equal to` "NavDagSyk"
-        vedtak[0].dagerPerson[1].dato `should be equal to` fom.plusDays(1)
-        vedtak[0].dagerPerson[2].dagtype `should be equal to` "NavDagSyk"
-        vedtak[0].dagerPerson[2].dato `should be equal to` fom.plusDays(2)
-        vedtak[0].dagerPerson[3].dagtype `should be equal to` "NavDagSyk"
-        vedtak[0].dagerPerson[3].dato `should be equal to` fom.plusDays(3)
-        vedtak[0].dagerPerson[4].dagtype `should be equal to` "NavHelgDag"
-        vedtak[0].dagerPerson[4].dato `should be equal to` fom.plusDays(4)
-        vedtak[0].dagerPerson[5].dagtype `should be equal to` "NavHelgDag"
-        vedtak[0].dagerPerson[5].dato `should be equal to` fom.plusDays(5)
-        vedtak[0].dagerPerson[6].dagtype `should be equal to` "NavDagSyk"
-        vedtak[0].dagerPerson[6].dato `should be equal to` fom.plusDays(6)
-        vedtak[0].dagerPerson[7].dagtype `should be equal to` "NavDagSyk"
-        vedtak[0].dagerPerson[7].dato `should be equal to` fom.plusDays(7)
     }
 }
