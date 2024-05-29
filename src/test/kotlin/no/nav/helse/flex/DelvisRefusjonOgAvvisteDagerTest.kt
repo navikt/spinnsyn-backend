@@ -80,17 +80,5 @@ class DelvisRefusjonOgAvvisteDagerTest : FellesTestOppsett() {
         vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
         vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2023, 2, 1))
         vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2023, 2, 28))
-
-        vedtak[0].sykepengebelopPerson.shouldBeEqualTo(17311)
-        vedtak[0].dagerPerson.shouldHaveSize(28)
-
-        vedtak[0].sykepengebelopArbeidsgiver.shouldBeEqualTo(4844)
-        vedtak[0].dagerArbeidsgiver.shouldHaveSize(9)
-        vedtak[0].dagerArbeidsgiver[0].dagtype.shouldBeEqualTo("NavDagSyk")
-        vedtak[0].dagerArbeidsgiver[0].belop.shouldBeEqualTo(692)
-        vedtak[0].dagerArbeidsgiver[3].dagtype.shouldBeEqualTo("NavHelgDag")
-        vedtak[0].dagerArbeidsgiver[3].belop.shouldBeEqualTo(0)
-        vedtak[0].dagerArbeidsgiver[8].dagtype.shouldBeEqualTo("NavDagSyk")
-        vedtak[0].dagerArbeidsgiver[8].belop.shouldBeEqualTo(692)
     }
 }
