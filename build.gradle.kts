@@ -2,11 +2,11 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.springframework.boot") version "3.2.5"
+    id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
-    kotlin("plugin.spring") version "1.9.24"
-    kotlin("jvm") version "1.9.24"
+    kotlin("plugin.spring") version "2.0.0"
+    kotlin("jvm") version "2.0.0"
 }
 
 group = "no.nav.helse.flex"
@@ -26,7 +26,7 @@ repositories {
 val testContainersVersion = "1.19.8"
 val logstashLogbackEncoderVersion = "7.4"
 val kluentVersion = "1.73"
-val tokenSupportVersion = "4.1.7"
+val tokenSupportVersion = "4.1.8"
 val sykepengesoknadKafkaVersion = "2024.05.04-08.31-672172ee"
 
 dependencies {
