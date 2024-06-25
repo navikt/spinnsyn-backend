@@ -33,8 +33,12 @@ class VedtakVeilederController(
         if (!istilgangskontrollClient.sjekkTilgangVeileder(fnr)) {
             throw IkkeTilgangException()
         }
-        return vedtakService.hentVedtak(fnr)
+        return vedtakService.hentVedtak(fnr).brukUtbetalingIdSomId()
     }
+}
+
+private fun List<RSVedtakWrapper>.brukUtbetalingIdSomId(): List<RSVedtakWrapper> {
+    return this.map { it.copy(id = it.vedtak.utbetaling.utbetalingId ?: it.id) }
 }
 
 class IkkeTilgangException : AbstractApiError(
