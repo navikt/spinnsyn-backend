@@ -3,6 +3,7 @@ package no.nav.helse.flex.metrikk
 import no.nav.helse.flex.FellesTestOppsett
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.MethodOrderer
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,7 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @DirtiesContext
-@TestMethodOrder(MethodOrderer.MethodName::class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @AutoConfigureObservability
 class MetrikkTest : FellesTestOppsett() {
     @Autowired
@@ -24,8 +25,9 @@ class MetrikkTest : FellesTestOppsett() {
             .perform(get("/internal/prometheus"))
             .andExpect(status().isOk).andReturn().response.contentAsString.split("\n")
 
+    @Order(1)
     @Test
-    fun `1 - initielle metrikker`() {
+    fun `Iitielle metrikker`() {
         val mottattVedtak =
             mockMvc.metrikker().filter { it.contains("mottatt_vedtak_counter") }
         assertThat(mottattVedtak).hasSize(3)
@@ -34,8 +36,9 @@ class MetrikkTest : FellesTestOppsett() {
         assertThat(counter).isEqualTo("mottatt_vedtak_counter_total 0.0")
     }
 
+    @Order(2)
     @Test
-    fun `2 - teller mottatt vedtak`() {
+    fun `Teller mottatt vedtak`() {
         metrikk.mottattVedtakCounter.increment()
         val mottattVedtak = mockMvc.metrikker().filter { it.contains("mottatt_vedtak_counter") }
         assertThat(mottattVedtak).hasSize(3)
@@ -44,8 +47,9 @@ class MetrikkTest : FellesTestOppsett() {
         assertThat(counter).isEqualTo("mottatt_vedtak_counter_total 1.0")
     }
 
+    @Order(3)
     @Test
-    fun `3 - teller enda et mottatt vedtak`() {
+    fun `Teller enda et mottatt vedtak`() {
         metrikk.mottattVedtakCounter.increment()
         val mottattVedtak = mockMvc.metrikker().filter { it.contains("mottatt_vedtak_counter") }
         assertThat(mottattVedtak).hasSize(3)
@@ -54,14 +58,15 @@ class MetrikkTest : FellesTestOppsett() {
         assertThat(counter).isEqualTo("mottatt_vedtak_counter_total 2.0")
     }
 
+    @Order(4)
     @Test
-    fun `4 - teller og legger til tag`() {
+    fun `Teller og legger til tag`() {
         metrikk.skalIkkeVises("ikkeSyk").increment()
 
         val skalIkkeVises = mockMvc.metrikker().filter { it.contains("skal_ikke_vises_counter") }
         assertThat(skalIkkeVises).hasSize(3)
 
         val counter = skalIkkeVises.first { !it.startsWith("#") }
-        assertThat(counter).isEqualTo("""skal_ikke_vises_counter_total{grunn="ikkeSyk",} 1.0""")
+        assertThat(counter).isEqualTo("""skal_ikke_vises_counter_total{grunn="ikkeSyk"} 1.0""")
     }
 }
