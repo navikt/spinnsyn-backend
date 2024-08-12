@@ -1,6 +1,7 @@
 # Idea project files
 *.iml
 .idea/
+.kotlin/
 
 # Gradle files
 out/
@@ -12,3 +13,4 @@ src/generated
 
 # OS specific
 .DS_Store
+
