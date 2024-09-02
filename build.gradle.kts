@@ -26,7 +26,7 @@ repositories {
 val testContainersVersion = "1.20.1"
 val logstashLogbackEncoderVersion = "8.0"
 val kluentVersion = "1.73"
-val tokenSupportVersion = "5.0.2"
+val tokenSupportVersion = "5.0.3"
 val sykepengesoknadKafkaVersion = "2024.08.14-11.09-eefd3265"
 
 dependencies {
