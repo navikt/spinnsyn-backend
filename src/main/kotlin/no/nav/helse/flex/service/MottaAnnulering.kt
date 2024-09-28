@@ -3,7 +3,6 @@ package no.nav.helse.flex.service
 import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.domene.tilAnnulleringDto
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.metrikk.Metrikk
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
@@ -11,7 +10,6 @@ import java.util.*
 @Service
 class MottaAnnulering(
     private val annulleringDAO: AnnulleringDAO,
-    private val metrikk: Metrikk,
 ) {
     private val log = logger()
 
@@ -47,8 +45,6 @@ class MottaAnnulering(
             opprettet = opprettet,
             kilde = kilde,
         )
-
-        metrikk.mottattAnnulleringVedtakCounter.increment()
 
         log.info("Opprettet annullering med spinnsyn databaseid $id")
     }

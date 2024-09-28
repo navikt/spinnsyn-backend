@@ -4,7 +4,6 @@ import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.metrikk.Metrikk
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -12,7 +11,6 @@ import java.time.Instant
 @Service
 class MottaUtbetaling(
     private val utbetalingRepository: UtbetalingRepository,
-    private val metrikk: Metrikk,
 ) {
     val log = logger()
 
@@ -57,12 +55,6 @@ class MottaUtbetaling(
             )
 
         log.info("Opprettet utbetaling med database id: ${utbetalingDB.id} og utbetaling id ${utbetalingDB.utbetalingId}")
-
-        if (utbetalingSerialisert.automatiskBehandling) {
-            metrikk.mottattAutomatiskVedtakCounter.increment()
-        } else {
-            metrikk.mottattManueltVedtakCounter.increment()
-        }
     }
 
     private fun ConsumerRecord<String, String>.erAnnullering(): Boolean {
