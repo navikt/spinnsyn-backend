@@ -4,7 +4,6 @@ import no.nav.helse.flex.db.VedtakDbRecord
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.metrikk.Metrikk
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -13,7 +12,6 @@ import java.util.*
 @Service
 class MottaVedtak(
     private val vedtakRepository: VedtakRepository,
-    private val metrikk: Metrikk,
     private val mottaAnnulering: MottaAnnulering,
 ) {
     val log = logger()
@@ -73,8 +71,6 @@ class MottaVedtak(
             )
 
         log.info("Opprettet vedtak med database id: ${vedtakDB.id} for utbetaling id ${vedtakDB.utbetalingId}")
-
-        metrikk.mottattVedtakCounter.increment()
     }
 
     private fun ConsumerRecord<String, String>.erVedtakFattet(): Boolean {
