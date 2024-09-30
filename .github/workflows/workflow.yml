@@ -5,7 +5,7 @@ on:
 
 jobs:
   felles-workflow:
-    uses: navikt/flex-github-actions-workflows/.github/workflows/spring-boot.yml@main
+    uses: navikt/flex-github-actions-workflows/.github/workflows/spring-boot.yml@trivy-db-repo
     permissions:
       packages: read
       contents: read
