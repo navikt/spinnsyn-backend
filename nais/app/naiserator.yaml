@@ -35,6 +35,14 @@ spec:
     requests:
       cpu: {{cpu}}
       memory: {{memory}}
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
   gcp:
     sqlInstances:
       - type: {{db_type}}
