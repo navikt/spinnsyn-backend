@@ -5,7 +5,7 @@ db_type: POSTGRES_14
 kafkaPool: nav-prod
 replicas_min: 2
 replicas_max: 3
-cpu: 600m
+cpu: 100m
 memory: 1000Mi
 external-host:
   - pdl-api.prod-fss-pub.nais.io
