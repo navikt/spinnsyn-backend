@@ -1,4 +1,6 @@
 # spinnsyn-backend
+# spinnsyn-backend
+# spinnsyn-backend
 
 Flex har ansvar for vise vedtak gjort som følge av søknad om sykepenger. Vedtakene blir gjort i saksbehandingssystemet
 Speil, som er eid av Team Bømlo. Team Flex mottar vedtakene som meldigner på Kafka og lagrer de for visning.
