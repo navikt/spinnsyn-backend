@@ -91,8 +91,8 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
         org: String,
         dato: LocalDate,
         utbetalingId: String,
-    ): VedtakFattetForEksternDto {
-        return VedtakFattetForEksternDto(
+    ): VedtakFattetForEksternDto =
+        VedtakFattetForEksternDto(
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = org,
@@ -108,32 +108,33 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
             begrensning = "VET_IKKE",
             vedtakFattetTidspunkt = LocalDate.now(),
         )
-    }
 
     fun VedtakFattetForEksternDto.leggPaKafka() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                this.fødselsnummer,
-                this.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    this.fødselsnummer,
+                    this.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(this.fødselsnummer).isNotEmpty()
         }
     }
 
     fun UtbetalingUtbetalt.leggPaKafka() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                this.fødselsnummer,
-                this.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    this.fødselsnummer,
+                    this.serialisertTilString(),
+                ),
+            ).get()
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(this.fødselsnummer).isNotEmpty()
         }
@@ -145,8 +146,8 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
         fom: LocalDate,
         tom: LocalDate,
         utbetalingId: String,
-    ): UtbetalingUtbetalt {
-        return UtbetalingUtbetalt(
+    ): UtbetalingUtbetalt =
+        UtbetalingUtbetalt(
             fødselsnummer = fnr,
             aktørId = fnr,
             organisasjonsnummer = org,
@@ -177,5 +178,4 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
                     ),
                 ),
         )
-    }
 }

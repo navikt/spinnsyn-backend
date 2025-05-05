@@ -37,13 +37,15 @@ class VedtakVeilederController(
     }
 }
 
-private fun List<RSVedtakWrapper>.brukUtbetalingIdSomId(): List<RSVedtakWrapper> {
-    return this.map { it.copy(id = it.vedtak.utbetaling.utbetalingId ?: it.id) }
-}
+private fun List<RSVedtakWrapper>.brukUtbetalingIdSomId(): List<RSVedtakWrapper> =
+    this.map {
+        it.copy(id = it.vedtak.utbetaling.utbetalingId ?: it.id)
+    }
 
-class IkkeTilgangException : AbstractApiError(
-    message = "Ingen tilgang til vedtak for veileder",
-    httpStatus = HttpStatus.FORBIDDEN,
-    reason = "INGEN_TILGANG",
-    loglevel = LogLevel.WARN,
-)
+class IkkeTilgangException :
+    AbstractApiError(
+        message = "Ingen tilgang til vedtak for veileder",
+        httpStatus = HttpStatus.FORBIDDEN,
+        reason = "INGEN_TILGANG",
+        loglevel = LogLevel.WARN,
+    )

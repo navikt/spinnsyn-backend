@@ -27,7 +27,8 @@ class MottaAnnulering(
                 throw RuntimeException("Kunne ikke deserialisere annulering", e)
             }
 
-        annulleringDAO.finnAnnullering(fnr)
+        annulleringDAO
+            .finnAnnullering(fnr)
             .firstOrNull { it.annullering == annulleringSerialisert }
             ?.let {
                 if (it.id == id.toString()) {

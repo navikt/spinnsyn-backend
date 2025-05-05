@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("testdata")
-class TestdataResetListener(val nullstillVedtak: NullstillVedtak) {
+class TestdataResetListener(
+    val nullstillVedtak: NullstillVedtak,
+) {
     val log = logger()
 
     @KafkaListener(

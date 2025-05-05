@@ -48,13 +48,12 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
     fun rSDag(
         dagersiden: Int,
         dagtype: String,
-    ): RSDag {
-        return RSDag(
+    ): RSDag =
+        RSDag(
             dato = LocalDate.now().minusDays(dagersiden.toLong()),
             dagtype = dagtype,
             begrunnelser = emptyList(),
             belop = 12,
             grad = 100.0,
         )
-    }
 }

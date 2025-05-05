@@ -143,13 +143,14 @@ class OppdaterOrganisasjonTabellTest : FellesTestOppsett() {
     }
 
     fun sendSykepengesoknad(soknad: SykepengesoknadDTO) {
-        kafkaProducer.send(
-            ProducerRecord(
-                FLEX_SYKEPENGESOKNAD_TOPIC,
-                null,
-                soknad.id,
-                soknad.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    FLEX_SYKEPENGESOKNAD_TOPIC,
+                    null,
+                    soknad.id,
+                    soknad.serialisertTilString(),
+                ),
+            ).get()
     }
 }

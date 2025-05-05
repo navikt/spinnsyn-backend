@@ -100,24 +100,26 @@ class AnnulleringVedtakTopicVerdikjedeTest : FellesTestOppsett() {
     @Test
     @Order(2)
     fun `Et vedtak med utbetaling mottatt fra kafka blir lagret i db`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling.serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
@@ -135,15 +137,16 @@ class AnnulleringVedtakTopicVerdikjedeTest : FellesTestOppsett() {
     @Test
     @Order(4)
     fun `Ei annullering mottatt fra kafka blir lagret i db`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtakAnnullertDto.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtakAnnullertDto.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             annulleringDAO.finnAnnullering(fnr).isNotEmpty()
@@ -162,15 +165,16 @@ class AnnulleringVedtakTopicVerdikjedeTest : FellesTestOppsett() {
     @Test
     @Order(6)
     fun `Ei ny annullering mottatt på kafka blir lagret i db`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtakAnnullertDto.copy(organisasjonsnummer = "456").serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtakAnnullertDto.copy(organisasjonsnummer = "456").serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             annulleringDAO.finnAnnullering(fnr).size == 2
@@ -188,34 +192,38 @@ class AnnulleringVedtakTopicVerdikjedeTest : FellesTestOppsett() {
     @Test
     @Order(8)
     fun `Et nytt vedtak mottatt fra kafka blir lagret i db`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.copy(
-                    organisasjonsnummer = "456",
-                    utbetalingId = "$utbetalingId nr2",
-                ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak
+                        .copy(
+                            organisasjonsnummer = "456",
+                            utbetalingId = "$utbetalingId nr2",
+                        ).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.copy(
-                    organisasjonsnummer = "456",
-                    utbetalingId = "$utbetalingId nr2",
-                    arbeidsgiverOppdrag =
-                        utbetaling.arbeidsgiverOppdrag?.copy(
-                            mottaker = "456",
-                        ),
-                ).serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling
+                        .copy(
+                            organisasjonsnummer = "456",
+                            utbetalingId = "$utbetalingId nr2",
+                            arbeidsgiverOppdrag =
+                                utbetaling.arbeidsgiverOppdrag?.copy(
+                                    mottaker = "456",
+                                ),
+                        ).serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()

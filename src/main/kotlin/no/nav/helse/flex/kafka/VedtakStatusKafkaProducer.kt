@@ -18,9 +18,10 @@ class VedtakStatusKafkaProducer(
     fun produserMelding(vedtakStatusDTO: VedtakStatusDTO): RecordMetadata {
         val vedtakId = vedtakStatusDTO.id
         try {
-            return producer.send(
-                ProducerRecord(VEDTAK_STATUS_TOPIC, vedtakId, vedtakStatusDTO),
-            ).get()
+            return producer
+                .send(
+                    ProducerRecord(VEDTAK_STATUS_TOPIC, vedtakId, vedtakStatusDTO),
+                ).get()
         } catch (e: Throwable) {
             if (vedtakId.matches("^[a-zA-Z0-9-]+$".toRegex())) {
                 log.error(

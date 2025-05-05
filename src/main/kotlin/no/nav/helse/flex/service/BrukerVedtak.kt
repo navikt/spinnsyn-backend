@@ -50,12 +50,14 @@ class BrukerVedtak(
         ALLEREDE_LEST,
     }
 
-    class VedtakIkkeFunnetException(vedtaksId: String) : AbstractApiError(
-        message = "Fant ikke vedtak $vedtaksId",
-        httpStatus = HttpStatus.NOT_FOUND,
-        reason = "VEDTAK_IKKE_FUNNET",
-        loglevel = LogLevel.WARN,
-    )
+    class VedtakIkkeFunnetException(
+        vedtaksId: String,
+    ) : AbstractApiError(
+            message = "Fant ikke vedtak $vedtaksId",
+            httpStatus = HttpStatus.NOT_FOUND,
+            reason = "VEDTAK_IKKE_FUNNET",
+            loglevel = LogLevel.WARN,
+        )
 
     fun hentVedtak(
         fnr: String,
@@ -115,13 +117,9 @@ class BrukerVedtak(
         return LesResultat.LEST
     }
 
-    private fun List<RSVedtakWrapper>.leggTilOrgnavn(): List<RSVedtakWrapper> {
-        return leggTilOrganisasjonavn.leggTilOrganisasjonnavn(this)
-    }
+    private fun List<RSVedtakWrapper>.leggTilOrgnavn(): List<RSVedtakWrapper> = leggTilOrganisasjonavn.leggTilOrganisasjonnavn(this)
 
-    private fun List<RSVedtakWrapper>.leggTilArbeidsgivere(): List<RSVedtakWrapper> {
-        return leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
-    }
+    private fun List<RSVedtakWrapper>.leggTilArbeidsgivere(): List<RSVedtakWrapper> = leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
 
     private fun finnAlleVedtak(
         identer: List<String>,
@@ -208,8 +206,8 @@ private fun UtbetalingUtbetalt.OppdragDto.tilRsOppdrag(): RSOppdrag =
         utbetalingslinjer = this.utbetalingslinjer.map { it.tilRsUtbetalingslinje() },
     )
 
-private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> {
-    return map { rSVedtakWrapper ->
+private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> =
+    map { rSVedtakWrapper ->
         val fom = rSVedtakWrapper.vedtak.fom
         val tom = rSVedtakWrapper.vedtak.tom
 
@@ -236,7 +234,6 @@ private fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWra
             sykepengebelopPerson = sykepengebelopPerson,
         )
     }
-}
 
 private val dagtyperMedUtbetaling = listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
 private val helg = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
@@ -249,7 +246,8 @@ internal fun hentDager(
 ): List<RSDag> {
     // Setter opp alle dager i perioden
     var dager =
-        fom.datesUntil(tom.plusDays(1))
+        fom
+            .datesUntil(tom.plusDays(1))
             .asSequence()
             .map { dato ->
                 RSDag(
@@ -263,7 +261,8 @@ internal fun hentDager(
             // Oppdaterer med beløp
             .map { dag ->
                 val overlappendeLinjer =
-                    oppdragDto?.utbetalingslinjer
+                    oppdragDto
+                        ?.utbetalingslinjer
                         ?.filter { linje -> linje.overlapperMed(dag.dato) } // alle linjer som overlapper
                         ?: emptyList()
 
@@ -304,8 +303,7 @@ internal fun hentDager(
                             grad = if (dag.dato.dayOfWeek in helg) 0.0 else dag.grad,
                         )
                 }
-            }
-            .toList()
+            }.toList()
 
     val sisteArbeidsgiverperiodeDag = dager.lastOrNull { it.dagtype == "ArbeidsgiverperiodeDag" }
     if (sisteArbeidsgiverperiodeDag?.dato?.dayOfWeek == DayOfWeek.SUNDAY) {
@@ -365,11 +363,10 @@ private fun List<RSVedtakWrapper>.markerRevurderte(): List<RSVedtakWrapper> {
     }
 }
 
-private fun List<Annullering>.annullererVedtak(vedtakDbRecord: VedtakFattetForEksternDto): Boolean {
-    return this.any {
+private fun List<Annullering>.annullererVedtak(vedtakDbRecord: VedtakFattetForEksternDto): Boolean =
+    this.any {
         vedtakDbRecord.matcherAnnullering(it)
     }
-}
 
 fun VedtakFattetForEksternDto.matcherAnnullering(annullering: Annullering): Boolean {
     val vedtaksperiode = PeriodeImpl(this.fom, this.tom)
@@ -383,8 +380,8 @@ fun VedtakFattetForEksternDto.matcherAnnullering(annullering: Annullering): Bool
     return vedtaksperiode.overlapper(annulleringsperiode) && (this.organisasjonsnummer == annulleringOrgnummer)
 }
 
-private fun UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto.tilRsUtbetalingslinje(): RSUtbetalingslinje {
-    return RSUtbetalingslinje(
+private fun UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto.tilRsUtbetalingslinje(): RSUtbetalingslinje =
+    RSUtbetalingslinje(
         fom = fom,
         tom = tom,
         dagsats = dagsats,
@@ -392,12 +389,10 @@ private fun UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto.tilRsUtbetalingsli
         grad = grad,
         stønadsdager = stønadsdager,
     )
-}
 
-private fun UtbetalingUtbetalt.UtbetalingdagDto.tilRsUtbetalingsdag(): RSUtbetalingdag {
-    return RSUtbetalingdag(
+private fun UtbetalingUtbetalt.UtbetalingdagDto.tilRsUtbetalingsdag(): RSUtbetalingdag =
+    RSUtbetalingdag(
         dato = this.dato,
         type = this.type,
         begrunnelser = this.begrunnelser.map { it.toString() },
     )
-}

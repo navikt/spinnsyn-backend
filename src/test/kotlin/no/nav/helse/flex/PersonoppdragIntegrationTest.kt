@@ -130,22 +130,26 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
     @Test
     @Order(1)
     fun `mottar vedtak`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val hentetVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
-        hentetVedtak.vedtak.tilVedtakFattetForEksternDto().fødselsnummer.shouldBeEqualTo(fnr)
+        hentetVedtak.vedtak
+            .tilVedtakFattetForEksternDto()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak.utbetalingId)
     }
 
@@ -158,21 +162,25 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
     @Test
     @Order(3)
     fun `mottar utbetaling`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling.serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first()
-        dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
+        dbUtbetaling.utbetaling
+            .tilUtbetalingUtbetalt()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
     }
@@ -188,8 +196,15 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
 
         vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
-        vedtak[0].vedtak.utbetaling.arbeidsgiverOppdrag.shouldBeNull()
-        vedtak[0].vedtak.utbetaling.personOppdrag.shouldNotBeNull()
-        vedtak[0].vedtak.utbetaling.personOppdrag!!.utbetalingslinjer.shouldHaveSize(1)
+        vedtak[0]
+            .vedtak.utbetaling.arbeidsgiverOppdrag
+            .shouldBeNull()
+        vedtak[0]
+            .vedtak.utbetaling.personOppdrag
+            .shouldNotBeNull()
+        vedtak[0]
+            .vedtak.utbetaling.personOppdrag!!
+            .utbetalingslinjer
+            .shouldHaveSize(1)
     }
 }

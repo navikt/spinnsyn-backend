@@ -52,16 +52,18 @@ class SkjonnsfastsettelseTest : FellesTestOppsett() {
             begrensning = "VET_IKKE",
             vedtakFattetTidspunkt = LocalDate.now(),
             sykepengegrunnlagsfakta =
-                Sykepengegrunnlagsfakta.EtterSkjønn(
-                    fastsatt = "EtterSkjønn",
-                    skjønnsfastsatt = 12343.00,
-                    arbeidsgivere = emptyList(),
-                    omregnetÅrsinntekt = 123123.02,
-                    innrapportertÅrsinntekt = 900.0,
-                    avviksprosent = 27.0,
-                    `6G` = 668862.0,
-                    tags = emptyList(),
-                ).serialisertTilString().tilJsonNode(),
+                Sykepengegrunnlagsfakta
+                    .EtterSkjønn(
+                        fastsatt = "EtterSkjønn",
+                        skjønnsfastsatt = 12343.00,
+                        arbeidsgivere = emptyList(),
+                        omregnetÅrsinntekt = 123123.02,
+                        innrapportertÅrsinntekt = 900.0,
+                        avviksprosent = 27.0,
+                        `6G` = 668862.0,
+                        tags = emptyList(),
+                    ).serialisertTilString()
+                    .tilJsonNode(),
             begrunnelser =
                 listOf(
                     Begrunnelse(
@@ -113,43 +115,51 @@ class SkjonnsfastsettelseTest : FellesTestOppsett() {
     @Test
     @Order(1)
     fun `mottar vedtak`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val hentetVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
-        hentetVedtak.vedtak.tilVedtakFattetForEksternDto().fødselsnummer.shouldBeEqualTo(fnr)
+        hentetVedtak.vedtak
+            .tilVedtakFattetForEksternDto()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak.utbetalingId)
     }
 
     @Test
     @Order(2)
     fun `mottar utbetaling`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling.serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first()
-        dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
+        dbUtbetaling.utbetaling
+            .tilUtbetalingUtbetalt()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
     }
@@ -160,8 +170,14 @@ class SkjonnsfastsettelseTest : FellesTestOppsett() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
         vedtak[0].lest.`should be false`()
-        vedtak[0].vedtak.begrunnelser!!.first().begrunnelse shouldBeEqualTo "Begrunnelse fra saksbehandler"
-        vedtak[0].vedtak.begrunnelser!!.first().type shouldBeEqualTo "SkjønnsfastsattSykepengegrunnlagFritekst"
+        vedtak[0]
+            .vedtak.begrunnelser!!
+            .first()
+            .begrunnelse shouldBeEqualTo "Begrunnelse fra saksbehandler"
+        vedtak[0]
+            .vedtak.begrunnelser!!
+            .first()
+            .type shouldBeEqualTo "SkjønnsfastsattSykepengegrunnlagFritekst"
 
         val etterSkjønn = vedtak[0].vedtak.sykepengegrunnlagsfakta!!.tilEtterSkjønn()
         etterSkjønn.avviksprosent shouldBeEqualTo 27.0
@@ -210,6 +226,4 @@ data class ArbeidsgiverMedSkjønn(
     val skjønnsfastsatt: Double,
 )
 
-fun String.tilJsonNode(): JsonNode {
-    return OBJECT_MAPPER.readTree(this)
-}
+fun String.tilJsonNode(): JsonNode = OBJECT_MAPPER.readTree(this)

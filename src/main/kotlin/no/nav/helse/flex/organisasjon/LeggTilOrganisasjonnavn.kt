@@ -37,8 +37,7 @@ class LeggTilOrganisasjonnavn(
                     it.vedtak.grunnlagForSykepengegrunnlagPerArbeidsgiver
                         ?.filterNot { organisasjon ->
                             it.vedtak.organisasjonsnummer == organisasjon.key
-                        }
-                        ?.leggTilAndreArbeidsgivere(organisasjoner),
+                        }?.leggTilAndreArbeidsgivere(organisasjoner),
                 organisasjoner = organisasjoner,
             )
         }
