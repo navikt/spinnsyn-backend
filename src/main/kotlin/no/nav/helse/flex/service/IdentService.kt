@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component
 import java.io.Serializable
 
 @Component
-class IdentService(private val pdlClient: PdlClient) {
-    private fun List<PdlIdent>.folkeregisteridenter(): List<String> {
-        return this.filter { it.gruppe == FOLKEREGISTERIDENT }.map { it.ident }
-    }
+class IdentService(
+    private val pdlClient: PdlClient,
+) {
+    private fun List<PdlIdent>.folkeregisteridenter(): List<String> = this.filter { it.gruppe == FOLKEREGISTERIDENT }.map { it.ident }
 
     fun hentFolkeregisterIdenterMedHistorikkForFnr(fnr: String): FolkeregisterIdenter {
         val identer = pdlClient.hentIdenterMedHistorikk(fnr)
@@ -22,14 +22,17 @@ class IdentService(private val pdlClient: PdlClient) {
         )
     }
 
-    private fun ResponseData.aktorId(): String {
-        return this.hentIdenter?.identer?.find { it.gruppe == AKTORID }?.ident
+    private fun ResponseData.aktorId(): String =
+        this.hentIdenter
+            ?.identer
+            ?.find { it.gruppe == AKTORID }
+            ?.ident
             ?: throw RuntimeException("Kunne ikke finne aktørid i pdl response")
-    }
 }
 
-data class FolkeregisterIdenter(val originalIdent: String, val andreIdenter: List<String>) : Serializable {
-    fun alle(): List<String> {
-        return mutableListOf(originalIdent).also { it.addAll(andreIdenter) }
-    }
+data class FolkeregisterIdenter(
+    val originalIdent: String,
+    val andreIdenter: List<String>,
+) : Serializable {
+    fun alle(): List<String> = mutableListOf(originalIdent).also { it.addAll(andreIdenter) }
 }

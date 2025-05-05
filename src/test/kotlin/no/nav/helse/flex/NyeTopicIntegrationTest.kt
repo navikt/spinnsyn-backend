@@ -107,22 +107,26 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     @Test
     @Order(1)
     fun `mottar vedtak`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val hentetVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
-        hentetVedtak.vedtak.tilVedtakFattetForEksternDto().fødselsnummer.shouldBeEqualTo(fnr)
+        hentetVedtak.vedtak
+            .tilVedtakFattetForEksternDto()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak.utbetalingId)
     }
 
@@ -135,21 +139,25 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     @Test
     @Order(3)
     fun `mottar utbetaling`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling.serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first()
-        dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
+        dbUtbetaling.utbetaling
+            .tilUtbetalingUtbetalt()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
     }
@@ -223,18 +231,20 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     @Test
     @Order(5)
     fun `maskin-til-maskin API-et trenger tokens for å lese brukervedtaket`() {
-        mockMvc.perform(
-            get("/api/v1/arkivering/vedtak")
-                .header("Authorization", "Bearer blabla-fake-token")
-                .header("fnr", fnr)
-                .contentType(APPLICATION_JSON),
-        ).andExpect(status().isUnauthorized)
+        mockMvc
+            .perform(
+                get("/api/v1/arkivering/vedtak")
+                    .header("Authorization", "Bearer blabla-fake-token")
+                    .header("fnr", fnr)
+                    .contentType(APPLICATION_JSON),
+            ).andExpect(status().isUnauthorized)
 
-        mockMvc.perform(
-            get("/api/v1/arkivering/vedtak")
-                .header("fnr", fnr)
-                .contentType(APPLICATION_JSON),
-        ).andExpect(status().isUnauthorized)
+        mockMvc
+            .perform(
+                get("/api/v1/arkivering/vedtak")
+                    .header("fnr", fnr)
+                    .contentType(APPLICATION_JSON),
+            ).andExpect(status().isUnauthorized)
     }
 
     @Test
@@ -251,21 +261,26 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
 
         lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
 
-        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first().lest.`should not be null`()
+        utbetalingRepository
+            .findUtbetalingDbRecordsByFnr(fnr)
+            .first()
+            .lest
+            .`should not be null`()
     }
 
     @Test
     @Order(8)
     fun `en annullering blir mottatt på Kafka blir lagret i db`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                annulleringDto.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    annulleringDto.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakAnnullert".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             annulleringDAO.finnAnnullering(fnr).size == 1
@@ -285,15 +300,16 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     fun `mottar ett vedtak med null som utbetalingId`() {
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(1)
 
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.copy(utbetalingId = null).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.copy(utbetalingId = null).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).size == 2
@@ -305,15 +321,16 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     fun `mottar enda et vedtak med null som utbetalingId`() {
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(2)
 
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.copy(utbetalingId = null).copy(fom = LocalDate.now().minusDays(5)).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.copy(utbetalingId = null).copy(fom = LocalDate.now().minusDays(5)).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).size == 3
@@ -325,15 +342,16 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     fun `duplikat av det første vedtaket blir ikke lagret som nytt vedtak`() {
         vedtakRepository.findVedtakDbRecordsByFnr(fnr).shouldHaveSize(3)
 
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         await().during(2, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).size == 3
@@ -347,14 +365,15 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     fun `duplikat av den første utbetalingen blir ikke lagret som ny utbetaling`() {
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).shouldHaveSize(1)
 
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling.serialisertTilString(),
+                ),
+            ).get()
 
         await().during(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).size == 1

@@ -18,8 +18,8 @@ import java.util.*
 class AnnulleringDAO(
     private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
-    fun finnAnnullering(fnr: String): List<Annullering> {
-        return namedParameterJdbcTemplate.query(
+    fun finnAnnullering(fnr: String): List<Annullering> =
+        namedParameterJdbcTemplate.query(
             """
             SELECT id, fnr, annullering, opprettet, kilde
             FROM annullering
@@ -30,10 +30,9 @@ class AnnulleringDAO(
         ) { resultSet, _ ->
             resultSet.toAnnullering()
         }
-    }
 
-    fun finnAnnulleringMedIdent(fnr: List<String>): List<Annullering> {
-        return namedParameterJdbcTemplate.query(
+    fun finnAnnulleringMedIdent(fnr: List<String>): List<Annullering> =
+        namedParameterJdbcTemplate.query(
             """
             SELECT id, fnr, annullering, opprettet, kilde
             FROM annullering
@@ -44,7 +43,6 @@ class AnnulleringDAO(
         ) { resultSet, _ ->
             resultSet.toAnnullering()
         }
-    }
 
     fun opprettAnnullering(
         id: UUID,

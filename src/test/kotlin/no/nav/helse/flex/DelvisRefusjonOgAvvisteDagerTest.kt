@@ -33,43 +33,51 @@ class DelvisRefusjonOgAvvisteDagerTest : FellesTestOppsett() {
     @Test
     @Order(1)
     fun `mottar utbetaling`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling,
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling,
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first()
-        dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
+        dbUtbetaling.utbetaling
+            .tilUtbetalingUtbetalt()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
     }
 
     @Test
     @Order(2)
     fun `mottar vedtakene til utbetalingen`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak,
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak,
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val hentetVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
-        hentetVedtak.vedtak.tilVedtakFattetForEksternDto().fødselsnummer.shouldBeEqualTo(fnr)
+        hentetVedtak.vedtak
+            .tilVedtakFattetForEksternDto()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
     }
 
     @Test

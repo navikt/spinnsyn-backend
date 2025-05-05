@@ -85,11 +85,14 @@ abstract class FellesTestOppsett {
         settUtbetalingKlarTilVisning()
 
         val json =
-            mockMvc.perform(
-                get("/api/v3/vedtak")
-                    .header("Authorization", "Bearer ${tokenxToken(fnr)}")
-                    .contentType(MediaType.APPLICATION_JSON),
-            ).andExpect(status().isOk).andReturn().response.contentAsString
+            mockMvc
+                .perform(
+                    get("/api/v3/vedtak")
+                        .header("Authorization", "Bearer ${tokenxToken(fnr)}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andReturn()
+                .response.contentAsString
 
         return objectMapper.readValue(json)
     }
@@ -99,11 +102,13 @@ abstract class FellesTestOppsett {
         acrClaim: String,
     ): String {
         val responseCode =
-            mockMvc.perform(
-                get("/api/v3/vedtak")
-                    .header("Authorization", "Bearer ${tokenxToken(fnr, acrClaim)}")
-                    .contentType(MediaType.APPLICATION_JSON),
-            ).andReturn().response.status
+            mockMvc
+                .perform(
+                    get("/api/v3/vedtak")
+                        .header("Authorization", "Bearer ${tokenxToken(fnr, acrClaim)}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andReturn()
+                .response.status
 
         return responseCode.toString()
     }
@@ -115,12 +120,15 @@ abstract class FellesTestOppsett {
         settUtbetalingKlarTilVisning()
 
         val json =
-            mockMvc.perform(
-                get("/api/v4/veileder/vedtak")
-                    .header("Authorization", "Bearer $token")
-                    .header("sykmeldt-fnr", fnr)
-                    .contentType(MediaType.APPLICATION_JSON),
-            ).andExpect(status().isOk).andReturn().response.contentAsString
+            mockMvc
+                .perform(
+                    get("/api/v4/veileder/vedtak")
+                        .header("Authorization", "Bearer $token")
+                        .header("sykmeldt-fnr", fnr)
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andReturn()
+                .response.contentAsString
 
         return objectMapper.readValue(json)
     }
@@ -132,12 +140,15 @@ abstract class FellesTestOppsett {
         settUtbetalingKlarTilVisning()
 
         val json =
-            mockMvc.perform(
-                get("/api/v1/arkivering/vedtak")
-                    .header("Authorization", "Bearer $token")
-                    .header("fnr", fnr)
-                    .contentType(MediaType.APPLICATION_JSON),
-            ).andExpect(status().isOk).andReturn().response.contentAsString
+            mockMvc
+                .perform(
+                    get("/api/v1/arkivering/vedtak")
+                        .header("Authorization", "Bearer $token")
+                        .header("fnr", fnr)
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andReturn()
+                .response.contentAsString
 
         return objectMapper.readValue(json)
     }
@@ -147,11 +158,14 @@ abstract class FellesTestOppsett {
         id: String,
     ): String {
         val json =
-            mockMvc.perform(
-                post("/api/v3/vedtak/$id/les")
-                    .header("Authorization", "Bearer ${tokenxToken(fnr)}")
-                    .contentType(MediaType.APPLICATION_JSON),
-            ).andExpect(status().isOk).andReturn().response.contentAsString
+            mockMvc
+                .perform(
+                    post("/api/v3/vedtak/$id/les")
+                        .header("Authorization", "Bearer ${tokenxToken(fnr)}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(status().isOk)
+                .andReturn()
+                .response.contentAsString
 
         val map: Map<String, String> = objectMapper.readValue(json)
         return map["status"]!!
@@ -210,19 +224,19 @@ abstract class FellesTestOppsett {
                 "client_id" to clientId,
                 "pid" to fnr,
             ),
-    ): String {
-        return server.issueToken(
-            issuerId,
-            clientId,
-            DefaultOAuth2TokenCallback(
-                issuerId = issuerId,
-                subject = UUID.randomUUID().toString(),
-                audience = listOf(audience),
-                claims = claims,
-                expiry = 3600,
-            ),
-        ).serialize()
-    }
+    ): String =
+        server
+            .issueToken(
+                issuerId,
+                clientId,
+                DefaultOAuth2TokenCallback(
+                    issuerId = issuerId,
+                    subject = UUID.randomUUID().toString(),
+                    audience = listOf(audience),
+                    claims = claims,
+                    expiry = 3600,
+                ),
+            ).serialize()
 }
 
 fun MockOAuth2Server.token(
@@ -232,16 +246,16 @@ fun MockOAuth2Server.token(
     clientId: String = UUID.randomUUID().toString(),
     audience: String,
     claims: Map<String, Any> = mapOf("acr" to acrClaim),
-): String {
-    return this.issueToken(
-        issuerId,
-        clientId,
-        DefaultOAuth2TokenCallback(
-            issuerId = issuerId,
-            subject = subject,
-            audience = listOf(audience),
-            claims = claims,
-            expiry = 3600,
-        ),
-    ).serialize()
-}
+): String =
+    this
+        .issueToken(
+            issuerId,
+            clientId,
+            DefaultOAuth2TokenCallback(
+                issuerId = issuerId,
+                subject = subject,
+                audience = listOf(audience),
+                claims = claims,
+                expiry = 3600,
+            ),
+        ).serialize()

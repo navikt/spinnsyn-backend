@@ -16,8 +16,8 @@ class MottaVedtak(
 ) {
     val log = logger()
 
-    fun handterMelding(cr: ConsumerRecord<String, String>) {
-        return when {
+    fun handterMelding(cr: ConsumerRecord<String, String>) =
+        when {
             cr.erVedtakFattet() -> {
                 mottaVedtak(
                     fnr = cr.key(),
@@ -40,7 +40,6 @@ class MottaVedtak(
                 // Ignorerer denne meldingen
             }
         }
-    }
 
     fun mottaVedtak(
         fnr: String,
@@ -73,15 +72,13 @@ class MottaVedtak(
         log.info("Opprettet vedtak med database id: ${vedtakDB.id} for utbetaling id ${vedtakDB.utbetalingId}")
     }
 
-    private fun ConsumerRecord<String, String>.erVedtakFattet(): Boolean {
-        return headers().any { header ->
+    private fun ConsumerRecord<String, String>.erVedtakFattet(): Boolean =
+        headers().any { header ->
             header.key() == "type" && String(header.value()) == "VedtakFattet"
         }
-    }
 
-    private fun ConsumerRecord<String, String>.erAnnullering(): Boolean {
-        return headers().any { header ->
+    private fun ConsumerRecord<String, String>.erAnnullering(): Boolean =
+        headers().any { header ->
             header.key() == "type" && String(header.value()) == "VedtakAnnullert"
         }
-    }
 }

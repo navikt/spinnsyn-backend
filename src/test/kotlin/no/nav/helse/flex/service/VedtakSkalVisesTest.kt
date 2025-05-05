@@ -37,8 +37,7 @@ class VedtakSkalVisesTest {
                     } else {
                         dag
                     }
-                }
-                .toList()
+                }.toList()
 
         sjekkDager(dager) shouldBeEqualTo "ArbeidsgiverperiodeMedArbeid"
     }
@@ -50,8 +49,7 @@ class VedtakSkalVisesTest {
                 .take(10)
                 .plus(
                     dagSequence("Arbeidsdag").take(1),
-                )
-                .toList()
+                ).toList()
 
         sjekkDager(dager) shouldBeEqualTo ""
     }

@@ -36,20 +36,18 @@ class TestKafkaConfig(
         ) + aivenKafkaConfig.commonConfig()
 
     @Bean
-    fun statusKafkaConsumer(): Consumer<String, String> {
-        return DefaultKafkaConsumerFactory(
+    fun statusKafkaConsumer(): Consumer<String, String> =
+        DefaultKafkaConsumerFactory(
             testConsumerProps("varsling-consumer"),
             StringDeserializer(),
             StringDeserializer(),
         ).createConsumer()
-    }
 
     @Bean
-    fun vedtakKafkaConsumer(): Consumer<String, String> {
-        return DefaultKafkaConsumerFactory(
+    fun vedtakKafkaConsumer(): Consumer<String, String> =
+        DefaultKafkaConsumerFactory(
             testConsumerProps("spinnsyn-consumer"),
             StringDeserializer(),
             StringDeserializer(),
         ).createConsumer()
-    }
 }

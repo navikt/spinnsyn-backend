@@ -38,7 +38,10 @@ data class VedtakDto(
     }
 }
 
-data class Dokument(val dokumentId: UUID, val type: Type) {
+data class Dokument(
+    val dokumentId: UUID,
+    val type: Type,
+) {
     enum class Type {
         Sykmelding,
         Søknad,

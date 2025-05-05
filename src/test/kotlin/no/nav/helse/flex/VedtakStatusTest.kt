@@ -136,17 +136,19 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(100)
     fun `mottar vedtak uten at status blir sendt da utbetaling ikke er mottatt`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak1.copy(
-                    utbetalingId = "VedtakFørst",
-                ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak1
+                        .copy(
+                            utbetalingId = "VedtakFørst",
+                        ).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).any { it.utbetalingId == "VedtakFørst" }
@@ -158,20 +160,23 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(101)
     fun `mottar utbetaling`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.copy(
-                    antallVedtak = 1,
-                    utbetalingId = "VedtakFørst",
-                ).serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling
+                        .copy(
+                            antallVedtak = 1,
+                            utbetalingId = "VedtakFørst",
+                        ).serialisertTilString(),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+            utbetalingRepository
+                .findUtbetalingDbRecordsByFnr(fnr)
                 .firstOrNull {
                     it.utbetalingId == "VedtakFørst"
                 } != null
@@ -244,17 +249,19 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(200)
     fun `mottar utbetaling uten at status blir sendt da vedtaket ikke er mottatt`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.copy(
-                    antallVedtak = 1,
-                    utbetalingId = "UtbetalingFørst",
-                ).serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling
+                        .copy(
+                            antallVedtak = 1,
+                            utbetalingId = "UtbetalingFørst",
+                        ).serialisertTilString(),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).firstOrNull {
@@ -268,17 +275,19 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(201)
     fun `mottar vedtak`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak1.copy(
-                    utbetalingId = "UtbetalingFørst",
-                ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak1
+                        .copy(
+                            utbetalingId = "UtbetalingFørst",
+                        ).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).any { it.utbetalingId == "UtbetalingFørst" }
@@ -329,17 +338,19 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(300)
     fun `mottar ett av to vedtak uten at status blir sendt`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak1.copy(
-                    utbetalingId = "EnAvTo",
-                ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak1
+                        .copy(
+                            utbetalingId = "EnAvTo",
+                        ).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).any { it.utbetalingId == "EnAvTo" }
@@ -351,17 +362,19 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(301)
     fun `mottar utbetaling men mangler fortsatt ett vedtak så ingen status sendes`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.copy(
-                    utbetalingId = "EnAvTo",
-                    antallVedtak = 2,
-                ).serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling
+                        .copy(
+                            utbetalingId = "EnAvTo",
+                            antallVedtak = 2,
+                        ).serialisertTilString(),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).firstOrNull {
@@ -375,20 +388,23 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(302)
     fun `mottar det siste vedtaket`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak2.copy(
-                    utbetalingId = "EnAvTo",
-                ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak2
+                        .copy(
+                            utbetalingId = "EnAvTo",
+                        ).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
-            vedtakRepository.findVedtakDbRecordsByFnr(fnr)
+            vedtakRepository
+                .findVedtakDbRecordsByFnr(fnr)
                 .filter { it.utbetalingId == "EnAvTo" }
                 .size == 2
         }
@@ -422,37 +438,41 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(400)
     fun `vedtakWrapper der det er ingen dager hvor NAV har vært involvert`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.copy(
-                    utbetalingId = "Arbeidsgiverperiode",
-                    antallVedtak = 1,
-                    utbetalingsdager =
-                        listOf(
-                            UtbetalingUtbetalt.UtbetalingdagDto(
-                                dato = now,
-                                type = "ArbeidsgiverperiodeDag",
-                                begrunnelser = emptyList(),
-                            ),
-                        ),
-                ).serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling
+                        .copy(
+                            utbetalingId = "Arbeidsgiverperiode",
+                            antallVedtak = 1,
+                            utbetalingsdager =
+                                listOf(
+                                    UtbetalingUtbetalt.UtbetalingdagDto(
+                                        dato = now,
+                                        type = "ArbeidsgiverperiodeDag",
+                                        begrunnelser = emptyList(),
+                                    ),
+                                ),
+                        ).serialisertTilString(),
+                ),
+            ).get()
 
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak1.copy(
-                    utbetalingId = "Arbeidsgiverperiode",
-                ).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak1
+                        .copy(
+                            utbetalingId = "Arbeidsgiverperiode",
+                        ).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.existsByUtbetalingId("Arbeidsgiverperiode") &&

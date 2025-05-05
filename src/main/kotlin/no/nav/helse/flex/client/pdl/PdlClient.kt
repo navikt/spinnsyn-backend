@@ -113,19 +113,21 @@ class PdlClient(
         return headers
     }
 
-    private fun requestToJson(graphQLRequest: Any): String {
-        return try {
+    private fun requestToJson(graphQLRequest: Any): String =
+        try {
             ObjectMapper().writeValueAsString(graphQLRequest)
         } catch (e: JsonProcessingException) {
             throw RuntimeException(e)
         }
-    }
 
-    private fun GetPersonResponse?.hentErrors(): String? {
-        return this?.errors?.map { it.message }?.joinToString(" - ")
-    }
+    private fun GetPersonResponse?.hentErrors(): String? = this?.errors?.map { it.message }?.joinToString(" - ")
 
-    data class GraphQLRequest(val query: String, val variables: Map<String, String>)
+    data class GraphQLRequest(
+        val query: String,
+        val variables: Map<String, String>,
+    )
 
-    class FunctionalPdlError(message: String) : RuntimeException(message)
+    class FunctionalPdlError(
+        message: String,
+    ) : RuntimeException(message)
 }

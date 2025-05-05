@@ -57,9 +57,8 @@ class MottaUtbetaling(
         log.info("Opprettet utbetaling med database id: ${utbetalingDB.id} og utbetaling id ${utbetalingDB.utbetalingId}")
     }
 
-    private fun ConsumerRecord<String, String>.erAnnullering(): Boolean {
-        return headers().any { header ->
+    private fun ConsumerRecord<String, String>.erAnnullering(): Boolean =
+        headers().any { header ->
             header.key() == "type" && String(header.value()) == "Annullering"
         }
-    }
 }

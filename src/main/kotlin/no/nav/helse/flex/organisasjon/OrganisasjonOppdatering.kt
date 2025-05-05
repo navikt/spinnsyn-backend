@@ -59,10 +59,7 @@ class OrganisasjonOppdatering(
     }
 }
 
-private fun SykepengesoknadDTO.harArbeidsgiver(): Boolean {
-    return this.arbeidsgiver?.orgnummer?.isNotBlank() ?: false && this.arbeidsgiver?.navn?.isNotBlank() ?: false
-}
+private fun SykepengesoknadDTO.harArbeidsgiver(): Boolean =
+    this.arbeidsgiver?.orgnummer?.isNotBlank() ?: false && this.arbeidsgiver?.navn?.isNotBlank() ?: false
 
-private fun SykepengesoknadDTO.erNy(): Boolean {
-    return this.status == SoknadsstatusDTO.NY
-}
+private fun SykepengesoknadDTO.erNy(): Boolean = this.status == SoknadsstatusDTO.NY

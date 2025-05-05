@@ -71,10 +71,11 @@ class SendVedtakStatus(
             val fnr = ut.fnr
             val utbetalingId = ut.utbetalingId
             val vedtakWrapper =
-                vedtakService.hentVedtak(
-                    fnr = fnr,
-                    hentSomBruker = false,
-                ).first { it.id == id }
+                vedtakService
+                    .hentVedtak(
+                        fnr = fnr,
+                        hentSomBruker = false,
+                    ).first { it.id == id }
 
             val skalIkkeVisesFordi = sjekkDager(vedtakWrapper.dagerArbeidsgiver + vedtakWrapper.dagerPerson)
             if (skalIkkeVisesFordi.isNotBlank()) {

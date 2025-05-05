@@ -11,4 +11,7 @@ interface Periode {
             (this.tom <= andre.tom && this.tom >= andre.fom)
 }
 
-class PeriodeImpl(override val fom: LocalDate, override val tom: LocalDate) : Periode
+class PeriodeImpl(
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+) : Periode

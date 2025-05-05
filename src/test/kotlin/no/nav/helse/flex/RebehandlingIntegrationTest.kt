@@ -89,22 +89,26 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
     @Test
     @Order(1)
     fun `mottar vedtak`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val hentetVedtak = vedtakRepository.findVedtakDbRecordsByFnr(fnr).first()
-        hentetVedtak.vedtak.tilVedtakFattetForEksternDto().fødselsnummer.shouldBeEqualTo(fnr)
+        hentetVedtak.vedtak
+            .tilVedtakFattetForEksternDto()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak.utbetalingId)
     }
 
@@ -117,21 +121,25 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
     @Test
     @Order(3)
     fun `mottar utbetaling`() {
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling.serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).isNotEmpty()
         }
 
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first()
-        dbUtbetaling.utbetaling.tilUtbetalingUtbetalt().fødselsnummer.shouldBeEqualTo(fnr)
+        dbUtbetaling.utbetaling
+            .tilUtbetalingUtbetalt()
+            .fødselsnummer
+            .shouldBeEqualTo(fnr)
         dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
         dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
     }
@@ -141,33 +149,37 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
     fun `finner vedtaket `() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
-        vedtak.first().vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
+        vedtak
+            .first()
+            .vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
     }
 
     @Test
     @Order(5)
     fun `mottar en revurdering på vedtaket`() {
         val utbetalingsid = UUID.randomUUID().toString()
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling
-                    .copy(utbetalingId = utbetalingsid, type = "REVURDERING")
-                    .serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling
+                        .copy(utbetalingId = utbetalingsid, type = "REVURDERING")
+                        .serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).size == 2
@@ -196,26 +208,28 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
     @Order(7)
     fun `mottar en revurdering på revurderinga`() {
         val utbetalingsid = UUID.randomUUID().toString()
-        kafkaProducer.send(
-            ProducerRecord(
-                VEDTAK_TOPIC,
-                null,
-                fnr,
-                vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString(),
-                listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    VEDTAK_TOPIC,
+                    null,
+                    fnr,
+                    vedtak.copy(utbetalingId = utbetalingsid).serialisertTilString(),
+                    listOf(RecordHeader("type", "VedtakFattet".toByteArray())),
+                ),
+            ).get()
 
-        kafkaProducer.send(
-            ProducerRecord(
-                UTBETALING_TOPIC,
-                null,
-                fnr,
-                utbetaling
-                    .copy(utbetalingId = utbetalingsid, type = "REVURDERING")
-                    .serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    UTBETALING_TOPIC,
+                    null,
+                    fnr,
+                    utbetaling
+                        .copy(utbetalingId = utbetalingsid, type = "REVURDERING")
+                        .serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(5, TimeUnit.SECONDS).until {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).size == 3
