@@ -165,6 +165,7 @@ class BrukerVedtak(
                 vedtak =
                     RSVedtak(
                         organisasjonsnummer = vedtaket.organisasjonsnummer,
+                        yrkesaktivitetstype = vedtaket.yrkesaktivitetstype ?: "ARBEIDSTAKER",
                         dokumenter = vedtakForUtbetaling.flatMap { it.dokumenter },
                         sykepengegrunnlag = vedtaket.sykepengegrunnlag,
                         inntekt = vedtaket.inntekt,

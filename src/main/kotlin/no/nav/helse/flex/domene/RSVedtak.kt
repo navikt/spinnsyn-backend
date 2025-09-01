@@ -29,6 +29,7 @@ data class RSVedtakWrapper(
 
 data class RSVedtak(
     val organisasjonsnummer: String,
+    val yrkesaktivitetstype: String,
     override val fom: LocalDate,
     override val tom: LocalDate,
     val dokumenter: List<Dokument>,

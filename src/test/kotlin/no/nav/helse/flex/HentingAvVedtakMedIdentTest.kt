@@ -96,6 +96,7 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = org,
+            yrkesaktivitetstype = null,
             fom = dato,
             tom = dato.plusDays(5),
             skjæringstidspunkt = dato,

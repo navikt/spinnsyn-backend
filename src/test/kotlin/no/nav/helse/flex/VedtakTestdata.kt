@@ -14,6 +14,7 @@ val vedtakTestdata =
         vedtak =
             RSVedtak(
                 organisasjonsnummer = "5678",
+                yrkesaktivitetstype = "ARBEIDSTAKER",
                 fom = LocalDate.now(),
                 tom = LocalDate.now(),
                 dokumenter = emptyList(),

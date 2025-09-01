@@ -44,6 +44,7 @@ class AnnulleringVedtakTopicVerdikjedeTest : FellesTestOppsett() {
             fødselsnummer = fnr,
             aktørId = fnr,
             organisasjonsnummer = org,
+            yrkesaktivitetstype = null,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = fom,
