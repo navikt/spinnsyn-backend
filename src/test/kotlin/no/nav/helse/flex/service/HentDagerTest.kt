@@ -4,6 +4,7 @@ import no.nav.helse.flex.domene.RSDag
 import no.nav.helse.flex.domene.RSOppdrag
 import no.nav.helse.flex.domene.RSUtbetalingdag
 import no.nav.helse.flex.domene.RSUtbetalingslinje
+import no.nav.helse.flex.util.hentDager
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
