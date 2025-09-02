@@ -49,6 +49,7 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = org,
+            yrkesaktivitetstype = null,
             fom = now,
             tom = now,
             skjæringstidspunkt = now,

@@ -36,6 +36,7 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = org,
+            yrkesaktivitetstype = null,
             fom = fom,
             tom = tom,
             skjæringstidspunkt = fom,

@@ -9,6 +9,7 @@ data class VedtakFattetForEksternDto(
     val fødselsnummer: String,
     val aktørId: String,
     val organisasjonsnummer: String,
+    val yrkesaktivitetstype: String?,
     val fom: LocalDate,
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
