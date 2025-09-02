@@ -6,7 +6,7 @@ import no.nav.helse.flex.domene.RSVedtakWrapper
 import java.time.Instant
 import java.time.LocalDate
 
-val vedtakTestdata =
+fun vedtakTestdata(yrkesaktivitetstype: String = "ARBEIDSTAKER") =
     RSVedtakWrapper(
         id = "1",
         lest = false,
@@ -14,7 +14,7 @@ val vedtakTestdata =
         vedtak =
             RSVedtak(
                 organisasjonsnummer = "5678",
-                yrkesaktivitetstype = "ARBEIDSTAKER",
+                yrkesaktivitetstype = yrkesaktivitetstype,
                 fom = LocalDate.now(),
                 tom = LocalDate.now(),
                 dokumenter = emptyList(),

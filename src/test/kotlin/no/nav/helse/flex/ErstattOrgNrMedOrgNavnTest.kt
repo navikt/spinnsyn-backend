@@ -27,7 +27,7 @@ class ErstattOrgNrMedOrgNavnTest : FellesTestOppsett() {
 
         organisasjonRepository.saveAll(mutableListOf(org1))
 
-        val orgMap = leggTilOrganisasjonnavn.leggTilAndreArbeidsgivere(vedtakene = listOf(vedtakTestdata))
+        val orgMap = leggTilOrganisasjonnavn.leggTilAndreArbeidsgivere(vedtakene = listOf(vedtakTestdata()))
         orgMap[0].andreArbeidsgivere `should be equal to`
             mapOf(
                 "Organisasjon nr 1" to 500000.0,
