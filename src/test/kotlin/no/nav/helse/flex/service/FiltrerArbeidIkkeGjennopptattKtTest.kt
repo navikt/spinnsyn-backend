@@ -12,14 +12,14 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
     @Test
     fun `fjerner arbeid ikke gjenopptatt dager`() {
         val vedtakMedDager =
-            vedtakTestdata.copy(
+            vedtakTestdata().copy(
                 dagerPerson =
                     listOf(
                         rSDag(5, "ArbeidIkkeGjenopptattDag"),
                         rSDag(4, "ArbeidIkkeGjenopptattDag"),
                         rSDag(3, "NAVDag"),
                     ),
-                vedtak = vedtakTestdata.vedtak.copy(fom = LocalDate.now().minusDays(5)),
+                vedtak = vedtakTestdata().vedtak.copy(fom = LocalDate.now().minusDays(5)),
             )
 
         val vedtakUtenArbeidIkkeGjenopptattDager = vedtakMedDager.fjernArbeidIkkeGjenopptattDager()
@@ -30,14 +30,14 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
     @Test
     fun `fjerner ikke vanlige dager`() {
         val vedtakMedDager =
-            vedtakTestdata.copy(
+            vedtakTestdata().copy(
                 dagerPerson =
                     listOf(
                         rSDag(5, "NAVDag"),
                         rSDag(4, "NAVDag"),
                         rSDag(3, "NAVDag"),
                     ),
-                vedtak = vedtakTestdata.vedtak.copy(fom = LocalDate.now().minusDays(5)),
+                vedtak = vedtakTestdata().vedtak.copy(fom = LocalDate.now().minusDays(5)),
             )
 
         val vedtakUtenArbeidIkkeGjenopptattDager = vedtakMedDager.fjernArbeidIkkeGjenopptattDager()
