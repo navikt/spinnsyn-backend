@@ -46,7 +46,6 @@ data class UtbetalingUtbetalt(
         val type: String,
         val begrunnelser: List<Begrunnelse>,
     ) {
-        @Suppress("unused")
         enum class Begrunnelse {
             SykepengedagerOppbrukt,
             SykepengedagerOppbruktOver67,
