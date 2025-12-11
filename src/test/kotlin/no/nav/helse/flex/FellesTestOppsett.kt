@@ -29,12 +29,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.client.RestTemplate
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 import java.util.*
 
-private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
+private class PostgreSQLContainer14 : PostgreSQLContainer("postgres:14-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnableMockOAuth2Server
