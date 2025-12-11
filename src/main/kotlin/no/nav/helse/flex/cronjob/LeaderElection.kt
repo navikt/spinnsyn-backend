@@ -14,7 +14,7 @@ import java.net.InetAddress
 @Component
 class LeaderElection(
     private val plainTextUtf8RestTemplate: RestTemplate,
-    @Value("\${elector.path}") private val electorPath: String,
+    @param:Value("\${elector.path}") private val electorPath: String,
 ) {
     val log = logger()
 

@@ -22,9 +22,9 @@ class VedtakBrukerController(
     val vedtakService: BrukerVedtak,
     val tokenValidationContextHolder: TokenValidationContextHolder,
     val brukerVedtak: BrukerVedtak,
-    @Value("\${SPINNSYN_FRONTEND_CLIENT_ID}")
+    @param:Value("\${SPINNSYN_FRONTEND_CLIENT_ID}")
     val spinnsynFrontendClientId: String,
-    @Value("\${DITT_SYKEFRAVAER_CLIENT_ID}")
+    @param:Value("\${DITT_SYKEFRAVAER_CLIENT_ID}")
     val dittSykefravaerClientId: String,
 ) {
     @GetMapping("/vedtak", produces = [APPLICATION_JSON_VALUE])
