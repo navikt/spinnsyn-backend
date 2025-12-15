@@ -44,6 +44,8 @@ data class RSVedtak(
     val sykepengegrunnlagsfakta: JsonNode?,
     val begrunnelser: List<Begrunnelse>?,
     val tags: List<String>?,
+    val saksbehandler: Saksbehandler? = null,
+    val beslutter: Saksbehandler? = null,
 ) : Periode
 
 data class RSUtbetalingUtbetalt(

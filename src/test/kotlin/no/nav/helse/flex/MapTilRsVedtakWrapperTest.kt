@@ -3,6 +3,7 @@ package no.nav.helse.flex
 import no.nav.helse.flex.db.Annullering
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.VedtakDbRecord
+import no.nav.helse.flex.domene.Saksbehandler
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.service.BrukerVedtak
@@ -115,6 +116,14 @@ class MapTilRsVedtakWrapperTest {
             grunnlagForSykepengegrunnlagPerArbeidsgiver shouldBeEqualTo grunnlagPerArbeidsgiver
             begrensning shouldBeEqualTo "ER_6G_BEGRENSET"
             vedtakFattetTidspunkt shouldBeEqualTo LocalDate.of(2024, 2, 1)
+            saksbehandler.shouldNotBeNull().let {
+                it.navn shouldBeEqualTo "Saksbehandler"
+                it.ident shouldBeEqualTo "ident-saksbehandler"
+            }
+            beslutter.shouldNotBeNull().let {
+                it.navn shouldBeEqualTo "Beslutter"
+                it.ident shouldBeEqualTo "ident-beslutter"
+            }
         }
     }
 
@@ -164,6 +173,16 @@ class MapTilRsVedtakWrapperTest {
         begrensning = begrensning,
         utbetalingId = "test-utbetaling-123",
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+        saksbehandler =
+            Saksbehandler(
+                navn = "Saksbehandler",
+                ident = "ident-saksbehandler",
+            ),
+        beslutter =
+            Saksbehandler(
+                navn = "Beslutter",
+                ident = "ident-beslutter",
+            ),
     )
 
     private fun lagUtbetalingDbRecord(
