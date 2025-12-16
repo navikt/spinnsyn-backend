@@ -145,6 +145,8 @@ class BrukerVedtak(
                             arbeidsgiverOppdrag = utbetalingen.arbeidsgiverOppdrag?.tilRsOppdrag(),
                             personOppdrag = utbetalingen.personOppdrag?.tilRsOppdrag(),
                         ),
+                    saksbehandler = vedtaket.saksbehandler,
+                    beslutter = vedtaket.beslutter,
                 ),
         )
     }

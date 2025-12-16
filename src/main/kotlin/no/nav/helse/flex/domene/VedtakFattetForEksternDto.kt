@@ -25,12 +25,19 @@ data class VedtakFattetForEksternDto(
     val sykepengegrunnlagsfakta: JsonNode? = null,
     val begrunnelser: List<Begrunnelse>? = null,
     val tags: List<String>? = null,
+    val saksbehandler: Saksbehandler? = null,
+    val beslutter: Saksbehandler? = null,
 )
 
 data class Begrunnelse(
     val type: String,
     val begrunnelse: String,
     val perioder: List<PeriodeImpl>,
+)
+
+data class Saksbehandler(
+    val navn: String,
+    val ident: String,
 )
 
 fun String.tilVedtakFattetForEksternDto(): VedtakFattetForEksternDto = objectMapper.readValue(this)
