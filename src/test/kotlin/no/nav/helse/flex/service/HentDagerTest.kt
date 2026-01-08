@@ -370,4 +370,38 @@ class HentDagerTest {
             ),
         )
     }
+
+    @Test
+    fun `Grad skal bevares selv når utbetalingslinje har 0 stønadsdager`() {
+        hentDager(
+            fom = mandag.plusDays(0),
+            tom = mandag.plusDays(2),
+            oppdragDto =
+                RSOppdrag(
+                    utbetalingslinjer =
+                        listOf(
+                            RSUtbetalingslinje(
+                                fom = mandag.plusDays(0),
+                                tom = mandag.plusDays(2),
+                                dagsats = 0,
+                                totalbeløp = 0,
+                                grad = 80.0,
+                                stønadsdager = 0,
+                            ),
+                        ),
+                ),
+            utbetalingsdager =
+                listOf(
+                    RSUtbetalingdag(mandag.plusDays(0), "NavDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(1), "NavDag", emptyList()),
+                    RSUtbetalingdag(mandag.plusDays(2), "NavDag", emptyList()),
+                ),
+        ).shouldBeEqualTo(
+            listOf(
+                RSDag(mandag.plusDays(0), 0, 80.0, "NavDagDelvisSyk", emptyList()),
+                RSDag(mandag.plusDays(1), 0, 80.0, "NavDagDelvisSyk", emptyList()),
+                RSDag(mandag.plusDays(2), 0, 80.0, "NavDagDelvisSyk", emptyList()),
+            ),
+        )
+    }
 }
