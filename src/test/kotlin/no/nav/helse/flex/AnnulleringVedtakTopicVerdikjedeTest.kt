@@ -1,10 +1,10 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.UtbetalingUtbetalt
-import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
+import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
+import no.nav.helse.flex.testdata.lagUtbetaling
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldHaveSize
@@ -59,36 +59,14 @@ class AnnulleringVedtakTopicVerdikjedeTest : FellesTestOppsett() {
         )
 
     val utbetaling =
-        UtbetalingUtbetalt(
+        lagUtbetaling(
             fødselsnummer = fnr,
             aktørId = fnr,
             organisasjonsnummer = org,
             fom = fom,
             tom = tom,
             utbetalingId = utbetalingId,
-            antallVedtak = 1,
-            event = "eventet",
-            forbrukteSykedager = 42,
-            gjenståendeSykedager = 3254,
-            foreløpigBeregnetSluttPåSykepenger = null,
-            automatiskBehandling = true,
-            arbeidsgiverOppdrag =
-                UtbetalingUtbetalt.OppdragDto(
-                    mottaker = org,
-                    fagområde = "SP",
-                    fagsystemId = "1234",
-                    nettoBeløp = 123,
-                    utbetalingslinjer = emptyList(),
-                ),
-            type = "UTBETALING",
-            utbetalingsdager =
-                listOf(
-                    UtbetalingUtbetalt.UtbetalingdagDto(
-                        dato = fom,
-                        type = "AvvistDag",
-                        begrunnelser = listOf(MinimumSykdomsgrad),
-                    ),
-                ),
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
         )
     val vedtakAnnullertDto =
         VedtakAnnullertDto(

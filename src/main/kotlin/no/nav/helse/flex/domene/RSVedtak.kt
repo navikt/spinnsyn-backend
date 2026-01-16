@@ -80,6 +80,9 @@ data class RSUtbetalingdag(
     val dato: LocalDate,
     val type: String,
     val begrunnelser: List<String>,
+    val beløpTilArbeidsgiver: Int? = null,
+    val beløpTilSykmeldt: Int? = null,
+    val sykdomsgrad: Int? = null,
 )
 
 data class RSDag(
