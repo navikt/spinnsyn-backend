@@ -4,40 +4,54 @@ import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import java.time.LocalDate
 
 fun lagUtbetaling(
-    fnr: String,
-    org: String,
+    event: String = "eventet",
+    utbetalingId: String = "utbetalingId",
+    fødselsnummer: String = "fnr",
+    aktørId: String = "fnr",
+    organisasjonsnummer: String = "org",
     fom: LocalDate,
     tom: LocalDate,
-    utbetalingId: String,
+    forbrukteSykedager: Int = 42,
+    stønadsdager: Int? = null,
+    antallVedtak: Int? = 1,
+    foreløpigBeregnetSluttPåSykepenger: LocalDate? = null,
+    gjenståendeSykedager: Int = 3254,
+    automatiskBehandling: Boolean = true,
+    arbeidsgiverOppdrag: UtbetalingUtbetalt.OppdragDto? =
+        UtbetalingUtbetalt.OppdragDto(
+            mottaker = organisasjonsnummer,
+            fagområde = "SP",
+            fagsystemId = "1234",
+            nettoBeløp = 123,
+            utbetalingslinjer = emptyList(),
+        ),
+    personOppdrag: UtbetalingUtbetalt.OppdragDto? = null,
+    type: String = "UTBETALING",
+    utbetalingsdager: List<UtbetalingUtbetalt.UtbetalingdagDto> =
+        listOf(
+            UtbetalingUtbetalt.UtbetalingdagDto(
+                dato = fom,
+                type = "AvvistDag",
+                begrunnelser = listOf(UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad),
+            ),
+        ),
 ): UtbetalingUtbetalt =
     UtbetalingUtbetalt(
-        fødselsnummer = fnr,
-        aktørId = fnr,
-        organisasjonsnummer = org,
+        event = event,
+        utbetalingId = utbetalingId,
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        organisasjonsnummer = organisasjonsnummer,
         fom = fom,
         tom = tom,
-        utbetalingId = utbetalingId,
-        antallVedtak = 1,
-        event = "eventet",
-        forbrukteSykedager = 42,
-        gjenståendeSykedager = 3254,
-        foreløpigBeregnetSluttPåSykepenger = null,
-        automatiskBehandling = true,
-        arbeidsgiverOppdrag =
-            UtbetalingUtbetalt.OppdragDto(
-                mottaker = org,
-                fagområde = "SP",
-                fagsystemId = "1234",
-                nettoBeløp = 123,
-                utbetalingslinjer = emptyList(),
-            ),
-        type = "UTBETALING",
-        utbetalingsdager =
-            listOf(
-                UtbetalingUtbetalt.UtbetalingdagDto(
-                    dato = fom,
-                    type = "AvvistDag",
-                    begrunnelser = listOf(UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad),
-                ),
-            ),
+        forbrukteSykedager = forbrukteSykedager,
+        stønadsdager = stønadsdager,
+        antallVedtak = antallVedtak,
+        foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger,
+        gjenståendeSykedager = gjenståendeSykedager,
+        automatiskBehandling = automatiskBehandling,
+        arbeidsgiverOppdrag = arbeidsgiverOppdrag,
+        personOppdrag = personOppdrag,
+        type = type,
+        utbetalingsdager = utbetalingsdager,
     )

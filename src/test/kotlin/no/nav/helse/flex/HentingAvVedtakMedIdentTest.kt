@@ -48,9 +48,30 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
     val vedtak2 = lagVedtak(fnr2, aktørId, org, now.plusDays(1), utbetalingId2)
     val vedtak3 = lagVedtak(fnr3, aktørId, org, now.plusDays(2), utbetalingId3)
 
-    val utbetaling1 = lagUtbetaling(fnr1, org, fom, tom, utbetalingId1)
-    val utbetaling2 = lagUtbetaling(fnr2, org, fom.plusDays(1), tom.plusDays(1), utbetalingId2)
-    val utbetaling3 = lagUtbetaling(fnr3, org, fom.plusDays(2), tom.plusDays(2), utbetalingId3)
+    val utbetaling1 =
+        lagUtbetaling(
+            fødselsnummer = fnr1,
+            organisasjonsnummer = org,
+            fom = fom,
+            tom = tom,
+            utbetalingId = utbetalingId1,
+        )
+    val utbetaling2 =
+        lagUtbetaling(
+            fødselsnummer = fnr2,
+            organisasjonsnummer = org,
+            fom = fom.plusDays(1),
+            tom = tom.plusDays(1),
+            utbetalingId = utbetalingId2,
+        )
+    val utbetaling3 =
+        lagUtbetaling(
+            fødselsnummer = fnr3,
+            organisasjonsnummer = org,
+            fom = fom.plusDays(2),
+            tom = tom.plusDays(2),
+            utbetalingId = utbetalingId3,
+        )
 
     @Test
     @Order(1)
