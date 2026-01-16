@@ -6,7 +6,9 @@ import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.service.IdentService
+import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
+import no.nav.helse.flex.testdata.lagUtbetalingdag
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldHaveSize
 import org.amshove.kluent.shouldNotBeNull
@@ -55,6 +57,8 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
             fom = fom,
             tom = tom,
             utbetalingId = utbetalingId1,
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
+            utbetalingsdager = listOf(lagUtbetalingdag(dato = fom)),
         )
     val utbetaling2 =
         lagUtbetaling(
@@ -63,6 +67,8 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
             fom = fom.plusDays(1),
             tom = tom.plusDays(1),
             utbetalingId = utbetalingId2,
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
+            utbetalingsdager = listOf(lagUtbetalingdag(dato = fom)),
         )
     val utbetaling3 =
         lagUtbetaling(
@@ -71,6 +77,8 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
             fom = fom.plusDays(2),
             tom = tom.plusDays(2),
             utbetalingId = utbetalingId3,
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
+            utbetalingsdager = listOf(lagUtbetalingdag(dato = fom)),
         )
 
     @Test

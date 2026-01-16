@@ -12,29 +12,15 @@ fun lagUtbetaling(
     fom: LocalDate,
     tom: LocalDate,
     forbrukteSykedager: Int = 42,
+    gjenståendeSykedager: Int = 3254,
+    utbetalingsdager: List<UtbetalingUtbetalt.UtbetalingdagDto> = listOf(lagUtbetalingdag(dato = fom)),
+    type: String = "UTBETALING",
     stønadsdager: Int? = null,
     antallVedtak: Int? = 1,
     foreløpigBeregnetSluttPåSykepenger: LocalDate? = null,
-    gjenståendeSykedager: Int = 3254,
     automatiskBehandling: Boolean = true,
-    arbeidsgiverOppdrag: UtbetalingUtbetalt.OppdragDto? =
-        UtbetalingUtbetalt.OppdragDto(
-            mottaker = organisasjonsnummer,
-            fagområde = "SP",
-            fagsystemId = "1234",
-            nettoBeløp = 123,
-            utbetalingslinjer = emptyList(),
-        ),
+    arbeidsgiverOppdrag: UtbetalingUtbetalt.OppdragDto? = null,
     personOppdrag: UtbetalingUtbetalt.OppdragDto? = null,
-    type: String = "UTBETALING",
-    utbetalingsdager: List<UtbetalingUtbetalt.UtbetalingdagDto> =
-        listOf(
-            UtbetalingUtbetalt.UtbetalingdagDto(
-                dato = fom,
-                type = "AvvistDag",
-                begrunnelser = listOf(UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad),
-            ),
-        ),
 ): UtbetalingUtbetalt =
     UtbetalingUtbetalt(
         event = event,
@@ -54,4 +40,62 @@ fun lagUtbetaling(
         personOppdrag = personOppdrag,
         type = type,
         utbetalingsdager = utbetalingsdager,
+    )
+
+fun lagArbeidsgiverOppdrag(
+    mottaker: String = "org",
+    fagområde: String = "SP",
+    fagsystemId: String = "1234",
+    nettoBeløp: Int = 123,
+    utbetalingslinjer: List<UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto> = emptyList(),
+): UtbetalingUtbetalt.OppdragDto =
+    UtbetalingUtbetalt.OppdragDto(
+        mottaker = mottaker,
+        fagområde = fagområde,
+        fagsystemId = fagsystemId,
+        nettoBeløp = nettoBeløp,
+        utbetalingslinjer = utbetalingslinjer,
+    )
+
+fun lagPersonOppdrag(
+    mottaker: String = "fnr",
+    fagområde: String = "SP",
+    fagsystemId: String = "1234",
+    nettoBeløp: Int = 123,
+    utbetalingslinjer: List<UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto> = emptyList(),
+): UtbetalingUtbetalt.OppdragDto =
+    UtbetalingUtbetalt.OppdragDto(
+        mottaker = mottaker,
+        fagområde = fagområde,
+        fagsystemId = fagsystemId,
+        nettoBeløp = nettoBeløp,
+        utbetalingslinjer = utbetalingslinjer,
+    )
+
+fun lagUtbetalingslinje(
+    fom: LocalDate,
+    tom: LocalDate,
+    dagsats: Int = 123,
+    totalbeløp: Int = 738,
+    grad: Double = 100.0,
+    stønadsdager: Int = 6,
+): UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto =
+    UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto(
+        fom = fom,
+        tom = tom,
+        dagsats = dagsats,
+        totalbeløp = totalbeløp,
+        grad = grad,
+        stønadsdager = stønadsdager,
+    )
+
+fun lagUtbetalingdag(
+    dato: LocalDate,
+    type: String = "AvvistDag",
+    begrunnelser: List<UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse> = emptyList(),
+): UtbetalingUtbetalt.UtbetalingdagDto =
+    UtbetalingUtbetalt.UtbetalingdagDto(
+        dato = dato,
+        type = type,
+        begrunnelser = begrunnelser,
     )
