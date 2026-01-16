@@ -79,29 +79,44 @@ fun hentDager(
             // Oppdaterer dager med dagtype og begrunnelser
             .map { (dag, utbetalingsdagen) ->
                 when (utbetalingsdagen) {
-                    null -> dag
-                    else ->
+                    null -> {
+                        dag
+                    }
+
+                    else -> {
                         dag.copy(
                             begrunnelser = utbetalingsdagen.begrunnelser,
                             dagtype =
                                 when (utbetalingsdagen.type) {
-                                    "NavDag" ->
+                                    "NavDag" -> {
                                         when {
                                             dag.grad < 100 -> "NavDagDelvisSyk"
                                             else -> "NavDagSyk"
                                         }
-                                    "ArbeidsgiverperiodeDag" ->
+                                    }
+
+                                    "ArbeidsgiverperiodeDag" -> {
                                         when {
                                             dag.belop == 0 -> "ArbeidsgiverperiodeDag"
-                                            dag.dato.dayOfWeek in helg -> "NavHelgDag" // NAV betaler ikke arbeidsgiverperiode i helg
-                                            dag.grad < 100 -> "NavDagDelvisSyk" // Vises som gradert syk
+
+                                            dag.dato.dayOfWeek in helg -> "NavHelgDag"
+
+                                            // NAV betaler ikke arbeidsgiverperiode i helg
+                                            dag.grad < 100 -> "NavDagDelvisSyk"
+
+                                            // Vises som gradert syk
                                             else -> "NavDagSyk" // Vises som 100% syk
                                         }
-                                    else -> utbetalingsdagen.type
+                                    }
+
+                                    else -> {
+                                        utbetalingsdagen.type
+                                    }
                                 },
                             belop = if (dag.dato.dayOfWeek in helg) 0 else dag.belop,
                             grad = if (dag.dato.dayOfWeek in helg) 0.0 else dag.grad,
                         )
+                    }
                 }
             }.toList()
 
@@ -199,4 +214,7 @@ fun UtbetalingUtbetalt.UtbetalingdagDto.tilRsUtbetalingsdag(): RSUtbetalingdag =
         dato = this.dato,
         type = this.type,
         begrunnelser = this.begrunnelser.map { it.toString() },
+        beløpTilArbeidsgiver = this.beløpTilArbeidsgiver,
+        beløpTilSykmeldt = this.beløpTilSykmeldt,
+        sykdomsgrad = this.sykdomsgrad,
     )
