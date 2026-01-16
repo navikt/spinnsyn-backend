@@ -1,12 +1,12 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.UtbetalingUtbetalt
-import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
+import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
+import no.nav.helse.flex.testdata.lagUtbetaling
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -55,36 +55,15 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
         )
 
     val utbetaling =
-        UtbetalingUtbetalt(
+        lagUtbetaling(
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = org,
             fom = now,
             tom = now,
             utbetalingId = utbetalingId,
-            event = "eventet",
             antallVedtak = 1,
-            forbrukteSykedager = 42,
-            foreløpigBeregnetSluttPåSykepenger = null,
-            gjenståendeSykedager = 3254,
-            automatiskBehandling = true,
-            arbeidsgiverOppdrag =
-                UtbetalingUtbetalt.OppdragDto(
-                    mottaker = org,
-                    fagområde = "SP",
-                    fagsystemId = "1234",
-                    nettoBeløp = 123,
-                    utbetalingslinjer = emptyList(),
-                ),
-            type = "UTBETALING",
-            utbetalingsdager =
-                listOf(
-                    UtbetalingUtbetalt.UtbetalingdagDto(
-                        dato = now,
-                        type = "AvvistDag",
-                        begrunnelser = listOf(MinimumSykdomsgrad),
-                    ),
-                ),
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
         )
 
     @Test

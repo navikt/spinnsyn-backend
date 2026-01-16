@@ -1,12 +1,14 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.UtbetalingUtbetalt
-import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
+import no.nav.helse.flex.testdata.lagPersonOppdrag
+import no.nav.helse.flex.testdata.lagUtbetaling
+import no.nav.helse.flex.testdata.lagUtbetalingdag
+import no.nav.helse.flex.testdata.lagUtbetalingslinje
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -51,7 +53,7 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
         )
 
     val utbetaling =
-        UtbetalingUtbetalt(
+        lagUtbetaling(
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = org,
@@ -59,71 +61,58 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
             tom = tom,
             utbetalingId = utbetalingId,
             antallVedtak = 1,
-            event = "eventet",
             forbrukteSykedager = 2,
             gjenståendeSykedager = 3254,
             foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
-            automatiskBehandling = true,
             personOppdrag =
-                UtbetalingUtbetalt.OppdragDto(
+                lagPersonOppdrag(
                     mottaker = org,
-                    fagområde = "SP",
-                    fagsystemId = "1234",
                     nettoBeløp = 738,
                     utbetalingslinjer =
                         listOf(
-                            UtbetalingUtbetalt.OppdragDto.UtbetalingslinjeDto(
-                                dagsats = 123,
+                            lagUtbetalingslinje(
                                 fom = fom,
                                 tom = tom,
+                                dagsats = 123,
+                                totalbeløp = 738,
                                 grad = 100.0,
                                 stønadsdager = 6,
-                                totalbeløp = 738,
                             ),
                         ),
                 ),
-            type = "UTBETALING",
             utbetalingsdager =
                 listOf(
-                    UtbetalingdagDto(
+                    lagUtbetalingdag(
                         dato = fom,
                         type = "ArbeidsgiverperiodeDag",
-                        begrunnelser = emptyList(),
                     ),
-                    UtbetalingdagDto(
+                    lagUtbetalingdag(
                         dato = fom.plusDays(1),
                         type = "ArbeidsgiverperiodeDag",
-                        begrunnelser = emptyList(),
                     ),
-                    UtbetalingdagDto(
+                    lagUtbetalingdag(
                         dato = fom.plusDays(2),
                         type = "ArbeidsgiverperiodeDag",
-                        begrunnelser = emptyList(),
                     ),
-                    UtbetalingdagDto(
+                    lagUtbetalingdag(
                         dato = fom.plusDays(3),
                         type = "ArbeidsgiverperiodeDag",
-                        begrunnelser = emptyList(),
                     ),
-                    UtbetalingdagDto(
+                    lagUtbetalingdag(
                         dato = fom.plusDays(4),
                         type = "ArbeidsgiverperiodeDag",
-                        begrunnelser = emptyList(),
                     ),
-                    UtbetalingdagDto(
+                    lagUtbetalingdag(
                         dato = fom.plusDays(5),
                         type = "ArbeidsgiverperiodeDag",
-                        begrunnelser = emptyList(),
                     ),
-                    UtbetalingdagDto(
+                    lagUtbetalingdag(
                         dato = fom.plusDays(6),
                         type = "NavDag",
-                        begrunnelser = emptyList(),
                     ),
-                    UtbetalingdagDto(
+                    lagUtbetalingdag(
                         dato = fom.plusDays(7),
                         type = "NavDag",
-                        begrunnelser = emptyList(),
                     ),
                 ),
         )

@@ -4,10 +4,11 @@ import no.nav.helse.flex.db.Annullering
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.VedtakDbRecord
 import no.nav.helse.flex.domene.Saksbehandler
-import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.service.BrukerVedtak
 import no.nav.helse.flex.service.IdentService
+import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
+import no.nav.helse.flex.testdata.lagUtbetaling
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.Test
@@ -215,7 +216,7 @@ class MapTilRsVedtakWrapperTest {
     )
 
     private fun lagUtbetalingUtbetalt() =
-        UtbetalingUtbetalt(
+        lagUtbetaling(
             fødselsnummer = "12345678901",
             aktørId = "1234567890123",
             organisasjonsnummer = "123456789",
@@ -227,14 +228,12 @@ class MapTilRsVedtakWrapperTest {
             forbrukteSykedager = 10,
             gjenståendeSykedager = 238,
             foreløpigBeregnetSluttPåSykepenger = LocalDate.now().plusDays(238),
-            automatiskBehandling = true,
             arbeidsgiverOppdrag =
-                UtbetalingUtbetalt.OppdragDto(
+                lagArbeidsgiverOppdrag(
                     mottaker = "123456789",
                     fagområde = "SPREF",
                     fagsystemId = "fagsystem-123",
                     nettoBeløp = 15000,
-                    utbetalingslinjer = emptyList(),
                 ),
             type = "UTBETALING",
             utbetalingsdager = emptyList(),
