@@ -93,9 +93,15 @@ fun lagUtbetalingdag(
     dato: LocalDate,
     type: String = "AvvistDag",
     begrunnelser: List<UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse> = emptyList(),
+    beløpTilArbeidsgiver: Int = 123,
+    beløpTilSykmeldt: Int = 123,
+    sykdomsgrad: Int = 100,
 ): UtbetalingUtbetalt.UtbetalingdagDto =
     UtbetalingUtbetalt.UtbetalingdagDto(
         dato = dato,
         type = type,
         begrunnelser = begrunnelser,
+        beløpTilArbeidsgiver = beløpTilArbeidsgiver,
+        beløpTilSykmeldt = beløpTilSykmeldt,
+        sykdomsgrad = sykdomsgrad,
     )

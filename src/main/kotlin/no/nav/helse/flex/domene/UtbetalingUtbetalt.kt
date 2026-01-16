@@ -45,6 +45,9 @@ data class UtbetalingUtbetalt(
         val dato: LocalDate,
         val type: String,
         val begrunnelser: List<Begrunnelse>,
+        val beløpTilArbeidsgiver: Int? = null,
+        val beløpTilSykmeldt: Int? = null,
+        val sykdomsgrad: Int? = null,
     ) {
         enum class Begrunnelse {
             SykepengedagerOppbrukt,
