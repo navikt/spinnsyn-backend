@@ -6,6 +6,9 @@ import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.service.IdentService
+import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
+import no.nav.helse.flex.testdata.lagUtbetaling
+import no.nav.helse.flex.testdata.lagUtbetalingdag
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldHaveSize
 import org.amshove.kluent.shouldNotBeNull
@@ -47,9 +50,36 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
     val vedtak2 = lagVedtak(fnr2, aktørId, org, now.plusDays(1), utbetalingId2)
     val vedtak3 = lagVedtak(fnr3, aktørId, org, now.plusDays(2), utbetalingId3)
 
-    val utbetaling1 = lagUtbetaling(fnr1, org, fom, tom, utbetalingId1)
-    val utbetaling2 = lagUtbetaling(fnr2, org, fom.plusDays(1), tom.plusDays(1), utbetalingId2)
-    val utbetaling3 = lagUtbetaling(fnr3, org, fom.plusDays(2), tom.plusDays(2), utbetalingId3)
+    val utbetaling1 =
+        lagUtbetaling(
+            fødselsnummer = fnr1,
+            organisasjonsnummer = org,
+            fom = fom,
+            tom = tom,
+            utbetalingId = utbetalingId1,
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
+            utbetalingsdager = listOf(lagUtbetalingdag(dato = fom)),
+        )
+    val utbetaling2 =
+        lagUtbetaling(
+            fødselsnummer = fnr2,
+            organisasjonsnummer = org,
+            fom = fom.plusDays(1),
+            tom = tom.plusDays(1),
+            utbetalingId = utbetalingId2,
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
+            utbetalingsdager = listOf(lagUtbetalingdag(dato = fom)),
+        )
+    val utbetaling3 =
+        lagUtbetaling(
+            fødselsnummer = fnr3,
+            organisasjonsnummer = org,
+            fom = fom.plusDays(2),
+            tom = tom.plusDays(2),
+            utbetalingId = utbetalingId3,
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
+            utbetalingsdager = listOf(lagUtbetalingdag(dato = fom)),
+        )
 
     @Test
     @Order(1)
@@ -140,43 +170,4 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
             utbetalingRepository.findUtbetalingDbRecordsByFnr(this.fødselsnummer).isNotEmpty()
         }
     }
-
-    private fun lagUtbetaling(
-        fnr: String,
-        org: String,
-        fom: LocalDate,
-        tom: LocalDate,
-        utbetalingId: String,
-    ): UtbetalingUtbetalt =
-        UtbetalingUtbetalt(
-            fødselsnummer = fnr,
-            aktørId = fnr,
-            organisasjonsnummer = org,
-            fom = fom,
-            tom = tom,
-            utbetalingId = utbetalingId,
-            antallVedtak = 1,
-            event = "eventet",
-            forbrukteSykedager = 42,
-            gjenståendeSykedager = 3254,
-            foreløpigBeregnetSluttPåSykepenger = null,
-            automatiskBehandling = true,
-            arbeidsgiverOppdrag =
-                UtbetalingUtbetalt.OppdragDto(
-                    mottaker = org,
-                    fagområde = "SP",
-                    fagsystemId = "1234",
-                    nettoBeløp = 123,
-                    utbetalingslinjer = emptyList(),
-                ),
-            type = "UTBETALING",
-            utbetalingsdager =
-                listOf(
-                    UtbetalingUtbetalt.UtbetalingdagDto(
-                        dato = fom,
-                        type = "AvvistDag",
-                        begrunnelser = listOf(UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad),
-                    ),
-                ),
-        )
 }

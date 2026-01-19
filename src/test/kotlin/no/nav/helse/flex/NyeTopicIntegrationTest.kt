@@ -1,15 +1,14 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.domene.AnnulleringDto
-import no.nav.helse.flex.domene.UtbetalingUtbetalt
-import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto
-import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.Organisasjon
+import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
+import no.nav.helse.flex.testdata.lagUtbetaling
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
@@ -64,7 +63,7 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         )
 
     val utbetaling =
-        UtbetalingUtbetalt(
+        lagUtbetaling(
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = org,
@@ -72,28 +71,8 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
             tom = now,
             utbetalingId = utbetalingId,
             antallVedtak = 1,
-            event = "eventet",
-            forbrukteSykedager = 42,
-            gjenståendeSykedager = 3254,
             foreløpigBeregnetSluttPåSykepenger = LocalDate.of(2020, 3, 12),
-            automatiskBehandling = true,
-            arbeidsgiverOppdrag =
-                UtbetalingUtbetalt.OppdragDto(
-                    mottaker = org,
-                    fagområde = "SP",
-                    fagsystemId = "1234",
-                    nettoBeløp = 123,
-                    utbetalingslinjer = emptyList(),
-                ),
-            type = "UTBETALING",
-            utbetalingsdager =
-                listOf(
-                    UtbetalingdagDto(
-                        dato = now,
-                        type = "AvvistDag",
-                        begrunnelser = listOf(MinimumSykdomsgrad),
-                    ),
-                ),
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
         )
 
     val annulleringDto =

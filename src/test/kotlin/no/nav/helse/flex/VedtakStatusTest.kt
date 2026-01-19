@@ -1,7 +1,5 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.domene.UtbetalingUtbetalt
-import no.nav.helse.flex.domene.UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.VedtakStatus
 import no.nav.helse.flex.domene.tilVedtakStatusDto
@@ -9,6 +7,9 @@ import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_STATUS_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.service.SendVedtakStatus
+import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
+import no.nav.helse.flex.testdata.lagUtbetaling
+import no.nav.helse.flex.testdata.lagUtbetalingdag
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeNull
@@ -85,7 +86,7 @@ class VedtakStatusTest : FellesTestOppsett() {
         )
 
     val utbetaling =
-        UtbetalingUtbetalt(
+        lagUtbetaling(
             fødselsnummer = fnr,
             aktørId = aktørId,
             organisasjonsnummer = org,
@@ -93,28 +94,10 @@ class VedtakStatusTest : FellesTestOppsett() {
             tom = now.plusDays(1),
             utbetalingId = utbetalingId,
             antallVedtak = 2,
-            event = "eventet",
             forbrukteSykedager = 42,
             gjenståendeSykedager = 254,
             foreløpigBeregnetSluttPåSykepenger = now.plusDays(256),
-            automatiskBehandling = true,
-            arbeidsgiverOppdrag =
-                UtbetalingUtbetalt.OppdragDto(
-                    mottaker = org,
-                    fagområde = "SP",
-                    fagsystemId = "1234",
-                    nettoBeløp = 123,
-                    utbetalingslinjer = emptyList(),
-                ),
-            type = "UTBETALING",
-            utbetalingsdager =
-                listOf(
-                    UtbetalingUtbetalt.UtbetalingdagDto(
-                        dato = now,
-                        type = "AvvistDag",
-                        begrunnelser = listOf(MinimumSykdomsgrad),
-                    ),
-                ),
+            arbeidsgiverOppdrag = lagArbeidsgiverOppdrag(mottaker = org),
         )
 
     @BeforeAll
@@ -452,7 +435,7 @@ class VedtakStatusTest : FellesTestOppsett() {
                             antallVedtak = 1,
                             utbetalingsdager =
                                 listOf(
-                                    UtbetalingUtbetalt.UtbetalingdagDto(
+                                    lagUtbetalingdag(
                                         dato = now,
                                         type = "ArbeidsgiverperiodeDag",
                                         begrunnelser = emptyList(),
