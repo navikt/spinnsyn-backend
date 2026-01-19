@@ -99,13 +99,14 @@ fun hentDager(
                                         when {
                                             dag.belop == 0 -> "ArbeidsgiverperiodeDag"
 
+                                            // NAV betaler ikke arbeidsgiverperiode i helg
                                             dag.dato.dayOfWeek in helg -> "NavHelgDag"
 
-                                            // NAV betaler ikke arbeidsgiverperiode i helg
+                                            // Vises som gradert syk
                                             dag.grad < 100 -> "NavDagDelvisSyk"
 
-                                            // Vises som gradert syk
-                                            else -> "NavDagSyk" // Vises som 100% syk
+                                            // Vises som 100% syk
+                                            else -> "NavDagSyk"
                                         }
                                     }
 
