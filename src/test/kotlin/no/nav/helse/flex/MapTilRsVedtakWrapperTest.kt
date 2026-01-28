@@ -5,29 +5,17 @@ import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.VedtakDbRecord
 import no.nav.helse.flex.domene.Saksbehandler
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
-import no.nav.helse.flex.service.BrukerVedtak
-import no.nav.helse.flex.service.IdentService
+import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
 class MapTilRsVedtakWrapperTest {
-    private val brukerVedtak =
-        BrukerVedtak(
-            identService = mock(IdentService::class.java),
-            vedtakRepository = mock(),
-            utbetalingRepository = mock(),
-            annulleringDAO = mock(),
-            leggTilOrganisasjonavn = mock(),
-            vedtakStatusProducer = mock(),
-        )
-
     @Test
     fun `mapTilRsVedtakWrapper håndterer SELVSTENDIG yrkesaktivitetstype korrekt`() {
         val vedtakFattet = lagVedtakFattetForEksternDto(yrkesaktivitetstype = "SELVSTENDIG")
@@ -36,7 +24,7 @@ class MapTilRsVedtakWrapperTest {
         val annulleringer = emptyList<Annullering>()
 
         val resultat =
-            brukerVedtak.mapTilRsVedtakWrapper(
+            mapTilRsVedtakWrapper(
                 utbetalingDbRecord = utbetalingDbRecord,
                 vedtakMedUtbetaling = listOf(vedtakDbRecord),
                 annulleringer = annulleringer,
@@ -58,7 +46,7 @@ class MapTilRsVedtakWrapperTest {
         val annulleringer = emptyList<Annullering>()
 
         val resultat =
-            brukerVedtak.mapTilRsVedtakWrapper(
+            mapTilRsVedtakWrapper(
                 utbetalingDbRecord = utbetalingDbRecord,
                 vedtakMedUtbetaling = listOf(vedtakDbRecord),
                 annulleringer = annulleringer,
@@ -93,7 +81,7 @@ class MapTilRsVedtakWrapperTest {
         val annulleringer = emptyList<Annullering>()
 
         val resultat =
-            brukerVedtak.mapTilRsVedtakWrapper(
+            mapTilRsVedtakWrapper(
                 utbetalingDbRecord = utbetalingDbRecord,
                 vedtakMedUtbetaling = listOf(vedtakDbRecord),
                 annulleringer = annulleringer,
@@ -137,7 +125,7 @@ class MapTilRsVedtakWrapperTest {
         val annulleringer = emptyList<Annullering>()
 
         val resultat =
-            brukerVedtak.mapTilRsVedtakWrapper(
+            mapTilRsVedtakWrapper(
                 utbetalingDbRecord = utbetalingDbRecord,
                 vedtakMedUtbetaling = listOf(vedtakDbRecord),
                 annulleringer = annulleringer,
@@ -190,7 +178,7 @@ class MapTilRsVedtakWrapperTest {
         val annulleringer = emptyList<Annullering>()
 
         val resultat =
-            brukerVedtak.mapTilRsVedtakWrapper(
+            mapTilRsVedtakWrapper(
                 utbetalingDbRecord = utbetalingDbRecord,
                 vedtakMedUtbetaling = listOf(vedtakDbRecord),
                 annulleringer = annulleringer,
@@ -256,7 +244,7 @@ class MapTilRsVedtakWrapperTest {
         val annulleringer = emptyList<Annullering>()
 
         val resultat =
-            brukerVedtak.mapTilRsVedtakWrapper(
+            mapTilRsVedtakWrapper(
                 utbetalingDbRecord = utbetalingDbRecord,
                 vedtakMedUtbetaling = listOf(vedtakDbRecord),
                 annulleringer = annulleringer,
