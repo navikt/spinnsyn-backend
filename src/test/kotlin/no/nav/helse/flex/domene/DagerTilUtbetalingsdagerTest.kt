@@ -87,7 +87,7 @@ class DagerTilUtbetalingsdagerTest {
             dato shouldBeEqualTo LocalDate.of(2025, 10, 28)
             type shouldBeEqualTo "NavDag"
             beløpTilSykmeldt shouldBeEqualTo 1846
-            beløpTilArbeidsgiver shouldBeEqualTo null
+            beløpTilArbeidsgiver shouldBeEqualTo 0
             sykdomsgrad shouldBeEqualTo 100
             begrunnelser shouldBeEqualTo listOf("Kun person")
         }
@@ -112,7 +112,7 @@ class DagerTilUtbetalingsdagerTest {
         utbetalingsdager[0].apply {
             dato shouldBeEqualTo LocalDate.of(2025, 10, 1)
             type shouldBeEqualTo "ArbeidsgiverperiodeDag"
-            beløpTilSykmeldt shouldBeEqualTo null
+            beløpTilSykmeldt shouldBeEqualTo 0
             beløpTilArbeidsgiver shouldBeEqualTo 923
             sykdomsgrad shouldBeEqualTo 100
             begrunnelser shouldBeEqualTo listOf("Kun arbeidsgiver")
@@ -224,13 +224,13 @@ class DagerTilUtbetalingsdagerTest {
         utbetalingsdager[2].apply {
             dato shouldBeEqualTo LocalDate.of(2025, 10, 28)
             beløpTilSykmeldt shouldBeEqualTo 1846
-            beløpTilArbeidsgiver shouldBeEqualTo null
+            beløpTilArbeidsgiver shouldBeEqualTo 0
         }
 
         utbetalingsdager[3].apply {
             dato shouldBeEqualTo LocalDate.of(2025, 10, 29)
             beløpTilSykmeldt shouldBeEqualTo 1846
-            beløpTilArbeidsgiver shouldBeEqualTo null
+            beløpTilArbeidsgiver shouldBeEqualTo 0
         }
     }
 
