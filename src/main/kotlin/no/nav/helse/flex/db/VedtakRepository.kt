@@ -30,6 +30,7 @@ interface VedtakRepository : CrudRepository<VedtakDbRecord, String> {
         """,
     )
     fun hentVedtakMedUtbetalingId(utbetalingIder: List<String>): List<String>
+    fun hentUtbetalingIdForVedtakMedUtbetalingId(utbetalingIder: List<String>): List<String>
 }
 
 @Table("vedtak_v2")

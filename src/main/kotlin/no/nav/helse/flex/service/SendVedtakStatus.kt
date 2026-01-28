@@ -51,7 +51,7 @@ class SendVedtakStatus(
 
         val vedtakGruppert =
             vedtakRepository
-                .hentVedtakMedUtbetalingId(utbetalinger.map { it.utbetalingId })
+                .hentUtbetalingIdForVedtakMedUtbetalingId(utbetalinger.map { it.utbetalingId })
                 .groupBy { it }
                 .map { it.key to it.value.size }
 
