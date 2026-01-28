@@ -29,8 +29,9 @@ interface VedtakRepository : CrudRepository<VedtakDbRecord, String> {
         WHERE utbetaling_id in (:utbetalingIder)
         """,
     )
-    fun hentVedtakMedUtbetalingId(utbetalingIder: List<String>): List<String>
     fun hentUtbetalingIdForVedtakMedUtbetalingId(utbetalingIder: List<String>): List<String>
+
+    fun findByUtbetalingId(utbetalingId: String): List<VedtakDbRecord>
 }
 
 @Table("vedtak_v2")

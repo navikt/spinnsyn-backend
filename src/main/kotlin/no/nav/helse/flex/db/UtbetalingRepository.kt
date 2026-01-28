@@ -62,6 +62,22 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         skalVisesTilBruker: Boolean?,
         id: String,
     ): Boolean
+
+    @Query(
+        """
+        SELECT 
+            *,
+            (utbetaling::jsonb -> 'utbetalingsdager' -> 0) as første_utbetalingsdag
+        FROM utbetaling
+        WHERE 
+            utbetaling::jsonb -> 'utbetalingsdager' -> 0 IS NOT NULL
+            AND utbetaling::jsonb -> 'utbetalingsdager' -> 0 ->> 'sykdomsgrad' IS NULL
+            ORDER BY opprettet DESC
+        FOR UPDATE SKIP LOCKED
+        LIMIT 500;
+        """,
+    )
+    fun hent500MedGammeltFormat(): List<UtbetalingDbRecord>
 }
 
 @Table("utbetaling")
