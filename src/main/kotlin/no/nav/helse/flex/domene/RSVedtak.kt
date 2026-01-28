@@ -2,6 +2,7 @@ package no.nav.helse.flex.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.flex.logger
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -25,7 +26,73 @@ data class RSVedtakWrapper(
     val sykepengebelopPerson: Int = 0,
     val andreArbeidsgivere: Map<String, Double>?,
     val organisasjoner: Map<String, String> = emptyMap(),
-)
+) {
+    companion object {
+        val log = logger()
+
+        fun dagerTilUtbetalingsdager(
+            dagerPerson: List<RSDag>,
+            dagerArbeidsgiver: List<RSDag>,
+        ): List<RSUtbetalingdag> {
+            val fom = (dagerPerson + dagerArbeidsgiver).minByOrNull { it.dato }?.dato ?: return emptyList()
+            val tom = (dagerPerson + dagerArbeidsgiver).maxByOrNull { it.dato }?.dato ?: return emptyList()
+            val utbetalingsdager = mutableListOf<RSUtbetalingdag>()
+
+            for (dato in fom.datesUntil(tom.plusDays(1))) {
+                val dagPerson = dagerPerson.find { it.dato.equals(dato) }
+                val dagArbeidsgiver = dagerArbeidsgiver.find { it.dato.equals(dato) }
+
+                if (dagPerson == null && dagArbeidsgiver == null) {
+                    log.warn("Fant ikke dag for dato $dato")
+                    continue
+                }
+
+                val dagtype: String
+                val grad: Double
+                val begrunnelser: List<String>
+
+                when {
+                    dagPerson != null && dagArbeidsgiver != null -> {
+                        if (dagPerson.dagtype != dagArbeidsgiver.dagtype) {
+                            log.warn("Ulike dagtyper for dato $dato: Person=${dagPerson.dagtype} Arbeidsgiver=${dagArbeidsgiver.dagtype}")
+                        }
+                        if (dagPerson.grad != dagArbeidsgiver.grad) {
+                            log.warn("Ulike grader for dato $dato: Person=${dagPerson.grad} Arbeidsgiver=${dagArbeidsgiver.grad}")
+                        }
+                        dagtype = dagPerson.dagtype
+                        grad = dagPerson.grad
+                        begrunnelser = dagPerson.begrunnelser + dagArbeidsgiver.begrunnelser
+                    }
+
+                    dagPerson != null -> {
+                        dagtype = dagPerson.dagtype
+                        grad = dagPerson.grad
+                        begrunnelser = dagPerson.begrunnelser
+                    }
+
+                    else -> {
+                        dagtype = dagArbeidsgiver!!.dagtype
+                        grad = dagArbeidsgiver.grad
+                        begrunnelser = dagArbeidsgiver.begrunnelser
+                    }
+                }
+
+                utbetalingsdager.add(
+                    RSUtbetalingdag(
+                        dato = dato,
+                        type = dagtype,
+                        begrunnelser = begrunnelser,
+                        beløpTilSykmeldt = dagPerson?.belop ?: 0,
+                        beløpTilArbeidsgiver = dagArbeidsgiver?.belop ?: 0,
+                        sykdomsgrad = grad.toInt(),
+                    ),
+                )
+            }
+
+            return utbetalingsdager.sortedBy { it.dato }
+        }
+    }
+}
 
 data class RSVedtak(
     val organisasjonsnummer: String,
@@ -83,7 +150,22 @@ data class RSUtbetalingdag(
     val beløpTilArbeidsgiver: Int? = null,
     val beløpTilSykmeldt: Int? = null,
     val sykdomsgrad: Int? = null,
-)
+) {
+    companion object {
+        fun konverterTilUtbetalindagDto(utbetalt: RSUtbetalingdag) =
+            UtbetalingUtbetalt.UtbetalingdagDto(
+                dato = utbetalt.dato,
+                type = utbetalt.type,
+                begrunnelser =
+                    utbetalt.begrunnelser.map {
+                        UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.valueOf(it)
+                    },
+                beløpTilArbeidsgiver = utbetalt.beløpTilArbeidsgiver,
+                beløpTilSykmeldt = utbetalt.beløpTilSykmeldt,
+                sykdomsgrad = utbetalt.sykdomsgrad,
+            )
+    }
+}
 
 data class RSDag(
     val dato: LocalDate,
