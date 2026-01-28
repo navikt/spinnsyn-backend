@@ -9,34 +9,35 @@ import kotlin.streams.asSequence
 private val dagtyperMedUtbetaling = listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
 private val helg = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 
-fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> =
-    map { rSVedtakWrapper ->
-        val fom = rSVedtakWrapper.vedtak.fom
-        val tom = rSVedtakWrapper.vedtak.tom
+fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(): RSVedtakWrapper {
+    val fom = this.vedtak.fom
+    val tom = this.vedtak.tom
 
-        var dagerArbeidsgiver =
-            hentDager(fom, tom, rSVedtakWrapper.vedtak.utbetaling.arbeidsgiverOppdrag, rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager)
-        val sykepengebelopArbeidsgiver = dagerArbeidsgiver.sumOf { it.belop }
+    var dagerArbeidsgiver =
+        hentDager(fom, tom, this.vedtak.utbetaling.arbeidsgiverOppdrag, this.vedtak.utbetaling.utbetalingsdager)
+    val sykepengebelopArbeidsgiver = dagerArbeidsgiver.sumOf { it.belop }
 
-        var dagerPerson =
-            hentDager(fom, tom, rSVedtakWrapper.vedtak.utbetaling.personOppdrag, rSVedtakWrapper.vedtak.utbetaling.utbetalingsdager)
-        val sykepengebelopPerson = dagerPerson.sumOf { it.belop }
+    var dagerPerson =
+        hentDager(fom, tom, this.vedtak.utbetaling.personOppdrag, this.vedtak.utbetaling.utbetalingsdager)
+    val sykepengebelopPerson = dagerPerson.sumOf { it.belop }
 
-        if (sykepengebelopPerson == 0 && sykepengebelopArbeidsgiver == 0) {
-            dagerArbeidsgiver = emptyList() // Helt avvist vedtak vises bare i dagerPerson
-        } else if (sykepengebelopPerson == 0) {
-            dagerPerson = emptyList() // Refusjonutbetaling
-        } else if (sykepengebelopArbeidsgiver == 0) {
-            dagerArbeidsgiver = emptyList() // Brukerutbetaling
-        }
-
-        rSVedtakWrapper.copy(
-            dagerArbeidsgiver = dagerArbeidsgiver,
-            dagerPerson = dagerPerson,
-            sykepengebelopArbeidsgiver = sykepengebelopArbeidsgiver,
-            sykepengebelopPerson = sykepengebelopPerson,
-        )
+    if (sykepengebelopPerson == 0 && sykepengebelopArbeidsgiver == 0) {
+        dagerArbeidsgiver = emptyList() // Helt avvist vedtak vises bare i dagerPerson
+    } else if (sykepengebelopPerson == 0) {
+        dagerPerson = emptyList() // Refusjonutbetaling
+    } else if (sykepengebelopArbeidsgiver == 0) {
+        dagerArbeidsgiver = emptyList() // Brukerutbetaling
     }
+
+    return this.copy(
+        dagerArbeidsgiver = dagerArbeidsgiver,
+        dagerPerson = dagerPerson,
+        sykepengebelopArbeidsgiver = sykepengebelopArbeidsgiver,
+        sykepengebelopPerson = sykepengebelopPerson,
+    )
+}
+
+fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> = this.map { it.leggTilDagerIVedtakPeriode() }
 
 fun hentDager(
     fom: LocalDate,
