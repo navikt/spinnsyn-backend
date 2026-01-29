@@ -45,7 +45,7 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                 ),
             )
 
-        val resultat = batchMigrator.migrerGammeltVedtakAsync(mapOf(utbetaling to listOf(vedtak))).join()
+        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak)))
 
         resultat.migrert.`should be equal to`(1)
         resultat.feilet.`should be equal to`(0)
@@ -64,7 +64,7 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                 antallVedtak = 1,
             )
 
-        val resultat = batchMigrator.migrerGammeltVedtakAsync(mapOf(utbetaling to emptyList())).join()
+        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to emptyList()))
 
         resultat.migrert.`should be equal to`(0)
         resultat.feilet.`should be equal to`(1)
@@ -90,7 +90,7 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                 utbetalingId = utbetalingId,
                 antallVedtak = 1,
             )
-        val resultat = batchMigrator.migrerGammeltVedtakAsync(mapOf(utbetaling to listOf(vedtak))).join()
+        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak)))
 
         resultat.migrert.`should be equal to`(0)
         resultat.feilet.`should be equal to`(1)
@@ -118,7 +118,7 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
 
         val lagretUtbetaling = utbetalingRepository.save(utbetaling)
 
-        val resultat = batchMigrator.migrerGammeltVedtakAsync(mapOf(lagretUtbetaling to listOf(vedtak))).join()
+        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(lagretUtbetaling to listOf(vedtak)))
 
         resultat.migrert.`should be equal to`(0)
         resultat.feilet.`should be equal to`(1)

@@ -8,11 +8,9 @@ import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
-import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -29,6 +27,7 @@ class MigrerTilUtbetalingsdagerJobb(
     }
 
     @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$offset)")
 
@@ -40,24 +39,17 @@ class MigrerTilUtbetalingsdagerJobb(
         val utbetalingVedtakMap = utbetalinger.associateWith { vedtakRepository.findByUtbetalingId(it.utbetalingId) }
 
         batchMigrator
-            .migrerGammeltVedtakAsync(utbetalingVedtakMap)
-            .whenComplete { resultat, throwable ->
-                if (throwable != null) {
+            .migrerGammeltVedtak(utbetalingVedtakMap)
+            .apply {
+                if (feilet != null) {
                     log.error(
-                        "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format (offset=$offset)",
-                        throwable,
+                        "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
+                            "(offset=$offset)" + this.toLogString(),
                     )
                 } else {
-                    val feilet = resultat.feilet ?: 0
-                    if (feilet > 0) {
-                        offset += feilet
-                        log.warn(
-                            "Batch hadde $feilet feil, øker offset til $offset og fortsetter.",
-                        )
-                    }
                     log.info(
                         "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format (offset=$offset): " +
-                            resultat.toLogString(),
+                            this.toLogString(),
                     )
                 }
             }
@@ -72,11 +64,8 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
 ) {
     private val log = logger()
 
-    @Async("fixedThreadPool")
     @Transactional(rollbackFor = [Exception::class])
-    fun migrerGammeltVedtakAsync(
-        utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>,
-    ): CompletableFuture<VedtakMigreringStatus> {
+    fun migrerGammeltVedtak(utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>): VedtakMigreringStatus {
         var feilet = 0
 
         val migrerteUtbetalinger =
@@ -121,11 +110,9 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
             utbetalingRepository.saveAll(migrerteUtbetalinger)
         }
 
-        return CompletableFuture.completedFuture(
-            VedtakMigreringStatus(
-                migrert = migrerteUtbetalinger.size,
-                feilet = feilet,
-            ),
+        return VedtakMigreringStatus(
+            migrert = migrerteUtbetalinger.size,
+            feilet = feilet,
         )
     }
 }
