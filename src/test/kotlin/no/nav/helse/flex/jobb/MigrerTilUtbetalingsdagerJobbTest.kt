@@ -38,7 +38,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
             ),
         )
 
-        utbetalingRepository.hent500MedGammeltFormat().single().`should not be null`()
+        utbetalingRepository.hent500MedGammeltFormatMedOffset().single().`should not be null`()
     }
 
     @Test
@@ -66,7 +66,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
         )
         jobb.kjørMigreringTilUtbetalingsdager()
 
-        utbetalingRepository.hent500MedGammeltFormat().`should be empty`()
+        utbetalingRepository.hent500MedGammeltFormatMedOffset().`should be empty`()
 
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr = "12345678910").single().also { utbetalingDbRecord ->
             objectMapper
@@ -102,5 +102,24 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
                         }
                 }
         }
+    }
+
+    @Test
+    fun `burde øke offset med antall feil i batch, når utbetaling mangler vedtak`() {
+        utbetalingRepository.save(
+            UtbetalingDbRecord(
+                fnr = "12345678910",
+                utbetalingType = "UTBETALING",
+                utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
+                opprettet = Instant.now(),
+                utbetalingId = "utbetaling-id",
+                antallVedtak = 1,
+            ),
+        )
+
+        jobb.kjørMigreringTilUtbetalingsdager()
+
+        utbetalingRepository.hent500MedGammeltFormatMedOffset(0).`should not be empty`()
+        utbetalingRepository.hent500MedGammeltFormatMedOffset(1).`should be empty`()
     }
 }

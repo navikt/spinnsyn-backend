@@ -73,11 +73,11 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
             utbetaling::jsonb -> 'utbetalingsdager' -> 0 IS NOT NULL
             AND utbetaling::jsonb -> 'utbetalingsdager' -> 0 ->> 'sykdomsgrad' IS NULL
             ORDER BY opprettet DESC
-        FOR UPDATE SKIP LOCKED
+        OFFSET :offset
         LIMIT 500;
         """,
     )
-    fun hent500MedGammeltFormat(): List<UtbetalingDbRecord>
+    fun hent500MedGammeltFormatMedOffset(offset: Int? = 0): List<UtbetalingDbRecord>
 }
 
 @Table("utbetaling")

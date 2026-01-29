@@ -22,12 +22,13 @@ class MigrerTilUtbetalingsdagerJobb(
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
 ) {
     val log = logger()
+    private var offset = 0
 
     @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     fun kjørMigreringTilUtbetalingsdager() {
-        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
+        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$offset)")
 
-        val utbetalinger = utbetalingRepository.hent500MedGammeltFormat()
+        val utbetalinger = utbetalingRepository.hent500MedGammeltFormatMedOffset(offset)
         if (utbetalinger.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
             return
@@ -39,12 +40,19 @@ class MigrerTilUtbetalingsdagerJobb(
             .whenComplete { resultat, throwable ->
                 if (throwable != null) {
                     log.error(
-                        "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format",
+                        "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format (offset=$offset)",
                         throwable,
                     )
                 } else {
+                    val feilet = resultat.feilet ?: 0
+                    if (feilet > 0) {
+                        offset += feilet
+                        log.warn(
+                            "Batch hadde $feilet feil, øker offset til $offset og fortsetter.",
+                        )
+                    }
                     log.info(
-                        "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format: " +
+                        "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format (offset=$offset): " +
                             resultat.toLogString(),
                     )
                 }
