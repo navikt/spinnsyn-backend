@@ -8,14 +8,20 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
 @EnableKafka
 @EnableJwtTokenValidation
-@EnableScheduling
 class Application
+
+@Profile("default")
+@Configuration
+@EnableScheduling
+class DeployApplicationConfig
 
 fun main(args: Array<String>) {
     runApplication<Application>(*args)

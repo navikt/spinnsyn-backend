@@ -38,7 +38,11 @@ private class PostgreSQLContainer14 : PostgreSQLContainer("postgres:14-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnableMockOAuth2Server
-@SpringBootTest
+@SpringBootTest(
+    properties = [
+        "spring.main.allow-bean-definition-overriding=true",
+    ],
+)
 @AutoConfigureMockMvc
 abstract class FellesTestOppsett {
     @Autowired
