@@ -23,7 +23,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
     fun setup() {
         vedtakRepository.deleteAll()
         utbetalingRepository.deleteAll()
-        jobb.resetOffset()
+        jobb.offset.set(0)
     }
 
     @Test
@@ -119,8 +119,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
         )
 
         jobb.kjørMigreringTilUtbetalingsdager()
-
-        utbetalingRepository.hent500MedGammeltFormatMedOffset(0).`should not be empty`()
-        utbetalingRepository.hent500MedGammeltFormatMedOffset(1).`should be empty`()
+        val offset = jobb.offset.get()
+        offset `should be equal to` 1
     }
 }

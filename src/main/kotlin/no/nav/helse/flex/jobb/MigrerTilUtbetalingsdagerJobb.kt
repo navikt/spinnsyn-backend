@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 class MigrerTilUtbetalingsdagerJobb(
@@ -20,18 +21,14 @@ class MigrerTilUtbetalingsdagerJobb(
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
 ) {
     val log = logger()
-    private var offset = 0
-
-    fun resetOffset() {
-        offset = 0
-    }
+    var offset = AtomicInteger(0)
 
     @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$offset)")
 
-        val utbetalinger = utbetalingRepository.hent500MedGammeltFormatMedOffset(offset)
+        val utbetalinger = utbetalingRepository.hent500MedGammeltFormatMedOffset(offset.get())
         if (utbetalinger.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
             return
@@ -42,6 +39,7 @@ class MigrerTilUtbetalingsdagerJobb(
             .migrerGammeltVedtak(utbetalingVedtakMap)
             .apply {
                 if (feilet != null) {
+                    offset.getAndUpdate { it + feilet }
                     log.error(
                         "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
                             "(offset=$offset)" + this.toLogString(),
