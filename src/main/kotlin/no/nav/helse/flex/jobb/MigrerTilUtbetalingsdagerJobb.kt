@@ -33,7 +33,7 @@ class MigrerTilUtbetalingsdagerJobb(
             log.info("Ingen flere vedtak med gammelt format å migrere")
             return
         }
-        val utbetalingVedtakMap = utbetalinger.associateWith { vedtakRepository.findByUtbetalingId(it.utbetalingId) }
+        val utbetalingVedtakMap = utbetalinger.associateWith { vedtakRepository.findByUtbetalingIdIn(utbetalinger.map { it.utbetalingId }) }
 
         batchMigrator
             .migrerGammeltVedtak(utbetalingVedtakMap)
