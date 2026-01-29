@@ -12,6 +12,7 @@ import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.interceptor.TransactionAspectSupport
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -27,31 +28,32 @@ class MigrerTilUtbetalingsdagerJobb(
     @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
-        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$offset)")
+        val gjeldendeOffset = offset.get()
+        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$gjeldendeOffset)")
 
-        val utbetalinger = utbetalingRepository.hent500MedGammeltFormatMedOffset(offset.get())
+        val utbetalinger = utbetalingRepository.hent500MedGammeltFormatMedOffset(gjeldendeOffset)
         if (utbetalinger.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
             return
         }
-        val utbetalingVedtakMap = utbetalinger.associateWith { vedtakRepository.findByUtbetalingIdIn(utbetalinger.map { it.utbetalingId }) }
 
-        batchMigrator
-            .migrerGammeltVedtak(utbetalingVedtakMap)
-            .apply {
-                if (feilet != null) {
-                    offset.getAndUpdate { it + feilet }
-                    log.error(
-                        "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
-                            "(offset=$offset)" + this.toLogString(),
-                    )
-                } else {
-                    log.info(
-                        "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format (offset=$offset): " +
-                            this.toLogString(),
-                    )
-                }
-            }
+        val vedtak = vedtakRepository.findByUtbetalingIdIn(utbetalinger.map { it.utbetalingId })
+        val utbetalingVedtakMap = utbetalinger.associateWith { utbetaling -> vedtak.filter { it.utbetalingId == utbetaling.utbetalingId } }
+
+        val status = batchMigrator.migrerGammeltVedtak(utbetalingVedtakMap)
+
+        if (status.feilet > 0) {
+            offset.getAndUpdate { it + status.feilet }
+            log.error(
+                "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
+                    "(offset=$gjeldendeOffset): ${status.toLogString()}",
+            )
+        } else {
+            log.info(
+                "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
+                    "(offset=$gjeldendeOffset): ${status.toLogString()}",
+            )
+        }
     }
 }
 
@@ -99,9 +101,9 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
 
         if (migrerteUtbetalinger.isNotEmpty()) {
             if (environmentToggles.isProduction()) {
-                log.info(
-                    "Dry run av migrering. Planlagt å migrere ${migrerteUtbetalinger.size} utbetalinger til nytt utbetalingsdager format",
-                )
+                utbetalingRepository.saveAll(migrerteUtbetalinger)
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()
+                log.info("DB-dry-run: kjørte saveAll for ${migrerteUtbetalinger.size} utbetalinger og rullet tilbake transaksjonen")
             } else {
                 utbetalingRepository.saveAll(migrerteUtbetalinger)
             }
@@ -115,13 +117,13 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
 }
 
 class VedtakMigreringStatus(
-    val migrert: Int? = null,
-    val feilet: Int? = null,
+    val migrert: Int = 0,
+    val feilet: Int = 0,
 ) {
     fun toLogString(): String {
         val deler = mutableListOf<String>()
-        migrert?.let { deler.add("Migrert: $it") }
-        feilet?.let { deler.add("Feilet: $it") }
+        deler.add("Migrert: $migrert")
+        deler.add("Feilet: $feilet")
         return deler.joinToString(", ")
     }
 }

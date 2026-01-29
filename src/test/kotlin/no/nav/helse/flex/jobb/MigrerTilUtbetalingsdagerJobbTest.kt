@@ -5,17 +5,24 @@ import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.VedtakDbRecord
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
+import no.nav.helse.flex.fake.EnvironmentTogglesFake
 import no.nav.helse.flex.objectMapper
+import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be empty`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be empty`
 import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.UnexpectedRollbackException
 import java.time.Instant
 
 class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
+    @Autowired
+    lateinit var environmentToggles: EnvironmentTogglesFake
+
     @Autowired
     private lateinit var jobb: MigrerTilUtbetalingsdagerJobb
 
@@ -44,6 +51,8 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
 
     @Test
     fun `burde migrere utbetaling med gammelt format til nytt format`() {
+        environmentToggles.setEnvironment("dev")
+
         vedtakRepository.save(
             VedtakDbRecord(
                 utbetalingId = "utbetaling-id",
@@ -107,6 +116,8 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
 
     @Test
     fun `burde øke offset med antall feil i batch, når utbetaling mangler vedtak`() {
+        environmentToggles.setEnvironment("dev")
+
         utbetalingRepository.save(
             UtbetalingDbRecord(
                 fnr = "12345678910",
@@ -121,5 +132,64 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
         jobb.kjørMigreringTilUtbetalingsdager()
         val offset = jobb.offset.get()
         offset `should be equal to` 1
+    }
+
+    @Test
+    fun `dry run burde ikke endre utbetalinger`() {
+        environmentToggles.setEnvironment("prod")
+
+        val fnr = "12345678910"
+
+        (1..500).forEach { indeks ->
+            val utbetalingId = "utbetaling-id-$indeks"
+
+            vedtakRepository.save(
+                VedtakDbRecord(
+                    utbetalingId = utbetalingId,
+                    fnr = fnr,
+                    vedtak =
+                        VEDTAK_JSON.replace(
+                            "\"utbetalingId\":\"3d19a9d1-c285-4dcd-abb3-b3bcfb538c4a\"",
+                            "\"utbetalingId\":\"$utbetalingId\"",
+                        ),
+                    opprettet = Instant.parse("2021-01-01T12:00:00Z"),
+                ),
+            )
+
+            utbetalingRepository.save(
+                UtbetalingDbRecord(
+                    fnr = fnr,
+                    utbetalingType = "UTBETALING",
+                    utbetaling =
+                        UTBETALING_GAMMELT_FORMAT_JSON.replace(
+                            "\"utbetalingId\":\"3d19a9d1-c285-4dcd-abb3-b3bcfb538c4a\"",
+                            "\"utbetalingId\":\"$utbetalingId\"",
+                        ),
+                    opprettet = Instant.parse("2021-01-01T12:00:00Z"),
+                    utbetalingId = utbetalingId,
+                    antallVedtak = 1,
+                ),
+            )
+        }
+
+        val utbetalingerFør = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+        utbetalingerFør.size.`should be equal to`(500)
+        utbetalingerFør.all { it.utbetaling.contains("\"sykdomsgrad\"") }.`should be equal to`(false)
+
+        invoking {
+            jobb.kjørMigreringTilUtbetalingsdager()
+        } `should throw` UnexpectedRollbackException::class
+
+        val utbetalingerEtterpå = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+        utbetalingerEtterpå.size.`should be equal to`(500)
+
+        val harBlittMigrert =
+            utbetalingerEtterpå.any { utbetalingDbRecord ->
+                objectMapper.readValue<UtbetalingUtbetalt>(utbetalingDbRecord.utbetaling).utbetalingsdager.any { it.sykdomsgrad != null }
+            }
+
+        harBlittMigrert.`should be equal to`(false)
+
+        utbetalingRepository.hent500MedGammeltFormatMedOffset().size.`should be equal to`(500)
     }
 }
