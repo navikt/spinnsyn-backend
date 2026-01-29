@@ -19,33 +19,50 @@ import java.util.concurrent.TimeUnit
 class MigrerTilUtbetalingsdagerJobb(
     private val utbetalingRepository: UtbetalingRepository,
     private val vedtakRepository: VedtakRepository,
-    private val annulleringDAO: AnnulleringDAO,
-    private val objectMapper: ObjectMapper,
+    private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 10_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
-    @Transactional
+    @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     fun kjørMigreringTilUtbetalingsdager() {
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
 
         val utbetalinger = utbetalingRepository.hent500MedGammeltFormat()
+        if (utbetalinger.isEmpty()) {
+            log.info("Ingen flere vedtak med gammelt format å migrere")
+            return
+        }
         val utbetalingVedtakMap = utbetalinger.associateWith { vedtakRepository.findByUtbetalingId(it.utbetalingId) }
 
-        migrerGamleVedtakAsyncThreadPool(utbetalingVedtakMap).also {
-            val resultat = it.get()
-            log.info("Ferdig med migrering av gamle vedtak til nytt utbetalingsdager format: ${resultat.toLogString()}")
-        }
+        batchMigrator
+            .migrerGammeltVedtakAsync(utbetalingVedtakMap)
+            .whenComplete { resultat, throwable ->
+                if (throwable != null) {
+                    log.error(
+                        "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format",
+                        throwable,
+                    )
+                } else {
+                    log.info(
+                        "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format: " +
+                            resultat.toLogString(),
+                    )
+                }
+            }
     }
+}
 
+@Component
+class MigrerTilUtbetalingsdagerBatchMigrator(
+    private val utbetalingRepository: UtbetalingRepository,
+    private val annulleringDAO: AnnulleringDAO,
+    private val objectMapper: ObjectMapper,
+) {
     @Async("fixedThreadPool")
     @Transactional(rollbackFor = [Exception::class])
-    fun migrerGamleVedtakAsyncThreadPool(
+    fun migrerGammeltVedtakAsync(
         utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>,
-    ): CompletableFuture<VedtakMigreringStatus> = CompletableFuture.completedFuture(migrerGammeltVedtak(utbetalingVedtakMap))
-
-    @Transactional(rollbackFor = [Exception::class])
-    fun migrerGammeltVedtak(utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>): VedtakMigreringStatus {
+    ): CompletableFuture<VedtakMigreringStatus> {
         val migrerteUtbetalinger =
             utbetalingVedtakMap.map { (utbetaling, vedtak) ->
                 val annuleringer = annulleringDAO.finnAnnulleringMedIdent(listOf(utbetaling.fnr))
@@ -77,24 +94,22 @@ class MigrerTilUtbetalingsdagerJobb(
                 )
             }
         utbetalingRepository.saveAll(migrerteUtbetalinger)
-        return VedtakMigreringStatus(
-            migrert = migrerteUtbetalinger.size,
+        return CompletableFuture.completedFuture(
+            VedtakMigreringStatus(
+                migrert = migrerteUtbetalinger.size,
+            ),
         )
     }
+}
 
-    class VedtakMigreringStatus(
-        val migrert: Int? = null,
-        val feilet: Int? = null,
-    ) {
-        companion object {
-            val INGEN = VedtakMigreringStatus()
-        }
-
-        fun toLogString(): String {
-            val deler = mutableListOf<String>()
-            migrert?.let { deler.add("Migrert: $it") }
-            feilet?.let { deler.add("Feilet: $it") }
-            return deler.joinToString(", ")
-        }
+class VedtakMigreringStatus(
+    val migrert: Int? = null,
+    val feilet: Int? = null,
+) {
+    fun toLogString(): String {
+        val deler = mutableListOf<String>()
+        migrert?.let { deler.add("Migrert: $it") }
+        feilet?.let { deler.add("Feilet: $it") }
+        return deler.joinToString(", ")
     }
 }
