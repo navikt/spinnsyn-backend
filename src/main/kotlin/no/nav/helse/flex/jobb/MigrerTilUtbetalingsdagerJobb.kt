@@ -1,6 +1,7 @@
 package no.nav.helse.flex.jobb
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.RSUtbetalingdag
 import no.nav.helse.flex.domene.RSVedtakWrapper
@@ -59,6 +60,7 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     private val utbetalingRepository: UtbetalingRepository,
     private val annulleringDAO: AnnulleringDAO,
     private val objectMapper: ObjectMapper,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     private val log = logger()
 
@@ -105,7 +107,13 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
             }
 
         if (migrerteUtbetalinger.isNotEmpty()) {
-            utbetalingRepository.saveAll(migrerteUtbetalinger)
+            if (environmentToggles.isProduction()) {
+                log.info(
+                    "Dry run av migrering. Planlagt å migrere ${migrerteUtbetalinger.size} utbetalinger til nytt utbetalingsdager format",
+                )
+            } else {
+                utbetalingRepository.saveAll(migrerteUtbetalinger)
+            }
         }
 
         return VedtakMigreringStatus(
