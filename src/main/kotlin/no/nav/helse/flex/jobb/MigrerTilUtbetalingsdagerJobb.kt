@@ -87,17 +87,8 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
                             utbetalingsdager = utbetalingdagDtos,
                         )
 
-                    UtbetalingDbRecord(
-                        id = utbetaling.id,
-                        fnr = utbetaling.fnr,
+                    utbetaling.copy(
                         utbetaling = objectMapper.writeValueAsString(utbetalingUtbetalt),
-                        opprettet = utbetaling.opprettet,
-                        utbetalingId = utbetaling.utbetalingId,
-                        utbetalingType = utbetaling.utbetalingType,
-                        antallVedtak = utbetaling.antallVedtak,
-                        lest = utbetaling.lest,
-                        motattPublisert = utbetaling.motattPublisert,
-                        skalVisesTilBruker = utbetaling.skalVisesTilBruker,
                     )
                 } catch (e: Exception) {
                     feilet++
