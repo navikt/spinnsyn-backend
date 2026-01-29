@@ -23,6 +23,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
     fun setup() {
         vedtakRepository.deleteAll()
         utbetalingRepository.deleteAll()
+        jobb.resetOffset()
     }
 
     @Test

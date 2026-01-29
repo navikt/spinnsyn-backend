@@ -24,6 +24,10 @@ class MigrerTilUtbetalingsdagerJobb(
     val log = logger()
     private var offset = 0
 
+    fun resetOffset() {
+        offset = 0
+    }
+
     @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     fun kjørMigreringTilUtbetalingsdager() {
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$offset)")
