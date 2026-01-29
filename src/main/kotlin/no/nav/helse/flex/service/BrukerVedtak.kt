@@ -99,7 +99,11 @@ class BrukerVedtak(
                     utbetalingDbRecord,
                     vedtakMedUtbetaling,
                 ).map { it.vedtak.tilVedtakFattetForEksternDto() }
-            val vedtaket = vedtakForUtbetaling.first()
+
+            val vedtaket =
+                vedtakForUtbetaling.firstOrNull()
+                    ?: throw NoSuchElementException("Fant ingen vedtak for utbetalingId=${utbetalingDbRecord.utbetalingId}")
+
             val utbetalingen = utbetalingDbRecord.utbetaling.tilUtbetalingUtbetalt()
 
             return RSVedtakWrapper(

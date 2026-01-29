@@ -58,45 +58,61 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     private val annulleringDAO: AnnulleringDAO,
     private val objectMapper: ObjectMapper,
 ) {
+    private val log = logger()
+
     @Async("fixedThreadPool")
     @Transactional(rollbackFor = [Exception::class])
     fun migrerGammeltVedtakAsync(
         utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>,
     ): CompletableFuture<VedtakMigreringStatus> {
-        val migrerteUtbetalinger =
-            utbetalingVedtakMap.map { (utbetaling, vedtak) ->
-                val annuleringer = annulleringDAO.finnAnnulleringMedIdent(listOf(utbetaling.fnr))
-                val vedtakMedUtbetaling = vedtak.filter { it.utbetalingId == utbetaling.utbetalingId }
-                val rsVedtak =
-                    mapTilRsVedtakWrapper(
-                        utbetalingDbRecord = utbetaling,
-                        vedtakMedUtbetaling = vedtakMedUtbetaling,
-                        annulleringer = annuleringer,
-                    ).leggTilDagerIVedtakPeriode()
+        var feilet = 0
 
-                val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(rsVedtak.dagerPerson, rsVedtak.dagerArbeidsgiver)
-                val utbetalingdagDtos = utbetalingsdager.map { RSUtbetalingdag.konverterTilUtbetalindagDto(it) }
-                val utbetalingUtbetalt =
-                    objectMapper.readValue(utbetaling.utbetaling, UtbetalingUtbetalt::class.java).copy(
-                        utbetalingsdager = utbetalingdagDtos,
+        val migrerteUtbetalinger =
+            utbetalingVedtakMap.mapNotNull { (utbetaling, vedtak) ->
+                try {
+                    val annuleringer = annulleringDAO.finnAnnulleringMedIdent(listOf(utbetaling.fnr))
+                    val vedtakMedUtbetaling = vedtak.filter { it.utbetalingId == utbetaling.utbetalingId }
+                    val rsVedtak =
+                        mapTilRsVedtakWrapper(
+                            utbetalingDbRecord = utbetaling,
+                            vedtakMedUtbetaling = vedtakMedUtbetaling,
+                            annulleringer = annuleringer,
+                        ).leggTilDagerIVedtakPeriode()
+
+                    val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(rsVedtak.dagerPerson, rsVedtak.dagerArbeidsgiver)
+                    val utbetalingdagDtos = utbetalingsdager.map { RSUtbetalingdag.konverterTilUtbetalindagDto(it) }
+                    val utbetalingUtbetalt =
+                        objectMapper.readValue(utbetaling.utbetaling, UtbetalingUtbetalt::class.java).copy(
+                            utbetalingsdager = utbetalingdagDtos,
+                        )
+
+                    UtbetalingDbRecord(
+                        id = utbetaling.id,
+                        fnr = utbetaling.fnr,
+                        utbetaling = objectMapper.writeValueAsString(utbetalingUtbetalt),
+                        opprettet = utbetaling.opprettet,
+                        utbetalingId = utbetaling.utbetalingId,
+                        utbetalingType = utbetaling.utbetalingType,
+                        antallVedtak = utbetaling.antallVedtak,
+                        lest = utbetaling.lest,
+                        motattPublisert = utbetaling.motattPublisert,
+                        skalVisesTilBruker = utbetaling.skalVisesTilBruker,
                     )
-                UtbetalingDbRecord(
-                    id = utbetaling.id,
-                    fnr = utbetaling.fnr,
-                    utbetaling = objectMapper.writeValueAsString(utbetalingUtbetalt),
-                    opprettet = utbetaling.opprettet,
-                    utbetalingId = utbetaling.utbetalingId,
-                    utbetalingType = utbetaling.utbetalingType,
-                    antallVedtak = utbetaling.antallVedtak,
-                    lest = utbetaling.lest,
-                    motattPublisert = utbetaling.motattPublisert,
-                    skalVisesTilBruker = utbetaling.skalVisesTilBruker,
-                )
+                } catch (e: Exception) {
+                    feilet++
+                    log.warn("Feilet migrering for utbetalingId=${utbetaling.utbetalingId}", e)
+                    null
+                }
             }
-        utbetalingRepository.saveAll(migrerteUtbetalinger)
+
+        if (migrerteUtbetalinger.isNotEmpty()) {
+            utbetalingRepository.saveAll(migrerteUtbetalinger)
+        }
+
         return CompletableFuture.completedFuture(
             VedtakMigreringStatus(
                 migrert = migrerteUtbetalinger.size,
+                feilet = feilet,
             ),
         )
     }
