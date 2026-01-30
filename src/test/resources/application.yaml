@@ -18,7 +18,7 @@ aiven-kafka:
   security-protocol: PLAINTEXT
 
 AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:flex:spinnsyn-frontend-arkivering\",\"clientId\":\"spinnsyn-frontend-arkivering-client-id\"},{\"name\":\"dev-gcp:flex:spinnsyn-frontend-interne\",\"clientId\":\"spinnsyn-frontend-interne-client-id\"}]"
-
+NAIS_CLUSTER_NAME: test
 
 no.nav.security.jwt:
   issuer:
