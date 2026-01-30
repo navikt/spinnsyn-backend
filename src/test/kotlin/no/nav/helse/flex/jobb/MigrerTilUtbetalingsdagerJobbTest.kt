@@ -14,6 +14,7 @@ import org.amshove.kluent.`should not be empty`
 import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.UnexpectedRollbackException
@@ -114,6 +115,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
         }
     }
 
+    @Disabled("Ikke gjeldende for dry run")
     @Test
     fun `burde øke offset med antall feil i batch, når utbetaling mangler vedtak`() {
         environmentToggles.setEnvironment("dev")

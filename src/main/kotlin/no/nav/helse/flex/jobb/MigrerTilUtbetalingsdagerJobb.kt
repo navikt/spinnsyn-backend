@@ -2,6 +2,7 @@ package no.nav.helse.flex.jobb
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.RSUtbetalingdag
 import no.nav.helse.flex.domene.RSVedtakWrapper
@@ -21,6 +22,7 @@ class MigrerTilUtbetalingsdagerJobb(
     private val utbetalingRepository: UtbetalingRepository,
     private val vedtakRepository: VedtakRepository,
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
+    private val leaderElection: LeaderElection,
 ) {
     val log = logger()
     var offset = AtomicInteger(0)
@@ -28,7 +30,12 @@ class MigrerTilUtbetalingsdagerJobb(
     @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
+        if (!leaderElection.isLeader()) {
+            return
+        }
+
         val gjeldendeOffset = offset.get()
+
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$gjeldendeOffset)")
 
         val utbetalinger = utbetalingRepository.hent500MedGammeltFormatMedOffset(gjeldendeOffset)
@@ -43,7 +50,6 @@ class MigrerTilUtbetalingsdagerJobb(
         val status = batchMigrator.migrerGammeltVedtak(utbetalingVedtakMap)
 
         if (status.feilet > 0) {
-            offset.getAndUpdate { it + status.feilet }
             log.error(
                 "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
                     "(offset=$gjeldendeOffset): ${status.toLogString()}",
@@ -54,6 +60,7 @@ class MigrerTilUtbetalingsdagerJobb(
                     "(offset=$gjeldendeOffset): ${status.toLogString()}",
             )
         }
+        offset.getAndAdd(utbetalinger.size + 4_500)
     }
 }
 
