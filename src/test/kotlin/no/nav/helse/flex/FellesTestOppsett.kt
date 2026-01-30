@@ -6,6 +6,7 @@ import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSVedtakWrapper
+import no.nav.helse.flex.fake.FakesTestConfig
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.OrganisasjonRepository
 import no.nav.helse.flex.service.SendVedtakStatus
@@ -38,7 +39,12 @@ private class PostgreSQLContainer14 : PostgreSQLContainer("postgres:14-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnableMockOAuth2Server
-@SpringBootTest
+@SpringBootTest(
+    properties = [
+        "spring.main.allow-bean-definition-overriding=true",
+    ],
+    classes = [FakesTestConfig::class],
+)
 @AutoConfigureMockMvc
 abstract class FellesTestOppsett {
     @Autowired
