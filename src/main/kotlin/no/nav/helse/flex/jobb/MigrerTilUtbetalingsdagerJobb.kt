@@ -3,18 +3,20 @@ package no.nav.helse.flex.jobb
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.cronjob.LeaderElection
-import no.nav.helse.flex.db.*
+import no.nav.helse.flex.db.AnnulleringDAO
+import no.nav.helse.flex.db.UtbetalingDbRecord
+import no.nav.helse.flex.db.UtbetalingRepository
+import no.nav.helse.flex.db.VedtakDbRecord
+import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSUtbetalingdag
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionAspectSupport
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 @Component
@@ -27,7 +29,6 @@ class MigrerTilUtbetalingsdagerJobb(
     val log = logger()
     var offset = AtomicInteger(0)
 
-    @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         if (!leaderElection.isLeader()) {
