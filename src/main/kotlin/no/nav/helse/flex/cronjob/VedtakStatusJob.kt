@@ -4,6 +4,7 @@ import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.SendVedtakStatus
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit
 
 @Component
 class VedtakStatusJob(
@@ -12,7 +13,7 @@ class VedtakStatusJob(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 1000L * 60 * 2, fixedDelay = 1000L * 5)
+    @Scheduled(initialDelay = 5, fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
     fun run() {
         if (leaderElection.isLeader()) {
             vedtakStatusService.prosesserUtbetalinger()
