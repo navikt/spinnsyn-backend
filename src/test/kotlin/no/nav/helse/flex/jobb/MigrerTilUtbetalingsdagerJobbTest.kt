@@ -7,18 +7,13 @@ import no.nav.helse.flex.db.VedtakDbRecord
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.fake.EnvironmentTogglesFake
 import no.nav.helse.flex.objectMapper
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be empty`
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should not be empty`
-import org.amshove.kluent.`should not be null`
-import org.amshove.kluent.`should throw`
+import org.amshove.kluent.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.UnexpectedRollbackException
 import java.time.Instant
+import java.util.*
 
 class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
     @Autowired
@@ -31,7 +26,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
     fun setup() {
         vedtakRepository.deleteAll()
         utbetalingRepository.deleteAll()
-        jobb.offset.set(0)
+        jobb.tilbakestill()
     }
 
     @Test
@@ -47,7 +42,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
             ),
         )
 
-        utbetalingRepository.hent500MedGammeltFormatMedOffset().single().`should not be null`()
+        utbetalingRepository.hent500MedGammeltFormat().single().`should not be null`()
     }
 
     @Test
@@ -62,22 +57,24 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
                 opprettet = Instant.parse("2021-01-01T12:00:00Z"),
             ),
         )
-        utbetalingRepository.save(
-            UtbetalingDbRecord(
-                fnr = "12345678910",
-                utbetalingType = "UTBETALING",
-                utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
-                opprettet = Instant.now(),
-                utbetalingId = "utbetaling-id",
-                antallVedtak = 1,
-                lest = Instant.parse("2024-01-01T00:00:00Z"),
-                motattPublisert = Instant.parse("2023-01-01T00:00:00Z"),
-                skalVisesTilBruker = true,
-            ),
-        )
+        val utbetaling =
+            utbetalingRepository.save(
+                UtbetalingDbRecord(
+                    fnr = "12345678910",
+                    utbetalingType = "UTBETALING",
+                    utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
+                    opprettet = Instant.now(),
+                    utbetalingId = "utbetaling-id",
+                    antallVedtak = 1,
+                    lest = Instant.parse("2024-01-01T00:00:00Z"),
+                    motattPublisert = Instant.parse("2023-01-01T00:00:00Z"),
+                    skalVisesTilBruker = true,
+                ),
+            )
         jobb.kjørMigreringTilUtbetalingsdager()
+        jobb.sistSettId `should be equal to` utbetaling.id
 
-        utbetalingRepository.hent500MedGammeltFormatMedOffset().`should be empty`()
+        utbetalingRepository.hent500MedGammeltFormat().`should be empty`()
 
         utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr = "12345678910").single().also { utbetalingDbRecord ->
             objectMapper
@@ -115,25 +112,24 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
         }
     }
 
-    @Disabled("Ikke gjeldende for dry run")
     @Test
-    fun `burde øke offset med antall feil i batch, når utbetaling mangler vedtak`() {
+    fun `burde sette sistSettId ved feil i batch, når utbetaling mangler vedtak`() {
         environmentToggles.setEnvironment("dev")
 
-        utbetalingRepository.save(
-            UtbetalingDbRecord(
-                fnr = "12345678910",
-                utbetalingType = "UTBETALING",
-                utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
-                opprettet = Instant.now(),
-                utbetalingId = "utbetaling-id",
-                antallVedtak = 1,
-            ),
-        )
+        val utbetaling =
+            utbetalingRepository.save(
+                UtbetalingDbRecord(
+                    fnr = "12345678910",
+                    utbetalingType = "UTBETALING",
+                    utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
+                    opprettet = Instant.now(),
+                    utbetalingId = "utbetaling-id",
+                    antallVedtak = 1,
+                ),
+            )
 
         jobb.kjørMigreringTilUtbetalingsdager()
-        val offset = jobb.offset.get()
-        offset `should be equal to` 1
+        jobb.sistSettId `should be equal to` utbetaling.id
     }
 
     @Test
@@ -192,6 +188,117 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
 
         harBlittMigrert.`should be equal to`(false)
 
-        utbetalingRepository.hent500MedGammeltFormatMedOffset().size.`should be equal to`(500)
+        utbetalingRepository.hent500MedGammeltFormat().size.`should be equal to`(500)
+    }
+
+    @Test
+    fun `keyset med uuid-id burde gi stabil rekkefølge ved lik opprettet`() {
+        val opprettet = Instant.parse("2021-01-01T12:00:00Z")
+
+        utbetalingRepository.save(
+            UtbetalingDbRecord(
+                fnr = "12345678910",
+                utbetalingType = "UTBETALING",
+                utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
+                opprettet = opprettet,
+                utbetalingId = "utbetaling-id-1",
+                antallVedtak = 1,
+            ),
+        )
+
+        utbetalingRepository.save(
+            UtbetalingDbRecord(
+                fnr = "12345678910",
+                utbetalingType = "UTBETALING",
+                utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
+                opprettet = opprettet,
+                utbetalingId = "utbetaling-id-2",
+                antallVedtak = 1,
+            ),
+        )
+
+        val side1 = utbetalingRepository.hent500MedGammeltFormat()
+        side1.size.`should be equal to`(2)
+
+        val idForste = side1.first().id.`should not be null`()
+        val idSiste = side1.last().id.`should not be null`()
+
+        UUID.fromString(idForste)
+        UUID.fromString(idSiste)
+
+        val side2 = utbetalingRepository.hent500MedGammeltFormat(sistSettOpprettet = opprettet, sistSettId = idSiste)
+        side2.`should be empty`()
+
+        val side3 = utbetalingRepository.hent500MedGammeltFormat(sistSettOpprettet = opprettet, sistSettId = idForste)
+        side3.size.`should be equal to`(1)
+        side3.single().id.`should be equal to`(idSiste)
+    }
+
+    @Test
+    fun `dry run utvalg burde være deterministisk i databasen`() {
+        val opprettet = Instant.parse("2021-01-01T12:00:00Z")
+
+        val lagredeUtbetalinger =
+            (1..200).map { indeks ->
+                utbetalingRepository.save(
+                    UtbetalingDbRecord(
+                        fnr = "12345678910",
+                        utbetalingType = "UTBETALING",
+                        utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
+                        opprettet = opprettet,
+                        utbetalingId = "utbetaling-id-$indeks",
+                        antallVedtak = 1,
+                    ),
+                )
+            }
+
+        val filtrert1 =
+            utbetalingRepository.hent500MedGammeltFormat(
+                sistSettOpprettet = null,
+                sistSettId = null,
+                andel = 10,
+            )
+
+        val filtrert2 =
+            utbetalingRepository.hent500MedGammeltFormat(
+                sistSettOpprettet = null,
+                sistSettId = null,
+                andel = 10,
+            )
+
+        val ider1 = filtrert1.mapNotNull { it.id }.toSet()
+        val ider2 = filtrert2.mapNotNull { it.id }.toSet()
+
+        ider1 `should be equal to` ider2
+
+        // Tillater et intervall for antall resultater i stedet for eksakt antall
+        filtrert1.size shouldBeInRange (5..30)
+    }
+
+    @Test
+    fun `verifiserer at hashtext gir konsistent utvalg for samme UUID`() {
+        val opprettet = Instant.parse("2021-01-01T12:00:00Z")
+
+        val lagretUtbetaling =
+            utbetalingRepository.save(
+                UtbetalingDbRecord(
+                    fnr = "12345678910",
+                    utbetalingType = "UTBETALING",
+                    utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
+                    opprettet = opprettet,
+                    utbetalingId = "utbetaling-id-test",
+                    antallVedtak = 1,
+                ),
+            )
+
+        val id = lagretUtbetaling.id.`should not be null`()
+
+        val resultat1 = utbetalingRepository.hent500MedGammeltFormat(andel = 10)
+        val resultat2 = utbetalingRepository.hent500MedGammeltFormat(andel = 10)
+
+        val inkludertIResultat1 = resultat1.any { it.id == id }
+        val inkludertIResultat2 = resultat2.any { it.id == id }
+
+        inkludertIResultat1.`should be equal to`(inkludertIResultat2)
     }
 }

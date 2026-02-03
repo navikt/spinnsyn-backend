@@ -1,9 +1,14 @@
 package no.nav.helse.flex.jobb
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.VedtakDbRecord
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
+import no.nav.helse.flex.objectMapper
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should be true`
+import org.amshove.kluent.`should not be null`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -125,14 +130,80 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
 
         utbetalingRepository
             .findById(lagretUtbetaling.id!!)
-            .also { utbetalingEtterpå ->
-                utbetalingEtterpå.isPresent.`should be equal to`(true)
-                utbetalingEtterpå
+            .also {
+                it.isPresent.`should be true`()
+                it
                     .get()
                     .utbetaling
                     .contains("\"utbetalingsdager\"")
                     .`should be equal to`(false)
             }
+    }
+
+    @Test
+    fun `burde håndtere flere vedtak for en utbetaling`() {
+        val utbetalingId = "utbetaling-med-flere-vedtak"
+        val fnr = "12345678910"
+
+        // Lagrer to vedtak knyttet til samme utbetalingId
+        val vedtak1 =
+            vedtakRepository.save(
+                VedtakDbRecord(
+                    utbetalingId = utbetalingId,
+                    fnr = fnr,
+                    vedtak =
+                        VEDTAK_JSON.replace(
+                            "\"utbetalingId\":\"3d19a9d1-c285-4dcd-abb3-b3bcfb538c4a\"",
+                            "\"utbetalingId\":\"$utbetalingId\"",
+                        ),
+                    opprettet = Instant.parse("2021-01-01T12:00:00Z"),
+                ),
+            )
+        val vedtak2 =
+            vedtakRepository.save(
+                VedtakDbRecord(
+                    utbetalingId = utbetalingId,
+                    fnr = fnr,
+                    vedtak =
+                        VEDTAK_JSON.replace(
+                            "\"utbetalingId\":\"3d19a9d1-c285-4dcd-abb3-b3bcfb538c4a\"",
+                            "\"utbetalingId\":\"$utbetalingId\"",
+                        ),
+                    opprettet = Instant.parse("2021-01-02T12:00:00Z"),
+                ),
+            )
+
+        val utbetaling =
+            utbetalingRepository.save(
+                UtbetalingDbRecord(
+                    fnr = fnr,
+                    utbetalingType = "UTBETALING",
+                    utbetaling =
+                        UTBETALING_GAMMELT_FORMAT_JSON.replace(
+                            "\"utbetalingId\":\"3d19a9d1-c285-4dcd-abb3-b3bcfb538c4a\"",
+                            "\"utbetalingId\":\"$utbetalingId\"",
+                        ),
+                    opprettet = Instant.now(),
+                    utbetalingId = utbetalingId,
+                    antallVedtak = 2,
+                ),
+            )
+
+        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak1, vedtak2)))
+
+        resultat.migrert.`should be equal to`(1)
+        resultat.feilet.`should be equal to`(0)
+
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr = fnr).single().also { utbetalingDbRecord ->
+            val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(utbetalingDbRecord.utbetaling)
+
+            utbetalingUtbetalt.utbetalingsdager.`should not be null`()
+            utbetalingUtbetalt.utbetalingsdager.size `should be equal to` 31
+
+            utbetalingUtbetalt.utbetalingsdager.count { it.type == "NavDag" } `should be equal to` 22
+            utbetalingUtbetalt.utbetalingsdager.count { it.type == "NavHelgDag" } `should be equal to` 8
+            utbetalingUtbetalt.utbetalingsdager.count { it.type == "AvvistDag" } `should be equal to` 1
+        }
     }
 }
 

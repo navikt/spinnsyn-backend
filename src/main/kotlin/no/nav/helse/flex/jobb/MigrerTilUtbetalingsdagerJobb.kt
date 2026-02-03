@@ -3,21 +3,21 @@ package no.nav.helse.flex.jobb
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.cronjob.LeaderElection
-import no.nav.helse.flex.db.AnnulleringDAO
-import no.nav.helse.flex.db.UtbetalingDbRecord
-import no.nav.helse.flex.db.UtbetalingRepository
-import no.nav.helse.flex.db.VedtakDbRecord
-import no.nav.helse.flex.db.VedtakRepository
+import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.RSUtbetalingdag
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionAspectSupport
-import java.util.concurrent.atomic.AtomicInteger
+import java.time.Instant
+import java.util.concurrent.TimeUnit
+
+const val ANDEL_SOM_SKAL_MIGRERES_I_DRY_RUN = 10
 
 @Component
 class MigrerTilUtbetalingsdagerJobb(
@@ -25,21 +25,41 @@ class MigrerTilUtbetalingsdagerJobb(
     private val vedtakRepository: VedtakRepository,
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
     private val leaderElection: LeaderElection,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
-    var offset = AtomicInteger(0)
 
+    @Volatile
+    private var sistSettOpprettet: Instant? = null
+
+    @Volatile
+    var sistSettId: String? = null
+
+    fun tilbakestill() {
+        sistSettOpprettet = null
+        sistSettId = null
+    }
+
+    @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         if (!leaderElection.isLeader()) {
             return
         }
 
-        val gjeldendeOffset = offset.get()
+        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (sistSettOpprettet=$sistSettOpprettet, sistSettId=$sistSettId)")
 
-        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$gjeldendeOffset)")
+        val utbetalinger =
+            if (environmentToggles.isProduction()) {
+                utbetalingRepository.hent500MedGammeltFormat(
+                    andel = ANDEL_SOM_SKAL_MIGRERES_I_DRY_RUN,
+                    sistSettOpprettet = sistSettOpprettet,
+                    sistSettId = sistSettId,
+                )
+            } else {
+                utbetalingRepository.hent500MedGammeltFormat(sistSettOpprettet = sistSettOpprettet, sistSettId = sistSettId)
+            }
 
-        val utbetalinger = utbetalingRepository.hent500MedGammeltFormatMedOffset(gjeldendeOffset)
         if (utbetalinger.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
             return
@@ -53,15 +73,19 @@ class MigrerTilUtbetalingsdagerJobb(
         if (status.feilet > 0) {
             log.error(
                 "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
-                    "(offset=$gjeldendeOffset): ${status.toLogString()}",
+                    "(sistSettOpprettet=$sistSettOpprettet, sistSettId=$sistSettId): ${status.toLogString()}",
             )
         } else {
             log.info(
                 "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
-                    "(offset=$gjeldendeOffset): ${status.toLogString()}",
+                    "(sistSettOpprettet=$sistSettOpprettet, sistSettId=$sistSettId): ${status.toLogString()}",
             )
         }
-        offset.getAndAdd(utbetalinger.size + 4_500)
+
+        utbetalinger.lastOrNull()?.let {
+            sistSettOpprettet = it.opprettet
+            sistSettId = it.id
+        }
     }
 }
 

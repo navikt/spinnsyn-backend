@@ -72,13 +72,22 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         WHERE 
             utbetaling::jsonb -> 'utbetalingsdager' -> 0 IS NOT NULL
             AND utbetaling::jsonb -> 'utbetalingsdager' -> 0 ->> 'sykdomsgrad' IS NULL
-        ORDER BY opprettet DESC
-        OFFSET :offset
+            AND (
+                CAST(:sistSettOpprettet AS timestamptz) IS NULL
+                OR opprettet < CAST(:sistSettOpprettet AS timestamptz)
+                OR (opprettet = CAST(:sistSettOpprettet AS timestamptz) AND id::uuid < CAST(:sistSettId AS uuid))
+            )
+            AND (abs(hashtext(id)) % 100) < :andel
+        ORDER BY opprettet DESC, id::uuid DESC
         LIMIT 500
-        FOR UPDATE SKIP LOCKED; 
+        FOR UPDATE SKIP LOCKED;
         """,
     )
-    fun hent500MedGammeltFormatMedOffset(offset: Int? = 0): List<UtbetalingDbRecord>
+    fun hent500MedGammeltFormat(
+        sistSettOpprettet: Instant? = null,
+        sistSettId: String? = null,
+        andel: Int = 100,
+    ): List<UtbetalingDbRecord>
 }
 
 @Table("utbetaling")
