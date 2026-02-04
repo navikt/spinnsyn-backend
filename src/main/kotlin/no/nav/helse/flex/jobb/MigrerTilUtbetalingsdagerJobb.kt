@@ -40,7 +40,7 @@ class MigrerTilUtbetalingsdagerJobb(
         sistSettId = null
     }
 
-    @Scheduled(initialDelay = 3_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Scheduled(initialDelay = 3_000, fixedDelay = 1_000, timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         if (!leaderElection.isLeader()) {
