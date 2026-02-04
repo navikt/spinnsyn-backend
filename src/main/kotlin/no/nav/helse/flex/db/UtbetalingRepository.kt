@@ -75,10 +75,10 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
             AND (
                 CAST(:sistSettOpprettet AS timestamptz) IS NULL
                 OR opprettet < CAST(:sistSettOpprettet AS timestamptz)
-                OR (opprettet = CAST(:sistSettOpprettet AS timestamptz) AND id::uuid < CAST(:sistSettId AS uuid))
+                OR (opprettet = CAST(:sistSettOpprettet AS timestamptz) AND id < :sistSettId)
             )
             AND (abs(hashtext(id)) % 100) < :andel
-        ORDER BY opprettet DESC, id::uuid DESC
+        ORDER BY opprettet DESC, id DESC
         LIMIT 500
         FOR UPDATE SKIP LOCKED;
         """,
