@@ -21,6 +21,7 @@ class MigrerTilUtbetalingsdagerJobb(
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
     private val leaderElection: LeaderElection,
     private val utbetalingMigreringRepository: UtbetalingMigreringRepository,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
@@ -33,7 +34,12 @@ class MigrerTilUtbetalingsdagerJobb(
 
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
 
-        val utbetalingerIder = utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).map { it.utbetalingId }
+        val utbetalingerIder =
+            if (environmentToggles.isProduction()) {
+                utbetalingMigreringRepository.hentUtdragForDryRun().map { it.utbetalingId }
+            } else {
+                utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).map { it.utbetalingId }
+            }
 
         if (utbetalingerIder.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
@@ -125,11 +131,9 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
 
         val utbetalingUtbetalt = objectMapper.readValue(utbetaling.utbetaling, UtbetalingUtbetalt::class.java)
 
-        // Opprett maps for å slå opp beløp per dato
         val dagerPersonMap = rsVedtak.dagerPerson.associateBy { it.dato }
         val dagerArbeidsgiverMap = rsVedtak.dagerArbeidsgiver.associateBy { it.dato }
 
-        // Berik eksisterende utbetalingsdager med beløpinformasjon
         val utbetalingdagDtos =
             utbetalingUtbetalt.utbetalingsdager.map { gammelDag ->
                 val dagPerson = dagerPersonMap[gammelDag.dato]
