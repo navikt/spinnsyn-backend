@@ -1,6 +1,7 @@
 package no.nav.helse.flex.jobb
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.db.*
@@ -98,10 +99,19 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         val feil = migreringsResultat.filterIsInstance<MigreringsResultat.Feil>()
 
         if (suksesser.isNotEmpty()) {
+            suksesser.forEach {
+                val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(it.utbetaling.utbetaling)
+                log.info(
+                    "Migrerte ider for utbetalinger: ${
+                        it.utbetaling.utbetalingId + ", med antall utbetalingsdager: " + utbetalingUtbetalt.utbetalingsdager.size
+                    }",
+                )
+            }
             lagreVellykkedeMigreringer(suksesser)
         }
 
         if (feil.isNotEmpty()) {
+            log.error("Feilet migrering for utbetalingId: ${feil.map { it.migreringsRecord.utbetalingId }}")
             lagreFeiledeMigreringer(feil)
         }
 
