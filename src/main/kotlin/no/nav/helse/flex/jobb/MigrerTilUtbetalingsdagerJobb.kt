@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionAspectSupport
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -95,11 +96,14 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         val feil = migreringsResultat.filterIsInstance<MigreringsResultat.Feil>()
 
         if (suksesser.isNotEmpty()) {
-            suksesser.forEach {
-                val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(it.utbetaling.utbetaling)
+            suksesser.forEach { migreringsResultatSuksess ->
+                val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(migreringsResultatSuksess.utbetaling.utbetaling)
                 log.info(
                     "Migrerte ider for utbetalinger: ${
-                        it.utbetaling.utbetalingId + ", med antall utbetalingsdager: " + utbetalingUtbetalt.utbetalingsdager.size
+                        migreringsResultatSuksess.utbetaling.utbetalingId + ", med antall utbetalingsdager: " +
+                            utbetalingUtbetalt.utbetalingsdager.size + ". " +
+                            "Aktuelle dager: ${utbetalingUtbetalt.utbetalingsdager.filter { it.beløpTilSykmeldt != null }.size}" +
+                            "Dager mellom fom og tom: ${ChronoUnit.DAYS.between(utbetalingUtbetalt.tom, utbetalingUtbetalt.fom) + 1}"
                     }",
                 )
             }
