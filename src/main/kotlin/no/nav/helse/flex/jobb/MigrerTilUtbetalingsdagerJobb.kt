@@ -2,7 +2,6 @@ package no.nav.helse.flex.jobb
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.RSVedtak
@@ -14,7 +13,6 @@ import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.interceptor.TransactionAspectSupport
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
@@ -25,11 +23,10 @@ class MigrerTilUtbetalingsdagerJobb(
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
     private val leaderElection: LeaderElection,
     private val utbetalingMigreringRepository: UtbetalingMigreringRepository,
-    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 180, fixedDelay = 60, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(initialDelay = 180_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         if (!leaderElection.isLeader()) {
@@ -38,12 +35,7 @@ class MigrerTilUtbetalingsdagerJobb(
 
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
 
-        val utbetalingerIder =
-            if (environmentToggles.isProduction()) {
-                utbetalingMigreringRepository.hentUtdragForDryRun().map { it.utbetalingId }
-            } else {
-                utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).map { it.utbetalingId }
-            }
+        val utbetalingerIder = utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).map { it.utbetalingId }
 
         if (utbetalingerIder.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
@@ -73,7 +65,6 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     private val utbetalingRepository: UtbetalingRepository,
     private val annulleringDAO: AnnulleringDAO,
     private val objectMapper: ObjectMapper,
-    private val environmentToggles: EnvironmentToggles,
     private val utbetalingMigreringRepository: UtbetalingMigreringRepository,
 ) {
     private val log = logger()
@@ -113,14 +104,6 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
                         }",
                     )
                 }
-                log.info(
-                    "Migrerte ider for utbetalinger: ${
-                        migreringsResultatSuksess.utbetaling.utbetalingId + ", med antall utbetalingsdager: " +
-                            utbetalingUtbetalt.utbetalingsdager.size + ". " +
-                            "Aktuelle dager: $aktuelleDager" +
-                            " Dager mellom fom og tom: $periode"
-                    }",
-                )
             }
             lagreVellykkedeMigreringer(suksesser)
         }
@@ -128,11 +111,6 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         if (feil.isNotEmpty()) {
             log.error("Feilet migrering for utbetalingId: ${feil.map { it.migreringsRecord.utbetalingId }}")
             lagreFeiledeMigreringer(feil)
-        }
-
-        if (environmentToggles.isProduction()) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()
-            log.info("DB-dry-run: kjørte saveAll for ${suksesser.size} utbetalinger og rullet tilbake transaksjonen")
         }
 
         return VedtakMigreringStatus(

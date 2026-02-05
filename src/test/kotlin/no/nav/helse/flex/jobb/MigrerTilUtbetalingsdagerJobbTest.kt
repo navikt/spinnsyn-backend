@@ -11,7 +11,6 @@ import org.amshove.kluent.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.UnexpectedRollbackException
 import java.time.Instant
 
 class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
@@ -75,41 +74,6 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
         } `should not throw` Exception::class
 
         utbetalingMigreringRepository.verifiserMigreringsStatus(utbetalingId, MigrertStatus.FEILET)
-    }
-
-    @Test
-    fun `dry run burde ikke endre utbetalinger`() {
-        environmentToggles.setEnvironment("prod")
-        val utbetalingId = "utbetaling-id"
-        val fnr = "12345678910"
-
-        vedtakRepository.opprettVedtak(utbetalingId, fnr)
-        utbetalingRepository.opprettUtbetaling(utbetalingId, fnr)
-        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
-
-        val utbetalingerFør = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-        utbetalingerFør.`should not be empty`()
-        utbetalingerFør
-            .single()
-            .utbetaling
-            .contains("\"sykdomsgrad\"")
-            .`should be false`()
-
-        invoking {
-            jobb.kjørMigreringTilUtbetalingsdager()
-        } `should throw` UnexpectedRollbackException::class
-
-        val utbetalingerEtterJobb = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-        utbetalingerEtterJobb.shouldHaveSize(1)
-
-        val harBlittMigrert =
-            utbetalingerEtterJobb.any { utbetalingDbRecord ->
-                objectMapper.readValue<UtbetalingUtbetalt>(utbetalingDbRecord.utbetaling).utbetalingsdager.any { it.sykdomsgrad != null }
-            }
-
-        harBlittMigrert.`should be equal to`(false)
-        utbetalingRepository.hent500MedGammeltFormat().shouldHaveSize(1)
-        utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.MIGRERT).`should be empty`()
     }
 
     private fun verifiserUtbetalingMigrert(fnr: String) {
