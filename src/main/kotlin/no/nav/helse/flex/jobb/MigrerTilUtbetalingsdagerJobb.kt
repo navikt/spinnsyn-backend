@@ -11,12 +11,10 @@ import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionAspectSupport
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
 
 @Component
 class MigrerTilUtbetalingsdagerJobb(
@@ -29,7 +27,6 @@ class MigrerTilUtbetalingsdagerJobb(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 180, fixedDelay = 60, timeUnit = TimeUnit.SECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         if (!leaderElection.isLeader()) {
