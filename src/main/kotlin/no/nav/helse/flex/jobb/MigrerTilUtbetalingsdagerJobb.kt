@@ -98,12 +98,24 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         if (suksesser.isNotEmpty()) {
             suksesser.forEach { migreringsResultatSuksess ->
                 val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(migreringsResultatSuksess.utbetaling.utbetaling)
+                val periode = ChronoUnit.DAYS.between(utbetalingUtbetalt.fom, utbetalingUtbetalt.tom) + 1
+                val aktuelleDager = utbetalingUtbetalt.utbetalingsdager.filter { it.beløpTilSykmeldt != null }.size
+                if (aktuelleDager.toLong() != periode) {
+                    log.warn(
+                        "Forskjell på perioder og aktuelle dager: ${
+                            migreringsResultatSuksess.utbetaling.utbetalingId + ", med antall utbetalingsdager: " +
+                                utbetalingUtbetalt.utbetalingsdager.size + ". " +
+                                "Aktuelle dager: $aktuelleDager" +
+                                " Dager mellom fom og tom: $periode"
+                        }",
+                    )
+                }
                 log.info(
                     "Migrerte ider for utbetalinger: ${
                         migreringsResultatSuksess.utbetaling.utbetalingId + ", med antall utbetalingsdager: " +
                             utbetalingUtbetalt.utbetalingsdager.size + ". " +
-                            "Aktuelle dager: ${utbetalingUtbetalt.utbetalingsdager.filter { it.beløpTilSykmeldt != null }.size}" +
-                            "Dager mellom fom og tom: ${ChronoUnit.DAYS.between(utbetalingUtbetalt.tom, utbetalingUtbetalt.fom) + 1}"
+                            "Aktuelle dager: $aktuelleDager" +
+                            " Dager mellom fom og tom: $periode"
                     }",
                 )
             }
