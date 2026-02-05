@@ -1,4 +1,4 @@
-db_tier: db-custom-1-3840
+db_tier: db-custom-2-7680
 db_highAvailability: true
 db_pointInTimeRecovery: true
 db_type: POSTGRES_14
