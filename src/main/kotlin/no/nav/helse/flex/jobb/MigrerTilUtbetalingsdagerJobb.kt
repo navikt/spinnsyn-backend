@@ -35,7 +35,7 @@ class MigrerTilUtbetalingsdagerJobb(
 
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
 
-        val utbetalingerIder = utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).mapNotNull { it.utbetalingId }
+        val utbetalingerIder = utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).map { it.utbetalingId }
 
         if (utbetalingerIder.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
@@ -98,13 +98,12 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
                     )
                 } catch (e: Exception) {
                     feilet++
-                    utbetalingMigreringRepository.save(
-                        UtbetalingMigreringDbRecord(
-                            utbetalingId = utbetaling.utbetalingId,
-                            status = MigrertStatus.FEILET,
-                        ),
+                    val migrering = utbetalingMigreringRepository.findByUtbetalingIdIn(listOf(utbetaling.utbetalingId)).single()
+                    migrering.copy(
+                        status = MigrertStatus.FEILET,
                     )
-                    log.warn("Feilet migrering for utbetalingId=${utbetaling.utbetalingId}", e)
+                    utbetalingMigreringRepository.save(migrering)
+                    log.error("Feilet migrering for utbetalingId=${utbetaling.utbetalingId}", e)
                     null
                 }
             }

@@ -28,10 +28,11 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
     fun setup() {
         vedtakRepository.deleteAll()
         utbetalingRepository.deleteAll()
+        utbetalingMigreringRepository.deleteAll()
     }
 
     @Test
-    fun `migrerer utbetaling med gammelt format til nytt format`() {
+    fun `Migrerer utbetaling med gammelt format til nytt format`() {
         val utbetalingId = "utbetaling-id"
 
         val vedtak =
@@ -70,7 +71,7 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
     }
 
     @Test
-    fun `feiler når utbetaling ikke har tilhørende vedtak`() {
+    fun `Migrering feiler når utbetaling ikke har tilhørende vedtak`() {
         val utbetaling =
             UtbetalingDbRecord(
                 id = "id-1",
@@ -82,6 +83,13 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                 antallVedtak = 1,
             )
 
+        utbetalingMigreringRepository.save(
+            UtbetalingMigreringDbRecord(
+                utbetalingId = "mangler-vedtak",
+                status = MigrertStatus.IKKE_MIGRERT,
+            ),
+        )
+
         val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to emptyList()))
 
         resultat.migrert.`should be equal to`(0)
@@ -89,7 +97,7 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
     }
 
     @Test
-    fun `feiler når utbetaling har ugyldig json`() {
+    fun `Migrering feiler når utbetaling har ugyldig json`() {
         val utbetalingId = "ugyldig-json-id"
         val vedtak =
             VedtakDbRecord(
@@ -108,6 +116,14 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                 utbetalingId = utbetalingId,
                 antallVedtak = 1,
             )
+
+        utbetalingMigreringRepository.save(
+            UtbetalingMigreringDbRecord(
+                utbetalingId = utbetalingId,
+                status = MigrertStatus.IKKE_MIGRERT,
+            ),
+        )
+
         val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak)))
 
         resultat.migrert.`should be equal to`(0)
@@ -115,7 +131,7 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
     }
 
     @Test
-    fun `feiler når utbetaling mangler utbetalingsdager`() {
+    fun `Migrering feiler når utbetaling mangler utbetalingsdager`() {
         val utbetalingId = "uten-dager"
         val vedtak =
             VedtakDbRecord(
@@ -133,6 +149,12 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                 utbetalingId = utbetalingId,
                 antallVedtak = 1,
             )
+        utbetalingMigreringRepository.save(
+            UtbetalingMigreringDbRecord(
+                utbetalingId = utbetalingId,
+                status = MigrertStatus.IKKE_MIGRERT,
+            ),
+        )
 
         val lagretUtbetaling = utbetalingRepository.save(utbetaling)
 
@@ -154,7 +176,7 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
     }
 
     @Test
-    fun `burde håndtere flere vedtak for en utbetaling`() {
+    fun `Burde håndtere flere vedtak for en utbetaling`() {
         val utbetalingId = "utbetaling-med-flere-vedtak"
         val fnr = "12345678910"
 
