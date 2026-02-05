@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionAspectSupport
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -79,10 +80,6 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     fun migrerGammeltVedtak(utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>): VedtakMigreringStatus {
         val utbetalingIder = utbetalingVedtakMap.keys.map { it.utbetalingId }
         val migreringsRecords = utbetalingMigreringRepository.findByUtbetalingIdIn(utbetalingIder).associateBy { it.utbetalingId }
-        utbetalingMigreringRepository
-            .findByUtbetalingIdIn(
-                utbetalingIder,
-            ).associateBy(UtbetalingMigreringDbRecord::utbetalingId)
 
         val migreringsResultat =
             utbetalingVedtakMap.map { (utbetaling, vedtak) ->
@@ -99,11 +96,26 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         val feil = migreringsResultat.filterIsInstance<MigreringsResultat.Feil>()
 
         if (suksesser.isNotEmpty()) {
-            suksesser.forEach {
-                val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(it.utbetaling.utbetaling)
+            suksesser.forEach { migreringsResultatSuksess ->
+                val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(migreringsResultatSuksess.utbetaling.utbetaling)
+                val periode = ChronoUnit.DAYS.between(utbetalingUtbetalt.fom, utbetalingUtbetalt.tom) + 1
+                val aktuelleDager = utbetalingUtbetalt.utbetalingsdager.filter { it.beløpTilSykmeldt != null }.size
+                if (aktuelleDager.toLong() != periode) {
+                    log.warn(
+                        "Forskjell på perioder og aktuelle dager: ${
+                            migreringsResultatSuksess.utbetaling.utbetalingId + ", med antall utbetalingsdager: " +
+                                utbetalingUtbetalt.utbetalingsdager.size + ". " +
+                                "Aktuelle dager: $aktuelleDager" +
+                                " Dager mellom fom og tom: $periode"
+                        }",
+                    )
+                }
                 log.info(
                     "Migrerte ider for utbetalinger: ${
-                        it.utbetaling.utbetalingId + ", med antall utbetalingsdager: " + utbetalingUtbetalt.utbetalingsdager.size
+                        migreringsResultatSuksess.utbetaling.utbetalingId + ", med antall utbetalingsdager: " +
+                            utbetalingUtbetalt.utbetalingsdager.size + ". " +
+                            "Aktuelle dager: $aktuelleDager" +
+                            " Dager mellom fom og tom: $periode"
                     }",
                 )
             }
@@ -146,6 +158,10 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
 
         val utbetalingdagDtos =
             utbetalingUtbetalt.utbetalingsdager.map { gammelDag ->
+                if (gammelDag.dato < rsVedtak.vedtak.fom || gammelDag.dato > rsVedtak.vedtak.tom) {
+                    return@map gammelDag
+                }
+
                 val dagPerson = dagerPersonMap[gammelDag.dato]
                 val dagArbeidsgiver = dagerArbeidsgiverMap[gammelDag.dato]
 
