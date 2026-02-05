@@ -14,10 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionAspectSupport
-import java.time.Instant
 import java.util.concurrent.TimeUnit
-
-const val ANDEL_SOM_SKAL_MIGRERES_I_DRY_RUN = 10
 
 @Component
 class MigrerTilUtbetalingsdagerJobb(
@@ -25,20 +22,9 @@ class MigrerTilUtbetalingsdagerJobb(
     private val vedtakRepository: VedtakRepository,
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
     private val leaderElection: LeaderElection,
-    private val environmentToggles: EnvironmentToggles,
+    private val utbetalingMigreringRepository: UtbetalingMigreringRepository,
 ) {
     val log = logger()
-
-    @Volatile
-    private var sistSettOpprettet: Instant? = null
-
-    @Volatile
-    var sistSettId: String? = null
-
-    fun tilbakestill() {
-        sistSettOpprettet = null
-        sistSettId = null
-    }
 
     @Scheduled(initialDelay = 3_000, fixedDelay = 1_000, timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(rollbackFor = [Exception::class])
@@ -47,24 +33,16 @@ class MigrerTilUtbetalingsdagerJobb(
             return
         }
 
-        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (sistSettOpprettet=$sistSettOpprettet, sistSettId=$sistSettId)")
+        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
 
-        val utbetalinger =
-            if (environmentToggles.isProduction()) {
-                utbetalingRepository.hent500MedGammeltFormat(
-                    andel = ANDEL_SOM_SKAL_MIGRERES_I_DRY_RUN,
-                    sistSettOpprettet = sistSettOpprettet,
-                    sistSettId = sistSettId,
-                )
-            } else {
-                utbetalingRepository.hent500MedGammeltFormat(sistSettOpprettet = sistSettOpprettet, sistSettId = sistSettId)
-            }
+        val utbetalingerIder = utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).mapNotNull { it.utbetalingId }
 
-        if (utbetalinger.isEmpty()) {
+        if (utbetalingerIder.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
             return
         }
 
+        val utbetalinger = utbetalingRepository.findByUtbetalingIdIn(utbetalingerIder)
         val vedtak = vedtakRepository.findByUtbetalingIdIn(utbetalinger.map { it.utbetalingId })
         val utbetalingVedtakMap = utbetalinger.associateWith { utbetaling -> vedtak.filter { it.utbetalingId == utbetaling.utbetalingId } }
 
@@ -72,19 +50,12 @@ class MigrerTilUtbetalingsdagerJobb(
 
         if (status.feilet > 0) {
             log.error(
-                "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
-                    "(sistSettOpprettet=$sistSettOpprettet, sistSettId=$sistSettId): ${status.toLogString()}",
+                "Noen migreringer av utbetalinger feilet: ${status.toLogString()}",
             )
         } else {
             log.info(
-                "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
-                    "(sistSettOpprettet=$sistSettOpprettet, sistSettId=$sistSettId): ${status.toLogString()}",
+                "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format: ${status.toLogString()}",
             )
-        }
-
-        utbetalinger.lastOrNull()?.let {
-            sistSettOpprettet = it.opprettet
-            sistSettId = it.id
         }
     }
 }
@@ -95,6 +66,7 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     private val annulleringDAO: AnnulleringDAO,
     private val objectMapper: ObjectMapper,
     private val environmentToggles: EnvironmentToggles,
+    private val utbetalingMigreringRepository: UtbetalingMigreringRepository,
 ) {
     private val log = logger()
 
@@ -126,18 +98,30 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
                     )
                 } catch (e: Exception) {
                     feilet++
+                    utbetalingMigreringRepository.save(
+                        UtbetalingMigreringDbRecord(
+                            utbetalingId = utbetaling.utbetalingId,
+                            status = MigrertStatus.FEILET,
+                        ),
+                    )
                     log.warn("Feilet migrering for utbetalingId=${utbetaling.utbetalingId}", e)
                     null
                 }
             }
 
         if (migrerteUtbetalinger.isNotEmpty()) {
+            utbetalingRepository.saveAll(migrerteUtbetalinger)
+            val alleMigreringer =
+                migrerteUtbetalinger.map {
+                    val migrering = utbetalingMigreringRepository.findByUtbetalingIdIn(listOf(it.utbetalingId)).single()
+                    migrering.copy(
+                        status = MigrertStatus.MIGRERT,
+                    )
+                }
+            utbetalingMigreringRepository.saveAll(alleMigreringer)
             if (environmentToggles.isProduction()) {
-                utbetalingRepository.saveAll(migrerteUtbetalinger)
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()
                 log.info("DB-dry-run: kjørte saveAll for ${migrerteUtbetalinger.size} utbetalinger og rullet tilbake transaksjonen")
-            } else {
-                utbetalingRepository.saveAll(migrerteUtbetalinger)
             }
         }
 

@@ -2,7 +2,10 @@ package no.nav.helse.flex.jobb
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.FellesTestOppsett
+import no.nav.helse.flex.db.MigrertStatus
 import no.nav.helse.flex.db.UtbetalingDbRecord
+import no.nav.helse.flex.db.UtbetalingMigreringDbRecord
+import no.nav.helse.flex.db.UtbetalingMigreringRepository
 import no.nav.helse.flex.db.VedtakDbRecord
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.objectMapper
@@ -17,6 +20,9 @@ import java.time.Instant
 class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
     @Autowired
     private lateinit var batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator
+
+    @Autowired
+    private lateinit var utbetalingMigreringRepository: UtbetalingMigreringRepository
 
     @BeforeEach
     fun setup() {
@@ -49,6 +55,13 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                     antallVedtak = 1,
                 ),
             )
+
+        utbetalingMigreringRepository.save(
+            UtbetalingMigreringDbRecord(
+                utbetalingId = utbetalingId,
+                status = MigrertStatus.IKKE_MIGRERT,
+            ),
+        )
 
         val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak)))
 
@@ -188,6 +201,13 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                     antallVedtak = 2,
                 ),
             )
+
+        utbetalingMigreringRepository.save(
+            UtbetalingMigreringDbRecord(
+                utbetalingId = utbetalingId,
+                status = MigrertStatus.IKKE_MIGRERT,
+            ),
+        )
 
         val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak1, vedtak2)))
 

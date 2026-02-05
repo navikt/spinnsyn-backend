@@ -88,6 +88,8 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
         sistSettId: String? = null,
         andel: Int = 100,
     ): List<UtbetalingDbRecord>
+
+    fun findByUtbetalingIdIn(utbetalingIder: List<String>): List<UtbetalingDbRecord>
 }
 
 @Table("utbetaling")
