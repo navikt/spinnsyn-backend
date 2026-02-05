@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.db.*
+import no.nav.helse.flex.domene.RSVedtak
+import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
@@ -84,8 +86,8 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         val migreringsResultat =
             utbetalingVedtakMap.map { (utbetaling, vedtak) ->
                 try {
-                    val migrertUtbetaling = migrerEnkelUtbetaling(utbetaling, vedtak)
-                    MigreringsResultat.Suksess(migrertUtbetaling, migreringsRecords[utbetaling.utbetalingId]!!)
+                    val (migrertUtbetaling, rsVedtak) = migrerEnkelUtbetaling(utbetaling, vedtak)
+                    MigreringsResultat.Suksess(migrertUtbetaling, migreringsRecords[utbetaling.utbetalingId]!!, rsVedtak.vedtak)
                 } catch (e: Exception) {
                     log.error("Feilet migrering for utbetalingId=${utbetaling.utbetalingId}", e)
                     MigreringsResultat.Feil(migreringsRecords[utbetaling.utbetalingId]!!, e)
@@ -98,7 +100,8 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         if (suksesser.isNotEmpty()) {
             suksesser.forEach { migreringsResultatSuksess ->
                 val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(migreringsResultatSuksess.utbetaling.utbetaling)
-                val periode = ChronoUnit.DAYS.between(utbetalingUtbetalt.fom, utbetalingUtbetalt.tom) + 1
+                val periode =
+                    ChronoUnit.DAYS.between(migreringsResultatSuksess.vedtak.fom, migreringsResultatSuksess.vedtak.tom) + 1
                 val aktuelleDager = utbetalingUtbetalt.utbetalingsdager.filter { it.beløpTilSykmeldt != null }.size
                 if (aktuelleDager.toLong() != periode) {
                     log.warn(
@@ -141,7 +144,7 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     private fun migrerEnkelUtbetaling(
         utbetaling: UtbetalingDbRecord,
         vedtak: List<VedtakDbRecord>,
-    ): UtbetalingDbRecord {
+    ): Pair<UtbetalingDbRecord, RSVedtakWrapper> {
         val annuleringer = annulleringDAO.finnAnnulleringMedIdent(listOf(utbetaling.fnr))
         val vedtakMedUtbetaling = vedtak.filter { it.utbetalingId == utbetaling.utbetalingId }
         val rsVedtak =
@@ -172,8 +175,11 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
                 )
             }
 
-        return utbetaling.copy(
-            utbetaling = objectMapper.writeValueAsString(utbetalingUtbetalt.copy(utbetalingsdager = utbetalingdagDtos)),
+        return Pair(
+            utbetaling.copy(
+                utbetaling = objectMapper.writeValueAsString(utbetalingUtbetalt.copy(utbetalingsdager = utbetalingdagDtos)),
+            ),
+            rsVedtak,
         )
     }
 
@@ -192,6 +198,7 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         data class Suksess(
             val utbetaling: UtbetalingDbRecord,
             val migreringsRecord: UtbetalingMigreringDbRecord,
+            val vedtak: RSVedtak,
         ) : MigreringsResultat()
 
         data class Feil(
