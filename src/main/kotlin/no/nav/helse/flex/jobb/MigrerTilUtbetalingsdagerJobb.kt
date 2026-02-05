@@ -25,7 +25,7 @@ class MigrerTilUtbetalingsdagerJobb(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 3_000, fixedDelay = 1_000, timeUnit = TimeUnit.MILLISECONDS)
+    @Scheduled(initialDelay = 180, fixedDelay = 60, timeUnit = TimeUnit.SECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         if (!leaderElection.isLeader()) {
