@@ -79,10 +79,6 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     fun migrerGammeltVedtak(utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>): VedtakMigreringStatus {
         val utbetalingIder = utbetalingVedtakMap.keys.map { it.utbetalingId }
         val migreringsRecords = utbetalingMigreringRepository.findByUtbetalingIdIn(utbetalingIder).associateBy { it.utbetalingId }
-        utbetalingMigreringRepository
-            .findByUtbetalingIdIn(
-                utbetalingIder,
-            ).associateBy(UtbetalingMigreringDbRecord::utbetalingId)
 
         val migreringsResultat =
             utbetalingVedtakMap.map { (utbetaling, vedtak) ->
@@ -146,6 +142,10 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
 
         val utbetalingdagDtos =
             utbetalingUtbetalt.utbetalingsdager.map { gammelDag ->
+                if (gammelDag.dato < rsVedtak.vedtak.fom || gammelDag.dato > rsVedtak.vedtak.tom) {
+                    return@map gammelDag
+                }
+
                 val dagPerson = dagerPersonMap[gammelDag.dato]
                 val dagArbeidsgiver = dagerArbeidsgiverMap[gammelDag.dato]
 
