@@ -1,23 +1,19 @@
 package no.nav.helse.flex.jobb
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.cronjob.LeaderElection
-import no.nav.helse.flex.db.AnnulleringDAO
-import no.nav.helse.flex.db.UtbetalingDbRecord
-import no.nav.helse.flex.db.UtbetalingRepository
-import no.nav.helse.flex.db.VedtakDbRecord
-import no.nav.helse.flex.db.VedtakRepository
-import no.nav.helse.flex.domene.RSUtbetalingdag
-import no.nav.helse.flex.domene.RSVedtakWrapper
+import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionAspectSupport
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.TimeUnit
 
 @Component
 class MigrerTilUtbetalingsdagerJobb(
@@ -25,26 +21,33 @@ class MigrerTilUtbetalingsdagerJobb(
     private val vedtakRepository: VedtakRepository,
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
     private val leaderElection: LeaderElection,
+    private val utbetalingMigreringRepository: UtbetalingMigreringRepository,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
-    var offset = AtomicInteger(0)
 
+    @Scheduled(initialDelay = 180, fixedDelay = 60, timeUnit = TimeUnit.SECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         if (!leaderElection.isLeader()) {
             return
         }
 
-        val gjeldendeOffset = offset.get()
+        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
 
-        log.info("Migrerer gamle vedtak til nytt utbetalingsdager format (offset=$gjeldendeOffset)")
+        val utbetalingerIder =
+            if (environmentToggles.isProduction()) {
+                utbetalingMigreringRepository.hentUtdragForDryRun().map { it.utbetalingId }
+            } else {
+                utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).map { it.utbetalingId }
+            }
 
-        val utbetalinger = utbetalingRepository.hent500MedGammeltFormatMedOffset(gjeldendeOffset)
-        if (utbetalinger.isEmpty()) {
+        if (utbetalingerIder.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
             return
         }
 
+        val utbetalinger = utbetalingRepository.findByUtbetalingIdIn(utbetalingerIder)
         val vedtak = vedtakRepository.findByUtbetalingIdIn(utbetalinger.map { it.utbetalingId })
         val utbetalingVedtakMap = utbetalinger.associateWith { utbetaling -> vedtak.filter { it.utbetalingId == utbetaling.utbetalingId } }
 
@@ -52,16 +55,13 @@ class MigrerTilUtbetalingsdagerJobb(
 
         if (status.feilet > 0) {
             log.error(
-                "Feilet ved migrering av batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
-                    "(offset=$gjeldendeOffset): ${status.toLogString()}",
+                "Noen migreringer av utbetalinger feilet: ${status.toLogString()}",
             )
         } else {
             log.info(
-                "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format " +
-                    "(offset=$gjeldendeOffset): ${status.toLogString()}",
+                "Migrert batch med ${utbetalinger.size} utbetalinger til nytt utbetalingsdager format: ${status.toLogString()}",
             )
         }
-        offset.getAndAdd(utbetalinger.size + 4_500)
     }
 }
 
@@ -71,56 +71,117 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     private val annulleringDAO: AnnulleringDAO,
     private val objectMapper: ObjectMapper,
     private val environmentToggles: EnvironmentToggles,
+    private val utbetalingMigreringRepository: UtbetalingMigreringRepository,
 ) {
     private val log = logger()
 
     @Transactional(rollbackFor = [Exception::class])
     fun migrerGammeltVedtak(utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>): VedtakMigreringStatus {
-        var feilet = 0
+        val utbetalingIder = utbetalingVedtakMap.keys.map { it.utbetalingId }
+        val migreringsRecords = utbetalingMigreringRepository.findByUtbetalingIdIn(utbetalingIder).associateBy { it.utbetalingId }
+        utbetalingMigreringRepository
+            .findByUtbetalingIdIn(
+                utbetalingIder,
+            ).associateBy(UtbetalingMigreringDbRecord::utbetalingId)
 
-        val migrerteUtbetalinger =
-            utbetalingVedtakMap.mapNotNull { (utbetaling, vedtak) ->
+        val migreringsResultat =
+            utbetalingVedtakMap.map { (utbetaling, vedtak) ->
                 try {
-                    val annuleringer = annulleringDAO.finnAnnulleringMedIdent(listOf(utbetaling.fnr))
-                    val vedtakMedUtbetaling = vedtak.filter { it.utbetalingId == utbetaling.utbetalingId }
-                    val rsVedtak =
-                        mapTilRsVedtakWrapper(
-                            utbetalingDbRecord = utbetaling,
-                            vedtakMedUtbetaling = vedtakMedUtbetaling,
-                            annulleringer = annuleringer,
-                        ).leggTilDagerIVedtakPeriode()
-
-                    val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(rsVedtak.dagerPerson, rsVedtak.dagerArbeidsgiver)
-                    val utbetalingdagDtos = utbetalingsdager.map { RSUtbetalingdag.konverterTilUtbetalindagDto(it) }
-                    val utbetalingUtbetalt =
-                        objectMapper.readValue(utbetaling.utbetaling, UtbetalingUtbetalt::class.java).copy(
-                            utbetalingsdager = utbetalingdagDtos,
-                        )
-
-                    utbetaling.copy(
-                        utbetaling = objectMapper.writeValueAsString(utbetalingUtbetalt),
-                    )
+                    val migrertUtbetaling = migrerEnkelUtbetaling(utbetaling, vedtak)
+                    MigreringsResultat.Suksess(migrertUtbetaling, migreringsRecords[utbetaling.utbetalingId]!!)
                 } catch (e: Exception) {
-                    feilet++
-                    log.warn("Feilet migrering for utbetalingId=${utbetaling.utbetalingId}", e)
-                    null
+                    log.error("Feilet migrering for utbetalingId=${utbetaling.utbetalingId}", e)
+                    MigreringsResultat.Feil(migreringsRecords[utbetaling.utbetalingId]!!, e)
                 }
             }
 
-        if (migrerteUtbetalinger.isNotEmpty()) {
-            if (environmentToggles.isProduction()) {
-                utbetalingRepository.saveAll(migrerteUtbetalinger)
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()
-                log.info("DB-dry-run: kjørte saveAll for ${migrerteUtbetalinger.size} utbetalinger og rullet tilbake transaksjonen")
-            } else {
-                utbetalingRepository.saveAll(migrerteUtbetalinger)
+        val suksesser = migreringsResultat.filterIsInstance<MigreringsResultat.Suksess>()
+        val feil = migreringsResultat.filterIsInstance<MigreringsResultat.Feil>()
+
+        if (suksesser.isNotEmpty()) {
+            suksesser.forEach {
+                val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(it.utbetaling.utbetaling)
+                log.info(
+                    "Migrerte ider for utbetalinger: ${
+                        it.utbetaling.utbetalingId + ", med antall utbetalingsdager: " + utbetalingUtbetalt.utbetalingsdager.size
+                    }",
+                )
             }
+            lagreVellykkedeMigreringer(suksesser)
+        }
+
+        if (feil.isNotEmpty()) {
+            log.error("Feilet migrering for utbetalingId: ${feil.map { it.migreringsRecord.utbetalingId }}")
+            lagreFeiledeMigreringer(feil)
+        }
+
+        if (environmentToggles.isProduction()) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()
+            log.info("DB-dry-run: kjørte saveAll for ${suksesser.size} utbetalinger og rullet tilbake transaksjonen")
         }
 
         return VedtakMigreringStatus(
-            migrert = migrerteUtbetalinger.size,
-            feilet = feilet,
+            migrert = suksesser.size,
+            feilet = feil.size,
         )
+    }
+
+    private fun migrerEnkelUtbetaling(
+        utbetaling: UtbetalingDbRecord,
+        vedtak: List<VedtakDbRecord>,
+    ): UtbetalingDbRecord {
+        val annuleringer = annulleringDAO.finnAnnulleringMedIdent(listOf(utbetaling.fnr))
+        val vedtakMedUtbetaling = vedtak.filter { it.utbetalingId == utbetaling.utbetalingId }
+        val rsVedtak =
+            mapTilRsVedtakWrapper(
+                utbetalingDbRecord = utbetaling,
+                vedtakMedUtbetaling = vedtakMedUtbetaling,
+                annulleringer = annuleringer,
+            ).leggTilDagerIVedtakPeriode()
+
+        val utbetalingUtbetalt = objectMapper.readValue(utbetaling.utbetaling, UtbetalingUtbetalt::class.java)
+
+        val dagerPersonMap = rsVedtak.dagerPerson.associateBy { it.dato }
+        val dagerArbeidsgiverMap = rsVedtak.dagerArbeidsgiver.associateBy { it.dato }
+
+        val utbetalingdagDtos =
+            utbetalingUtbetalt.utbetalingsdager.map { gammelDag ->
+                val dagPerson = dagerPersonMap[gammelDag.dato]
+                val dagArbeidsgiver = dagerArbeidsgiverMap[gammelDag.dato]
+
+                gammelDag.copy(
+                    beløpTilSykmeldt = dagPerson?.belop ?: 0,
+                    beløpTilArbeidsgiver = dagArbeidsgiver?.belop ?: 0,
+                    sykdomsgrad = (dagPerson?.grad ?: dagArbeidsgiver?.grad ?: 0.0).toInt(),
+                )
+            }
+
+        return utbetaling.copy(
+            utbetaling = objectMapper.writeValueAsString(utbetalingUtbetalt.copy(utbetalingsdager = utbetalingdagDtos)),
+        )
+    }
+
+    private fun lagreVellykkedeMigreringer(suksesser: List<MigreringsResultat.Suksess>) {
+        utbetalingRepository.saveAll(suksesser.map { it.utbetaling })
+        val oppdaterteMigreringer = suksesser.map { it.migreringsRecord.copy(status = MigrertStatus.MIGRERT) }
+        utbetalingMigreringRepository.saveAll(oppdaterteMigreringer)
+    }
+
+    private fun lagreFeiledeMigreringer(feil: List<MigreringsResultat.Feil>) {
+        val oppdaterteMigreringer = feil.map { it.migreringsRecord.copy(status = MigrertStatus.FEILET) }
+        utbetalingMigreringRepository.saveAll(oppdaterteMigreringer)
+    }
+
+    private sealed class MigreringsResultat {
+        data class Suksess(
+            val utbetaling: UtbetalingDbRecord,
+            val migreringsRecord: UtbetalingMigreringDbRecord,
+        ) : MigreringsResultat()
+
+        data class Feil(
+            val migreringsRecord: UtbetalingMigreringDbRecord,
+            val exception: Exception,
+        ) : MigreringsResultat()
     }
 }
 

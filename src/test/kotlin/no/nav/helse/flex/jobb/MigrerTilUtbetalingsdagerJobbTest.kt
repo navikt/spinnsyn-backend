@@ -2,19 +2,13 @@ package no.nav.helse.flex.jobb
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.FellesTestOppsett
-import no.nav.helse.flex.db.UtbetalingDbRecord
-import no.nav.helse.flex.db.VedtakDbRecord
+import no.nav.helse.flex.db.MigrertStatus
+import no.nav.helse.flex.db.UtbetalingMigreringRepository
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.fake.EnvironmentTogglesFake
 import no.nav.helse.flex.objectMapper
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be empty`
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should not be empty`
-import org.amshove.kluent.`should not be null`
-import org.amshove.kluent.`should throw`
+import org.amshove.kluent.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.UnexpectedRollbackException
@@ -27,59 +21,99 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
     @Autowired
     private lateinit var jobb: MigrerTilUtbetalingsdagerJobb
 
+    @Autowired
+    private lateinit var utbetalingMigreringRepository: UtbetalingMigreringRepository
+
     @BeforeEach
     fun setup() {
         vedtakRepository.deleteAll()
         utbetalingRepository.deleteAll()
-        jobb.offset.set(0)
+        utbetalingMigreringRepository.deleteAll()
     }
 
     @Test
-    fun `burde hente ut utbetalinger som skal migreres`() {
-        utbetalingRepository.save(
-            UtbetalingDbRecord(
-                fnr = "12345678910",
-                utbetalingType = "UTBETALING",
-                utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
-                opprettet = Instant.parse("2021-01-01T12:00:00Z"),
-                utbetalingId = "utbetaling-id",
-                antallVedtak = 1,
-            ),
-        )
+    fun `Burde hente ut utbetalinger med gammelt format`() {
+        utbetalingRepository.opprettUtbetaling("utbetaling-id", "12345678910")
 
-        utbetalingRepository.hent500MedGammeltFormatMedOffset().single().`should not be null`()
+        utbetalingRepository.hent500MedGammeltFormat().single().`should not be null`()
     }
 
     @Test
-    fun `burde migrere utbetaling med gammelt format til nytt format`() {
+    fun `Burde migrere utbetaling med gammelt format til nytt format`() {
         environmentToggles.setEnvironment("dev")
+        val utbetalingId = "utbetaling-id"
+        val fnr = "12345678910"
 
-        vedtakRepository.save(
-            VedtakDbRecord(
-                utbetalingId = "utbetaling-id",
-                fnr = "12345678910",
-                vedtak = VEDTAK_JSON,
-                opprettet = Instant.parse("2021-01-01T12:00:00Z"),
-            ),
+        vedtakRepository.opprettVedtak(utbetalingId, fnr)
+        utbetalingRepository.opprettUtbetaling(
+            utbetalingId,
+            fnr,
+            lest = Instant.parse("2024-01-01T00:00:00Z"),
+            motattPublisert = Instant.parse("2023-01-01T00:00:00Z"),
+            skalVisesTilBruker = true,
         )
-        utbetalingRepository.save(
-            UtbetalingDbRecord(
-                fnr = "12345678910",
-                utbetalingType = "UTBETALING",
-                utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
-                opprettet = Instant.now(),
-                utbetalingId = "utbetaling-id",
-                antallVedtak = 1,
-                lest = Instant.parse("2024-01-01T00:00:00Z"),
-                motattPublisert = Instant.parse("2023-01-01T00:00:00Z"),
-                skalVisesTilBruker = true,
-            ),
-        )
+        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+
         jobb.kjørMigreringTilUtbetalingsdager()
 
-        utbetalingRepository.hent500MedGammeltFormatMedOffset().`should be empty`()
+        utbetalingMigreringRepository.verifiserMigreringsStatus(utbetalingId, MigrertStatus.MIGRERT)
+        utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).`should be empty`()
 
-        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr = "12345678910").single().also { utbetalingDbRecord ->
+        verifiserUtbetalingMigrert(fnr)
+    }
+
+    @Test
+    fun `Burde ikke kaste feil når migrering feiler (mangler vedtak)`() {
+        environmentToggles.setEnvironment("dev")
+        val utbetalingId = "utbetaling-id"
+
+        utbetalingRepository.opprettUtbetaling(utbetalingId, "12345678910")
+        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+
+        invoking {
+            jobb.kjørMigreringTilUtbetalingsdager()
+        } `should not throw` Exception::class
+
+        utbetalingMigreringRepository.verifiserMigreringsStatus(utbetalingId, MigrertStatus.FEILET)
+    }
+
+    @Test
+    fun `dry run burde ikke endre utbetalinger`() {
+        environmentToggles.setEnvironment("prod")
+        val utbetalingId = "utbetaling-id"
+        val fnr = "12345678910"
+
+        vedtakRepository.opprettVedtak(utbetalingId, fnr)
+        utbetalingRepository.opprettUtbetaling(utbetalingId, fnr)
+        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+
+        val utbetalingerFør = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+        utbetalingerFør.`should not be empty`()
+        utbetalingerFør
+            .single()
+            .utbetaling
+            .contains("\"sykdomsgrad\"")
+            .`should be false`()
+
+        invoking {
+            jobb.kjørMigreringTilUtbetalingsdager()
+        } `should throw` UnexpectedRollbackException::class
+
+        val utbetalingerEtterJobb = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
+        utbetalingerEtterJobb.shouldHaveSize(1)
+
+        val harBlittMigrert =
+            utbetalingerEtterJobb.any { utbetalingDbRecord ->
+                objectMapper.readValue<UtbetalingUtbetalt>(utbetalingDbRecord.utbetaling).utbetalingsdager.any { it.sykdomsgrad != null }
+            }
+
+        harBlittMigrert.`should be equal to`(false)
+        utbetalingRepository.hent500MedGammeltFormat().shouldHaveSize(1)
+        utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.MIGRERT).`should be empty`()
+    }
+
+    private fun verifiserUtbetalingMigrert(fnr: String) {
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr = fnr).single().also { utbetalingDbRecord ->
             objectMapper
                 .readValue<UtbetalingUtbetalt>(utbetalingDbRecord.utbetaling)
                 .also { utbetalingUtbetalt ->
@@ -113,85 +147,5 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
                         }
                 }
         }
-    }
-
-    @Disabled("Ikke gjeldende for dry run")
-    @Test
-    fun `burde øke offset med antall feil i batch, når utbetaling mangler vedtak`() {
-        environmentToggles.setEnvironment("dev")
-
-        utbetalingRepository.save(
-            UtbetalingDbRecord(
-                fnr = "12345678910",
-                utbetalingType = "UTBETALING",
-                utbetaling = UTBETALING_GAMMELT_FORMAT_JSON,
-                opprettet = Instant.now(),
-                utbetalingId = "utbetaling-id",
-                antallVedtak = 1,
-            ),
-        )
-
-        jobb.kjørMigreringTilUtbetalingsdager()
-        val offset = jobb.offset.get()
-        offset `should be equal to` 1
-    }
-
-    @Test
-    fun `dry run burde ikke endre utbetalinger`() {
-        environmentToggles.setEnvironment("prod")
-
-        val fnr = "12345678910"
-
-        (1..500).forEach { indeks ->
-            val utbetalingId = "utbetaling-id-$indeks"
-
-            vedtakRepository.save(
-                VedtakDbRecord(
-                    utbetalingId = utbetalingId,
-                    fnr = fnr,
-                    vedtak =
-                        VEDTAK_JSON.replace(
-                            "\"utbetalingId\":\"3d19a9d1-c285-4dcd-abb3-b3bcfb538c4a\"",
-                            "\"utbetalingId\":\"$utbetalingId\"",
-                        ),
-                    opprettet = Instant.parse("2021-01-01T12:00:00Z"),
-                ),
-            )
-
-            utbetalingRepository.save(
-                UtbetalingDbRecord(
-                    fnr = fnr,
-                    utbetalingType = "UTBETALING",
-                    utbetaling =
-                        UTBETALING_GAMMELT_FORMAT_JSON.replace(
-                            "\"utbetalingId\":\"3d19a9d1-c285-4dcd-abb3-b3bcfb538c4a\"",
-                            "\"utbetalingId\":\"$utbetalingId\"",
-                        ),
-                    opprettet = Instant.parse("2021-01-01T12:00:00Z"),
-                    utbetalingId = utbetalingId,
-                    antallVedtak = 1,
-                ),
-            )
-        }
-
-        val utbetalingerFør = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-        utbetalingerFør.size.`should be equal to`(500)
-        utbetalingerFør.all { it.utbetaling.contains("\"sykdomsgrad\"") }.`should be equal to`(false)
-
-        invoking {
-            jobb.kjørMigreringTilUtbetalingsdager()
-        } `should throw` UnexpectedRollbackException::class
-
-        val utbetalingerEtterpå = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr)
-        utbetalingerEtterpå.size.`should be equal to`(500)
-
-        val harBlittMigrert =
-            utbetalingerEtterpå.any { utbetalingDbRecord ->
-                objectMapper.readValue<UtbetalingUtbetalt>(utbetalingDbRecord.utbetaling).utbetalingsdager.any { it.sykdomsgrad != null }
-            }
-
-        harBlittMigrert.`should be equal to`(false)
-
-        utbetalingRepository.hent500MedGammeltFormatMedOffset().size.`should be equal to`(500)
     }
 }
