@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
+import kotlin.collections.mapOf
 
 class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
     @Autowired
@@ -47,9 +48,9 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
 
         val vedtak = vedtakRepository.opprettVedtak(utbetalingId, fnr)
         val utbetaling = utbetalingRepository.opprettUtbetaling(utbetalingId, fnr, UTBETALING_GAMMELT_FORMAT_JSON)
-        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+        val utbetalingMigrering = utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
 
-        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak)))
+        val resultat = batchMigrator.migrerGammeltVedtak(listOf(utbetalingMigrering), mapOf(utbetaling to listOf(vedtak)))
 
         resultat.migrert.`should be equal to`(1)
         resultat.feilet.`should be equal to`(0)
@@ -65,9 +66,9 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
                 UTBETALING_GAMMELT_FORMAT_JSON,
                 lagreIDb = false,
             )
-        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+        val utbetalingMigrering = utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
 
-        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to emptyList()))
+        val resultat = batchMigrator.migrerGammeltVedtak(listOf(utbetalingMigrering), mapOf(utbetaling to emptyList()))
 
         resultat.migrert.`should be equal to`(0)
         resultat.feilet.`should be equal to`(1)
@@ -80,9 +81,9 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
         val utbetalingId = "ugyldig-json-id"
         val vedtak = vedtakRepository.opprettVedtak(utbetalingId, "12345678910", lagreIDb = false)
         val utbetaling = utbetalingRepository.opprettUtbetaling(utbetalingId, "12345678910", "{ikke gyldig json", lagreIDb = false)
-        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+        val utbetalingMigrering = utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
 
-        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak)))
+        val resultat = batchMigrator.migrerGammeltVedtak(listOf(utbetalingMigrering), mapOf(utbetaling to listOf(vedtak)))
 
         resultat.migrert.`should be equal to`(0)
         resultat.feilet.`should be equal to`(1)
@@ -97,9 +98,9 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
 
         val vedtak = vedtakRepository.opprettVedtak(utbetalingId, fnr, lagreIDb = false)
         val utbetaling = utbetalingRepository.opprettUtbetaling(utbetalingId, fnr, UTBETALING_UTEN_UTBETALINGSDAGER_JSON)
-        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+        val utbetalingMigrering = utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
 
-        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak)))
+        val resultat = batchMigrator.migrerGammeltVedtak(listOf(utbetalingMigrering), mapOf(utbetaling to listOf(vedtak)))
 
         resultat.migrert.`should be equal to`(0)
         resultat.feilet.`should be equal to`(1)
@@ -126,9 +127,9 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
         val vedtak1 = vedtakRepository.opprettVedtak(utbetalingId, fnr)
         val vedtak2 = vedtakRepository.opprettVedtak(utbetalingId, fnr, opprettet = Instant.parse("2021-01-02T12:00:00Z"))
         val utbetaling = utbetalingRepository.opprettUtbetaling(utbetalingId, fnr, UTBETALING_GAMMELT_FORMAT_JSON, antallVedtak = 2)
-        utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+        val utbetalingMigrering = utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
 
-        val resultat = batchMigrator.migrerGammeltVedtak(mapOf(utbetaling to listOf(vedtak1, vedtak2)))
+        val resultat = batchMigrator.migrerGammeltVedtak(listOf(utbetalingMigrering), mapOf(utbetaling to listOf(vedtak1, vedtak2)))
 
         resultat.migrert.`should be equal to`(1)
         resultat.feilet.`should be equal to`(0)

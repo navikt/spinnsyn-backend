@@ -27,14 +27,13 @@ object MigreringsTestData {
 fun UtbetalingMigreringRepository.opprettMigreringsRecord(
     utbetalingId: String,
     status: MigrertStatus,
-) {
+): UtbetalingMigreringDbRecord =
     save(
         UtbetalingMigreringDbRecord(
             utbetalingId = utbetalingId,
             status = status,
         ),
     )
-}
 
 fun UtbetalingMigreringRepository.verifiserMigreringsStatus(
     utbetalingId: String,
