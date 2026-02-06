@@ -2,7 +2,6 @@ package no.nav.helse.flex.jobb
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.cronjob.LeaderElection
 import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.RSVedtak
 import no.nav.helse.flex.domene.RSVedtakWrapper
@@ -10,43 +9,41 @@ import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 
 @Component
 class MigrerTilUtbetalingsdagerJobb(
     private val utbetalingRepository: UtbetalingRepository,
     private val vedtakRepository: VedtakRepository,
     private val batchMigrator: MigrerTilUtbetalingsdagerBatchMigrator,
-    private val leaderElection: LeaderElection,
     private val utbetalingMigreringRepository: UtbetalingMigreringRepository,
 ) {
     val log = logger()
 
+    @Scheduled(initialDelay = 180, fixedRate = 1, timeUnit = TimeUnit.SECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
-        if (!leaderElection.isLeader()) {
-            return
-        }
-
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
 
-        val utbetalingerIder = utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).map { it.utbetalingId }
+        val utbetalingMigreringer = utbetalingMigreringRepository.findNextBatch(status = MigrertStatus.IKKE_MIGRERT)
 
-        if (utbetalingerIder.isEmpty()) {
+        if (utbetalingMigreringer.isEmpty()) {
             log.info("Ingen flere vedtak med gammelt format å migrere")
             return
         }
 
-        val utbetalinger = utbetalingRepository.findByUtbetalingIdIn(utbetalingerIder)
+        val utbetalinger = utbetalingRepository.findByUtbetalingIdIn(utbetalingMigreringer.map { it.utbetalingId })
         val vedtak = vedtakRepository.findByUtbetalingIdIn(utbetalinger.map { it.utbetalingId })
         val utbetalingVedtakMap = utbetalinger.associateWith { utbetaling -> vedtak.filter { it.utbetalingId == utbetaling.utbetalingId } }
 
-        val status = batchMigrator.migrerGammeltVedtak(utbetalingVedtakMap)
+        val status = batchMigrator.migrerGammeltVedtak(utbetalingMigreringer, utbetalingVedtakMap)
 
         if (status.feilet > 0) {
-            log.error(
+            log.info(
                 "Noen migreringer av utbetalinger feilet: ${status.toLogString()}",
             )
         } else {
@@ -67,9 +64,11 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
     private val log = logger()
 
     @Transactional(rollbackFor = [Exception::class])
-    fun migrerGammeltVedtak(utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>): VedtakMigreringStatus {
-        val utbetalingIder = utbetalingVedtakMap.keys.map { it.utbetalingId }
-        val migreringsRecords = utbetalingMigreringRepository.findByUtbetalingIdIn(utbetalingIder).associateBy { it.utbetalingId }
+    fun migrerGammeltVedtak(
+        utbetalingMigreringer: List<UtbetalingMigreringDbRecord>,
+        utbetalingVedtakMap: Map<UtbetalingDbRecord, List<VedtakDbRecord>>,
+    ): VedtakMigreringStatus {
+        val migreringsRecords = utbetalingMigreringer.associateBy { it.utbetalingId }
 
         val migreringsResultat =
             utbetalingVedtakMap.map { (utbetaling, vedtak) ->
@@ -106,7 +105,6 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
         }
 
         if (feil.isNotEmpty()) {
-            log.error("Feilet migrering for utbetalingId: ${feil.map { it.migreringsRecord.utbetalingId }}")
             lagreFeiledeMigreringer(feil)
         }
 

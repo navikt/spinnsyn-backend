@@ -56,7 +56,7 @@ class MigrerTilUtbetalingsdagerJobbTest : FellesTestOppsett() {
         jobb.kjørMigreringTilUtbetalingsdager()
 
         utbetalingMigreringRepository.verifiserMigreringsStatus(utbetalingId, MigrertStatus.MIGRERT)
-        utbetalingMigreringRepository.findFirst500ByStatus(MigrertStatus.IKKE_MIGRERT).`should be empty`()
+        utbetalingMigreringRepository.findNextBatch(status = MigrertStatus.IKKE_MIGRERT).`should be empty`()
 
         verifiserUtbetalingMigrert(fnr)
     }
