@@ -9,11 +9,9 @@ import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
 
 @Component
 class MigrerTilUtbetalingsdagerJobb(
@@ -24,7 +22,6 @@ class MigrerTilUtbetalingsdagerJobb(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 180, fixedRate = 1, timeUnit = TimeUnit.SECONDS)
     @Transactional(rollbackFor = [Exception::class])
     fun kjørMigreringTilUtbetalingsdager() {
         log.info("Migrerer gamle vedtak til nytt utbetalingsdager format")
