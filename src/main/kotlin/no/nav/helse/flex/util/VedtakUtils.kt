@@ -9,7 +9,7 @@ import kotlin.streams.asSequence
 private val dagtyperMedUtbetaling = listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
 private val helg = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 
-fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(): RSVedtakWrapper {
+fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean = false): RSVedtakWrapper {
     val fom = this.vedtak.fom
     val tom = this.vedtak.tom
 
@@ -34,10 +34,53 @@ fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(): RSVedtakWrapper {
         dagerPerson = dagerPerson,
         sykepengebelopArbeidsgiver = sykepengebelopArbeidsgiver,
         sykepengebelopPerson = sykepengebelopPerson,
+        vedtak =
+            if (korrigerUtbetalingsdager) {
+                this.vedtak.copy(
+                    utbetaling =
+                        this.vedtak.utbetaling.copy(
+                            utbetalingsdager = korrigerUtbetalingsdager(this.vedtak.utbetaling.utbetalingsdager),
+                        ),
+                )
+            } else {
+                this.vedtak
+            },
     )
 }
 
-fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> = this.map { it.leggTilDagerIVedtakPeriode() }
+internal fun korrigerUtbetalingsdager(utbetalingsdager: List<RSUtbetalingdag>?): List<RSUtbetalingdag> =
+    utbetalingsdager?.map { dag ->
+        dag
+            .korrigerArbeidsgiverperiode()
+            .korrigerHelg()
+    } ?: emptyList()
+
+private fun RSUtbetalingdag.korrigerHelg(): RSUtbetalingdag =
+    if (dato.dayOfWeek in helg) {
+        copy(type = "NavHelgDag", beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 0, sykdomsgrad = 0)
+    } else {
+        this
+    }
+
+private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag =
+    when {
+        type != "ArbeidsgiverperiodeDag" -> {
+            this
+        }
+
+        beløpTilArbeidsgiver == 0 && beløpTilSykmeldt == 0 -> {
+            copy(type = "ArbeidsgiverperiodeDag")
+        }
+
+        else -> {
+            copy(type = "NavDag")
+        }
+    }
+
+fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean = false): List<RSVedtakWrapper> =
+    this.map {
+        it.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager)
+    }
 
 fun hentDager(
     fom: LocalDate,

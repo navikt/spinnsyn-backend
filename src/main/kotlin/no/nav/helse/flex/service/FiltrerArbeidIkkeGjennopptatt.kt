@@ -3,6 +3,7 @@ package no.nav.helse.flex.service
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import java.time.LocalDate
 
+// TODO: Konverter til å bruke utbetalingsdager
 fun RSVedtakWrapper.fjernArbeidIkkeGjenopptattDager(): RSVedtakWrapper {
     val dagerArbeidsgiver = this.dagerArbeidsgiver.filter { it.dagtype != "ArbeidIkkeGjenopptattDag" }
     val dagerPerson = this.dagerPerson.filter { it.dagtype != "ArbeidIkkeGjenopptattDag" }
