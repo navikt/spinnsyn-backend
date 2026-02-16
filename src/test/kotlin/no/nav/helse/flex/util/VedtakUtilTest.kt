@@ -126,4 +126,27 @@ class VedtakUtilTest {
             )
         korrigert shouldBeEqualTo emptyList()
     }
+
+    @Test
+    fun `Utbetalingsdag med null beløp blir ikke korrigert`() {
+        val dag =
+            RSUtbetalingdag(
+                dato = LocalDate.of(2024, 2, 7),
+                type = "NavDag",
+                beløpTilArbeidsgiver = null,
+                beløpTilSykmeldt = null,
+                sykdomsgrad = null,
+                begrunnelser = emptyList(),
+            )
+        val korrigert =
+            korrigerUtbetalingsdager(
+                utbetalingsdager = listOf(dag),
+                fom = dag.dato,
+                tom = dag.dato,
+            ).first()
+        korrigert.type shouldBeEqualTo "NavDag"
+        korrigert.beløpTilArbeidsgiver shouldBeEqualTo null
+        korrigert.beløpTilSykmeldt shouldBeEqualTo null
+        korrigert.sykdomsgrad shouldBeEqualTo null
+    }
 }

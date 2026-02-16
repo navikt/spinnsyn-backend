@@ -2,6 +2,7 @@ package no.nav.helse.flex.util
 
 import no.nav.helse.flex.db.Annullering
 import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.logger
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.streams.asSequence
@@ -74,6 +75,11 @@ private fun RSUtbetalingdag.korrigerHelg(): RSUtbetalingdag =
     }
 
 private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag {
+    val harBeløp = beløpTilArbeidsgiver != null && beløpTilSykmeldt != null
+    if (!harBeløp) {
+        logger().warn("Utbetalingsdag ${this.dato} mangler beløp, kan ikke korrigere for arbeidsgiverperiode")
+        return this
+    }
     val erUtbetaling = beløpTilArbeidsgiver != 0 || beløpTilSykmeldt != 0
     return if (type == "ArbeidsgiverperiodeDag" && erUtbetaling) {
         copy(type = "NavDag")
