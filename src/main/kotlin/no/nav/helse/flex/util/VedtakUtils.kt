@@ -61,18 +61,8 @@ internal fun korrigerUtbetalingsdager(
 ): List<RSUtbetalingdag> =
     utbetalingsdager
         ?.filter { it.dato in fom..tom }
-        ?.map {
-            it
-                .korrigerArbeidsgiverperiode()
-                .korrigerHelg()
-        } ?: emptyList()
-
-private fun RSUtbetalingdag.korrigerHelg(): RSUtbetalingdag =
-    if (dato.dayOfWeek in helg) {
-        copy(type = "NavHelgDag", beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 0, sykdomsgrad = 0)
-    } else {
-        this
-    }
+        ?.map { it.korrigerArbeidsgiverperiode() }
+        ?: emptyList()
 
 private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag {
     val harBeløp = beløpTilArbeidsgiver != null && beløpTilSykmeldt != null
@@ -82,7 +72,11 @@ private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag {
     }
     val erUtbetaling = beløpTilArbeidsgiver != 0 || beløpTilSykmeldt != 0
     return if (type == "ArbeidsgiverperiodeDag" && erUtbetaling) {
-        copy(type = "NavDag")
+        if (dato.dayOfWeek in helg) {
+            copy(type = "NavHelgDag", beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 0, sykdomsgrad = 0)
+        } else {
+            copy(type = "NavDag")
+        }
     } else {
         this
     }

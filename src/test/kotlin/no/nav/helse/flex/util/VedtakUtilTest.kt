@@ -71,12 +71,12 @@ class VedtakUtilTest {
     }
 
     @Test
-    fun `NavDag på helg blir NavHelgDag`() {
+    fun `ArbeidsgiverperiodeDag på helg blir NavHelgDag`() {
         val sondag = LocalDate.of(2024, 2, 11)
         val dag =
             RSUtbetalingdag(
                 dato = sondag,
-                type = "NavDag",
+                type = "ArbeidsgiverperiodeDag",
                 beløpTilArbeidsgiver = 100,
                 beløpTilSykmeldt = 100,
                 sykdomsgrad = 100,
