@@ -49,8 +49,8 @@ fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean
 }
 
 internal fun korrigerUtbetalingsdager(utbetalingsdager: List<RSUtbetalingdag>?): List<RSUtbetalingdag> =
-    utbetalingsdager?.map { dag ->
-        dag
+    utbetalingsdager?.map {
+        it
             .korrigerArbeidsgiverperiode()
             .korrigerHelg()
     } ?: emptyList()
@@ -62,20 +62,14 @@ private fun RSUtbetalingdag.korrigerHelg(): RSUtbetalingdag =
         this
     }
 
-private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag =
-    when {
-        type != "ArbeidsgiverperiodeDag" -> {
-            this
-        }
-
-        beløpTilArbeidsgiver == 0 && beløpTilSykmeldt == 0 -> {
-            copy(type = "ArbeidsgiverperiodeDag")
-        }
-
-        else -> {
-            copy(type = "NavDag")
-        }
+private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag {
+    val erUtbetaling = beløpTilArbeidsgiver != 0 || beløpTilSykmeldt != 0
+    return if (type == "ArbeidsgiverperiodeDag" && erUtbetaling) {
+        copy(type = "NavDag")
+    } else {
+        this
     }
+}
 
 fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean = false): List<RSVedtakWrapper> =
     this.map {
