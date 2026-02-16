@@ -149,4 +149,61 @@ class VedtakUtilTest {
         korrigert.beløpTilSykmeldt shouldBeEqualTo null
         korrigert.sykdomsgrad shouldBeEqualTo null
     }
+
+    @Test
+    fun `Håndterer arbeidsgiverperiode i helg der Nav overtar utbetaling på mandagen`() {
+        val lordag = LocalDate.of(2024, 2, 10)
+        val sondag = LocalDate.of(2024, 2, 11)
+        val mandag = LocalDate.of(2024, 2, 12)
+
+        val utbetalingsdager =
+            listOf(
+                RSUtbetalingdag(
+                    dato = lordag,
+                    type = "ArbeidsgiverperiodeDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = sondag,
+                    type = "ArbeidsgiverperiodeDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = mandag,
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+            )
+
+        val korrigert =
+            korrigerUtbetalingsdager(
+                utbetalingsdager = utbetalingsdager,
+                fom = lordag,
+                tom = mandag,
+            )
+
+        korrigert[0].type shouldBeEqualTo "NavHelgDag"
+        korrigert[0].beløpTilArbeidsgiver shouldBeEqualTo 0
+        korrigert[0].beløpTilSykmeldt shouldBeEqualTo 0
+        korrigert[0].sykdomsgrad shouldBeEqualTo 0
+
+        korrigert[1].type shouldBeEqualTo "NavHelgDag"
+        korrigert[1].beløpTilArbeidsgiver shouldBeEqualTo 0
+        korrigert[1].beløpTilSykmeldt shouldBeEqualTo 0
+        korrigert[1].sykdomsgrad shouldBeEqualTo 0
+
+        korrigert[2].type shouldBeEqualTo "NavDag"
+        korrigert[2].beløpTilArbeidsgiver shouldBeEqualTo 0
+        korrigert[2].beløpTilSykmeldt shouldBeEqualTo 100
+        korrigert[2].sykdomsgrad shouldBeEqualTo 100
+    }
 }

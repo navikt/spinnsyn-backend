@@ -62,6 +62,7 @@ internal fun korrigerUtbetalingsdager(
     utbetalingsdager
         ?.filter { it.dato in fom..tom }
         ?.map { it.korrigerArbeidsgiverperiode() }
+        ?.fiksHelgFoerOvertagelse()
         ?: emptyList()
 
 private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag {
@@ -80,6 +81,24 @@ private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag {
     } else {
         this
     }
+}
+
+// Dersom nav overtar på mandag så skal ikke helgen før vises som arbeidsgiverperiode
+private fun List<RSUtbetalingdag>.fiksHelgFoerOvertagelse(): List<RSUtbetalingdag> {
+    val sisteArbeidsgiverperiodeDag = this.lastOrNull { it.type == "ArbeidsgiverperiodeDag" }
+    if (sisteArbeidsgiverperiodeDag?.dato?.dayOfWeek == DayOfWeek.SUNDAY) {
+        val overtagelseMandag = this.find { it.dato.equals(sisteArbeidsgiverperiodeDag.dato.plusDays(1)) }
+        if (overtagelseMandag != null && overtagelseMandag.type != "ArbeidsgiverperiodeDag") {
+            return this.map { dag ->
+                when (dag.dato) {
+                    overtagelseMandag.dato.minusDays(2) -> dag.copy(type = "NavHelgDag")
+                    overtagelseMandag.dato.minusDays(1) -> dag.copy(type = "NavHelgDag")
+                    else -> dag
+                }
+            }
+        }
+    }
+    return this
 }
 
 fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean = false): List<RSVedtakWrapper> =
