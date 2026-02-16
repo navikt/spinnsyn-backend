@@ -29,29 +29,42 @@ fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean
     } else if (sykepengebelopArbeidsgiver == 0) {
         dagerArbeidsgiver = emptyList() // Brukerutbetaling
     }
+    val utbetalingsdager =
+        korrigerUtbetalingsdager(
+            utbetalingsdager = this.vedtak.utbetaling.utbetalingsdager,
+            fom = vedtak.fom,
+            tom = vedtak.tom,
+        )
+    val (daglisteSykmeldt, daglisteArbeidsgiver) = finnDagliste(utbetalingsdager)
 
     return this.copy(
         dagerArbeidsgiver = dagerArbeidsgiver,
         dagerPerson = dagerPerson,
         sykepengebelopArbeidsgiver = sykepengebelopArbeidsgiver,
         sykepengebelopPerson = sykepengebelopPerson,
-        vedtak =
-            if (korrigerUtbetalingsdager) {
-                this.vedtak.copy(
-                    utbetaling =
-                        this.vedtak.utbetaling.copy(
-                            utbetalingsdager =
-                                korrigerUtbetalingsdager(
-                                    utbetalingsdager = this.vedtak.utbetaling.utbetalingsdager,
-                                    fom = vedtak.fom,
-                                    tom = vedtak.tom,
-                                ),
-                        ),
-                )
-            } else {
-                this.vedtak
-            },
+        daglisteSykmeldt = daglisteSykmeldt,
+        daglisteArbeidsgiver = daglisteArbeidsgiver,
     )
+}
+
+fun finnDagliste(utbetalingsdager: List<RSUtbetalingdag>): Pair<List<RSDagV2>, List<RSDagV2>> {
+    val (periodeSykmeldt, periodeArbeidsgiver) = finnPeriodeMedBelop(utbetalingsdager)
+
+    val dagerSykmeldt = utbetalingsdager.filter { periodeSykmeldt.inneholderDato(it.dato) }
+    val dagerArbeidsgiver = utbetalingsdager.filter { periodeArbeidsgiver.inneholderDato(it.dato) }
+}
+
+fun finnPeriodeMedBelop(utbetalingsdager: List<RSUtbetalingdag>): Pair<Periode, Periode> {
+    val dagerMedBelopSykmeldt = utbetalingsdager.filter { it.beløpTilSykmeldt != null && it.beløpTilSykmeldt > 0 }
+    val dagerMedBelopArbeidsgiver = utbetalingsdager.filter { it.beløpTilArbeidsgiver != null && it.beløpTilArbeidsgiver > 0 }
+
+    val fomSykmeldt = dagerMedBelopSykmeldt.minBy { it.dato }.dato
+    val tomSykmeldt = dagerMedBelopSykmeldt.maxBy { it.dato }.dato
+
+    val fomArbeidsgiver = dagerMedBelopArbeidsgiver.minBy { it.dato }.dato
+    val tomArbeidsgiver = dagerMedBelopArbeidsgiver.maxBy { it.dato }.dato
+
+    return Pair(PeriodeImpl(fomSykmeldt, tomSykmeldt), PeriodeImpl(fomArbeidsgiver, tomArbeidsgiver))
 }
 
 internal fun korrigerUtbetalingsdager(

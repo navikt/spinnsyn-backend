@@ -24,6 +24,8 @@ data class RSVedtakWrapper(
     val sykepengebelopArbeidsgiver: Int = 0,
     @JsonIgnore
     val sykepengebelopPerson: Int = 0,
+    val daglisteSykmeldt: List<RSDagV2> = emptyList(),
+    val daglisteArbeidsgiver: List<RSDagV2> = emptyList(),
     val andreArbeidsgivere: Map<String, Double>?,
     val organisasjoner: Map<String, String> = emptyMap(),
 ) {
@@ -171,6 +173,14 @@ data class RSDag(
     val dato: LocalDate,
     val belop: Int,
     val grad: Double,
+    val dagtype: String,
+    val begrunnelser: List<String>,
+)
+
+data class RSDagV2(
+    val dato: LocalDate,
+    val belop: Int,
+    val grad: Int,
     val dagtype: String,
     val begrunnelser: List<String>,
 )

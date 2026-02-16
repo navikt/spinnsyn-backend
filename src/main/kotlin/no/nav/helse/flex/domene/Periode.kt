@@ -9,6 +9,8 @@ interface Periode {
     fun overlapper(andre: Periode) =
         (this.fom >= andre.fom && this.fom <= andre.tom) ||
             (this.tom <= andre.tom && this.tom >= andre.fom)
+
+    fun inneholderDato(dato: LocalDate): Boolean = dato >= this.fom && dato <= this.tom
 }
 
 class PeriodeImpl(
