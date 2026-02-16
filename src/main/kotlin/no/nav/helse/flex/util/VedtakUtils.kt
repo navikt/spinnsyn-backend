@@ -39,7 +39,12 @@ fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean
                 this.vedtak.copy(
                     utbetaling =
                         this.vedtak.utbetaling.copy(
-                            utbetalingsdager = korrigerUtbetalingsdager(this.vedtak.utbetaling.utbetalingsdager),
+                            utbetalingsdager =
+                                korrigerUtbetalingsdager(
+                                    this.vedtak.utbetaling.utbetalingsdager,
+                                    fom = vedtak.fom,
+                                    tom = vedtak.tom,
+                                ),
                         ),
                 )
             } else {
@@ -48,12 +53,18 @@ fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean
     )
 }
 
-internal fun korrigerUtbetalingsdager(utbetalingsdager: List<RSUtbetalingdag>?): List<RSUtbetalingdag> =
-    utbetalingsdager?.map {
-        it
-            .korrigerArbeidsgiverperiode()
-            .korrigerHelg()
-    } ?: emptyList()
+internal fun korrigerUtbetalingsdager(
+    utbetalingsdager: List<RSUtbetalingdag>?,
+    fom: LocalDate,
+    tom: LocalDate,
+): List<RSUtbetalingdag> =
+    utbetalingsdager
+        ?.filter { it.dato in fom..tom }
+        ?.map {
+            it
+                .korrigerArbeidsgiverperiode()
+                .korrigerHelg()
+        } ?: emptyList()
 
 private fun RSUtbetalingdag.korrigerHelg(): RSUtbetalingdag =
     if (dato.dayOfWeek in helg) {

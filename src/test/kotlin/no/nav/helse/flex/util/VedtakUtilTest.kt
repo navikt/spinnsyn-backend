@@ -17,7 +17,7 @@ class VedtakUtilTest {
                 sykdomsgrad = 100,
                 begrunnelser = emptyList(),
             )
-        val korrigert = korrigerUtbetalingsdager(listOf(dag)).first()
+        val korrigert = korrigerUtbetalingsdager(utbetalingsdager = listOf(dag), fom = dag.dato, tom = dag.dato).first()
         korrigert.type shouldBeEqualTo "ArbeidsgiverperiodeDag"
     }
 
@@ -32,7 +32,7 @@ class VedtakUtilTest {
                 sykdomsgrad = 100,
                 begrunnelser = emptyList(),
             )
-        val korrigert = korrigerUtbetalingsdager(listOf(dag)).first()
+        val korrigert = korrigerUtbetalingsdager(utbetalingsdager = listOf(dag), fom = dag.dato, tom = dag.dato).first()
         korrigert.type shouldBeEqualTo "NavDag"
     }
 
@@ -47,7 +47,7 @@ class VedtakUtilTest {
                 sykdomsgrad = 100,
                 begrunnelser = emptyList(),
             )
-        val korrigert = korrigerUtbetalingsdager(listOf(dag)).first()
+        val korrigert = korrigerUtbetalingsdager(utbetalingsdager = listOf(dag), fom = dag.dato, tom = dag.dato).first()
         korrigert.type shouldBeEqualTo "NavDag"
     }
 
@@ -63,7 +63,7 @@ class VedtakUtilTest {
                 sykdomsgrad = 100,
                 begrunnelser = emptyList(),
             )
-        val korrigert = korrigerUtbetalingsdager(listOf(dag)).first()
+        val korrigert = korrigerUtbetalingsdager(utbetalingsdager = listOf(dag), fom = dag.dato, tom = dag.dato).first()
         korrigert.type shouldBeEqualTo "NavHelgDag"
         korrigert.beløpTilArbeidsgiver shouldBeEqualTo 0
         korrigert.beløpTilSykmeldt shouldBeEqualTo 0
@@ -82,7 +82,7 @@ class VedtakUtilTest {
                 sykdomsgrad = 100,
                 begrunnelser = emptyList(),
             )
-        val korrigert = korrigerUtbetalingsdager(listOf(dag)).first()
+        val korrigert = korrigerUtbetalingsdager(utbetalingsdager = listOf(dag), fom = dag.dato, tom = dag.dato).first()
         korrigert.type shouldBeEqualTo "NavHelgDag"
         korrigert.beløpTilArbeidsgiver shouldBeEqualTo 0
         korrigert.beløpTilSykmeldt shouldBeEqualTo 0
@@ -100,10 +100,30 @@ class VedtakUtilTest {
                 sykdomsgrad = 100,
                 begrunnelser = emptyList(),
             )
-        val korrigert = korrigerUtbetalingsdager(listOf(dag)).first()
+        val korrigert = korrigerUtbetalingsdager(utbetalingsdager = listOf(dag), fom = dag.dato, tom = dag.dato).first()
         korrigert.type shouldBeEqualTo "NavDag"
         korrigert.beløpTilArbeidsgiver shouldBeEqualTo 100
         korrigert.beløpTilSykmeldt shouldBeEqualTo 100
         korrigert.sykdomsgrad shouldBeEqualTo 100
+    }
+
+    @Test
+    fun `Utbetalingsdag utenfor vedtaksperiode blir ikke med i dagliste`() {
+        val dag =
+            RSUtbetalingdag(
+                dato = LocalDate.of(2024, 2, 7),
+                type = "NavDag",
+                beløpTilArbeidsgiver = 100,
+                beløpTilSykmeldt = 100,
+                sykdomsgrad = 100,
+                begrunnelser = emptyList(),
+            )
+        val korrigert =
+            korrigerUtbetalingsdager(
+                utbetalingsdager = listOf(dag),
+                fom = LocalDate.of(2024, 2, 8),
+                tom = LocalDate.of(2024, 2, 10),
+            )
+        korrigert shouldBeEqualTo emptyList()
     }
 }
