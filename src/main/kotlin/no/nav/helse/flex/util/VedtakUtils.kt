@@ -42,7 +42,7 @@ fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean
                         this.vedtak.utbetaling.copy(
                             utbetalingsdager =
                                 korrigerUtbetalingsdager(
-                                    this.vedtak.utbetaling.utbetalingsdager,
+                                    utbetalingsdager = this.vedtak.utbetaling.utbetalingsdager,
                                     fom = vedtak.fom,
                                     tom = vedtak.tom,
                                 ),
