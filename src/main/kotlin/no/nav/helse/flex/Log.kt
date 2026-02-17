@@ -21,3 +21,7 @@ fun Logger.errorSecure(
     this.error("$message (TeamLogId: $teamLogId)")
     this.error(LogMarker.TEAM_LOG, "$message (TeamLogId: $teamLogId) $secureMessage", secureThrowable)
 }
+
+fun Logger.secure(secureMessage: String) {
+    this.warn(LogMarker.TEAM_LOG, secureMessage)
+}

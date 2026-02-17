@@ -7,6 +7,7 @@ import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.organisasjon.LeggTilOrganisasjonnavn
+import no.nav.helse.flex.secure
 import no.nav.helse.flex.util.*
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -50,6 +51,7 @@ class BrukerVedtak(
             .map { it.fjernArbeidIkkeGjenopptattDager() }
             .leggTilOrgnavn()
             .leggTilArbeidsgivere()
+            .sammenlignDaglister()
     }
 
     fun lesVedtak(
@@ -203,4 +205,62 @@ class BrukerVedtak(
     private fun List<RSVedtakWrapper>.leggTilOrgnavn(): List<RSVedtakWrapper> = leggTilOrganisasjonavn.leggTilOrganisasjonnavn(this)
 
     private fun List<RSVedtakWrapper>.leggTilArbeidsgivere(): List<RSVedtakWrapper> = leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
+}
+
+private fun List<RSVedtakWrapper>.sammenlignDaglister(): List<RSVedtakWrapper> {
+    this.forEach {
+        val personDiff = it.dagerPerson.finnForskjeller(it.daglisteSykmeldt)
+        if (personDiff != null) {
+            logger().secure("Diff i sykmeldt dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}: $personDiff")
+        }
+        val arbeidsgiverDiff = it.dagerArbeidsgiver.finnForskjeller(it.daglisteArbeidsgiver)
+        if (arbeidsgiverDiff != null) {
+            logger().secure("Diff i arbeidsgiver dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}: $arbeidsgiverDiff")
+        }
+    }
+    return this
+}
+
+private fun List<RSDag>.finnForskjeller(annen: List<RSDag>): String? {
+    if (this.size != annen.size) {
+        return "Ulik størrelse: ${this.size} vs ${annen.size}"
+    }
+
+    val forskjeller = mutableListOf<String>()
+    this.forEachIndexed { index, it ->
+        val dagDiff = mutableListOf<String>()
+
+        if (it.dato != annen[index].dato) {
+            dagDiff.add("dato: ${it.dato} vs ${annen[index].dato}")
+        }
+        if (it.belop != annen[index].belop) {
+            dagDiff.add("belop: ${it.belop} vs ${annen[index].belop}")
+        }
+        if (it.begrunnelser.toSet() != annen[index].begrunnelser.toSet()) {
+            dagDiff.add("begrunnelser: ${it.begrunnelser} vs ${annen[index].begrunnelser}")
+        }
+
+        when (it.dagtype) {
+            "NavDag", "NavDagSyk", "NavDagDelvisSyk" -> {
+                if (annen[index].dagtype != "NavDag") {
+                    dagDiff.add("dagtype: ${it.dagtype} vs ${annen[index].dagtype}")
+                }
+                if (it.grad != annen[index].grad) {
+                    dagDiff.add("grad: ${it.grad} vs ${annen[index].grad}")
+                }
+            }
+
+            else -> {
+                if (it.dagtype != annen[index].dagtype) {
+                    dagDiff.add("dagtype: ${it.dagtype} vs ${annen[index].dagtype}")
+                }
+            }
+        }
+
+        if (dagDiff.isNotEmpty()) {
+            forskjeller.add("Index $index (${it.dato}): ${dagDiff.joinToString(", ")}")
+        }
+    }
+
+    return if (forskjeller.isEmpty()) null else forskjeller.joinToString("; ")
 }
