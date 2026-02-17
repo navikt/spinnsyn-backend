@@ -23,5 +23,5 @@ fun Logger.errorSecure(
 }
 
 fun Logger.secure(secureMessage: String) {
-    this.info(LogMarker.TEAM_LOG, secureMessage)
+    this.error(LogMarker.TEAM_LOG, secureMessage)
 }
