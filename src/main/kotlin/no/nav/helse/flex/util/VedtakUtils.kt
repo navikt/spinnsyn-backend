@@ -116,34 +116,38 @@ internal fun korrigerUtbetalingsdager(
 ): List<RSUtbetalingdag> =
     utbetalingsdager
         ?.filter { it.dato in fom..tom }
-        ?.map { it.korrigerArbeidsgiverperiode() }
-        ?.fiksHelgFoerOvertagelse()
+        ?.korrigerArbeidsgiverperiode()
+        ?.fiksHelgFoerOvertagelse(utbetalingsdager)
         ?: emptyList()
 
-private fun RSUtbetalingdag.korrigerArbeidsgiverperiode(): RSUtbetalingdag {
-    val harBeløp = beløpTilArbeidsgiver != null && beløpTilSykmeldt != null
-    if (!harBeløp) {
-        logger().warn("Utbetalingsdag ${this.dato} mangler beløp, kan ikke korrigere for arbeidsgiverperiode")
-        return this
-    }
-    val erUtbetaling = beløpTilArbeidsgiver != 0 || beløpTilSykmeldt != 0
-    return if (type == "ArbeidsgiverperiodeDag" && erUtbetaling) {
-        if (dato.dayOfWeek in helg) {
-            copy(type = "NavHelgDag", beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 0, sykdomsgrad = 0)
-        } else {
-            copy(type = "NavDag")
+private fun List<RSUtbetalingdag>.korrigerArbeidsgiverperiode(): List<RSUtbetalingdag> {
+    if (this.isEmpty()) return emptyList()
+    val førsteUtbetaling = this.firstOrNull { it.beløpTilArbeidsgiver != 0 || it.beløpTilSykmeldt != 0 }?.dato ?: return this
+
+    return this.map {
+        val harBeløp = it.beløpTilArbeidsgiver != null && it.beløpTilSykmeldt != null
+        if (!harBeløp) {
+            logger().warn("Utbetalingsdag ${it.dato} mangler beløp, kan ikke korrigere for arbeidsgiverperiode")
+            return this
         }
-    } else {
-        this
+        if (it.type == "ArbeidsgiverperiodeDag" && it.dato >= førsteUtbetaling) {
+            if (it.dato.dayOfWeek in helg) {
+                it.copy(type = "NavHelgDag", beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 0, sykdomsgrad = 0)
+            } else {
+                it.copy(type = "NavDag")
+            }
+        } else {
+            it
+        }
     }
 }
 
 // Dersom nav overtar på mandag så skal ikke helgen før vises som arbeidsgiverperiode
-private fun List<RSUtbetalingdag>.fiksHelgFoerOvertagelse(): List<RSUtbetalingdag> {
+private fun List<RSUtbetalingdag>.fiksHelgFoerOvertagelse(utbetalingsdager: List<RSUtbetalingdag>): List<RSUtbetalingdag> {
     val sisteArbeidsgiverperiodeDag = this.lastOrNull { it.type == "ArbeidsgiverperiodeDag" }
     if (sisteArbeidsgiverperiodeDag?.dato?.dayOfWeek == DayOfWeek.SUNDAY) {
-        val overtagelseMandag = this.find { it.dato.equals(sisteArbeidsgiverperiodeDag.dato.plusDays(1)) }
-        if (overtagelseMandag != null && overtagelseMandag.type != "ArbeidsgiverperiodeDag") {
+        val overtagelseMandag = utbetalingsdager.find { it.dato.equals(sisteArbeidsgiverperiodeDag.dato.plusDays(1)) }
+        if (overtagelseMandag != null && overtagelseMandag.type == "ArbeidsgiverperiodeDag") {
             return this.map { dag ->
                 when (dag.dato) {
                     overtagelseMandag.dato.minusDays(2) -> dag.copy(type = "NavHelgDag")
@@ -275,7 +279,8 @@ fun hentDager(
     }
 
     val forsteUtbetalteDag = dager.indexOfFirst { it.belop > 0 }
-    val annenUtbetalingIStarten = dager.subList(0, forsteUtbetalteDag).indexOfLast { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
+    val annenUtbetalingIStarten =
+        dager.subList(0, forsteUtbetalteDag).indexOfLast { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
     if (annenUtbetalingIStarten > -1) {
         // Ligger en person/refusjon utbetaling tidligere så vi starter visningen her.
         dager = dager.subList(forsteUtbetalteDag, dager.size).toList()
