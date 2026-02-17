@@ -12,12 +12,13 @@ fun RSVedtakWrapper.fjernArbeidIkkeGjenopptattDager(): RSVedtakWrapper {
     val daglisteSykmeldt = this.daglisteSykmeldt.filter { it.dagtype != "ArbeidIkkeGjenopptattDag" }
     val daglisteArbeidsgiver = this.daglisteArbeidsgiver.filter { it.dagtype != "ArbeidIkkeGjenopptattDag" }
 
-
     val faktiskFomGammel = finnFaktiskFom(dagerArbeidsgiver, dagerPerson, this.vedtak.fom)
     val faktiskFomNy = finnFaktiskFom(daglisteArbeidsgiver, daglisteSykmeldt, this.vedtak.fom)
 
     if (faktiskFomNy != faktiskFomGammel) {
-        logger().warn("Fant ulik fom i daglisteArbeidsgiver og daglisteSykmeldt: $faktiskFomNy og $faktiskFomGammel. ${this.vedtak.utbetaling.utbetalingId}")
+        logger().warn(
+            "Fant ulik fom i daglisteArbeidsgiver og daglisteSykmeldt: $faktiskFomNy og $faktiskFomGammel. ${this.vedtak.utbetaling.utbetalingId}",
+        )
     }
 
     return this.copy(
@@ -27,7 +28,11 @@ fun RSVedtakWrapper.fjernArbeidIkkeGjenopptattDager(): RSVedtakWrapper {
     )
 }
 
-fun finnFaktiskFom(dagerArbeidsgiver: List<RSDag>, dagerPerson: List<RSDag>, fom: LocalDate): LocalDate {
+fun finnFaktiskFom(
+    dagerArbeidsgiver: List<RSDag>,
+    dagerPerson: List<RSDag>,
+    fom: LocalDate,
+): LocalDate {
     val tidligsteDagerDag = (dagerArbeidsgiver + dagerPerson).minByOrNull { it.dato }
     if (tidligsteDagerDag != null) {
         if (tidligsteDagerDag.dato.isAfter(fom)) {

@@ -50,6 +50,7 @@ class BrukerVedtak(
             .map { it.fjernArbeidIkkeGjenopptattDager() }
             .leggTilOrgnavn()
             .leggTilArbeidsgivere()
+            .sammenlignDaglister()
     }
 
     fun lesVedtak(
@@ -203,4 +204,16 @@ class BrukerVedtak(
     private fun List<RSVedtakWrapper>.leggTilOrgnavn(): List<RSVedtakWrapper> = leggTilOrganisasjonavn.leggTilOrganisasjonnavn(this)
 
     private fun List<RSVedtakWrapper>.leggTilArbeidsgivere(): List<RSVedtakWrapper> = leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
+}
+
+fun List<RSVedtakWrapper>.sammenlignDaglister(): List<RSVedtakWrapper> {
+    this.forEach {
+        if (it.daglisteSykmeldt != it.dagerPerson) {
+            logger().warn("Diff i sykmeldt dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}")
+        }
+        if (it.daglisteArbeidsgiver != it.dagerArbeidsgiver) {
+            logger().warn("Diff i arbeidsgiver dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}")
+        }
+    }
+    return this
 }
