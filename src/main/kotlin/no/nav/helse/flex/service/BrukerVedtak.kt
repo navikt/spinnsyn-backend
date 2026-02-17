@@ -212,7 +212,7 @@ private fun List<RSVedtakWrapper>.sammenlignDaglister(): List<RSVedtakWrapper> {
         if (personDiff != null) {
             logger().warn("Diff i sykmeldt dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}: $personDiff")
         }
-        val arbeidsgiverDiff = it.daglisteArbeidsgiver.finnForskjeller(it.dagerArbeidsgiver)
+        val arbeidsgiverDiff = it.dagerArbeidsgiver.finnForskjeller(it.daglisteArbeidsgiver)
         if (arbeidsgiverDiff != null) {
             logger().warn("Diff i arbeidsgiver dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}: $arbeidsgiverDiff")
         }
