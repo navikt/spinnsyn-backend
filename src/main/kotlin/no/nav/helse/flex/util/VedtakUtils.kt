@@ -95,12 +95,12 @@ private fun fordelDager(
     return Pair(dagerSykmeldt.sortedBy { it.dato }, dagerArbeidsgiver.sortedBy { it.dato })
 }
 
-private fun List<RSUtbetalingdag>.mapTil(erSykmeldt: Boolean): List<RSDagV2> =
+private fun List<RSUtbetalingdag>.mapTil(erSykmeldt: Boolean): List<RSDag> =
     this.map {
-        RSDagV2(
+        RSDag(
             dato = it.dato,
             belop = (if (erSykmeldt) it.beløpTilSykmeldt else it.beløpTilArbeidsgiver) ?: 0,
-            grad = it.sykdomsgrad ?: 0,
+            grad = it.sykdomsgrad?.toDouble() ?: 0.0,
             dagtype = it.type,
             begrunnelser = it.begrunnelser,
         )
