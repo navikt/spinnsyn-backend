@@ -7,6 +7,7 @@ import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.kafka.VedtakStatusKafkaProducer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.organisasjon.LeggTilOrganisasjonnavn
+import no.nav.helse.flex.secure
 import no.nav.helse.flex.util.*
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -210,11 +211,11 @@ private fun List<RSVedtakWrapper>.sammenlignDaglister(): List<RSVedtakWrapper> {
     this.forEach {
         val personDiff = it.dagerPerson.finnForskjeller(it.daglisteSykmeldt)
         if (personDiff != null) {
-            logger().warn("Diff i sykmeldt dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}: $personDiff")
+            logger().secure("Diff i sykmeldt dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}: $personDiff")
         }
         val arbeidsgiverDiff = it.dagerArbeidsgiver.finnForskjeller(it.daglisteArbeidsgiver)
         if (arbeidsgiverDiff != null) {
-            logger().warn("Diff i arbeidsgiver dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}: $arbeidsgiverDiff")
+            logger().secure("Diff i arbeidsgiver dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}: $arbeidsgiverDiff")
         }
     }
     return this
@@ -248,6 +249,7 @@ private fun List<RSDag>.finnForskjeller(annen: List<RSDag>): String? {
                     dagDiff.add("grad: ${it.grad} vs ${annen[index].grad}")
                 }
             }
+
             else -> {
                 if (it.dagtype != annen[index].dagtype) {
                     dagDiff.add("dagtype: ${it.dagtype} vs ${annen[index].dagtype}")
