@@ -16,9 +16,7 @@ data class RSVedtakWrapper(
     val orgnavn: String,
     val annullert: Boolean = false,
     val revurdert: Boolean = false,
-    @JsonIgnore
     val dagerArbeidsgiver: List<RSDag> = emptyList(),
-    @JsonIgnore
     val dagerPerson: List<RSDag> = emptyList(),
     @JsonIgnore
     val sykepengebelopArbeidsgiver: Int = 0,
