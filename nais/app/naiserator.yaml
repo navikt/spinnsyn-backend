@@ -68,6 +68,8 @@ spec:
       rules:
         - application: istilgangskontroll
           namespace: teamsykefravr
+        - application: logging
+          namespace: nais-system
       external:
     {{#each external-host}}
         - host: {{this}}
