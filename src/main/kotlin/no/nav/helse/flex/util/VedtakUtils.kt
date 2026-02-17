@@ -2,6 +2,7 @@ package no.nav.helse.flex.util
 
 import no.nav.helse.flex.db.Annullering
 import no.nav.helse.flex.domene.*
+import no.nav.helse.flex.domene.PeriodeImpl
 import no.nav.helse.flex.logger
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -10,7 +11,7 @@ import kotlin.streams.asSequence
 private val dagtyperMedUtbetaling = listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
 private val helg = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 
-fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean = false): RSVedtakWrapper {
+fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(): RSVedtakWrapper {
     val fom = this.vedtak.fom
     val tom = this.vedtak.tom
 
@@ -35,37 +36,78 @@ fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean
             fom = vedtak.fom,
             tom = vedtak.tom,
         )
-    val (daglisteSykmeldt, daglisteArbeidsgiver) = finnDagliste(utbetalingsdager)
+    val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(utbetalingsdager)
 
     return this.copy(
         dagerArbeidsgiver = dagerArbeidsgiver,
         dagerPerson = dagerPerson,
         sykepengebelopArbeidsgiver = sykepengebelopArbeidsgiver,
         sykepengebelopPerson = sykepengebelopPerson,
-        daglisteSykmeldt = daglisteSykmeldt,
-        daglisteArbeidsgiver = daglisteArbeidsgiver,
+        daglisteSykmeldt = daglisteSykmeldt.mapTil(erSykmeldt = true),
+        daglisteArbeidsgiver = daglisteArbeidsgiver.mapTil(erSykmeldt = false),
     )
 }
 
-fun finnDagliste(utbetalingsdager: List<RSUtbetalingdag>): Pair<List<RSDagV2>, List<RSDagV2>> {
-    val (periodeSykmeldt, periodeArbeidsgiver) = finnPeriodeMedBelop(utbetalingsdager)
+fun splittDaglister(utbetalingsdager: List<RSUtbetalingdag>): Pair<List<RSUtbetalingdag>, List<RSUtbetalingdag>> {
+    if (utbetalingsdager.isEmpty()) return Pair(emptyList(), emptyList())
 
-    val dagerSykmeldt = utbetalingsdager.filter { periodeSykmeldt.inneholderDato(it.dato) }
-    val dagerArbeidsgiver = utbetalingsdager.filter { periodeArbeidsgiver.inneholderDato(it.dato) }
-}
-
-fun finnPeriodeMedBelop(utbetalingsdager: List<RSUtbetalingdag>): Pair<Periode, Periode> {
     val dagerMedBelopSykmeldt = utbetalingsdager.filter { it.beløpTilSykmeldt != null && it.beløpTilSykmeldt > 0 }
-    val dagerMedBelopArbeidsgiver = utbetalingsdager.filter { it.beløpTilArbeidsgiver != null && it.beløpTilArbeidsgiver > 0 }
+    val dagerMedBelopArbeidsgiver =
+        utbetalingsdager.filter { it.beløpTilArbeidsgiver != null && it.beløpTilArbeidsgiver > 0 }
 
-    val fomSykmeldt = dagerMedBelopSykmeldt.minBy { it.dato }.dato
-    val tomSykmeldt = dagerMedBelopSykmeldt.maxBy { it.dato }.dato
+    if (dagerMedBelopArbeidsgiver.isEmpty()) return Pair(utbetalingsdager, emptyList())
+    if (dagerMedBelopSykmeldt.isEmpty()) return Pair(emptyList(), utbetalingsdager)
 
-    val fomArbeidsgiver = dagerMedBelopArbeidsgiver.minBy { it.dato }.dato
-    val tomArbeidsgiver = dagerMedBelopArbeidsgiver.maxBy { it.dato }.dato
-
-    return Pair(PeriodeImpl(fomSykmeldt, tomSykmeldt), PeriodeImpl(fomArbeidsgiver, tomArbeidsgiver))
+    return fordelDager(dagerMedBelopSykmeldt, dagerMedBelopArbeidsgiver, utbetalingsdager)
 }
+
+private fun fordelDager(
+    dagerMedBelopSykmeldt: List<RSUtbetalingdag>,
+    dagerMedBelopArbeidsgiver: List<RSUtbetalingdag>,
+    utbetalingsdager: List<RSUtbetalingdag>,
+): Pair<List<RSUtbetalingdag>, List<RSUtbetalingdag>> {
+    val periodeSykmeldt = finnPerioder(dagerMedBelopSykmeldt)
+    val periodeArbeidsgiver = finnPerioder(dagerMedBelopArbeidsgiver)
+
+    val erSykmeldtPeriodeTidligst = periodeSykmeldt.fom <= periodeArbeidsgiver.fom
+    val erSykmeldtPeriodeSenest = periodeSykmeldt.tom >= periodeArbeidsgiver.tom
+    val tidligsteFom = minOf(periodeSykmeldt.fom, periodeArbeidsgiver.fom)
+    val senesteTom = maxOf(periodeSykmeldt.tom, periodeArbeidsgiver.tom)
+
+    val dagerFørFom = utbetalingsdager.filter { it.dato < tidligsteFom }
+    val dagerEtterTom = utbetalingsdager.filter { it.dato > senesteTom }
+
+    val dagerSykmeldt = utbetalingsdager.filter { periodeSykmeldt.inneholderDato(it.dato) }.toMutableList()
+    val dagerArbeidsgiver = utbetalingsdager.filter { periodeArbeidsgiver.inneholderDato(it.dato) }.toMutableList()
+
+    if (erSykmeldtPeriodeTidligst) {
+        dagerSykmeldt += dagerFørFom
+    } else {
+        dagerArbeidsgiver += dagerFørFom
+    }
+
+    if (erSykmeldtPeriodeSenest) {
+        dagerSykmeldt += dagerEtterTom
+    } else {
+        dagerArbeidsgiver += dagerEtterTom
+    }
+
+    return Pair(dagerSykmeldt.sortedBy { it.dato }, dagerArbeidsgiver.sortedBy { it.dato })
+}
+
+private fun List<RSUtbetalingdag>.mapTil(erSykmeldt: Boolean): List<RSDagV2> =
+    this.map {
+        RSDagV2(
+            dato = it.dato,
+            belop = (if (erSykmeldt) it.beløpTilSykmeldt else it.beløpTilArbeidsgiver) ?: 0,
+            grad = it.sykdomsgrad ?: 0,
+            dagtype = it.type,
+            begrunnelser = it.begrunnelser,
+        )
+    }
+
+private fun finnPerioder(dager: List<RSUtbetalingdag>): PeriodeImpl =
+    PeriodeImpl(dager.minBy { it.dato }.dato, dager.maxBy { it.dato }.dato)
 
 internal fun korrigerUtbetalingsdager(
     utbetalingsdager: List<RSUtbetalingdag>?,
@@ -114,9 +156,9 @@ private fun List<RSUtbetalingdag>.fiksHelgFoerOvertagelse(): List<RSUtbetalingda
     return this
 }
 
-fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager: Boolean = false): List<RSVedtakWrapper> =
+fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> =
     this.map {
-        it.leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager)
+        it.leggTilDagerIVedtakPeriode()
     }
 
 fun hentDager(

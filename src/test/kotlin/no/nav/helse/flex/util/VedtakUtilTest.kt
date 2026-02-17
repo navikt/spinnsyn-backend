@@ -206,4 +206,272 @@ class VedtakUtilTest {
         korrigert[2].beløpTilSykmeldt shouldBeEqualTo 100
         korrigert[2].sykdomsgrad shouldBeEqualTo 100
     }
+
+    @Test
+    fun `splittDaglister returnerer tomme lister når input er tom`() {
+        val resultat = splittDaglister(emptyList())
+
+        resultat.first shouldBeEqualTo emptyList()
+        resultat.second shouldBeEqualTo emptyList()
+    }
+
+    @Test
+    fun `splittDaglister returnerer alle dager til sykmeldt når det ikke er beløp til arbeidsgiver`() {
+        val dager =
+            listOf(
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 5),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 6),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+            )
+
+        val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(dager)
+
+        daglisteSykmeldt shouldBeEqualTo dager
+        daglisteArbeidsgiver shouldBeEqualTo emptyList()
+    }
+
+    @Test
+    fun `splittDaglister returnerer alle dager til arbeidsgiver når det ikke er beløp til sykmeldt`() {
+        val dager =
+            listOf(
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 5),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 6),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+            )
+
+        val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(dager)
+
+        daglisteSykmeldt shouldBeEqualTo emptyList()
+        daglisteArbeidsgiver shouldBeEqualTo dager
+    }
+
+    @Test
+    fun `splittDaglister deler dager når begge har beløp og sykmeldt periode er tidligst`() {
+        val dager =
+            listOf(
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 5),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 6),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 7),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 8),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+            )
+
+        val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(dager)
+
+        daglisteSykmeldt shouldBeEqualTo dager.slice(0..2)
+        daglisteArbeidsgiver shouldBeEqualTo dager.slice(1..3)
+    }
+
+    @Test
+    fun `splittDaglister legger dager før periode til riktig liste`() {
+        val dager =
+            listOf(
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 4),
+                    type = "ArbeidsgiverperiodeDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 5),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 6),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+            )
+
+        val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(dager)
+
+        daglisteSykmeldt shouldBeEqualTo dager.slice(2..2)
+        daglisteArbeidsgiver shouldBeEqualTo dager.slice(0..1)
+    }
+
+    @Test
+    fun `splittDaglister legger dager etter periode til riktig liste`() {
+        val dager =
+            listOf(
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 5),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 6),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 7),
+                    type = "Helg",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 0,
+                    begrunnelser = emptyList(),
+                ),
+            )
+
+        val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(dager)
+
+        daglisteSykmeldt shouldBeEqualTo dager.slice(0..0)
+        daglisteArbeidsgiver shouldBeEqualTo dager.slice(1..2)
+    }
+
+    @Test
+    fun `splittDaglister legger dager før og etter til sykmeldt hvis fom og tom er lik`() {
+        val dager =
+            listOf(
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 4),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 5),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 6),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 7),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+            )
+
+        val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(dager)
+
+        daglisteSykmeldt shouldBeEqualTo dager
+        daglisteArbeidsgiver shouldBeEqualTo dager.slice(1..2)
+    }
+
+    @Test
+    fun `splittDaglister legger dager før og etter i riktig sortert rekkefølge`() {
+        val dager =
+            listOf(
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 7),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 5),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 4),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+                RSUtbetalingdag(
+                    dato = LocalDate.of(2024, 2, 6),
+                    type = "NavDag",
+                    beløpTilArbeidsgiver = 100,
+                    beløpTilSykmeldt = 100,
+                    sykdomsgrad = 100,
+                    begrunnelser = emptyList(),
+                ),
+            )
+
+        val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(dager)
+
+        daglisteSykmeldt shouldBeEqualTo dager.sortedBy { it.dato }
+        daglisteArbeidsgiver shouldBeEqualTo dager.sortedBy { it.dato }.slice(1..2)
+    }
 }

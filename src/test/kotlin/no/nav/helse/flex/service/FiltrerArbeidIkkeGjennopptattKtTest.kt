@@ -4,7 +4,6 @@ import no.nav.helse.flex.domene.RSDag
 import no.nav.helse.flex.vedtakTestdata
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -44,8 +43,7 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
 
         val vedtakUtenArbeidIkkeGjenopptattDager = vedtakMedDager.fjernArbeidIkkeGjenopptattDager()
         vedtakUtenArbeidIkkeGjenopptattDager.dagerPerson.shouldHaveSize(3)
-        vedtakUtenArbeidIkkeGjenopptattDager.vedtak.fom shouldBeEqualTo (LocalDate.now().minusDays(5))
-            vedtakUtenArbeidIkkeGjenopptattDager.dagerPerson.maxByOrNull { it.dato }!!.dato
+        vedtakUtenArbeidIkkeGjenopptattDager.vedtak.fom shouldBeEqualTo dato.minusDays(5)
     }
 
     fun rSDag(

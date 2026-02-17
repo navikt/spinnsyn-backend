@@ -45,7 +45,7 @@ class BrukerVedtak(
     ): List<RSVedtakWrapper> {
         val identer = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnr)
         return finnAlleVedtak(identer.alle(), hentSomBruker)
-            .leggTilDagerIVedtakPeriode(korrigerUtbetalingsdager = true)
+            .leggTilDagerIVedtakPeriode()
             .markerRevurderte()
             .map { it.fjernArbeidIkkeGjenopptattDager() }
             .leggTilOrgnavn()
