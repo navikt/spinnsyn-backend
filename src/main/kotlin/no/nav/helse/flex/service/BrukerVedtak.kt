@@ -225,15 +225,14 @@ private fun List<RSDag>.erLike(annen: List<RSDag>): Boolean {
         val erVerdierLike =
             it.dato == annen[index].dato &&
                 it.belop == annen[index].belop &&
-                it.grad == annen[index].grad &&
                 it.begrunnelser.toSet() == annen[index].begrunnelser.toSet()
-        val erDagtypeTilsvarende =
+        val erVerdierTilsvarende =
             when (it.dagtype) {
-                "NavDag", "NavDagSyk", "NavDagDelvisSyk" -> annen[index].dagtype == "NavDag"
+                "NavDag", "NavDagSyk", "NavDagDelvisSyk" -> annen[index].dagtype == "NavDag" && it.grad == annen[index].grad
                 else -> it.dagtype == annen[index].dagtype
             }
 
-        if (!erVerdierLike || !erDagtypeTilsvarende) return false
+        if (!erVerdierLike || !erVerdierTilsvarende) return false
     }
 
     return true
