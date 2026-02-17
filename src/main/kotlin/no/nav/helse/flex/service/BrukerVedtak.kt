@@ -206,14 +206,35 @@ class BrukerVedtak(
     private fun List<RSVedtakWrapper>.leggTilArbeidsgivere(): List<RSVedtakWrapper> = leggTilOrganisasjonavn.leggTilAndreArbeidsgivere(this)
 }
 
-fun List<RSVedtakWrapper>.sammenlignDaglister(): List<RSVedtakWrapper> {
+private fun List<RSVedtakWrapper>.sammenlignDaglister(): List<RSVedtakWrapper> {
     this.forEach {
-        if (it.daglisteSykmeldt != it.dagerPerson) {
+        if (!it.dagerPerson.erLike(it.daglisteSykmeldt)) {
             logger().warn("Diff i sykmeldt dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}")
         }
-        if (it.daglisteArbeidsgiver != it.dagerArbeidsgiver) {
+        if (!it.daglisteArbeidsgiver.erLike(it.dagerArbeidsgiver)) {
             logger().warn("Diff i arbeidsgiver dagliste for vedtak ${it.vedtak.utbetaling.utbetalingId}")
         }
     }
     return this
+}
+
+private fun List<RSDag>.erLike(annen: List<RSDag>): Boolean {
+    if (this.size != annen.size) return false
+
+    this.forEachIndexed { index, it ->
+        val erVerdierLike =
+            it.dato == annen[index].dato &&
+                it.belop == annen[index].belop &&
+                it.grad == annen[index].grad &&
+                it.begrunnelser.toSet() == annen[index].begrunnelser.toSet()
+        val erDagtypeTilsvarende =
+            when (it.dagtype) {
+                "NavDag", "NavDagSyk", "NavDagDelvisSyk" -> annen[index].dagtype == "NavDag"
+                else -> it.dagtype == annen[index].dagtype
+            }
+
+        if (!erVerdierLike || !erDagtypeTilsvarende) return false
+    }
+
+    return true
 }
