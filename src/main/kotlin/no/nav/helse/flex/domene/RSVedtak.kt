@@ -16,13 +16,17 @@ data class RSVedtakWrapper(
     val orgnavn: String,
     val annullert: Boolean = false,
     val revurdert: Boolean = false,
+    @JsonIgnore
     val dagerArbeidsgiver: List<RSDag> = emptyList(),
+    @JsonIgnore
     val dagerPerson: List<RSDag> = emptyList(),
     @JsonIgnore
     val sykepengebelopArbeidsgiver: Int = 0,
     @JsonIgnore
     val sykepengebelopPerson: Int = 0,
+    @JsonIgnore
     val daglisteSykmeldt: List<RSDag> = emptyList(),
+    @JsonIgnore
     val daglisteArbeidsgiver: List<RSDag> = emptyList(),
     val andreArbeidsgivere: Map<String, Double>?,
     val organisasjoner: Map<String, String> = emptyMap(),
