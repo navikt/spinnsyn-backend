@@ -11,8 +11,6 @@ interface Periode {
             (this.tom <= andre.tom && this.tom >= andre.fom)
 
     fun inneholderDato(dato: LocalDate): Boolean = dato >= this.fom && dato <= this.tom
-
-    fun inneholderIkkeDato(dato: LocalDate): Boolean = dato < this.fom || dato > this.tom
 }
 
 class PeriodeImpl(
