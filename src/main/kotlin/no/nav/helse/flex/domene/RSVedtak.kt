@@ -25,9 +25,9 @@ data class RSVedtakWrapper(
     @JsonIgnore
     val sykepengebelopPerson: Int = 0,
     @JsonIgnore
-    val daglisteSykmeldt: List<RSDag> = emptyList(),
-    @JsonIgnore
     val daglisteArbeidsgiver: List<RSDag> = emptyList(),
+    @JsonIgnore
+    val daglisteSykmeldt: List<RSDag> = emptyList(),
     val andreArbeidsgivere: Map<String, Double>?,
     val organisasjoner: Map<String, String> = emptyMap(),
 ) {

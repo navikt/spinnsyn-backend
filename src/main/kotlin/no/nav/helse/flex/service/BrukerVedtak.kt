@@ -239,24 +239,12 @@ private fun List<RSDag>.finnForskjeller(annen: List<RSDag>): String? {
         if (it.begrunnelser.toSet() != annen[index].begrunnelser.toSet()) {
             dagDiff.add("begrunnelser: ${it.begrunnelser} vs ${annen[index].begrunnelser}")
         }
-
-        when (it.dagtype) {
-            "NavDag", "NavDagSyk", "NavDagDelvisSyk" -> {
-                if (annen[index].dagtype != "NavDag") {
-                    dagDiff.add("dagtype: ${it.dagtype} vs ${annen[index].dagtype}")
-                }
-                if (it.grad != annen[index].grad) {
-                    dagDiff.add("grad: ${it.grad} vs ${annen[index].grad}")
-                }
-            }
-
-            else -> {
-                if (it.dagtype != annen[index].dagtype) {
-                    dagDiff.add("dagtype: ${it.dagtype} vs ${annen[index].dagtype}")
-                }
-            }
+        if (it.dagtype != annen[index].dagtype) {
+            dagDiff.add("dagtype: ${it.dagtype} vs ${annen[index].dagtype}")
         }
-
+        if (it.grad != annen[index].grad) {
+            dagDiff.add("grad: ${it.grad} vs ${annen[index].grad}")
+        }
         if (dagDiff.isNotEmpty()) {
             forskjeller.add("Index $index (${it.dato}): ${dagDiff.joinToString(", ")}")
         }

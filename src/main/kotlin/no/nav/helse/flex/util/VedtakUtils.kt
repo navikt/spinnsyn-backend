@@ -3,7 +3,6 @@ package no.nav.helse.flex.util
 import no.nav.helse.flex.db.Annullering
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.domene.PeriodeImpl
-import no.nav.helse.flex.logger
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.streams.asSequence
@@ -30,140 +29,166 @@ fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(): RSVedtakWrapper {
     } else if (sykepengebelopArbeidsgiver == 0) {
         dagerArbeidsgiver = emptyList() // Brukerutbetaling
     }
-    val utbetalingsdager =
-        korrigerUtbetalingsdager(
-            utbetalingsdager = this.vedtak.utbetaling.utbetalingsdager,
-            fom = vedtak.fom,
-            tom = vedtak.tom,
-        )
-    val (daglisteSykmeldt, daglisteArbeidsgiver) = splittDaglister(utbetalingsdager)
+
+    var dagerArbeidsgiverNy =
+        hentDagerNy(fom, tom, this.vedtak.utbetaling.utbetalingsdager, false)
+    val sykepengebelopArbeidsgiverNy = dagerArbeidsgiverNy.sumOf { it.belop }
+
+    var dagerPersonNy =
+        hentDagerNy(fom, tom, this.vedtak.utbetaling.utbetalingsdager, true)
+    val sykepengebelopPersonNy = dagerPersonNy.sumOf { it.belop }
+
+    if (sykepengebelopPersonNy == 0 && sykepengebelopArbeidsgiverNy == 0) {
+        dagerArbeidsgiverNy = emptyList() // Helt avvist vedtak vises bare i dagerPerson
+    } else if (sykepengebelopPersonNy == 0) {
+        dagerPersonNy = emptyList() // Refusjonutbetaling
+    } else if (sykepengebelopArbeidsgiverNy == 0) {
+        dagerArbeidsgiverNy = emptyList() // Brukerutbetaling
+    }
 
     return this.copy(
         dagerArbeidsgiver = dagerArbeidsgiver,
         dagerPerson = dagerPerson,
         sykepengebelopArbeidsgiver = sykepengebelopArbeidsgiver,
         sykepengebelopPerson = sykepengebelopPerson,
-        daglisteSykmeldt = daglisteSykmeldt.mapTil(erSykmeldt = true),
-        daglisteArbeidsgiver = daglisteArbeidsgiver.mapTil(erSykmeldt = false),
+        daglisteArbeidsgiver = dagerArbeidsgiverNy,
+        daglisteSykmeldt = dagerPersonNy,
     )
-}
-
-fun splittDaglister(utbetalingsdager: List<RSUtbetalingdag>): Pair<List<RSUtbetalingdag>, List<RSUtbetalingdag>> {
-    if (utbetalingsdager.isEmpty()) return Pair(emptyList(), emptyList())
-
-    val dagerMedBelopSykmeldt = utbetalingsdager.filter { it.beløpTilSykmeldt != null && it.beløpTilSykmeldt > 0 }
-    val dagerMedBelopArbeidsgiver =
-        utbetalingsdager.filter { it.beløpTilArbeidsgiver != null && it.beløpTilArbeidsgiver > 0 }
-
-    if (dagerMedBelopArbeidsgiver.isEmpty()) return Pair(utbetalingsdager, emptyList())
-    if (dagerMedBelopSykmeldt.isEmpty()) return Pair(emptyList(), utbetalingsdager)
-
-    return fordelDager(dagerMedBelopSykmeldt, dagerMedBelopArbeidsgiver, utbetalingsdager)
-}
-
-private fun fordelDager(
-    dagerMedBelopSykmeldt: List<RSUtbetalingdag>,
-    dagerMedBelopArbeidsgiver: List<RSUtbetalingdag>,
-    utbetalingsdager: List<RSUtbetalingdag>,
-): Pair<List<RSUtbetalingdag>, List<RSUtbetalingdag>> {
-    val periodeSykmeldt = finnPerioder(dagerMedBelopSykmeldt)
-    val periodeArbeidsgiver = finnPerioder(dagerMedBelopArbeidsgiver)
-
-    val erSykmeldtPeriodeTidligst = periodeSykmeldt.fom <= periodeArbeidsgiver.fom
-    val erSykmeldtPeriodeSenest = periodeSykmeldt.tom >= periodeArbeidsgiver.tom
-    val tidligsteFom = minOf(periodeSykmeldt.fom, periodeArbeidsgiver.fom)
-    val senesteTom = maxOf(periodeSykmeldt.tom, periodeArbeidsgiver.tom)
-
-    val dagerFørFom = utbetalingsdager.filter { it.dato < tidligsteFom }
-    val dagerEtterTom = utbetalingsdager.filter { it.dato > senesteTom }
-
-    val dagerSykmeldt = utbetalingsdager.filter { periodeSykmeldt.inneholderDato(it.dato) }.toMutableList()
-    val dagerArbeidsgiver = utbetalingsdager.filter { periodeArbeidsgiver.inneholderDato(it.dato) }.toMutableList()
-
-    if (erSykmeldtPeriodeTidligst) {
-        dagerSykmeldt += dagerFørFom
-    } else {
-        dagerArbeidsgiver += dagerFørFom
-    }
-
-    if (erSykmeldtPeriodeSenest) {
-        dagerSykmeldt += dagerEtterTom
-    } else {
-        dagerArbeidsgiver += dagerEtterTom
-    }
-
-    return Pair(dagerSykmeldt.sortedBy { it.dato }, dagerArbeidsgiver.sortedBy { it.dato })
-}
-
-private fun List<RSUtbetalingdag>.mapTil(erSykmeldt: Boolean): List<RSDag> =
-    this.map {
-        RSDag(
-            dato = it.dato,
-            belop = (if (erSykmeldt) it.beløpTilSykmeldt else it.beløpTilArbeidsgiver) ?: 0,
-            grad = it.sykdomsgrad?.toDouble() ?: 0.0,
-            dagtype = it.type,
-            begrunnelser = it.begrunnelser,
-        )
-    }
-
-private fun finnPerioder(dager: List<RSUtbetalingdag>): PeriodeImpl =
-    PeriodeImpl(dager.minBy { it.dato }.dato, dager.maxBy { it.dato }.dato)
-
-internal fun korrigerUtbetalingsdager(
-    utbetalingsdager: List<RSUtbetalingdag>?,
-    fom: LocalDate,
-    tom: LocalDate,
-): List<RSUtbetalingdag> =
-    utbetalingsdager
-        ?.filter { it.dato in fom..tom }
-        ?.korrigerArbeidsgiverperiode()
-        ?.fiksHelgFoerOvertagelse(utbetalingsdager)
-        ?: emptyList()
-
-private fun List<RSUtbetalingdag>.korrigerArbeidsgiverperiode(): List<RSUtbetalingdag> {
-    if (this.isEmpty()) return emptyList()
-    val førsteUtbetaling = this.firstOrNull { it.beløpTilArbeidsgiver != 0 || it.beløpTilSykmeldt != 0 }?.dato ?: return this
-
-    return this.map {
-        val harBeløp = it.beløpTilArbeidsgiver != null && it.beløpTilSykmeldt != null
-        if (!harBeløp) {
-            logger().warn("Utbetalingsdag ${it.dato} mangler beløp, kan ikke korrigere for arbeidsgiverperiode")
-            return this
-        }
-        if (it.type == "ArbeidsgiverperiodeDag" && it.dato >= førsteUtbetaling) {
-            if (it.dato.dayOfWeek in helg) {
-                it.copy(type = "NavHelgDag", beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 0, sykdomsgrad = 0)
-            } else {
-                it.copy(type = "NavDag")
-            }
-        } else {
-            it
-        }
-    }
-}
-
-// Dersom nav overtar på mandag så skal ikke helgen før vises som arbeidsgiverperiode
-private fun List<RSUtbetalingdag>.fiksHelgFoerOvertagelse(utbetalingsdager: List<RSUtbetalingdag>): List<RSUtbetalingdag> {
-    val sisteArbeidsgiverperiodeDag = this.lastOrNull { it.type == "ArbeidsgiverperiodeDag" }
-    if (sisteArbeidsgiverperiodeDag?.dato?.dayOfWeek == DayOfWeek.SUNDAY) {
-        val overtagelseMandag = utbetalingsdager.find { it.dato.equals(sisteArbeidsgiverperiodeDag.dato.plusDays(1)) }
-        if (overtagelseMandag != null && overtagelseMandag.type == "ArbeidsgiverperiodeDag") {
-            return this.map { dag ->
-                when (dag.dato) {
-                    overtagelseMandag.dato.minusDays(2) -> dag.copy(type = "NavHelgDag")
-                    overtagelseMandag.dato.minusDays(1) -> dag.copy(type = "NavHelgDag")
-                    else -> dag
-                }
-            }
-        }
-    }
-    return this
 }
 
 fun List<RSVedtakWrapper>.leggTilDagerIVedtakPeriode(): List<RSVedtakWrapper> =
     this.map {
         it.leggTilDagerIVedtakPeriode()
     }
+
+fun hentDagerNy(
+    fom: LocalDate,
+    tom: LocalDate,
+    utbetalingsdager: List<RSUtbetalingdag>?,
+    erSykmeldt: Boolean,
+): List<RSDag> {
+    val dagerMedUtbetaling = utbetalingsdager?.filter { it.getBeløp(erSykmeldt) > 0 } ?: emptyList()
+    val periodeMedUtbetaling = if (dagerMedUtbetaling.isNotEmpty()) finnPerioder(dagerMedUtbetaling) else null
+
+    // Setter opp alle dager i perioden
+    var dager =
+        fom
+            .datesUntil(tom.plusDays(1))
+            .asSequence()
+            .map { dato ->
+                RSDag(
+                    dato = dato,
+                    belop = 0,
+                    grad = 0.0,
+                    dagtype = if (dato.dayOfWeek in helg) "NavHelgDag" else "NavDag",
+                    begrunnelser = emptyList(),
+                )
+            }
+            // Slår sammen med dager fra bømlo
+            .associateWith { dag -> utbetalingsdager?.find { it.dato == dag.dato } }
+            // Oppdaterer dager med dagtype og begrunnelser
+            .map { (dag, utbetalingsdagen) ->
+                when (utbetalingsdagen) {
+                    null -> {
+                        dag
+                    }
+
+                    else -> {
+                        dag.copy(
+                            begrunnelser = utbetalingsdagen.begrunnelser,
+                            dagtype =
+                                when (utbetalingsdagen.type) {
+                                    "NavDag" -> {
+                                        when {
+                                            (utbetalingsdagen.sykdomsgrad ?: 0) < 100 -> "NavDagDelvisSyk"
+                                            else -> "NavDagSyk"
+                                        }
+                                    }
+
+                                    "ArbeidsgiverperiodeDag" -> {
+                                        when {
+                                            // NAV betaler ikke arbeidsgiverperiode i helg
+                                            periodeMedUtbetaling?.inneholderDato(dag.dato) == true &&
+                                                utbetalingsdagen.dato.dayOfWeek in helg -> "NavHelgDag"
+
+                                            utbetalingsdagen.getBeløp(erSykmeldt) == 0 -> "ArbeidsgiverperiodeDag"
+
+                                            // Vises som gradert syk
+                                            (utbetalingsdagen.sykdomsgrad ?: 0) < 100 -> "NavDagDelvisSyk"
+
+                                            // Vises som 100% syk
+                                            else -> "NavDagSyk"
+                                        }
+                                    }
+
+                                    else -> {
+                                        utbetalingsdagen.type
+                                    }
+                                },
+                            belop = if (utbetalingsdagen.dato.dayOfWeek in helg) 0 else utbetalingsdagen.getBeløp(erSykmeldt),
+                            grad =
+                                if (utbetalingsdagen.dato.dayOfWeek in
+                                    helg
+                                ) {
+                                    0.0
+                                } else if (utbetalingsdagen.getBeløp(erSykmeldt) ==
+                                    0
+                                ) {
+                                    0.0
+                                } else {
+                                    utbetalingsdagen.sykdomsgrad?.toDouble() ?: 0.0
+                                },
+                        )
+                    }
+                }
+            }.toList()
+
+    val sisteArbeidsgiverperiodeDag = dager.lastOrNull { it.dagtype == "ArbeidsgiverperiodeDag" }
+    if (sisteArbeidsgiverperiodeDag?.dato?.dayOfWeek == DayOfWeek.SUNDAY) {
+        val overtagelseMandag = utbetalingsdager?.find { it.dato == sisteArbeidsgiverperiodeDag.dato.plusDays(1) }
+        if (overtagelseMandag?.type == "ArbeidsgiverperiodeDag") {
+            // Dersom nav overtar på mandag så skal ikke helgen før vises som arbeidsgiverperiode
+            dager =
+                dager.map { dag ->
+                    when (dag.dato) {
+                        overtagelseMandag.dato.minusDays(2) -> dag.copy(dagtype = "NavHelgDag")
+                        overtagelseMandag.dato.minusDays(1) -> dag.copy(dagtype = "NavHelgDag")
+                        else -> dag
+                    }
+                }
+        }
+    }
+
+    val sisteUtbetalteDag = dager.indexOfLast { it.belop > 0 }
+    if (sisteUtbetalteDag == -1) {
+        return dager // Ingen dager med utbetaling
+    }
+
+    val annenUtbetalingISlutten =
+        dager.subList(sisteUtbetalteDag, dager.size).indexOfFirst {
+            it.belop == 0 && it.dagtype in dagtyperMedUtbetaling
+        }
+    if (annenUtbetalingISlutten > -1) {
+        // Ligger en person/refusjon utbetaling senere så vi stanser visningen her.
+        dager = dager.subList(0, sisteUtbetalteDag + annenUtbetalingISlutten).toList()
+    }
+
+    val forsteUtbetalteDag = dager.indexOfFirst { it.belop > 0 }
+    val annenUtbetalingIStarten =
+        dager.subList(0, forsteUtbetalteDag).indexOfLast { it.belop == 0 && it.dagtype in dagtyperMedUtbetaling }
+    if (annenUtbetalingIStarten > -1) {
+        // Ligger en person/refusjon utbetaling tidligere så vi starter visningen her.
+        dager = dager.subList(forsteUtbetalteDag, dager.size).toList()
+    }
+
+    return dager
+}
+
+private fun RSUtbetalingdag.getBeløp(erSykmeldt: Boolean): Int =
+    if (erSykmeldt) this.beløpTilSykmeldt ?: 0 else this.beløpTilArbeidsgiver ?: 0
+
+private fun finnPerioder(dager: List<RSUtbetalingdag>): PeriodeImpl =
+    PeriodeImpl(dager.minBy { it.dato }.dato, dager.maxBy { it.dato }.dato)
 
 fun hentDager(
     fom: LocalDate,
