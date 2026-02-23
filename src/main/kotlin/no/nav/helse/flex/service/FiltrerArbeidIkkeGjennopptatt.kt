@@ -24,6 +24,8 @@ fun RSVedtakWrapper.fjernArbeidIkkeGjenopptattDager(): RSVedtakWrapper {
     return this.copy(
         dagerArbeidsgiver = dagerArbeidsgiver,
         dagerPerson = dagerPerson,
+        daglisteArbeidsgiver = daglisteArbeidsgiver,
+        daglisteSykmeldt = daglisteSykmeldt,
         vedtak = this.vedtak.copy(fom = faktiskFomGammel),
     )
 }
