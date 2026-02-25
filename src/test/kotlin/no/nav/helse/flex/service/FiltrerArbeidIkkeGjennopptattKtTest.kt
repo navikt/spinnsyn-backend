@@ -14,7 +14,7 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
     fun `fjerner arbeid ikke gjenopptatt dager`() {
         val vedtakMedDager =
             vedtakTestdata().copy(
-                dagerPerson =
+                daglisteSykmeldt =
                     listOf(
                         rSDag(5, "ArbeidIkkeGjenopptattDag"),
                         rSDag(4, "ArbeidIkkeGjenopptattDag"),
@@ -24,7 +24,7 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
             )
 
         val vedtakUtenArbeidIkkeGjenopptattDager = vedtakMedDager.fjernArbeidIkkeGjenopptattDager()
-        vedtakUtenArbeidIkkeGjenopptattDager.dagerPerson.shouldHaveSize(1)
+        vedtakUtenArbeidIkkeGjenopptattDager.daglisteSykmeldt.shouldHaveSize(1)
         vedtakUtenArbeidIkkeGjenopptattDager.vedtak.fom shouldBeEqualTo (dato.minusDays(3))
     }
 
@@ -32,7 +32,7 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
     fun `fjerner ikke vanlige dager`() {
         val vedtakMedDager =
             vedtakTestdata().copy(
-                dagerPerson =
+                daglisteSykmeldt =
                     listOf(
                         rSDag(5, "NAVDag"),
                         rSDag(4, "NAVDag"),
@@ -42,7 +42,7 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
             )
 
         val vedtakUtenArbeidIkkeGjenopptattDager = vedtakMedDager.fjernArbeidIkkeGjenopptattDager()
-        vedtakUtenArbeidIkkeGjenopptattDager.dagerPerson.shouldHaveSize(3)
+        vedtakUtenArbeidIkkeGjenopptattDager.daglisteSykmeldt.shouldHaveSize(3)
         vedtakUtenArbeidIkkeGjenopptattDager.vedtak.fom shouldBeEqualTo dato.minusDays(5)
     }
 

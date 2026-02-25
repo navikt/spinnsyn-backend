@@ -7,8 +7,8 @@ import java.time.LocalDate
 
 class DagerTilUtbetalingsdagerTest {
     @Test
-    fun `kombinerer dager fra person og arbeidsgiver når begge eksisterer`() {
-        val dagerPerson =
+    fun `kombinerer dager fra sykmeldt og arbeidsgiver når begge eksisterer`() {
+        val dagerSykmeldt =
             listOf(
                 RSDag(
                     dato = LocalDate.of(2025, 10, 1),
@@ -44,7 +44,7 @@ class DagerTilUtbetalingsdagerTest {
                 ),
             )
 
-        val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(dagerPerson, dagerArbeidsgiver)
+        val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(dagerSykmeldt, dagerArbeidsgiver)
 
         utbetalingsdager.shouldHaveSize(2)
 
@@ -68,8 +68,8 @@ class DagerTilUtbetalingsdagerTest {
     }
 
     @Test
-    fun `håndterer kun person dager`() {
-        val dagerPerson =
+    fun `håndterer kun sykmeldt dager`() {
+        val dagerSykmeldt =
             listOf(
                 RSDag(
                     dato = LocalDate.of(2025, 10, 28),
@@ -80,7 +80,7 @@ class DagerTilUtbetalingsdagerTest {
                 ),
             )
 
-        val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(dagerPerson, emptyList())
+        val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(dagerSykmeldt, emptyList())
 
         utbetalingsdager.shouldHaveSize(1)
         utbetalingsdager[0].apply {
@@ -121,7 +121,7 @@ class DagerTilUtbetalingsdagerTest {
 
     @Test
     fun `fyller ut manglende dager i perioden`() {
-        val dagerPerson =
+        val dagerSykmeldt =
             listOf(
                 RSDag(
                     dato = LocalDate.of(2025, 10, 1),
@@ -143,7 +143,7 @@ class DagerTilUtbetalingsdagerTest {
                 ),
             )
 
-        val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(dagerPerson, dagerArbeidsgiver)
+        val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(dagerSykmeldt, dagerArbeidsgiver)
 
         // Skal bare inneholde dagene som faktisk finnes, ikke fylle ut manglende
         utbetalingsdager.shouldHaveSize(2)
@@ -153,7 +153,7 @@ class DagerTilUtbetalingsdagerTest {
 
     @Test
     fun `komplett eksempel basert på faktisk vedtak`() {
-        val dagerPerson =
+        val dagerSykmeldt =
             listOf(
                 RSDag(
                     dato = LocalDate.of(2025, 10, 1),
@@ -203,7 +203,7 @@ class DagerTilUtbetalingsdagerTest {
                 ),
             )
 
-        val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(dagerPerson, dagerArbeidsgiver)
+        val utbetalingsdager = RSVedtakWrapper.dagerTilUtbetalingsdager(dagerSykmeldt, dagerArbeidsgiver)
 
         utbetalingsdager.shouldHaveSize(4)
 

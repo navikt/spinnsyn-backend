@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component
 class Vedtaktype {
     private fun RSVedtakWrapper.erRefusjon() = this.sykepengebelopArbeidsgiver > 0
 
-    private fun RSVedtakWrapper.erBrukerutbetaling() = this.sykepengebelopPerson > 0
+    private fun RSVedtakWrapper.erBrukerutbetaling() = this.sykepengebelopSykmeldt > 0
 
     private fun RSVedtakWrapper.erKombinasjonutbetaling() = erRefusjon() && erBrukerutbetaling()
 
-    private fun RSVedtakWrapper.erAvvist() = (dagerPerson + dagerArbeidsgiver).any { it.dagtype == "AvvistDag" }
+    private fun RSVedtakWrapper.erAvvist() = (daglisteSykmeldt + daglisteArbeidsgiver).any { it.dagtype == "AvvistDag" }
 
     private fun RSVedtakWrapper.erDelvisAvvist() = (erRefusjon() || erBrukerutbetaling()) && erAvvist()
 
