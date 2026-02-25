@@ -1,6 +1,5 @@
 package no.nav.helse.flex.domene
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.logger
 import java.time.Instant
@@ -16,14 +15,8 @@ data class RSVedtakWrapper(
     val orgnavn: String,
     val annullert: Boolean = false,
     val revurdert: Boolean = false,
-    @JsonIgnore
-    val dagerArbeidsgiver: List<RSDag> = emptyList(),
-    @JsonIgnore
-    val dagerPerson: List<RSDag> = emptyList(),
-    @JsonIgnore
     val sykepengebelopArbeidsgiver: Int = 0,
-    @JsonIgnore
-    val sykepengebelopPerson: Int = 0,
+    val sykepengebelopSykmeldt: Int = 0,
     val daglisteArbeidsgiver: List<RSDag> = emptyList(),
     val daglisteSykmeldt: List<RSDag> = emptyList(),
     val andreArbeidsgivere: Map<String, Double>?,
@@ -33,15 +26,15 @@ data class RSVedtakWrapper(
         val log = logger()
 
         fun dagerTilUtbetalingsdager(
-            dagerPerson: List<RSDag>,
+            dagerSykmeldt: List<RSDag>,
             dagerArbeidsgiver: List<RSDag>,
         ): List<RSUtbetalingdag> {
-            val fom = (dagerPerson + dagerArbeidsgiver).minByOrNull { it.dato }?.dato ?: return emptyList()
-            val tom = (dagerPerson + dagerArbeidsgiver).maxByOrNull { it.dato }?.dato ?: return emptyList()
+            val fom = (dagerSykmeldt + dagerArbeidsgiver).minByOrNull { it.dato }?.dato ?: return emptyList()
+            val tom = (dagerSykmeldt + dagerArbeidsgiver).maxByOrNull { it.dato }?.dato ?: return emptyList()
             val utbetalingsdager = mutableListOf<RSUtbetalingdag>()
 
             for (dato in fom.datesUntil(tom.plusDays(1))) {
-                val dagPerson = dagerPerson.find { it.dato.equals(dato) }
+                val dagPerson = dagerSykmeldt.find { it.dato.equals(dato) }
                 val dagArbeidsgiver = dagerArbeidsgiver.find { it.dato.equals(dato) }
 
                 if (dagPerson == null && dagArbeidsgiver == null) {

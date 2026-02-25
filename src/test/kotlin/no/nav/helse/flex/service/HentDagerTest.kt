@@ -2,10 +2,7 @@ package no.nav.helse.flex.service
 
 import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.helse.flex.domene.RSDag
-import no.nav.helse.flex.domene.RSOppdrag
 import no.nav.helse.flex.domene.RSUtbetalingdag
-import no.nav.helse.flex.domene.RSUtbetalingslinje
-import no.nav.helse.flex.util.hentDager
 import no.nav.helse.flex.util.hentDagerNy
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -42,13 +39,6 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(8), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(9), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
             )
-
-        hentDager(
-            fom = mandag.plusDays(0),
-            tom = mandag.plusDays(9),
-            oppdragDto = null,
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(forventetArbeidgiverDagliste)
 
         hentDagerNy(
             fom = mandag.plusDays(0),
@@ -102,27 +92,6 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
             )
-        hentDager(
-            fom = mandag.plusDays(0),
-            tom = mandag.plusDays(17),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = mandag.plusDays(16),
-                                tom = mandag.plusDays(17),
-                                dagsats = 100,
-                                totalbeløp = 200,
-                                grad = 100.0,
-                                stønadsdager = 2,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(
-            forventetArbeidgiverDagliste,
-        )
 
         hentDagerNy(
             fom = mandag.plusDays(0),
@@ -214,27 +183,7 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
             )
-        hentDager(
-            fom = mandag.plusDays(0),
-            tom = mandag.plusDays(17),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = mandag.plusDays(10),
-                                tom = mandag.plusDays(17),
-                                dagsats = 100,
-                                totalbeløp = 800,
-                                grad = 100.0,
-                                stønadsdager = 8,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(
-            forventetArbeidgiverDagliste,
-        )
+
         hentDagerNy(
             fom = mandag.plusDays(0),
             tom = mandag.plusDays(17),
@@ -341,27 +290,7 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
             )
-        hentDager(
-            fom = mandag.plusDays(0),
-            tom = mandag.plusDays(17),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = mandag.plusDays(7),
-                                tom = mandag.plusDays(17),
-                                dagsats = 100,
-                                totalbeløp = 900,
-                                grad = 100.0,
-                                stønadsdager = 9,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(
-            forventetArbeidgiverDagliste,
-        )
+
         hentDagerNy(
             fom = mandag.plusDays(0),
             tom = mandag.plusDays(17),
@@ -416,27 +345,7 @@ class HentDagerTest {
                 RSDag(søndag.plusDays(1), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(søndag.plusDays(2), 100, 100.0, "NavDagSyk", emptyList()),
             )
-        hentDager(
-            fom = søndag.minusDays(15),
-            tom = søndag.plusDays(2),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = søndag.plusDays(1),
-                                tom = søndag.plusDays(2),
-                                dagsats = 100,
-                                totalbeløp = 200,
-                                grad = 100.0,
-                                stønadsdager = 2,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(
-            forventetArbeidgiverDagliste,
-        )
+
         hentDagerNy(
             fom = søndag.minusDays(15),
             tom = søndag.plusDays(2),
@@ -581,27 +490,7 @@ class HentDagerTest {
                 RSDag(søndag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
                 RSDag(søndag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
             )
-        hentDager(
-            fom = søndag.plusDays(0),
-            tom = søndag.plusDays(17),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = søndag.plusDays(1),
-                                tom = søndag.plusDays(17),
-                                dagsats = 100,
-                                totalbeløp = 1300,
-                                grad = 100.0,
-                                stønadsdager = 13,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(
-            forventetArbeidgiverDagliste,
-        )
+
         hentDagerNy(
             fom = søndag.plusDays(0),
             tom = søndag.plusDays(17),
@@ -803,52 +692,12 @@ class HentDagerTest {
                 RSDag(søndag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
             )
 
-        hentDager(
-            fom = søndag.plusDays(0),
-            tom = søndag.plusDays(17),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = søndag.plusDays(0),
-                                tom = søndag.plusDays(3),
-                                dagsats = 200,
-                                totalbeløp = 600,
-                                grad = 100.0,
-                                stønadsdager = 4,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(forventetArbeidsgiverDagliste)
-
         hentDagerNy(
             fom = søndag.plusDays(0),
             tom = søndag.plusDays(17),
             utbetalingsdager = utbetalingsdager,
             erSykmeldt = false,
         ).shouldContainExactly(forventetArbeidsgiverDagliste)
-
-        hentDager(
-            fom = søndag.plusDays(0),
-            tom = søndag.plusDays(17),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = søndag.plusDays(4),
-                                tom = søndag.plusDays(17),
-                                dagsats = 100,
-                                totalbeløp = 1000,
-                                grad = 100.0,
-                                stønadsdager = 14,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(forventetSykmeldtDagliste)
 
         hentDagerNy(
             fom = søndag.plusDays(0),
@@ -1160,68 +1009,12 @@ class HentDagerTest {
                 RSDag(dato.plusDays(29), 0, 0.0, "NavHelgDag", emptyList()),
             )
 
-        hentDager(
-            fom = dato.plusDays(0),
-            tom = dato.plusDays(29),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = dato.plusDays(2),
-                                tom = dato.plusDays(2),
-                                dagsats = 2308,
-                                totalbeløp = 2308,
-                                grad = 100.0,
-                                stønadsdager = 1,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(forventetArbeidsgiverDagliste)
-
         hentDagerNy(
             fom = dato.plusDays(0),
             tom = dato.plusDays(29),
             utbetalingsdager = utbetalingsdager,
             erSykmeldt = false,
         ).shouldContainExactly(forventetArbeidsgiverDagliste)
-
-        hentDager(
-            fom = dato.plusDays(0),
-            tom = dato.plusDays(29),
-            oppdragDto =
-                RSOppdrag(
-                    utbetalingslinjer =
-                        listOf(
-                            RSUtbetalingslinje(
-                                fom = dato.plusDays(3),
-                                tom = dato.plusDays(9),
-                                dagsats = 2308,
-                                totalbeløp = 11540,
-                                grad = 100.0,
-                                stønadsdager = 5,
-                            ),
-                            RSUtbetalingslinje(
-                                fom = dato.plusDays(12),
-                                tom = dato.plusDays(17),
-                                dagsats = 2308,
-                                totalbeløp = 9232,
-                                grad = 100.0,
-                                stønadsdager = 4,
-                            ),
-                            RSUtbetalingslinje(
-                                fom = dato.plusDays(20),
-                                tom = dato.plusDays(29),
-                                dagsats = 2308,
-                                totalbeløp = 13848,
-                                grad = 100.0,
-                                stønadsdager = 6,
-                            ),
-                        ),
-                ),
-            utbetalingsdager = utbetalingsdager,
-        ).shouldContainExactly(forventetSykmeldtDagliste)
 
         hentDagerNy(
             fom = dato.plusDays(0),
@@ -1323,18 +1116,6 @@ class HentDagerTest {
                 RSDag(dato.plusDays(7), 0, 0.0, "NavHelgDag", emptyList()),
                 RSDag(dato.plusDays(8), 0, 0.0, "NavHelgDag", emptyList()),
             )
-
-        val hentDager =
-            hentDager(
-                fom = dato.plusDays(0),
-                tom = dato.plusDays(8),
-                oppdragDto =
-                    RSOppdrag(
-                        utbetalingslinjer = listOf(),
-                    ),
-                utbetalingsdager = utbetalingsdager,
-            )
-        hentDager.shouldContainExactly(forventetSykmeldtDagliste)
 
         hentDagerNy(
             fom = dato.plusDays(0),

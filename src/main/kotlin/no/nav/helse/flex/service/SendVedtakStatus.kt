@@ -77,7 +77,7 @@ class SendVedtakStatus(
                         hentSomBruker = false,
                     ).first { it.id == id }
 
-            val skalIkkeVisesFordi = sjekkDager(vedtakWrapper.dagerArbeidsgiver + vedtakWrapper.dagerPerson)
+            val skalIkkeVisesFordi = sjekkDager(vedtakWrapper.daglisteArbeidsgiver + vedtakWrapper.daglisteSykmeldt)
             if (skalIkkeVisesFordi.isNotBlank()) {
                 log.info("Utbetaling $utbetalingId inneholder bare $skalIkkeVisesFordi og vises ikke til bruker")
                 skalIkkeVises(id, skalIkkeVisesFordi)
