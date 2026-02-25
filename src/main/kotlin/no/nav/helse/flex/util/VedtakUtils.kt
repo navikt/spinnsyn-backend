@@ -94,13 +94,21 @@ fun hentDagerNy(
                     }
 
                     else -> {
+                        val grad =
+                            if (utbetalingsdagen.dato.dayOfWeek in helg) {
+                                0.0
+                            } else if (utbetalingsdagen.getBeløp(erSykmeldt) == 0) {
+                                0.0
+                            } else {
+                                utbetalingsdagen.sykdomsgrad?.toDouble() ?: 0.0
+                            }
                         dag.copy(
                             begrunnelser = utbetalingsdagen.begrunnelser,
                             dagtype =
                                 when (utbetalingsdagen.type) {
                                     "NavDag" -> {
                                         when {
-                                            (utbetalingsdagen.sykdomsgrad ?: 0) < 100 -> "NavDagDelvisSyk"
+                                            grad < 100 -> "NavDagDelvisSyk"
                                             else -> "NavDagSyk"
                                         }
                                     }
@@ -114,7 +122,7 @@ fun hentDagerNy(
                                             utbetalingsdagen.getBeløp(erSykmeldt) == 0 -> "ArbeidsgiverperiodeDag"
 
                                             // Vises som gradert syk
-                                            (utbetalingsdagen.sykdomsgrad ?: 0) < 100 -> "NavDagDelvisSyk"
+                                            grad < 100 -> "NavDagDelvisSyk"
 
                                             // Vises som 100% syk
                                             else -> "NavDagSyk"
@@ -126,18 +134,7 @@ fun hentDagerNy(
                                     }
                                 },
                             belop = if (utbetalingsdagen.dato.dayOfWeek in helg) 0 else utbetalingsdagen.getBeløp(erSykmeldt),
-                            grad =
-                                if (utbetalingsdagen.dato.dayOfWeek in
-                                    helg
-                                ) {
-                                    0.0
-                                } else if (utbetalingsdagen.getBeløp(erSykmeldt) ==
-                                    0
-                                ) {
-                                    0.0
-                                } else {
-                                    utbetalingsdagen.sykdomsgrad?.toDouble() ?: 0.0
-                                },
+                            grad = grad,
                         )
                     }
                 }
