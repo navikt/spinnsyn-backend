@@ -12,6 +12,7 @@ import no.nav.helse.flex.util.leggTilDagerIVedtakPeriode
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.temporal.ChronoUnit
+import kotlin.math.roundToInt
 
 @Component
 class MigrerTilUtbetalingsdagerJobb(
@@ -141,7 +142,7 @@ class MigrerTilUtbetalingsdagerBatchMigrator(
                 gammelDag.copy(
                     beløpTilSykmeldt = dagPerson?.belop ?: 0,
                     beløpTilArbeidsgiver = dagArbeidsgiver?.belop ?: 0,
-                    sykdomsgrad = (dagPerson?.grad ?: dagArbeidsgiver?.grad ?: 0.0).toInt(),
+                    sykdomsgrad = (dagPerson?.grad ?: dagArbeidsgiver?.grad ?: 0.0).roundToInt(),
                 )
             }
 

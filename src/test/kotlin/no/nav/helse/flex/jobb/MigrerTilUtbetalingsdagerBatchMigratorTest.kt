@@ -7,6 +7,7 @@ import no.nav.helse.flex.db.UtbetalingMigreringRepository
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.fake.EnvironmentTogglesFake
 import no.nav.helse.flex.jobb.MigreringsTestData.UTBETALING_GAMMELT_FORMAT_JSON
+import no.nav.helse.flex.jobb.MigreringsTestData.UTBETALING_GAMMELT_FORMAT_JSON_DESIMALER
 import no.nav.helse.flex.jobb.MigreringsTestData.UTBETALING_UTEN_UTBETALINGSDAGER_JSON
 import no.nav.helse.flex.objectMapper
 import org.amshove.kluent.`should be equal to`
@@ -143,6 +144,38 @@ class MigrerTilUtbetalingsdagerBatchMigratorTest : FellesTestOppsett() {
             utbetalingUtbetalt.utbetalingsdager.count { it.type == "NavDag" } `should be equal to` 22
             utbetalingUtbetalt.utbetalingsdager.count { it.type == "NavHelgDag" } `should be equal to` 8
             utbetalingUtbetalt.utbetalingsdager.count { it.type == "AvvistDag" } `should be equal to` 1
+        }
+    }
+
+    @Test
+    fun `Burde håndtere vedtak med grad med desimaler`() {
+        val utbetalingId = "utbetaling-med-flere-vedtak"
+        val fnr = "12345678910"
+
+        val vedtak1 = vedtakRepository.opprettVedtak(utbetalingId, fnr)
+        val vedtak2 = vedtakRepository.opprettVedtak(utbetalingId, fnr, opprettet = Instant.parse("2021-01-02T12:00:00Z"))
+        val utbetaling =
+            utbetalingRepository.opprettUtbetaling(
+                utbetalingId,
+                fnr,
+                UTBETALING_GAMMELT_FORMAT_JSON_DESIMALER,
+                antallVedtak = 2,
+            )
+        val utbetalingMigrering = utbetalingMigreringRepository.opprettMigreringsRecord(utbetalingId, MigrertStatus.IKKE_MIGRERT)
+
+        val resultat = batchMigrator.migrerGammeltVedtak(listOf(utbetalingMigrering), mapOf(utbetaling to listOf(vedtak1, vedtak2)))
+
+        resultat.migrert.`should be equal to`(1)
+        resultat.feilet.`should be equal to`(0)
+        utbetalingMigreringRepository.verifiserMigreringsStatus(utbetalingId, MigrertStatus.MIGRERT)
+
+        utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr = fnr).single().also { utbetalingDbRecord ->
+            val utbetalingUtbetalt = objectMapper.readValue<UtbetalingUtbetalt>(utbetalingDbRecord.utbetaling)
+
+            utbetalingUtbetalt.utbetalingsdager.`should not be null`()
+            utbetalingUtbetalt.utbetalingsdager.size `should be equal to` 31
+            utbetalingUtbetalt.utbetalingsdager.filter { it.sykdomsgrad == 30 }.size `should be equal to` 12
+            utbetalingUtbetalt.utbetalingsdager.filter { it.sykdomsgrad == 33 }.size `should be equal to` 10
         }
     }
 }
