@@ -152,22 +152,7 @@ data class RSUtbetalingdag(
     val beløpTilArbeidsgiver: Int? = null,
     val beløpTilSykmeldt: Int? = null,
     val sykdomsgrad: Int? = null,
-) {
-    companion object {
-        fun konverterTilUtbetalindagDto(utbetalt: RSUtbetalingdag) =
-            UtbetalingUtbetalt.UtbetalingdagDto(
-                dato = utbetalt.dato,
-                type = utbetalt.type,
-                begrunnelser =
-                    utbetalt.begrunnelser.map {
-                        UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse.valueOf(it)
-                    },
-                beløpTilArbeidsgiver = utbetalt.beløpTilArbeidsgiver,
-                beløpTilSykmeldt = utbetalt.beløpTilSykmeldt,
-                sykdomsgrad = utbetalt.sykdomsgrad,
-            )
-    }
-}
+)
 
 data class RSDag(
     val dato: LocalDate,
