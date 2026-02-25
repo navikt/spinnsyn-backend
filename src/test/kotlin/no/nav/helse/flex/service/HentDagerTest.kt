@@ -859,7 +859,7 @@ class HentDagerTest {
     }
 
     @Test
-    fun `Både brukerutbetaling og arbeidsgiverrefusjon i arbeidsgiverperiode2`() {
+    fun `Både brukerutbetaling og arbeidsgiverrefusjon med mange utbetalingsperioder og ferie`() {
         val dato = LocalDate.of(2025, 11, 1)
 
         val utbetalingsdager =
@@ -1229,5 +1229,174 @@ class HentDagerTest {
             utbetalingsdager = utbetalingsdager,
             erSykmeldt = true,
         ).shouldContainExactly(forventetSykmeldtDagliste)
+    }
+
+    @Test
+    fun `NavDagDelvisSyk basert på at dagen er nullet ut`() {
+        val dato = LocalDate.of(2025, 11, 8)
+
+        val utbetalingsdager =
+            listOf(
+                RSUtbetalingdag(
+                    dato.plusDays(0),
+                    "NavHelgDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(1),
+                    "NavHelgDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(2),
+                    "NavDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(3),
+                    "NavDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(4),
+                    "AvvistDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(5),
+                    "AvvistDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(6),
+                    "AvvistDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(7),
+                    "NavHelgDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(8),
+                    "NavHelgDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+            )
+
+        val forventetSykmeldtDagliste =
+            listOf(
+                RSDag(dato.plusDays(0), 0, 0.0, "NavHelgDag", emptyList()),
+                RSDag(dato.plusDays(1), 0, 0.0, "NavHelgDag", emptyList()),
+                RSDag(dato.plusDays(2), 0, 0.0, "NavDagDelvisSyk", emptyList()),
+                RSDag(dato.plusDays(3), 0, 0.0, "NavDagDelvisSyk", emptyList()),
+                RSDag(dato.plusDays(4), 0, 0.0, "AvvistDag", emptyList()),
+                RSDag(dato.plusDays(5), 0, 0.0, "AvvistDag", emptyList()),
+                RSDag(dato.plusDays(6), 0, 0.0, "AvvistDag", emptyList()),
+                RSDag(dato.plusDays(7), 0, 0.0, "NavHelgDag", emptyList()),
+                RSDag(dato.plusDays(8), 0, 0.0, "NavHelgDag", emptyList()),
+            )
+
+        val hentDager =
+            hentDager(
+                fom = dato.plusDays(0),
+                tom = dato.plusDays(8),
+                oppdragDto =
+                    RSOppdrag(
+                        utbetalingslinjer = listOf(),
+                    ),
+                utbetalingsdager = utbetalingsdager,
+            )
+        hentDager.shouldContainExactly(forventetSykmeldtDagliste)
+
+        hentDagerNy(
+            fom = dato.plusDays(0),
+            tom = dato.plusDays(8),
+            utbetalingsdager = utbetalingsdager,
+            erSykmeldt = true,
+        ).shouldContainExactly(forventetSykmeldtDagliste)
+    }
+
+    @Test
+    fun `Helg på slutten av arbeidsgiverperiode`() {
+        val dato = LocalDate.of(2025, 12, 4)
+
+        val utbetalingsdager =
+            listOf(
+                RSUtbetalingdag(
+                    dato.plusDays(0),
+                    "ArbeidsgiverperiodeDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 2018,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(1),
+                    "ArbeidsgiverperiodeDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 2018,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(2),
+                    "ArbeidsgiverperiodeDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(3),
+                    "ArbeidsgiverperiodeDag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+            )
+
+        val forventetArbeidsgiverDagliste =
+            listOf(
+                RSDag(dato.plusDays(0), 2018, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(1), 2018, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(2), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
+                RSDag(dato.plusDays(3), 0, 0.0, "ArbeidsgiverperiodeDag", emptyList()),
+            )
+
+        hentDagerNy(
+            fom = dato.plusDays(0),
+            tom = dato.plusDays(3),
+            utbetalingsdager = utbetalingsdager,
+            erSykmeldt = false,
+        ).shouldContainExactly(forventetArbeidsgiverDagliste)
     }
 }
