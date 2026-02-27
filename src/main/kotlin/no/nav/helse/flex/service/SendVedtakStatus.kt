@@ -45,9 +45,13 @@ class SendVedtakStatus(
         }
     }
 
-    fun prosesserUtbetalinger(): Int {
+    fun prosesserUtbetalinger() {
+        log.info("Starter prosessering av utbetalinger.")
+
         val utbetalinger = utbetalingRepository.utbetalingerKlarTilVarsling()
-        if (utbetalinger.isEmpty()) return 0
+        if (utbetalinger.isEmpty()) {
+            return
+        }
 
         val vedtakGruppert =
             vedtakRepository
@@ -64,7 +68,7 @@ class SendVedtakStatus(
                     } != null
             }
 
-        var sendt = 0
+        log.info("Fant ${utbetalingerMedAlleVedtak.size} utbetalinger klar til varsling.")
 
         utbetalingerMedAlleVedtak.forEach { ut ->
             val id = ut.id
@@ -80,7 +84,7 @@ class SendVedtakStatus(
             val skalIkkeVisesFordi = sjekkDager(vedtakWrapper.daglisteArbeidsgiver + vedtakWrapper.daglisteSykmeldt)
             if (skalIkkeVisesFordi.isNotBlank()) {
                 log.info("Utbetaling $utbetalingId inneholder bare $skalIkkeVisesFordi og vises ikke til bruker")
-                skalIkkeVises(id, skalIkkeVisesFordi)
+                skalIkkeVises(id)
                 return@forEach
             }
 
@@ -96,16 +100,10 @@ class SendVedtakStatus(
                 skalVisesTilBruker = true,
                 id = id,
             )
-            sendt += 1
         }
-
-        return sendt
     }
 
-    private fun skalIkkeVises(
-        id: String,
-        grunn: String,
-    ) {
+    private fun skalIkkeVises(id: String) {
         utbetalingRepository.settSkalVisesOgMotattPublisert(
             skalVisesTilBruker = false,
             motattPublisert = null,
