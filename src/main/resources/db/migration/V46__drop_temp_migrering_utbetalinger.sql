@@ -1,0 +1,1 @@
+DROP TABLE temp_utbetalinger_migrering;
