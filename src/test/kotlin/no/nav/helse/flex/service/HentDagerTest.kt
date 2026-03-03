@@ -54,7 +54,7 @@ class HentDagerTest {
             listOf(
                 RSUtbetalingdag(
                     dato = mandag.plusDays(0),
-                    type = "NavDagSyk",
+                    type = "NavDag",
                     begrunnelser = emptyList(),
                     beløpTilArbeidsgiver = 0,
                     sykdomsgrad = 100,
@@ -67,7 +67,7 @@ class HentDagerTest {
                     dato = mandag.plusDays(0),
                     belop = 0,
                     grad = 100.0,
-                    dagtype = "NavDagSyk",
+                    dagtype = "NavDag",
                     begrunnelser = emptyList(),
                 ),
             )
@@ -121,8 +121,8 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(13), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(14), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(15), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
-                RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(mandag.plusDays(16), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(17), 100, 100.0, "NavDag", emptyList()),
             )
 
         hentDagerNy(
@@ -206,14 +206,14 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(7), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(8), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(9), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
-                RSDag(mandag.plusDays(10), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(11), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(mandag.plusDays(10), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(11), 100, 100.0, "NavDag", emptyList()),
                 RSDag(mandag.plusDays(12), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(mandag.plusDays(13), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(mandag.plusDays(14), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(15), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(mandag.plusDays(14), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(15), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(16), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(17), 100, 100.0, "NavDag", emptyList()),
             )
 
         hentDagerNy(
@@ -310,17 +310,17 @@ class HentDagerTest {
                 RSDag(mandag.plusDays(4), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(mandag.plusDays(5), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(mandag.plusDays(6), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(mandag.plusDays(7), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(8), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(9), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(10), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(11), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(mandag.plusDays(7), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(8), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(9), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(10), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(11), 100, 100.0, "NavDag", emptyList()),
                 RSDag(mandag.plusDays(12), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(mandag.plusDays(13), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(mandag.plusDays(14), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(15), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(mandag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(mandag.plusDays(14), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(15), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(16), 100, 100.0, "NavDag", emptyList()),
+                RSDag(mandag.plusDays(17), 100, 100.0, "NavDag", emptyList()),
             )
 
         hentDagerNy(
@@ -374,8 +374,8 @@ class HentDagerTest {
                 RSDag(søndag.minusDays(2), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(søndag.minusDays(1), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(søndag.minusDays(0), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
-                RSDag(søndag.plusDays(1), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(2), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(1), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(2), 100, 100.0, "NavDag", emptyList()),
             )
 
         hentDagerNy(
@@ -504,23 +504,23 @@ class HentDagerTest {
         val forventetArbeidgiverDagliste =
             listOf(
                 RSDag(søndag.plusDays(0), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(søndag.plusDays(1), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(2), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(3), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(4), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(5), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(1), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(2), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(3), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(4), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(5), 100, 100.0, "NavDag", emptyList()),
                 RSDag(søndag.plusDays(6), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(søndag.plusDays(7), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(søndag.plusDays(8), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(9), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(10), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(11), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(12), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(8), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(9), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(10), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(11), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(12), 100, 100.0, "NavDag", emptyList()),
                 RSDag(søndag.plusDays(13), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(søndag.plusDays(14), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(søndag.plusDays(15), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(15), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(16), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(17), 100, 100.0, "NavDag", emptyList()),
             )
 
         hentDagerNy(
@@ -685,9 +685,9 @@ class HentDagerTest {
         val forventetArbeidsgiverDagliste =
             listOf(
                 RSDag(søndag.plusDays(0), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(søndag.plusDays(1), 200, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(2), 200, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(3), 200, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(1), 200, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(2), 200, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(3), 200, 100.0, "NavDag", emptyList()),
                 RSDag(søndag.plusDays(4), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(søndag.plusDays(5), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(søndag.plusDays(6), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
@@ -708,20 +708,20 @@ class HentDagerTest {
                 RSDag(søndag.plusDays(1), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(søndag.plusDays(2), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(søndag.plusDays(3), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
-                RSDag(søndag.plusDays(4), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(5), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(4), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(5), 100, 100.0, "NavDag", emptyList()),
                 RSDag(søndag.plusDays(6), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(søndag.plusDays(7), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(søndag.plusDays(8), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(9), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(10), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(11), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(12), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(8), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(9), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(10), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(11), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(12), 100, 100.0, "NavDag", emptyList()),
                 RSDag(søndag.plusDays(13), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(søndag.plusDays(14), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(søndag.plusDays(15), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(16), 100, 100.0, "NavDagSyk", emptyList()),
-                RSDag(søndag.plusDays(17), 100, 100.0, "NavDagSyk", emptyList()),
+                RSDag(søndag.plusDays(15), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(16), 100, 100.0, "NavDag", emptyList()),
+                RSDag(søndag.plusDays(17), 100, 100.0, "NavDag", emptyList()),
             )
 
         hentDagerNy(
@@ -991,7 +991,7 @@ class HentDagerTest {
             listOf(
                 RSDag(dato.plusDays(0), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(dato.plusDays(1), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
-                RSDag(dato.plusDays(2), 2308, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(2), 2308, 100.0, "NavDag", emptyList()),
                 RSDag(dato.plusDays(3), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(dato.plusDays(4), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(dato.plusDays(5), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
@@ -1012,31 +1012,31 @@ class HentDagerTest {
                 RSDag(dato.plusDays(0), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(dato.plusDays(1), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(dato.plusDays(2), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
-                RSDag(dato.plusDays(3), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(4), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(5), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(6), 2308, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(3), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(4), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(5), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(6), 2308, 100.0, "NavDag", emptyList()),
                 RSDag(dato.plusDays(7), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(dato.plusDays(8), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(dato.plusDays(9), 2308, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(9), 2308, 100.0, "NavDag", emptyList()),
                 RSDag(dato.plusDays(10), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(dato.plusDays(11), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
-                RSDag(dato.plusDays(12), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(13), 2308, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(12), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(13), 2308, 100.0, "NavDag", emptyList()),
                 RSDag(dato.plusDays(14), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(dato.plusDays(15), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(dato.plusDays(16), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(17), 2308, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(16), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(17), 2308, 100.0, "NavDag", emptyList()),
                 RSDag(dato.plusDays(18), 0, 0.0, "Feriedag", emptyList()),
                 RSDag(dato.plusDays(19), 0, 0.0, "Feriedag", emptyList()),
-                RSDag(dato.plusDays(20), 2308, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(20), 2308, 100.0, "NavDag", emptyList()),
                 RSDag(dato.plusDays(21), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(dato.plusDays(22), 0, 100.0, "NavHelgDag", emptyList()),
-                RSDag(dato.plusDays(23), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(24), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(25), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(26), 2308, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(27), 2308, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(23), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(24), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(25), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(26), 2308, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(27), 2308, 100.0, "NavDag", emptyList()),
                 RSDag(dato.plusDays(28), 0, 100.0, "NavHelgDag", emptyList()),
                 RSDag(dato.plusDays(29), 0, 100.0, "NavHelgDag", emptyList()),
             )
@@ -1051,48 +1051,6 @@ class HentDagerTest {
         hentDagerNy(
             fom = dato.plusDays(0),
             tom = dato.plusDays(29),
-            utbetalingsdager = utbetalingsdager,
-            erSykmeldt = true,
-        ).shouldContainExactly(forventetSykmeldtDagliste)
-    }
-
-    @Test
-    fun `Støtter NavDagDelvisSyk (gammel type) og fordeling i daglister til sykmeldt og arbeidsgiver`() {
-        val dato = LocalDate.of(2025, 11, 10)
-
-        val utbetalingsdager =
-            listOf(
-                RSUtbetalingdag(
-                    dato.plusDays(0),
-                    "NavDagDelvisSyk",
-                    emptyList(),
-                    beløpTilArbeidsgiver = 100,
-                    beløpTilSykmeldt = 0,
-                    sykdomsgrad = 50,
-                ),
-                RSUtbetalingdag(
-                    dato.plusDays(1),
-                    "NavDagDelvisSyk",
-                    emptyList(),
-                    beløpTilArbeidsgiver = 0,
-                    beløpTilSykmeldt = 100,
-                    sykdomsgrad = 50,
-                ),
-            )
-
-        val foreventetArbeidsgiverDagliste = listOf(RSDag(dato.plusDays(0), 100, 50.0, "NavDagDelvisSyk", emptyList()))
-
-        hentDagerNy(
-            fom = dato.plusDays(0),
-            tom = dato.plusDays(0),
-            utbetalingsdager = utbetalingsdager,
-            erSykmeldt = false,
-        ).shouldContainExactly(foreventetArbeidsgiverDagliste)
-
-        val forventetSykmeldtDagliste = listOf(RSDag(dato.plusDays(1), 100, 50.0, "NavDagDelvisSyk", emptyList()))
-        hentDagerNy(
-            fom = dato.plusDays(1),
-            tom = dato.plusDays(1),
             utbetalingsdager = utbetalingsdager,
             erSykmeldt = true,
         ).shouldContainExactly(forventetSykmeldtDagliste)
@@ -1140,8 +1098,8 @@ class HentDagerTest {
 
         val forventetArbeidsgiverDagliste =
             listOf(
-                RSDag(dato.plusDays(0), 2018, 100.0, "NavDagSyk", emptyList()),
-                RSDag(dato.plusDays(1), 2018, 100.0, "NavDagSyk", emptyList()),
+                RSDag(dato.plusDays(0), 2018, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(1), 2018, 100.0, "NavDag", emptyList()),
                 RSDag(dato.plusDays(2), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
                 RSDag(dato.plusDays(3), 0, 100.0, "ArbeidsgiverperiodeDag", emptyList()),
             )

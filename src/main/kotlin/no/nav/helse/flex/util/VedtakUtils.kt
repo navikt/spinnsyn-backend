@@ -7,7 +7,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.streams.asSequence
 
-private val dagtyperMedUtbetaling = listOf("NavDag", "NavDagSyk", "NavDagDelvisSyk")
+private val dagtyperMedUtbetaling = listOf("NavDag")
 private val helg = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 
 fun RSVedtakWrapper.leggTilDagerIVedtakPeriode(): RSVedtakWrapper {
@@ -80,10 +80,6 @@ fun hentDagerNy(
                             begrunnelser = utbetalingsdagen.begrunnelser,
                             dagtype =
                                 when (utbetalingsdagen.type) {
-                                    "NavDag" -> {
-                                        "NavDagSyk"
-                                    }
-
                                     "ArbeidsgiverperiodeDag" -> {
                                         when {
                                             // NAV betaler ikke arbeidsgiverperiode i helg
@@ -92,7 +88,7 @@ fun hentDagerNy(
 
                                             utbetalingsdagen.getBeløp(erSykmeldt) == 0 -> "ArbeidsgiverperiodeDag"
 
-                                            else -> "NavDagSyk"
+                                            else -> "NavDag"
                                         }
                                     }
 
