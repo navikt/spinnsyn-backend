@@ -31,11 +31,7 @@ class MottaAnnulering(
             .finnAnnullering(fnr)
             .firstOrNull { it.annullering == annulleringSerialisert }
             ?.let {
-                if (it.id == id.toString()) {
-                    log.info("Annullering $id er allerede mottat, går videre")
-                } else {
-                    log.warn("Oppretter ikke duplikate annulleringer ny id: $id, eksisterende id: ${it.id}")
-                }
+                log.info("Annullering ${it.id} er allerede mottatt, går videre")
                 return
             }
 

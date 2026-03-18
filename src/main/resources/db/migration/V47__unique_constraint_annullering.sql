@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX annullering_annullering_unique ON annullering (md5(annullering::text));

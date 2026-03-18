@@ -28,7 +28,7 @@ class MottaVedtak(
 
             cr.erAnnullering() -> {
                 mottaAnnulering.mottaAnnullering(
-                    id = UUID.nameUUIDFromBytes("${cr.partition()}-${cr.offset()}".toByteArray()),
+                    id = UUID.randomUUID(),
                     fnr = cr.key(),
                     annullering = cr.value(),
                     opprettet = Instant.now(),
