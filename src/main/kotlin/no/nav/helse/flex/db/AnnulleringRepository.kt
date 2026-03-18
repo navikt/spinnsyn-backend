@@ -81,17 +81,6 @@ class AnnulleringDAO(
                 .addValue("fnr", fnr),
         )
     }
-
-    fun slettAnnullering(id: String) {
-        namedParameterJdbcTemplate.update(
-            """
-                DELETE FROM ANNULLERING
-                WHERE id = :id;
-            """,
-            MapSqlParameterSource()
-                .addValue("id", id),
-        )
-    }
 }
 
 data class Annullering(
