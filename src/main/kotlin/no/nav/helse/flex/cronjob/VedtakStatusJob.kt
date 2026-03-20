@@ -13,7 +13,7 @@ class VedtakStatusJob(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 5, fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(initialDelay = 5, fixedDelay = 10, timeUnit = TimeUnit.MINUTES)
     fun run() {
         if (leaderElection.isLeader()) {
             vedtakStatusService.prosesserUtbetalinger()
