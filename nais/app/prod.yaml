@@ -9,6 +9,10 @@ cpu: 100m
 memory: 1500Mi
 external-host:
   - pdl-api.prod-fss-pub.nais.io
+db_flags:
+  cloudsql.enable_pgaudit: "true"
+  pgaudit.log: 'write,ddl,role'
+  pgaudit.log_parameter: "on"
 env:
   PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
   PDL_API_AAD_CLIENT_ID: prod-fss.pdl.pdl-api
