@@ -19,7 +19,7 @@ spring:
       max-lifetime: 600000
 
 aiven-kafka:
-  auto-offset-reset: none
+  auto-offset-reset: latest
   security-protocol: SSL
 
 management:
