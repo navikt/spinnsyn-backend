@@ -12,7 +12,6 @@ import no.nav.helse.flex.testdata.lagUtbetaling
 import no.nav.helse.flex.testdata.lagUtbetalingdag
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeEmpty
-import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldHaveSize
 import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.Consumer
@@ -422,7 +421,7 @@ class VedtakStatusTest : FellesTestOppsett() {
 
     @Test
     @Order(400)
-    fun `vedtakWrapper der det er ingen dager hvor NAV har vært involvert`() {
+    fun `vedtakWrapper der det er ingen dager hvor NAV har vært involvert skal vises uansett`() {
         kafkaProducer
             .send(
                 ProducerRecord(
@@ -469,12 +468,14 @@ class VedtakStatusTest : FellesTestOppsett() {
 
         vedtakStatusService.prosesserUtbetalinger()
 
+        statusKafkaConsumer.ventPåRecords(1)
+
         val utbetalingDbRecord =
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
                 it.utbetalingId == "Arbeidsgiverperiode"
             }
-        utbetalingDbRecord.motattPublisert.shouldBeNull()
-        utbetalingDbRecord.skalVisesTilBruker `should be equal to` false
+        utbetalingDbRecord.motattPublisert.shouldNotBeNull()
+        utbetalingDbRecord.skalVisesTilBruker `should be equal to` true
     }
 
     private fun hentFrontendVedtak(utbetalingId: String) =
