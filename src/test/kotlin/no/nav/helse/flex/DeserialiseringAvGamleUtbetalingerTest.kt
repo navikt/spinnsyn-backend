@@ -1,9 +1,12 @@
 package no.nav.helse.flex
 
+import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 /**
  * Denne testen verifiserer at gamle utbetalinger fra databasen uten de nye feltene
@@ -110,5 +113,40 @@ class DeserialiseringAvGamleUtbetalingerTest {
         utbetaling.utbetalingsdager[1].beløpTilArbeidsgiver.shouldBeEqualTo(800)
         utbetaling.utbetalingsdager[1].beløpTilSykmeldt.shouldBeEqualTo(200)
         utbetaling.utbetalingsdager[1].sykdomsgrad.shouldBeEqualTo(75)
+    }
+
+    @ParameterizedTest
+    @EnumSource(UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse::class)
+    fun `alle begrunnelser kan deserialiseres fra JSON`(begrunnelse: UtbetalingUtbetalt.UtbetalingdagDto.Begrunnelse) {
+        val json =
+            """
+            {
+              "event": "utbetaling_utbetalt",
+              "utbetalingId": "test-begrunnelse",
+              "fødselsnummer": "12345678910",
+              "aktørId": "1234567891234",
+              "organisasjonsnummer": "123456789",
+              "fom": "2023-01-01",
+              "tom": "2023-01-31",
+              "forbrukteSykedager": 10,
+              "gjenståendeSykedager": 238,
+              "automatiskBehandling": true,
+              "type": "UTBETALING",
+              "antallVedtak": 1,
+              "foreløpigBeregnetSluttPåSykepenger": "2023-12-31",
+              "utbetalingsdager": [
+                {
+                  "dato": "2023-01-19",
+                  "type": "AvvistDag",
+                  "begrunnelser": ["${begrunnelse.name}"]
+                }
+              ]
+            }
+            """.trimIndent()
+
+        val utbetaling = json.tilUtbetalingUtbetalt()
+
+        utbetaling.shouldNotBeNull()
+        utbetaling.utbetalingsdager[0].begrunnelser shouldBeEqualTo listOf(begrunnelse)
     }
 }
