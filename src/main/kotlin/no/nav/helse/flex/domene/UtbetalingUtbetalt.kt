@@ -67,6 +67,7 @@ data class UtbetalingUtbetalt(
             AndreYtelserOpplaringspenger,
             AndreYtelserPleiepenger,
             AndreYtelserSvangerskapspenger,
+            AvslattMeldingTilNavDag,
         }
     }
 }
