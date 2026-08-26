@@ -1,6 +1,5 @@
 package no.nav.helse.flex.kafka
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.kafka.producer.AUDIT_LOG_TOPIC
 import no.nav.helse.flex.kafka.producer.AuditEntry
@@ -14,6 +13,7 @@ import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import tools.jackson.module.kotlin.readValue
 import java.net.URI
 import java.util.UUID
 

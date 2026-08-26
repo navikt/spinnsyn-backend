@@ -1,6 +1,5 @@
 package no.nav.helse.flex.clientidvalidation
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.AbstractApiError
 import no.nav.helse.flex.api.LogLevel
 import no.nav.helse.flex.clientidvalidation.ClientIdValidation.NamespaceAndApp
@@ -10,6 +9,7 @@ import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import tools.jackson.module.kotlin.readValue
 
 @Component
 class ClientIdValidation(

@@ -1,8 +1,8 @@
 package no.nav.helse.flex.domene
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.objectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 data class VedtakFattetForEksternDto(
@@ -14,9 +14,11 @@ data class VedtakFattetForEksternDto(
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
     val dokumenter: List<Dokument>,
-    val inntekt: Double,
-    val sykepengegrunnlag: Double,
-    val grunnlagForSykepengegrunnlag: Double,
+    // Defaultene på de primitive non-null feltene gjør at oppførsel fra Jackson 2 videreføres siden
+    // Jackson 3 feiler på manglende felter.
+    val inntekt: Double = 0.0,
+    val sykepengegrunnlag: Double = 0.0,
+    val grunnlagForSykepengegrunnlag: Double = 0.0,
     val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>?,
     // ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD og VET_IKKE
     val begrensning: String?,
