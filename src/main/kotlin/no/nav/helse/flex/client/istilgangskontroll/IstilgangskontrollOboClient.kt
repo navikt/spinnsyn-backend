@@ -7,10 +7,11 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.exchange
 
 @Component
 class IstilgangskontrollOboClient(
@@ -32,11 +33,10 @@ class IstilgangskontrollOboClient(
 
         return try {
             val response =
-                istilgangskontrollRestTemplate.exchange(
+                istilgangskontrollRestTemplate.exchange<String>(
                     accessToUserV2Url(),
                     GET,
                     HttpEntity<Any>(headers),
-                    String::class.java,
                 )
             response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {

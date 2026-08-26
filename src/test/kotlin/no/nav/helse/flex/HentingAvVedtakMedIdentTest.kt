@@ -1,10 +1,9 @@
-import no.nav.helse.flex.Application
-import no.nav.helse.flex.FellesTestOppsett
+package no.nav.helse.flex
+
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.service.IdentService
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
@@ -21,11 +20,9 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
-@SpringBootTest(classes = [Application::class])
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
     @Autowired

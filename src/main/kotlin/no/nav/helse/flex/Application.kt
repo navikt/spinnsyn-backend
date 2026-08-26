@@ -1,21 +1,21 @@
 package no.nav.helse.flex
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.EnableKafka
+import org.springframework.resilience.annotation.EnableResilientMethods
 import org.springframework.scheduling.annotation.EnableScheduling
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.kotlinModule
 
 @SpringBootApplication
 @EnableKafka
 @EnableJwtTokenValidation
+@EnableResilientMethods
 class Application
 
 @Profile("default")
@@ -28,11 +28,9 @@ fun main(args: Array<String>) {
 }
 
 val objectMapper: ObjectMapper =
-    ObjectMapper().apply {
-        registerKotlinModule()
-        registerModule(JavaTimeModule())
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-    }
+    JsonMapper
+        .builder()
+        .addModule(kotlinModule())
+        .build()
 
 fun Any.serialisertTilString(): String = objectMapper.writeValueAsString(this)

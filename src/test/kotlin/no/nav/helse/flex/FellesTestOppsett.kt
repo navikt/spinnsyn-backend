@@ -1,7 +1,7 @@
 package no.nav.helse.flex
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.annotation.PostConstruct
+import mockwebserver3.MockWebServer
 import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
@@ -13,17 +13,18 @@ import no.nav.helse.flex.service.SendVedtakStatus
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import okhttp3.mockwebserver.MockWebServer
 import org.apache.kafka.clients.consumer.Consumer
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -33,7 +34,9 @@ import org.springframework.web.client.RestTemplate
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
+import tools.jackson.module.kotlin.readValue
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 private class PostgreSQLContainer14 : PostgreSQLContainer("postgres:14-alpine")
 
@@ -76,6 +79,9 @@ abstract class FellesTestOppsett {
 
     @Autowired
     lateinit var vedtakKafkaConsumer: Consumer<String, String>
+
+    @Autowired
+    lateinit var kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
 
     var istilgangskontrollMockRestServiceServer: MockRestServiceServer? = null
 
@@ -200,8 +206,9 @@ abstract class FellesTestOppsett {
 
         val pdlMockWebserver =
             MockWebServer().apply {
-                System.setProperty("pdl.api.url", "http://localhost:$port")
                 dispatcher = PdlMockDispatcher
+                start()
+                System.setProperty("pdl.api.url", "http://localhost:$port")
             }
     }
 
@@ -215,7 +222,20 @@ abstract class FellesTestOppsett {
     @BeforeAll
     fun `Vi subscriber til kafka topicet før testene kjører`() {
         vedtakKafkaConsumer.subscribeHvisIkkeSubscribed(VEDTAK_TOPIC)
+        ventPaaPartisjonering()
     }
+
+    // Alle test-listeners deler samme group.id "spinnsyn-backend-consumer", men har hver sin subscription.
+    // Hver lytter som joiner trigger derfor en rebalansering av hele gruppa, og en lytter kan bli stående
+    // uten partisjoner fram til neste runde. I testene produserers meldinger rett etter oppstart. Er ikke
+    // partisjonering ferdig blir meldinga lest for sent.
+    // Venter derfor til alle lytterne er tildelt partisjoner før første test kjøres.
+    private fun ventPaaPartisjonering() =
+        await().atMost(30, TimeUnit.SECONDS).until {
+            kafkaListenerEndpointRegistry.listenerContainers.all {
+                !it.assignedPartitions.isNullOrEmpty()
+            }
+        }
 
     fun tokenxToken(
         fnr: String,
