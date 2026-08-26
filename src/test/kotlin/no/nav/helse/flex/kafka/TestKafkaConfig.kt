@@ -1,5 +1,6 @@
 package no.nav.helse.flex.kafka
 
+import no.nav.helse.flex.testdata.TESTDATA_RESET_TOPIC
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -8,12 +9,37 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.kafka.config.TopicBuilder
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
+import org.springframework.kafka.core.KafkaAdmin
 
 @Configuration
 class TestKafkaConfig(
     private val aivenKafkaConfig: AivenKafkaConfig,
 ) {
+    // Oppretter topics før tester listenere subscribes og repartisjonering gjøres for å sikret at tester ikke
+    // publiserer meldinger før de har en partisjon.
+    @Bean
+    fun kafkaAdmin(): KafkaAdmin = KafkaAdmin(aivenKafkaConfig.commonConfig())
+
+    @Bean
+    fun testTopics(): KafkaAdmin.NewTopics =
+        KafkaAdmin.NewTopics(
+            *listOf(
+                VEDTAK_TOPIC,
+                UTBETALING_TOPIC,
+                VEDTAK_STATUS_TOPIC,
+                FLEX_SYKEPENGESOKNAD_TOPIC,
+                TESTDATA_RESET_TOPIC,
+            ).map {
+                TopicBuilder
+                    .name(it)
+                    .partitions(1)
+                    .replicas(1)
+                    .build()
+            }.toTypedArray(),
+        )
+
     @Bean
     fun producer(): KafkaProducer<String, String> {
         val config =

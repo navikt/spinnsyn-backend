@@ -1,7 +1,7 @@
 package no.nav.helse.flex.domene
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.objectMapper
+import tools.jackson.module.kotlin.readValue
 
 data class VedtakStatusDTO(
     val id: String,

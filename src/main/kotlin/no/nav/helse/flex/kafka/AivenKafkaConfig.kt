@@ -59,10 +59,9 @@ class AivenKafkaConfig(
                 ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
                 ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to "600000",
             ) + commonConfig()
-        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config)
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = consumerFactory
+        factory.setConsumerFactory(DefaultKafkaConsumerFactory(config))
         factory.setCommonErrorHandler(kafkaErrorHandler)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         return factory

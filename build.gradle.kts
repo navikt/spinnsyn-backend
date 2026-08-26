@@ -2,7 +2,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.springframework.boot") version "3.5.15"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     kotlin("plugin.spring") version "2.4.10"
@@ -14,8 +14,6 @@ version = "1.0.0"
 description = "spinnsyn-backend"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
-ext["okhttp3.version"] = "4.12" // Token-support tester trenger MockWebServer.
-
 repositories {
     mavenCentral()
     maven {
@@ -26,29 +24,30 @@ repositories {
 val testContainersVersion = "2.0.5"
 val logstashLogbackEncoderVersion = "9.0"
 val kluentVersion = "1.73"
-val tokenSupportVersion = "5.0.39"
+val tokenSupportVersion = "6.0.12"
 val sykepengesoknadKafkaVersion = "2026.07.28-13.22-138bf702"
 val kotestVersion = "6.2.4"
+val mockWebServerVersion = "5.5.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-    implementation(kotlin("stdlib"))
-    implementation(kotlin("reflect"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    implementation("org.springframework.boot:spring-boot-restclient")
+    implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("org.postgresql:postgresql")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.hibernate.validator:hibernate-validator")
-    implementation("org.springframework.kafka:spring-kafka")
-    implementation("org.postgresql:postgresql")
-    implementation("org.flywaydb:flyway-database-postgresql")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-kafka:$testContainersVersion")
@@ -56,10 +55,7 @@ dependencies {
     testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
-}
-
-ktlint {
-    version.set("1.5.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver3:$mockWebServerVersion")
 }
 
 kotlin {
