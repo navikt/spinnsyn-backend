@@ -108,6 +108,7 @@ data class RSVedtak(
     val tags: List<String>?,
     val saksbehandler: Saksbehandler? = null,
     val beslutter: Saksbehandler? = null,
+    val forsikringsvurdering: RSForsikringsvurdering? = null,
 ) : Periode
 
 data class RSUtbetalingUtbetalt(
@@ -153,4 +154,16 @@ data class RSDag(
     val grad: Double,
     val dagtype: String,
     val begrunnelser: List<String>,
+)
+
+data class RSForsikringsvurdering(
+    val forsikringsvurderingId: String,
+    val individuellForsikringNavn: String?,
+    val kollektivForsikringNavn: String?,
+    val dekning: RSDekning?,
+)
+
+data class RSDekning(
+    val grad: Int,
+    val fraDag: Int,
 )

@@ -27,6 +27,7 @@ data class VedtakFattetForEksternDto(
     val tags: List<String>? = null,
     val saksbehandler: Saksbehandler? = null,
     val beslutter: Saksbehandler? = null,
+    val forsikringsvurdering: Forsikringsvurdering? = null,
 )
 
 data class Begrunnelse(
@@ -38,6 +39,18 @@ data class Begrunnelse(
 data class Saksbehandler(
     val navn: String,
     val ident: String,
+)
+
+data class Forsikringsvurdering(
+    val forsikringsvurderingId: String,
+    val individuellForsikringNavn: String?,
+    val kollektivForsikringNavn: String?,
+    val dekning: Dekning?,
+)
+
+data class Dekning(
+    val grad: Int,
+    val fraDag: Int,
 )
 
 fun String.tilVedtakFattetForEksternDto(): VedtakFattetForEksternDto = objectMapper.readValue(this)

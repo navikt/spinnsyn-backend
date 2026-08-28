@@ -3,10 +3,12 @@ package no.nav.helse.flex
 import no.nav.helse.flex.db.Annullering
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.VedtakDbRecord
+import no.nav.helse.flex.domene.Forsikringsvurdering
 import no.nav.helse.flex.domene.Saksbehandler
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
+import no.nav.helse.flex.testdata.lagForsikringsvurdering
 import no.nav.helse.flex.testdata.lagUtbetaling
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeNull
@@ -70,6 +72,7 @@ class MapTilRsVedtakWrapperTest {
                 grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagPerArbeidsgiver,
                 begrensning = "ER_6G_BEGRENSET",
                 vedtakFattetTidspunkt = LocalDate.of(2024, 2, 1),
+                forsikringsvurdering = lagForsikringsvurdering(),
             )
 
         val utbetalingDbRecord =
@@ -112,6 +115,15 @@ class MapTilRsVedtakWrapperTest {
             beslutter.shouldNotBeNull().let {
                 it.navn shouldBeEqualTo "Beslutter"
                 it.ident shouldBeEqualTo "ident-beslutter"
+            }
+            forsikringsvurdering.shouldNotBeNull().let {
+                it.forsikringsvurderingId shouldBeEqualTo "forsikringsvurdering-123"
+                it.individuellForsikringNavn shouldBeEqualTo "Individuell Forsikring AS"
+                it.kollektivForsikringNavn shouldBeEqualTo "Kollektiv Forsikring AS"
+                it.dekning.shouldNotBeNull().let { dekning ->
+                    dekning.grad shouldBeEqualTo 80
+                    dekning.fraDag shouldBeEqualTo 1
+                }
             }
         }
     }
@@ -275,6 +287,7 @@ class MapTilRsVedtakWrapperTest {
         grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double> = mapOf("123456789" to 500000.0),
         begrensning: String = "VET_IKKE",
         vedtakFattetTidspunkt: LocalDate = LocalDate.now(),
+        forsikringsvurdering: Forsikringsvurdering? = null,
     ) = VedtakFattetForEksternDto(
         fødselsnummer = "12345678901",
         aktørId = "1234567890123",
@@ -301,6 +314,7 @@ class MapTilRsVedtakWrapperTest {
                 navn = "Beslutter",
                 ident = "ident-beslutter",
             ),
+        forsikringsvurdering = forsikringsvurdering,
     )
 
     private fun lagUtbetalingDbRecord(

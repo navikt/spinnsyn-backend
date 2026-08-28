@@ -6,6 +6,7 @@ import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
+import no.nav.helse.flex.testdata.lagForsikringsvurdering
 import no.nav.helse.flex.testdata.lagUtbetaling
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
@@ -54,6 +55,7 @@ class LesVedtakTest : FellesTestOppsett() {
             grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
             begrensning = "VET_IKKE",
             vedtakFattetTidspunkt = LocalDate.now(),
+            forsikringsvurdering = lagForsikringsvurdering(),
         )
 
     val vedtak2 =
@@ -73,6 +75,7 @@ class LesVedtakTest : FellesTestOppsett() {
             grunnlagForSykepengegrunnlagPerArbeidsgiver = mutableMapOf("1234" to 0.0),
             begrensning = "VET_IKKE",
             vedtakFattetTidspunkt = LocalDate.now(),
+            forsikringsvurdering = lagForsikringsvurdering(),
         )
 
     val utbetaling =
