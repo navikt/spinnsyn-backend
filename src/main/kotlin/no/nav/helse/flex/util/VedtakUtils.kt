@@ -208,3 +208,17 @@ fun UtbetalingUtbetalt.UtbetalingdagDto.tilRsUtbetalingsdag(): RSUtbetalingdag =
         beløpTilSykmeldt = this.beløpTilSykmeldt,
         sykdomsgrad = this.sykdomsgrad,
     )
+
+fun Forsikringsvurdering.tilRsForsikringsvurdering(): RSForsikringsvurdering =
+    RSForsikringsvurdering(
+        forsikringsvurderingId = this.forsikringsvurderingId,
+        individuellForsikringNavn = this.individuellForsikringNavn,
+        kollektivForsikringNavn = this.kollektivForsikringNavn,
+        dekning = this.dekning?.tilRsDekning(),
+    )
+
+fun Dekning.tilRsDekning(): RSDekning =
+    RSDekning(
+        grad = this.grad,
+        fraDag = this.fraDag,
+    )

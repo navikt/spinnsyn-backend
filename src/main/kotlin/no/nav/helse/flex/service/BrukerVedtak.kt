@@ -145,6 +145,7 @@ class BrukerVedtak(
                             ),
                         saksbehandler = vedtaket.saksbehandler,
                         beslutter = vedtaket.beslutter,
+                        forsikringsvurdering = vedtaket.forsikringsvurdering?.tilRsForsikringsvurdering(),
                     ),
             )
         }
