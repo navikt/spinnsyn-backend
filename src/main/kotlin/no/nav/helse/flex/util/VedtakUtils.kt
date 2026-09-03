@@ -95,7 +95,8 @@ fun hentDagerNy(
                                         when {
                                             // Dersom forsikring har vi beløp
                                             utbetalingsdagen.getBeløp(erSykmeldt) > 0 -> "NavDag"
-                                            else -> "Ventetidsdag"
+                                            utbetalingsdagen.dato.dayOfWeek in helg -> "NavHelgDag"
+                                            else -> utbetalingsdagen.type
                                         }
                                     }
 
