@@ -91,6 +91,13 @@ fun hentDagerNy(
                                             else -> "NavDag"
                                         }
                                     }
+                                    "Ventetidsdag" -> {
+                                        when {
+                                            // Dersom forsikring har vi beløp
+                                            utbetalingsdagen.getBeløp(erSykmeldt) > 0 -> "NavDag"
+                                            else -> "Ventetidsdag"
+                                        }
+                                    }
 
                                     else -> {
                                         utbetalingsdagen.type

@@ -1111,4 +1111,42 @@ class HentDagerTest {
             erSykmeldt = false,
         ).shouldContainExactly(forventetArbeidsgiverDagliste)
     }
+
+    @Test
+    fun `Ventetid blir til NAV Syk med forsikring`() {
+        val dato = LocalDate.of(2025, 12, 4)
+
+        val utbetalingsdager =
+            listOf(
+                RSUtbetalingdag(
+                    dato.plusDays(0),
+                    "Ventetidsdag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 2018,
+                    sykdomsgrad = 100,
+                ),
+                RSUtbetalingdag(
+                    dato.plusDays(1),
+                    "Ventetidsdag",
+                    emptyList(),
+                    beløpTilArbeidsgiver = 0,
+                    beløpTilSykmeldt = 0,
+                    sykdomsgrad = 100,
+                ),
+            )
+
+        val forventetDagliste =
+            listOf(
+                RSDag(dato.plusDays(0), 2018, 100.0, "NavDag", emptyList()),
+                RSDag(dato.plusDays(1), 0, 100.0, "Ventetidsdag", emptyList()),
+            )
+
+        hentDagerNy(
+            fom = dato.plusDays(0),
+            tom = dato.plusDays(1),
+            utbetalingsdager = utbetalingsdager,
+            erSykmeldt = true,
+        ).shouldContainExactly(forventetDagliste)
+    }
 }
