@@ -1,14 +1,11 @@
 package no.nav.helse.flex
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
-import no.nav.helse.flex.util.OBJECT_MAPPER
-import no.nav.helse.flex.util.serialisertTilString
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeEqualTo
@@ -22,6 +19,8 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -191,6 +190,8 @@ sealed class Sykepengegrunnlagsfakta {
         val omregnetÅrsinntekt: Double,
         val innrapportertÅrsinntekt: Double,
         val avviksprosent: Double,
+        // Jackson har strammet inn mapping-regler sånn at felt som starter med tall ikke ble mappet.
+        @get:JsonProperty("6G")
         val `6G`: Double,
         val tags: List<String>,
     ) : Sykepengegrunnlagsfakta()
@@ -207,4 +208,4 @@ data class ArbeidsgiverMedSkjønn(
     val skjønnsfastsatt: Double,
 )
 
-fun String.tilJsonNode(): JsonNode = OBJECT_MAPPER.readTree(this)
+fun String.tilJsonNode(): JsonNode = objectMapper.readTree(this)

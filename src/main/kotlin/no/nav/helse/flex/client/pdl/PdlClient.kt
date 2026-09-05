@@ -1,14 +1,16 @@
 package no.nav.helse.flex.client.pdl
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.util.OBJECT_MAPPER
+import no.nav.helse.flex.objectMapper
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.*
-import org.springframework.retry.annotation.Retryable
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.readValue
 import java.util.*
 
 private const val TEMA = "Tema"
@@ -33,7 +35,7 @@ class PdlClient(
         }
         """.trimIndent()
 
-    @Retryable(exclude = [FunctionalPdlError::class])
+    @Retryable(excludes = [FunctionalPdlError::class])
     fun hentPerson(ident: String): ResponseData {
         val graphQLRequest =
             GraphQLRequest(
@@ -45,7 +47,7 @@ class PdlClient(
             pdlRestTemplate.exchange(
                 "$pdlApiUrl/graphql",
                 HttpMethod.POST,
-                HttpEntity(requestToJson(graphQLRequest), createHeaderWithTema()),
+                HttpEntity(objectMapper.writeValueAsString(graphQLRequest), createHeaderWithTema()),
                 String::class.java,
             )
 
@@ -53,7 +55,7 @@ class PdlClient(
             throw RuntimeException("PDL svarer med status ${responseEntity.statusCode} - ${responseEntity.body}")
         }
 
-        val parsedResponse: GetPersonResponse? = responseEntity.body?.let { OBJECT_MAPPER.readValue(it) }
+        val parsedResponse: GetPersonResponse? = responseEntity.body?.let { objectMapper.readValue(it) }
 
         parsedResponse?.data?.let {
             return it
@@ -73,7 +75,7 @@ class PdlClient(
         }
         """.trimIndent()
 
-    @Retryable(exclude = [FunctionalPdlError::class])
+    @Retryable(excludes = [FunctionalPdlError::class])
     fun hentIdenterMedHistorikk(ident: String): List<PdlIdent> {
         val graphQLRequest =
             GraphQLRequest(
@@ -85,7 +87,7 @@ class PdlClient(
             pdlRestTemplate.exchange(
                 "$pdlApiUrl/graphql",
                 HttpMethod.POST,
-                HttpEntity(requestToJson(graphQLRequest), createHeaderWithTema()),
+                HttpEntity(objectMapper.writeValueAsString(graphQLRequest), createHeaderWithTema()),
                 String::class.java,
             )
 
@@ -93,7 +95,7 @@ class PdlClient(
             throw RuntimeException("PDL svarer med status ${responseEntity.statusCode} - ${responseEntity.body}")
         }
 
-        val parsedResponse: GetPersonResponse? = responseEntity.body?.let { OBJECT_MAPPER.readValue(it) }
+        val parsedResponse: GetPersonResponse? = responseEntity.body?.let { objectMapper.readValue(it) }
 
         parsedResponse?.data?.let {
             return it.hentIdenter?.identer ?: emptyList()
@@ -112,13 +114,6 @@ class PdlClient(
         headers.contentType = MediaType.APPLICATION_JSON
         return headers
     }
-
-    private fun requestToJson(graphQLRequest: Any): String =
-        try {
-            ObjectMapper().writeValueAsString(graphQLRequest)
-        } catch (e: JsonProcessingException) {
-            throw RuntimeException(e)
-        }
 
     private fun GetPersonResponse?.hentErrors(): String? = this?.errors?.map { it.message }?.joinToString(" - ")
 

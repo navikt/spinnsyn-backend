@@ -155,9 +155,10 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
         vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
 
+        // Bruker org-navn med æåø for å teste at det fortsatt fungerer etter fjerning av config/CharsetConfig.
         organisasjonRepository.save(
             Organisasjon(
-                navn = "Barneskolen",
+                navn = "Bærums Verk Ålesund Sjøfart AS",
                 orgnummer = org,
                 oppdatert = Instant.now(),
                 opprettet = Instant.now(),
@@ -166,7 +167,7 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         )
 
         val vedtakMedNavn = hentVedtakMedTokenXToken(fnr)
-        vedtakMedNavn[0].orgnavn `should be equal to` "Barneskolen"
+        vedtakMedNavn[0].orgnavn `should be equal to` "Bærums Verk Ålesund Sjøfart AS"
     }
 
     @Test
