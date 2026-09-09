@@ -1,7 +1,7 @@
 package no.nav.helse.flex.domene
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.logger
+import tools.jackson.databind.JsonNode
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime

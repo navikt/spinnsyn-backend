@@ -26,9 +26,9 @@ class AnnulleringVedtakTopicVerdikjedeTest : FellesTestOppsett() {
     lateinit var kafkaProducer: KafkaProducer<String, String>
 
     final val fnr = "983475"
-    final val fom = LocalDate.now().minusDays(7)
-    final val tom = LocalDate.now()
-    final val vedtakFattetTidspunk = LocalDate.now()
+    final val fom: LocalDate = LocalDate.now().minusDays(7)
+    final val tom: LocalDate = LocalDate.now()
+    final val vedtakFattetTidspunk: LocalDate = LocalDate.now()
     final val org = "394783764"
     final val utbetalingId = "124542"
 
@@ -143,7 +143,7 @@ class AnnulleringVedtakTopicVerdikjedeTest : FellesTestOppsett() {
 
     @Test
     @Order(6)
-    fun `Ei ny annullering mottatt på kafka blir lagret i db`() {
+    fun `En ny annullering mottatt på kafka blir lagret i db`() {
         kafkaProducer
             .send(
                 ProducerRecord(
