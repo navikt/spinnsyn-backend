@@ -14,3 +14,4 @@ src/generated
 # OS specific
 .DS_Store
 
+/.omo/
