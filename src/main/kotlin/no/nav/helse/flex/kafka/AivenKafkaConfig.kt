@@ -1,10 +1,12 @@
 package no.nav.helse.flex.kafka
 
 import no.nav.helse.flex.domene.VedtakStatusDTO
+import no.nav.helse.flex.kafka.producer.AUDIT_LOG_TOPIC
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -12,6 +14,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ContainerProperties
@@ -79,5 +82,20 @@ class AivenKafkaConfig(
                 ProducerConfig.RETRY_BACKOFF_MS_CONFIG to 100,
             ) + commonConfig()
         return KafkaProducer<String, VedtakStatusDTO>(kafkaConfig)
+    }
+
+    @Bean
+    @Profile("!test")
+    fun auditLogKafkaProducer(): Producer<String, String> {
+        val kafkaConfig =
+            mapOf(
+                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                ProducerConfig.ACKS_CONFIG to "all",
+                ProducerConfig.RETRIES_CONFIG to 10,
+                ProducerConfig.RETRY_BACKOFF_MS_CONFIG to 100,
+                ProducerConfig.CLIENT_ID_CONFIG to "${AUDIT_LOG_TOPIC}-producer",
+            ) + commonConfig()
+        return KafkaProducer<String, String>(kafkaConfig)
     }
 }

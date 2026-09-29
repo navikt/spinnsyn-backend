@@ -6,16 +6,16 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
-@Configuration
+@TestConfiguration
 class TestKafkaConfig(
     private val aivenKafkaConfig: AivenKafkaConfig,
 ) {
-    @Bean
-    fun producer(): KafkaProducer<String, String> {
+    @Bean(name = ["producer", "auditLogKafkaProducer"])
+    fun auditLogKafkaProducer(): KafkaProducer<String, String> {
         val config =
             mapOf(
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
@@ -47,6 +47,14 @@ class TestKafkaConfig(
     fun vedtakKafkaConsumer(): Consumer<String, String> =
         DefaultKafkaConsumerFactory(
             testConsumerProps("spinnsyn-consumer"),
+            StringDeserializer(),
+            StringDeserializer(),
+        ).createConsumer()
+
+    @Bean
+    fun auditKafkaConsumer(): Consumer<String, String> =
+        DefaultKafkaConsumerFactory(
+            testConsumerProps("audit-consumer"),
             StringDeserializer(),
             StringDeserializer(),
         ).createConsumer()

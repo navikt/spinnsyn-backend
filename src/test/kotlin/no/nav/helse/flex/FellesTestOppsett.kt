@@ -7,6 +7,7 @@ import no.nav.helse.flex.db.UtbetalingRepository
 import no.nav.helse.flex.db.VedtakRepository
 import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.fake.FakesTestConfig
+import no.nav.helse.flex.kafka.TestKafkaConfig
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.OrganisasjonRepository
 import no.nav.helse.flex.service.SendVedtakStatus
@@ -24,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -39,11 +41,12 @@ private class PostgreSQLContainer14 : PostgreSQLContainer("postgres:14-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnableMockOAuth2Server
+@ActiveProfiles("test", "testdata")
 @SpringBootTest(
     properties = [
         "spring.main.allow-bean-definition-overriding=true",
     ],
-    classes = [FakesTestConfig::class],
+    classes = [Application::class, FakesTestConfig::class, TestKafkaConfig::class],
 )
 @AutoConfigureMockMvc
 abstract class FellesTestOppsett {
