@@ -15,7 +15,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
 @EnableKafka
-@EnableJwtTokenValidation
+@EnableJwtTokenValidation(
+    ignore = ["org.springframework", "no.nav.helse.flex.api.VedtakFlexInternalController"],
+)
 class Application
 
 @Profile("default")

@@ -83,11 +83,18 @@ spec:
         - application: spinnsyn-frontend-arkivering
         - application: spinnsyn-frontend-interne
         - application: spinnsyn-frontend
+        - application: flex-internal-frontend
+          permissions:
+            scopes:
+              - vedtak.read
         - application: ditt-sykefravaer
   azure:
     application:
       enabled: true
       allowAllUsers: true
+      claims:
+        groups:
+          - id: "{{flex_group_id}}"
   env:
   {{#each env}}
      - name: {{@key}}
