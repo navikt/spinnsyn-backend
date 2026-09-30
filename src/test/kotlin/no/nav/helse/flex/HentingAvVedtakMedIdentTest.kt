@@ -1,4 +1,3 @@
-import no.nav.helse.flex.Application
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
@@ -21,11 +20,9 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
-@SpringBootTest(classes = [Application::class])
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
     @Autowired
