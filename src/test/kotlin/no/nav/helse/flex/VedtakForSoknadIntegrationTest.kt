@@ -1,8 +1,8 @@
 package no.nav.helse.flex
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.api.HentVedtakForSoknadResponse
 import no.nav.helse.flex.domene.Dokument
-import no.nav.helse.flex.domene.RSVedtakWrapper
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
@@ -57,18 +57,27 @@ class VedtakForSoknadIntegrationTest : FellesTestOppsett() {
                 .andReturn()
                 .response
 
-        val vedtakFraApi: List<RSVedtakWrapper> = objectMapper.readValue(response.contentAsString)
+        val vedtakFraApi = objectMapper.readValue<HentVedtakForSoknadResponse>(response.contentAsString).vedtak
         vedtakFraApi.shouldHaveSize(2)
 
-        val expected =
+        val forventedeIder =
+            utbetalingRepository
+                .findUtbetalingDbRecordsByFnr(fnr)
+                .filter { it.utbetalingId in listOf("u1", "u2") }
+                .map { it.id }
+                .toSet()
+
+        vedtakFraApi.map { it.id }.toSet() shouldBeEqualTo forventedeIder
+        vedtakFraApi.map { it.vedtak.utbetaling.utbetalingId }.toSet() shouldBeEqualTo setOf("u1", "u2")
+
+        val forventetRekkefolge =
             vedtakService
                 .hentVedtak(fnr, hentSomBruker = false)
-                .map { it.copy(id = it.vedtak.utbetaling.utbetalingId ?: it.id) }
                 .filter { wrapper ->
                     wrapper.vedtak.dokumenter.any { it.type == Dokument.Type.Søknad && it.dokumentId == soknadId }
                 }.map { it.id }
 
-        vedtakFraApi.map { it.id } shouldBeEqualTo expected
+        vedtakFraApi.map { it.id } shouldBeEqualTo forventetRekkefolge
     }
 
     @Test
@@ -86,7 +95,7 @@ class VedtakForSoknadIntegrationTest : FellesTestOppsett() {
                 .andReturn()
                 .response
 
-        val vedtakFraApi: List<RSVedtakWrapper> = objectMapper.readValue(response.contentAsString)
+        val vedtakFraApi = objectMapper.readValue<HentVedtakForSoknadResponse>(response.contentAsString).vedtak
         vedtakFraApi.shouldHaveSize(0)
     }
 

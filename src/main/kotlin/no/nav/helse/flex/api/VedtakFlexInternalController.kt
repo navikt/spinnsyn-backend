@@ -33,7 +33,7 @@ class VedtakFlexInternalController(
     fun hentVedtakForSoknad(
         @RequestBody request: HentVedtakForSoknadRequest,
         httpRequest: HttpServletRequest,
-    ): List<RSVedtakWrapper> {
+    ): HentVedtakForSoknadResponse {
         val navIdent =
             tokenValideringService.validerTilgangOgHentNavIdent(
                 token = httpRequest.getToken(),
@@ -53,7 +53,6 @@ class VedtakFlexInternalController(
         val vedtakForSoknad =
             vedtakService
                 .hentVedtak(fnr, hentSomBruker = false)
-                .brukUtbetalingIdSomId()
                 .filter { wrapper ->
                     wrapper.vedtak.dokumenter.any {
                         it.type == Dokument.Type.Søknad && it.dokumentId == soknadUuid
@@ -72,7 +71,7 @@ class VedtakFlexInternalController(
                 requestMethod = "POST",
             ),
         )
-        return vedtakForSoknad
+        return HentVedtakForSoknadResponse(vedtak = vedtakForSoknad)
     }
 }
 
@@ -81,8 +80,9 @@ data class HentVedtakForSoknadRequest(
     val soknadId: String,
 )
 
-private fun List<RSVedtakWrapper>.brukUtbetalingIdSomId(): List<RSVedtakWrapper> =
-    map { it.copy(id = it.vedtak.utbetaling.utbetalingId ?: it.id) }
+data class HentVedtakForSoknadResponse(
+    val vedtak: List<RSVedtakWrapper>,
+)
 
 class UgyldigRequestException(
     message: String,
