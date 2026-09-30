@@ -24,7 +24,7 @@ class TokenValideringService(
 
         val respons = texasClient.introspect(identityProvider = identityProvider, token = token)
         if (!respons.active) {
-            throw UautorisertException("Ugyldig token")
+            throw UautorisertException("Utgått token")
         }
 
         val navIdent = respons.NAVident ?: throw UautorisertException("Fant ikke NAVident i token")
