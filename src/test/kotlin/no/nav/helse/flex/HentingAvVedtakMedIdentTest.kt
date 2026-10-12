@@ -1,9 +1,10 @@
+package no.nav.helse.flex
+
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.service.IdentService
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling

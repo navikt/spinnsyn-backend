@@ -6,6 +6,7 @@ import no.nav.helse.flex.kafka.producer.EventType
 import org.apache.kafka.clients.producer.MockProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.clients.producer.RoundRobinPartitioner
 import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -14,10 +15,11 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 
 class AuditLogProducerFailureTest {
-    private class FeilendeProducer : MockProducer<String, String>(true, StringSerializer(), StringSerializer()) {
+    private class FeilendeProducer :
+        MockProducer<String, String>(true, RoundRobinPartitioner(), StringSerializer(), StringSerializer()) {
         override fun send(record: ProducerRecord<String, String>?): CompletableFuture<RecordMetadata> {
             val failedFuture = CompletableFuture<RecordMetadata>()
-            failedFuture.completeExceptionally(RuntimeException("simulert kafka-feil"))
+            failedFuture.completeExceptionally(RuntimeException("Simulert kafka-feil"))
             return failedFuture
         }
     }

@@ -1,6 +1,5 @@
 package no.nav.helse.flex
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.HentVedtakForSoknadResponse
 import no.nav.helse.flex.domene.Dokument
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
@@ -21,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.TimeUnit
