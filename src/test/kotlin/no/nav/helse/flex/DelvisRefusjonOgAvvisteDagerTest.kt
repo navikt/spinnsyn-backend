@@ -1,12 +1,11 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -51,8 +50,8 @@ class DelvisRefusjonOgAvvisteDagerTest : FellesTestOppsett() {
         dbUtbetaling.utbetaling
             .tilUtbetalingUtbetalt()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
+            .shouldBe(fnr)
+        dbUtbetaling.utbetalingType.shouldBe("UTBETALING")
     }
 
     @Test
@@ -77,7 +76,7 @@ class DelvisRefusjonOgAvvisteDagerTest : FellesTestOppsett() {
         hentetVedtak.vedtak
             .tilVedtakFattetForEksternDto()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
+            .shouldBe(fnr)
     }
 
     @Test
@@ -85,8 +84,8 @@ class DelvisRefusjonOgAvvisteDagerTest : FellesTestOppsett() {
     fun `Arbeidsgiver og persondager avkortes riktig`() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
-        vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
-        vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2023, 2, 1))
-        vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2023, 2, 28))
+        vedtak[0].vedtak.utbetaling.utbetalingType shouldBe "UTBETALING"
+        vedtak[0].vedtak.fom.shouldBe(LocalDate.of(2023, 2, 1))
+        vedtak[0].vedtak.tom.shouldBe(LocalDate.of(2023, 2, 28))
     }
 }

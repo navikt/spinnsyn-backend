@@ -1,5 +1,10 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.VedtakStatus
 import no.nav.helse.flex.domene.tilVedtakStatusDto
@@ -10,11 +15,6 @@ import no.nav.helse.flex.service.SendVedtakStatus
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
 import no.nav.helse.flex.testdata.lagUtbetalingdag
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeEmpty
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -115,7 +115,7 @@ class VedtakStatusTest : FellesTestOppsett() {
     @AfterAll
     fun `alle meldinger er konsumert fra fra status topic`() {
         statusKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
-        vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
+        vedtakStatusService.prosesserUtbetalinger() shouldBe 0
     }
 
     @Test
@@ -139,7 +139,7 @@ class VedtakStatusTest : FellesTestOppsett() {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).any { it.utbetalingId == "VedtakFørst" }
         }
 
-        vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
+        vedtakStatusService.prosesserUtbetalinger() shouldBe 0
     }
 
     @Test
@@ -171,7 +171,7 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(102)
     fun `sender statusmelding på Kafka etter at utbetaling er mottatt`() {
-        vedtakStatusService.prosesserUtbetalinger() `should be equal to` 1
+        vedtakStatusService.prosesserUtbetalinger() shouldBe 1
 
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
@@ -183,12 +183,12 @@ class VedtakStatusTest : FellesTestOppsett() {
         utbetalingDbRecord.shouldNotBeNull()
 
         val crStatus = kafkameldinger.first()
-        crStatus.key() `should be equal to` utbetalingDbRecord.id
+        crStatus.key() shouldBe utbetalingDbRecord.id
 
         val statudDto = crStatus.value().tilVedtakStatusDto()
-        statudDto.id `should be equal to` utbetalingDbRecord.id
-        statudDto.fnr `should be equal to` utbetalingDbRecord.fnr
-        statudDto.vedtakStatus `should be equal to` VedtakStatus.MOTATT
+        statudDto.id shouldBe utbetalingDbRecord.id
+        statudDto.fnr shouldBe utbetalingDbRecord.fnr
+        statudDto.vedtakStatus shouldBe VedtakStatus.MOTATT
     }
 
     @Test
@@ -196,17 +196,17 @@ class VedtakStatusTest : FellesTestOppsett() {
     fun `sender melding om at bruker har lest vedtaket på Kafka`() {
         val vedtaket = hentFrontendVedtak("VedtakFørst")
         val vedtaksId = vedtaket.id
-        vedtaket.lest `should be equal to` false
+        vedtaket.lest shouldBe false
 
-        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) shouldBe "Leste vedtak $vedtaksId"
 
         val crStatus = statusKafkaConsumer.ventPåRecords(1).first()
-        crStatus.key() `should be equal to` vedtaksId
+        crStatus.key() shouldBe vedtaksId
 
         val statudDto = crStatus.value().tilVedtakStatusDto()
-        statudDto.id `should be equal to` vedtaksId
-        statudDto.fnr `should be equal to` fnr
-        statudDto.vedtakStatus `should be equal to` VedtakStatus.LEST
+        statudDto.id shouldBe vedtaksId
+        statudDto.fnr shouldBe fnr
+        statudDto.vedtakStatus shouldBe VedtakStatus.LEST
     }
 
     @Test
@@ -214,21 +214,21 @@ class VedtakStatusTest : FellesTestOppsett() {
     fun `ny melding sender ikke selv om bruker leser vedtaket på nytt`() {
         val vedtaket = hentFrontendVedtak("VedtakFørst")
         val vedtaksId = vedtaket.id
-        vedtaket.lest `should be equal to` true
+        vedtaket.lest shouldBe true
 
         val utbetalingFørLesing =
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
                 it.utbetalingId == "VedtakFørst"
             }
 
-        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) shouldBe "Vedtak $vedtaksId er allerede lest"
         statusKafkaConsumer.ventPåRecords(0).shouldBeEmpty()
 
         val etter =
             utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first {
                 it.utbetalingId == "VedtakFørst"
             }
-        utbetalingFørLesing.lest `should be equal to` etter.lest
+        utbetalingFørLesing.lest shouldBe etter.lest
     }
 
     @Test
@@ -254,7 +254,7 @@ class VedtakStatusTest : FellesTestOppsett() {
             } != null
         }
 
-        vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
+        vedtakStatusService.prosesserUtbetalinger() shouldBe 0
     }
 
     @Test
@@ -282,7 +282,7 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(202)
     fun `sender statusmelding på Kafka etter at vedtaket er mottatt`() {
-        vedtakStatusService.prosesserUtbetalinger() `should be equal to` 1
+        vedtakStatusService.prosesserUtbetalinger() shouldBe 1
 
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
@@ -294,12 +294,12 @@ class VedtakStatusTest : FellesTestOppsett() {
         utbetalingDbRecord.shouldNotBeNull()
 
         val crStatus = kafkameldinger.first()
-        crStatus.key() `should be equal to` utbetalingDbRecord.id
+        crStatus.key() shouldBe utbetalingDbRecord.id
 
         val statudDto = crStatus.value().tilVedtakStatusDto()
-        statudDto.id `should be equal to` utbetalingDbRecord.id
-        statudDto.fnr `should be equal to` utbetalingDbRecord.fnr
-        statudDto.vedtakStatus `should be equal to` VedtakStatus.MOTATT
+        statudDto.id shouldBe utbetalingDbRecord.id
+        statudDto.fnr shouldBe utbetalingDbRecord.fnr
+        statudDto.vedtakStatus shouldBe VedtakStatus.MOTATT
     }
 
     @Test
@@ -307,17 +307,17 @@ class VedtakStatusTest : FellesTestOppsett() {
     fun `bruker leser vedtaket`() {
         val vedtaket = hentFrontendVedtak("UtbetalingFørst")
         val vedtaksId = vedtaket.id
-        vedtaket.lest `should be equal to` false
+        vedtaket.lest shouldBe false
 
-        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) shouldBe "Leste vedtak $vedtaksId"
 
         val crStatus = statusKafkaConsumer.ventPåRecords(1).first()
-        crStatus.key() `should be equal to` vedtaksId
+        crStatus.key() shouldBe vedtaksId
 
         val statudDto = crStatus.value().tilVedtakStatusDto()
-        statudDto.id `should be equal to` vedtaksId
-        statudDto.fnr `should be equal to` fnr
-        statudDto.vedtakStatus `should be equal to` VedtakStatus.LEST
+        statudDto.id shouldBe vedtaksId
+        statudDto.fnr shouldBe fnr
+        statudDto.vedtakStatus shouldBe VedtakStatus.LEST
     }
 
     @Test
@@ -341,7 +341,7 @@ class VedtakStatusTest : FellesTestOppsett() {
             vedtakRepository.findVedtakDbRecordsByFnr(fnr).any { it.utbetalingId == "EnAvTo" }
         }
 
-        vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
+        vedtakStatusService.prosesserUtbetalinger() shouldBe 0
     }
 
     @Test
@@ -367,7 +367,7 @@ class VedtakStatusTest : FellesTestOppsett() {
             } != null
         }
 
-        vedtakStatusService.prosesserUtbetalinger() `should be equal to` 0
+        vedtakStatusService.prosesserUtbetalinger() shouldBe 0
     }
 
     @Test
@@ -398,7 +398,7 @@ class VedtakStatusTest : FellesTestOppsett() {
     @Test
     @Order(303)
     fun `prosesserer utbetalinger da alle vedtak er mottatt`() {
-        vedtakStatusService.prosesserUtbetalinger() `should be equal to` 1
+        vedtakStatusService.prosesserUtbetalinger() shouldBe 1
 
         val kafkameldinger = statusKafkaConsumer.ventPåRecords(1)
         kafkameldinger.shouldHaveSize(1)
@@ -408,16 +408,16 @@ class VedtakStatusTest : FellesTestOppsett() {
                 it.utbetalingId == "EnAvTo"
             }
         utbetalingDbRecord.shouldNotBeNull()
-        utbetalingDbRecord.antallVedtak `should be equal to` 2
-        utbetalingDbRecord.skalVisesTilBruker `should be equal to` true
+        utbetalingDbRecord.antallVedtak shouldBe 2
+        utbetalingDbRecord.skalVisesTilBruker shouldBe true
 
         val crStatus = kafkameldinger.first()
-        crStatus.key() `should be equal to` utbetalingDbRecord.id
+        crStatus.key() shouldBe utbetalingDbRecord.id
 
         val statusDto = crStatus.value().tilVedtakStatusDto()
-        statusDto.id `should be equal to` utbetalingDbRecord.id
-        statusDto.fnr `should be equal to` utbetalingDbRecord.fnr
-        statusDto.vedtakStatus `should be equal to` VedtakStatus.MOTATT
+        statusDto.id shouldBe utbetalingDbRecord.id
+        statusDto.fnr shouldBe utbetalingDbRecord.fnr
+        statusDto.vedtakStatus shouldBe VedtakStatus.MOTATT
     }
 
     @Test
@@ -474,7 +474,7 @@ class VedtakStatusTest : FellesTestOppsett() {
                 it.utbetalingId == "Arbeidsgiverperiode"
             }
         utbetalingDbRecord.motattPublisert.shouldBeNull()
-        utbetalingDbRecord.skalVisesTilBruker `should be equal to` false
+        utbetalingDbRecord.skalVisesTilBruker shouldBe false
     }
 
     private fun hentFrontendVedtak(utbetalingId: String) =

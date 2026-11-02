@@ -1,5 +1,10 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
@@ -8,12 +13,6 @@ import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagForsikringsvurdering
 import no.nav.helse.flex.testdata.lagUtbetaling
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.`should not be null`
-import org.amshove.kluent.shouldBeEmpty
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -112,8 +111,8 @@ class LesVedtakTest : FellesTestOppsett() {
         hentetVedtak.vedtak
             .tilVedtakFattetForEksternDto()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak1.utbetalingId)
+            .shouldBe(fnr)
+        hentetVedtak.utbetalingId.shouldBe(vedtak1.utbetalingId)
     }
 
     @Test
@@ -143,9 +142,9 @@ class LesVedtakTest : FellesTestOppsett() {
         dbUtbetaling.utbetaling
             .tilUtbetalingUtbetalt()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
+            .shouldBe(fnr)
+        dbUtbetaling.utbetalingId.shouldBe(utbetaling.utbetalingId)
+        dbUtbetaling.utbetalingType.shouldBe("UTBETALING")
     }
 
     @Test
@@ -178,11 +177,11 @@ class LesVedtakTest : FellesTestOppsett() {
     fun `finner brukervedtaket`() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
-        vedtak[0].annullert.`should be false`()
-        vedtak[0].lest.`should be false`()
-        vedtak[0].vedtak.fom `should be equal to` vedtak1.fom
-        vedtak[0].vedtak.tom `should be equal to` vedtak2.tom
-        vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
+        vedtak[0].annullert.shouldBeFalse()
+        vedtak[0].lest.shouldBeFalse()
+        vedtak[0].vedtak.fom shouldBe vedtak1.fom
+        vedtak[0].vedtak.tom shouldBe vedtak2.tom
+        vedtak[0].vedtak.utbetaling.utbetalingId shouldBe utbetalingId
     }
 
     @Test
@@ -191,15 +190,15 @@ class LesVedtakTest : FellesTestOppsett() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
 
         vedtak.shouldHaveSize(1)
-        vedtak[0].lest.`should be false`()
+        vedtak[0].lest.shouldBeFalse()
 
         val vedtaksId = vedtak[0].id
 
-        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
-        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) shouldBe "Leste vedtak $vedtaksId"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) shouldBe "Vedtak $vedtaksId er allerede lest"
 
         val utbetalingDbRecord = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).first { it.id == vedtaksId }
-        utbetalingDbRecord.lest.`should not be null`()
+        utbetalingDbRecord.lest.shouldNotBeNull()
     }
 
     @Test

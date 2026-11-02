@@ -1,5 +1,8 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
@@ -9,9 +12,6 @@ import no.nav.helse.flex.service.IdentService
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
 import no.nav.helse.flex.testdata.lagUtbetalingdag
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -94,12 +94,12 @@ class HentingAvVedtakMedIdentTest : FellesTestOppsett() {
         hentetVedtak.shouldHaveSize(3)
 
         val responseData = identService.hentFolkeregisterIdenterMedHistorikkForFnr("31111111111")
-        responseData.andreIdenter `should be equal to` listOf("11111111111", "21111111111")
-        responseData.originalIdent `should be equal to` "31111111111"
+        responseData.andreIdenter shouldBe listOf("11111111111", "21111111111")
+        responseData.originalIdent shouldBe "31111111111"
 
         val vedtakFraService1 = hentVedtakMedTokenXToken(fnr1)
 
-        vedtakFraService1.size `should be equal to` 3
+        vedtakFraService1.size shouldBe 3
     }
 
     @Test

@@ -1,8 +1,8 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.organisasjon.LeggTilOrganisasjonnavn
 import no.nav.helse.flex.organisasjon.Organisasjon
-import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
@@ -28,13 +28,13 @@ class ErstattOrgNrMedOrgNavnTest : FellesTestOppsett() {
         organisasjonRepository.saveAll(mutableListOf(org1))
 
         val orgMap = leggTilOrganisasjonnavn.leggTilAndreArbeidsgivere(vedtakene = listOf(vedtakTestdata()))
-        orgMap[0].andreArbeidsgivere `should be equal to`
+        orgMap[0].andreArbeidsgivere shouldBe
             mapOf(
                 "Organisasjon nr 1" to 500000.0,
                 "Organisasjonsnummer: 547123456" to 300000.0,
             )
 
-        orgMap[0].organisasjoner `should be equal to`
+        orgMap[0].organisasjoner shouldBe
             mapOf(
                 "123456547" to "Organisasjon nr 1",
             )

@@ -1,5 +1,11 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
@@ -9,7 +15,6 @@ import no.nav.helse.flex.testdata.lagPersonOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
 import no.nav.helse.flex.testdata.lagUtbetalingdag
 import no.nav.helse.flex.testdata.lagUtbetalingslinje
-import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -139,8 +144,8 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
         hentetVedtak.vedtak
             .tilVedtakFattetForEksternDto()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak.utbetalingId)
+            .shouldBe(fnr)
+        hentetVedtak.utbetalingId.shouldBe(vedtak.utbetalingId)
     }
 
     @Test
@@ -170,9 +175,9 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
         dbUtbetaling.utbetaling
             .tilUtbetalingUtbetalt()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
+            .shouldBe(fnr)
+        dbUtbetaling.utbetalingId.shouldBe(utbetaling.utbetalingId)
+        dbUtbetaling.utbetalingType.shouldBe("UTBETALING")
     }
 
     @Test
@@ -180,12 +185,12 @@ class PersonoppdragIntegrationTest : FellesTestOppsett() {
     fun `finner vedtaket`() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
-        vedtak[0].annullert.`should be false`()
-        vedtak[0].lest.`should be false`()
-        vedtak[0].orgnavn `should be equal to` org
+        vedtak[0].annullert.shouldBeFalse()
+        vedtak[0].lest.shouldBeFalse()
+        vedtak[0].orgnavn shouldBe org
 
-        vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
-        vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
+        vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger shouldBe LocalDate.of(2020, 3, 12)
+        vedtak[0].vedtak.utbetaling.utbetalingId shouldBe utbetalingId
         vedtak[0]
             .vedtak.utbetaling.arbeidsgiverOppdrag
             .shouldBeNull()

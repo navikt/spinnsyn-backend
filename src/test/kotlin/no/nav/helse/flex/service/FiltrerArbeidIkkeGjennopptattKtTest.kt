@@ -1,9 +1,9 @@
 package no.nav.helse.flex.service
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.RSDag
 import no.nav.helse.flex.vedtakTestdata
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -25,7 +25,7 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
 
         val vedtakUtenArbeidIkkeGjenopptattDager = vedtakMedDager.fjernArbeidIkkeGjenopptattDager()
         vedtakUtenArbeidIkkeGjenopptattDager.daglisteSykmeldt.shouldHaveSize(1)
-        vedtakUtenArbeidIkkeGjenopptattDager.vedtak.fom shouldBeEqualTo (dato.minusDays(3))
+        vedtakUtenArbeidIkkeGjenopptattDager.vedtak.fom shouldBe (dato.minusDays(3))
     }
 
     @Test
@@ -43,7 +43,7 @@ class FiltrerArbeidIkkeGjennopptattKtTest {
 
         val vedtakUtenArbeidIkkeGjenopptattDager = vedtakMedDager.fjernArbeidIkkeGjenopptattDager()
         vedtakUtenArbeidIkkeGjenopptattDager.daglisteSykmeldt.shouldHaveSize(3)
-        vedtakUtenArbeidIkkeGjenopptattDager.vedtak.fom shouldBeEqualTo dato.minusDays(5)
+        vedtakUtenArbeidIkkeGjenopptattDager.vedtak.fom shouldBe dato.minusDays(5)
     }
 
     fun rSDag(

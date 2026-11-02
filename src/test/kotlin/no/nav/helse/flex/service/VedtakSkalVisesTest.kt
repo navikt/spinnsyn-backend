@@ -1,8 +1,8 @@
 package no.nav.helse.flex.service
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.RSDag
 import no.nav.helse.flex.service.SendVedtakStatus.Companion.sjekkDager
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -23,7 +23,7 @@ class VedtakSkalVisesTest {
     @Test
     fun `Vedtak med bare arbeidsgiverperiode dager skal ikke vises`() {
         val dager = dagSequence("ArbeidsgiverperiodeDag").take(10).toList()
-        sjekkDager(dager) shouldBeEqualTo "ArbeidsgiverperiodeDag"
+        sjekkDager(dager) shouldBe "ArbeidsgiverperiodeDag"
     }
 
     @Test
@@ -39,7 +39,7 @@ class VedtakSkalVisesTest {
                     }
                 }.toList()
 
-        sjekkDager(dager) shouldBeEqualTo "ArbeidsgiverperiodeMedArbeid"
+        sjekkDager(dager) shouldBe "ArbeidsgiverperiodeMedArbeid"
     }
 
     @Test
@@ -51,6 +51,6 @@ class VedtakSkalVisesTest {
                     dagSequence("Arbeidsdag").take(1),
                 ).toList()
 
-        sjekkDager(dager) shouldBeEqualTo ""
+        sjekkDager(dager) shouldBe ""
     }
 }

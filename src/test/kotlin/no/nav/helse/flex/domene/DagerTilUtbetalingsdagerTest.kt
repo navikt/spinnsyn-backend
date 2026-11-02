@@ -1,7 +1,7 @@
 package no.nav.helse.flex.domene
 
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -49,21 +49,21 @@ class DagerTilUtbetalingsdagerTest {
         utbetalingsdager.shouldHaveSize(2)
 
         utbetalingsdager[0].apply {
-            dato shouldBeEqualTo LocalDate.of(2025, 10, 1)
-            type shouldBeEqualTo "ArbeidsgiverperiodeDag"
-            beløpTilSykmeldt shouldBeEqualTo 923
-            beløpTilArbeidsgiver shouldBeEqualTo 923
-            sykdomsgrad shouldBeEqualTo 100
-            begrunnelser shouldBeEqualTo listOf("Person begrunnelse", "Arbeidsgiver begrunnelse")
+            dato shouldBe LocalDate.of(2025, 10, 1)
+            type shouldBe "ArbeidsgiverperiodeDag"
+            beløpTilSykmeldt shouldBe 923
+            beløpTilArbeidsgiver shouldBe 923
+            sykdomsgrad shouldBe 100
+            begrunnelser shouldBe listOf("Person begrunnelse", "Arbeidsgiver begrunnelse")
         }
 
         utbetalingsdager[1].apply {
-            dato shouldBeEqualTo LocalDate.of(2025, 10, 2)
-            type shouldBeEqualTo "ArbeidsgiverperiodeDag"
-            beløpTilSykmeldt shouldBeEqualTo 923
-            beløpTilArbeidsgiver shouldBeEqualTo 923
-            sykdomsgrad shouldBeEqualTo 100
-            begrunnelser shouldBeEqualTo emptyList()
+            dato shouldBe LocalDate.of(2025, 10, 2)
+            type shouldBe "ArbeidsgiverperiodeDag"
+            beløpTilSykmeldt shouldBe 923
+            beløpTilArbeidsgiver shouldBe 923
+            sykdomsgrad shouldBe 100
+            begrunnelser shouldBe emptyList()
         }
     }
 
@@ -84,12 +84,12 @@ class DagerTilUtbetalingsdagerTest {
 
         utbetalingsdager.shouldHaveSize(1)
         utbetalingsdager[0].apply {
-            dato shouldBeEqualTo LocalDate.of(2025, 10, 28)
-            type shouldBeEqualTo "NavDag"
-            beløpTilSykmeldt shouldBeEqualTo 1846
-            beløpTilArbeidsgiver shouldBeEqualTo 0
-            sykdomsgrad shouldBeEqualTo 100
-            begrunnelser shouldBeEqualTo listOf("Kun person")
+            dato shouldBe LocalDate.of(2025, 10, 28)
+            type shouldBe "NavDag"
+            beløpTilSykmeldt shouldBe 1846
+            beløpTilArbeidsgiver shouldBe 0
+            sykdomsgrad shouldBe 100
+            begrunnelser shouldBe listOf("Kun person")
         }
     }
 
@@ -110,12 +110,12 @@ class DagerTilUtbetalingsdagerTest {
 
         utbetalingsdager.shouldHaveSize(1)
         utbetalingsdager[0].apply {
-            dato shouldBeEqualTo LocalDate.of(2025, 10, 1)
-            type shouldBeEqualTo "ArbeidsgiverperiodeDag"
-            beløpTilSykmeldt shouldBeEqualTo 0
-            beløpTilArbeidsgiver shouldBeEqualTo 923
-            sykdomsgrad shouldBeEqualTo 100
-            begrunnelser shouldBeEqualTo listOf("Kun arbeidsgiver")
+            dato shouldBe LocalDate.of(2025, 10, 1)
+            type shouldBe "ArbeidsgiverperiodeDag"
+            beløpTilSykmeldt shouldBe 0
+            beløpTilArbeidsgiver shouldBe 923
+            sykdomsgrad shouldBe 100
+            begrunnelser shouldBe listOf("Kun arbeidsgiver")
         }
     }
 
@@ -147,8 +147,8 @@ class DagerTilUtbetalingsdagerTest {
 
         // Skal bare inneholde dagene som faktisk finnes, ikke fylle ut manglende
         utbetalingsdager.shouldHaveSize(2)
-        utbetalingsdager[0].dato shouldBeEqualTo LocalDate.of(2025, 10, 1)
-        utbetalingsdager[1].dato shouldBeEqualTo LocalDate.of(2025, 10, 3)
+        utbetalingsdager[0].dato shouldBe LocalDate.of(2025, 10, 1)
+        utbetalingsdager[1].dato shouldBe LocalDate.of(2025, 10, 3)
     }
 
     @Test
@@ -209,28 +209,28 @@ class DagerTilUtbetalingsdagerTest {
 
         // Dager med både person og arbeidsgiver
         utbetalingsdager[0].apply {
-            dato shouldBeEqualTo LocalDate.of(2025, 10, 1)
-            beløpTilSykmeldt shouldBeEqualTo 923
-            beløpTilArbeidsgiver shouldBeEqualTo 923
+            dato shouldBe LocalDate.of(2025, 10, 1)
+            beløpTilSykmeldt shouldBe 923
+            beløpTilArbeidsgiver shouldBe 923
         }
 
         utbetalingsdager[1].apply {
-            dato shouldBeEqualTo LocalDate.of(2025, 10, 2)
-            beløpTilSykmeldt shouldBeEqualTo 923
-            beløpTilArbeidsgiver shouldBeEqualTo 923
+            dato shouldBe LocalDate.of(2025, 10, 2)
+            beløpTilSykmeldt shouldBe 923
+            beløpTilArbeidsgiver shouldBe 923
         }
 
         // Dager med kun person
         utbetalingsdager[2].apply {
-            dato shouldBeEqualTo LocalDate.of(2025, 10, 28)
-            beløpTilSykmeldt shouldBeEqualTo 1846
-            beløpTilArbeidsgiver shouldBeEqualTo 0
+            dato shouldBe LocalDate.of(2025, 10, 28)
+            beløpTilSykmeldt shouldBe 1846
+            beløpTilArbeidsgiver shouldBe 0
         }
 
         utbetalingsdager[3].apply {
-            dato shouldBeEqualTo LocalDate.of(2025, 10, 29)
-            beløpTilSykmeldt shouldBeEqualTo 1846
-            beløpTilArbeidsgiver shouldBeEqualTo 0
+            dato shouldBe LocalDate.of(2025, 10, 29)
+            beløpTilSykmeldt shouldBe 1846
+            beløpTilArbeidsgiver shouldBe 0
         }
     }
 
