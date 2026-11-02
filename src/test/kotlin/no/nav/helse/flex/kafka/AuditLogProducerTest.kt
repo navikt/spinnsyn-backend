@@ -1,5 +1,7 @@
 package no.nav.helse.flex.kafka
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.kafka.producer.AUDIT_LOG_TOPIC
 import no.nav.helse.flex.kafka.producer.AuditEntry
@@ -7,8 +9,6 @@ import no.nav.helse.flex.kafka.producer.AuditLogProducer
 import no.nav.helse.flex.kafka.producer.EventType
 import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.ventPåRecords
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
@@ -63,14 +63,14 @@ class AuditLogProducerTest : FellesTestOppsett() {
         UUID.fromString(record.key()).shouldNotBeNull()
 
         val payload: AuditEntry = objectMapper.readValue(record.value())
-        payload.appNavn shouldBeEqualTo "spinnsyn-backend"
-        payload.utførtAv shouldBeEqualTo "Z999999"
-        payload.oppslagPå shouldBeEqualTo "12345678901"
-        payload.eventType shouldBeEqualTo EventType.READ
-        payload.forespørselTillatt shouldBeEqualTo true
-        payload.beskrivelse shouldBeEqualTo "Test auditmelding"
-        payload.requestUrl shouldBeEqualTo URI.create("/api/v1/flex/vedtak/soknad")
-        payload.requestMethod shouldBeEqualTo "POST"
+        payload.appNavn shouldBe "spinnsyn-backend"
+        payload.utførtAv shouldBe "Z999999"
+        payload.oppslagPå shouldBe "12345678901"
+        payload.eventType shouldBe EventType.READ
+        payload.forespørselTillatt shouldBe true
+        payload.beskrivelse shouldBe "Test auditmelding"
+        payload.requestUrl shouldBe URI.create("/api/v1/flex/vedtak/soknad")
+        payload.requestMethod shouldBe "POST"
         payload.oppslagUtførtTid.shouldNotBeNull()
     }
 }

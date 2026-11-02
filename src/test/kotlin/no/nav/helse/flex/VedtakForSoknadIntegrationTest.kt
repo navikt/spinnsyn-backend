@@ -1,5 +1,7 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.api.HentVedtakForSoknadResponse
 import no.nav.helse.flex.domene.Dokument
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
@@ -9,8 +11,6 @@ import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.service.BrukerVedtak
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -67,8 +67,8 @@ class VedtakForSoknadIntegrationTest : FellesTestOppsett() {
                 .map { it.id }
                 .toSet()
 
-        vedtakFraApi.map { it.id }.toSet() shouldBeEqualTo forventedeIder
-        vedtakFraApi.map { it.vedtak.utbetaling.utbetalingId }.toSet() shouldBeEqualTo setOf("u1", "u2")
+        vedtakFraApi.map { it.id }.toSet() shouldBe forventedeIder
+        vedtakFraApi.map { it.vedtak.utbetaling.utbetalingId }.toSet() shouldBe setOf("u1", "u2")
 
         val forventetRekkefolge =
             vedtakService
@@ -77,7 +77,7 @@ class VedtakForSoknadIntegrationTest : FellesTestOppsett() {
                     wrapper.vedtak.dokumenter.any { it.type == Dokument.Type.Søknad && it.dokumentId == soknadId }
                 }.map { it.id }
 
-        vedtakFraApi.map { it.id } shouldBeEqualTo forventetRekkefolge
+        vedtakFraApi.map { it.id } shouldBe forventetRekkefolge
     }
 
     @Test

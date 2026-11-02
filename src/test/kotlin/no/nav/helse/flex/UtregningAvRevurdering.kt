@@ -1,14 +1,13 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -54,8 +53,8 @@ class UtregningAvRevurdering : FellesTestOppsett() {
         dbUtbetaling.utbetaling
             .tilUtbetalingUtbetalt()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("REVURDERING")
+            .shouldBe(fnr)
+        dbUtbetaling.utbetalingType.shouldBe("REVURDERING")
     }
 
     @Test
@@ -90,7 +89,7 @@ class UtregningAvRevurdering : FellesTestOppsett() {
         hentetVedtak.vedtak
             .tilVedtakFattetForEksternDto()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
+            .shouldBe(fnr)
     }
 
     @Test
@@ -98,10 +97,10 @@ class UtregningAvRevurdering : FellesTestOppsett() {
     fun `Kan hente revurderingen`() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
-        vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "REVURDERING"
-        vedtak[0].revurdert.`should be false`()
-        vedtak[0].vedtak.fom.shouldBeEqualTo(LocalDate.of(2021, 7, 1))
-        vedtak[0].vedtak.tom.shouldBeEqualTo(LocalDate.of(2021, 8, 15))
+        vedtak[0].vedtak.utbetaling.utbetalingType shouldBe "REVURDERING"
+        vedtak[0].revurdert.shouldBeFalse()
+        vedtak[0].vedtak.fom.shouldBe(LocalDate.of(2021, 7, 1))
+        vedtak[0].vedtak.tom.shouldBe(LocalDate.of(2021, 8, 15))
         vedtak[0].andreArbeidsgivere.shouldBeNull()
     }
 }

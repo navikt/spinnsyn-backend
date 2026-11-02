@@ -1,9 +1,9 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.UtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -54,12 +54,12 @@ class DeserialiseringAvGamleUtbetalingerTest {
         val utbetaling = gammelUtbetalingJson.tilUtbetalingUtbetalt()
 
         utbetaling.shouldNotBeNull()
-        utbetaling.utbetalingId.shouldBeEqualTo("test-123")
-        utbetaling.utbetalingsdager.size.shouldBeEqualTo(3)
+        utbetaling.utbetalingId.shouldBe("test-123")
+        utbetaling.utbetalingsdager.size.shouldBe(3)
 
-        utbetaling.utbetalingsdager[0].beløpTilArbeidsgiver.shouldBeEqualTo(null)
-        utbetaling.utbetalingsdager[0].beløpTilSykmeldt.shouldBeEqualTo(null)
-        utbetaling.utbetalingsdager[0].sykdomsgrad.shouldBeEqualTo(null)
+        utbetaling.utbetalingsdager[0].beløpTilArbeidsgiver.shouldBe(null)
+        utbetaling.utbetalingsdager[0].beløpTilSykmeldt.shouldBe(null)
+        utbetaling.utbetalingsdager[0].sykdomsgrad.shouldBe(null)
     }
 
     @Test
@@ -104,15 +104,15 @@ class DeserialiseringAvGamleUtbetalingerTest {
         val utbetaling = nyUtbetalingJson.tilUtbetalingUtbetalt()
 
         utbetaling.shouldNotBeNull()
-        utbetaling.utbetalingId.shouldBeEqualTo("test-456")
+        utbetaling.utbetalingId.shouldBe("test-456")
 
-        utbetaling.utbetalingsdager[0].beløpTilArbeidsgiver.shouldBeEqualTo(1000)
-        utbetaling.utbetalingsdager[0].beløpTilSykmeldt.shouldBeEqualTo(500)
-        utbetaling.utbetalingsdager[0].sykdomsgrad.shouldBeEqualTo(100)
+        utbetaling.utbetalingsdager[0].beløpTilArbeidsgiver.shouldBe(1000)
+        utbetaling.utbetalingsdager[0].beløpTilSykmeldt.shouldBe(500)
+        utbetaling.utbetalingsdager[0].sykdomsgrad.shouldBe(100)
 
-        utbetaling.utbetalingsdager[1].beløpTilArbeidsgiver.shouldBeEqualTo(800)
-        utbetaling.utbetalingsdager[1].beløpTilSykmeldt.shouldBeEqualTo(200)
-        utbetaling.utbetalingsdager[1].sykdomsgrad.shouldBeEqualTo(75)
+        utbetaling.utbetalingsdager[1].beløpTilArbeidsgiver.shouldBe(800)
+        utbetaling.utbetalingsdager[1].beløpTilSykmeldt.shouldBe(200)
+        utbetaling.utbetalingsdager[1].sykdomsgrad.shouldBe(75)
     }
 
     @ParameterizedTest
@@ -147,6 +147,6 @@ class DeserialiseringAvGamleUtbetalingerTest {
         val utbetaling = json.tilUtbetalingUtbetalt()
 
         utbetaling.shouldNotBeNull()
-        utbetaling.utbetalingsdager[0].begrunnelser shouldBeEqualTo listOf(begrunnelse)
+        utbetaling.utbetalingsdager[0].begrunnelser shouldBe listOf(begrunnelse)
     }
 }

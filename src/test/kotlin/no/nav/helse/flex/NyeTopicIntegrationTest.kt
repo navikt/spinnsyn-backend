@@ -1,5 +1,11 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.AnnulleringDto
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
@@ -9,14 +15,6 @@ import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.organisasjon.Organisasjon
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
-import org.amshove.kluent.`should be`
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.`should be true`
-import org.amshove.kluent.`should not be null`
-import org.amshove.kluent.shouldBeEmpty
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -106,8 +104,8 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         hentetVedtak.vedtak
             .tilVedtakFattetForEksternDto()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak.utbetalingId)
+            .shouldBe(fnr)
+        hentetVedtak.utbetalingId.shouldBe(vedtak.utbetalingId)
     }
 
     @Test
@@ -137,9 +135,9 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         dbUtbetaling.utbetaling
             .tilUtbetalingUtbetalt()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
+            .shouldBe(fnr)
+        dbUtbetaling.utbetalingId.shouldBe(utbetaling.utbetalingId)
+        dbUtbetaling.utbetalingType.shouldBe("UTBETALING")
     }
 
     @Test
@@ -147,13 +145,13 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     fun `finner brukervedtaket i v2 og v3`() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         val vedtakTokenX = hentVedtakMedTokenXToken(fnr)
-        vedtak `should be equal to` vedtakTokenX
+        vedtak shouldBe vedtakTokenX
         vedtak.shouldHaveSize(1)
-        vedtak[0].annullert.`should be false`()
-        vedtak[0].lest.`should be false`()
-        vedtak[0].orgnavn `should be equal to` org
-        vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger `should be equal to` LocalDate.of(2020, 3, 12)
-        vedtak[0].vedtak.utbetaling.utbetalingId `should be equal to` utbetalingId
+        vedtak[0].annullert.shouldBeFalse()
+        vedtak[0].lest.shouldBeFalse()
+        vedtak[0].orgnavn shouldBe org
+        vedtak[0].vedtak.utbetaling.foreløpigBeregnetSluttPåSykepenger shouldBe LocalDate.of(2020, 3, 12)
+        vedtak[0].vedtak.utbetaling.utbetalingId shouldBe utbetalingId
 
         // Bruker org-navn med æåø for å teste at det fortsatt fungerer etter fjerning av config/CharsetConfig.
         organisasjonRepository.save(
@@ -167,7 +165,7 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         )
 
         val vedtakMedNavn = hentVedtakMedTokenXToken(fnr)
-        vedtakMedNavn[0].orgnavn `should be equal to` "Bærums Verk Ålesund Sjøfart AS"
+        vedtakMedNavn[0].orgnavn shouldBe "Bærums Verk Ålesund Sjøfart AS"
     }
 
     @Test
@@ -179,7 +177,7 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         val vedtak = hentVedtakSomVeilederOboV4(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
-        vedtak.first().lest `should be` false
+        vedtak.first().lest shouldBe false
         istilgangskontrollMockRestServiceServer?.verify()
         istilgangskontrollMockRestServiceServer?.reset()
     }
@@ -193,7 +191,7 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         val vedtak = hentVedtakSomVeilederOboV4(fnr, veilederToken)
 
         vedtak shouldHaveSize 1
-        vedtak.first().lest `should be` false
+        vedtak.first().lest shouldBe false
         istilgangskontrollMockRestServiceServer?.verify()
         istilgangskontrollMockRestServiceServer?.reset()
     }
@@ -206,7 +204,7 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         val vedtak = hentVedtakSomSpinnsynFrontendArkivering(fnr, token)
 
         vedtak shouldHaveSize 1
-        vedtak.first().lest `should be` false
+        vedtak.first().lest shouldBe false
     }
 
     @Test
@@ -234,19 +232,19 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
 
         vedtak.shouldHaveSize(1)
-        vedtak[0].lest.`should be false`()
+        vedtak[0].lest.shouldBeFalse()
 
         val vedtaksId = vedtak[0].id
 
-        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Leste vedtak $vedtaksId"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) shouldBe "Leste vedtak $vedtaksId"
 
-        lesVedtakMedTokenXToken(fnr, vedtaksId) `should be equal to` "Vedtak $vedtaksId er allerede lest"
+        lesVedtakMedTokenXToken(fnr, vedtaksId) shouldBe "Vedtak $vedtaksId er allerede lest"
 
         utbetalingRepository
             .findUtbetalingDbRecordsByFnr(fnr)
             .first()
             .lest
-            .`should not be null`()
+            .shouldNotBeNull()
     }
 
     @Test
@@ -273,7 +271,7 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
     fun `finner det nå annulerte vedtaket`() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
-        vedtak[0].annullert.`should be true`()
+        vedtak[0].annullert.shouldBeTrue()
     }
 
     @Test

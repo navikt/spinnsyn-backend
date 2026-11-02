@@ -1,7 +1,7 @@
 package no.nav.helse.flex.client.texas
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.fake.TexasClientFake
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
@@ -14,7 +14,7 @@ class TokenValideringServiceTest {
     fun `returnerer ansatt for aktivt entra-token`() {
         val navIdent = service.validerTilgangOgHentNavIdent("gyldig-flex-token", "entra_id")
 
-        navIdent shouldBeEqualTo "Z999999"
+        navIdent shouldBe "Z999999"
     }
 
     @Test

@@ -1,10 +1,10 @@
 package no.nav.helse.flex.pdl
 
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.client.pdl.PdlClient
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeTrue
-import org.amshove.kluent.shouldStartWith
 import org.junit.jupiter.api.Test
 import org.springframework.aop.support.AopUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,11 +23,11 @@ class PdlClientTest : FellesTestOppsett() {
     fun `Vi tester happycase`() {
         val responseData = pdlClient.hentIdenterMedHistorikk("31111111111")
 
-        responseData.map { it.ident } `should be equal to` listOf("31111111111", "11111111111", "21111111111", "3111111111100")
+        responseData.map { it.ident } shouldBe listOf("31111111111", "11111111111", "21111111111", "3111111111100")
 
         val takeRequest = pdlMockWebserver.takeRequest()
-        takeRequest.headers["TEMA"] `should be equal to` "SYK"
-        takeRequest.method `should be equal to` "POST"
+        takeRequest.headers["TEMA"] shouldBe "SYK"
+        takeRequest.method shouldBe "POST"
         takeRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
     }
 }

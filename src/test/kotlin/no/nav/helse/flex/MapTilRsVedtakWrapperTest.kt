@@ -1,5 +1,7 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.db.Annullering
 import no.nav.helse.flex.db.UtbetalingDbRecord
 import no.nav.helse.flex.db.VedtakDbRecord
@@ -10,8 +12,6 @@ import no.nav.helse.flex.service.BrukerVedtak.Companion.mapTilRsVedtakWrapper
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagForsikringsvurdering
 import no.nav.helse.flex.testdata.lagUtbetaling
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -32,12 +32,12 @@ class MapTilRsVedtakWrapperTest {
                 annulleringer = annulleringer,
             )
 
-        resultat.vedtak.yrkesaktivitetstype shouldBeEqualTo "SELVSTENDIG"
-        resultat.vedtak.organisasjonsnummer shouldBeEqualTo vedtakFattet.organisasjonsnummer
-        resultat.vedtak.fom shouldBeEqualTo vedtakFattet.fom
-        resultat.vedtak.tom shouldBeEqualTo vedtakFattet.tom
-        resultat.vedtak.sykepengegrunnlag shouldBeEqualTo vedtakFattet.sykepengegrunnlag
-        resultat.vedtak.inntekt shouldBeEqualTo vedtakFattet.inntekt
+        resultat.vedtak.yrkesaktivitetstype shouldBe "SELVSTENDIG"
+        resultat.vedtak.organisasjonsnummer shouldBe vedtakFattet.organisasjonsnummer
+        resultat.vedtak.fom shouldBe vedtakFattet.fom
+        resultat.vedtak.tom shouldBe vedtakFattet.tom
+        resultat.vedtak.sykepengegrunnlag shouldBe vedtakFattet.sykepengegrunnlag
+        resultat.vedtak.inntekt shouldBe vedtakFattet.inntekt
     }
 
     @Test
@@ -54,7 +54,7 @@ class MapTilRsVedtakWrapperTest {
                 annulleringer = annulleringer,
             )
 
-        resultat.vedtak.yrkesaktivitetstype shouldBeEqualTo "ARBEIDSTAKER"
+        resultat.vedtak.yrkesaktivitetstype shouldBe "ARBEIDSTAKER"
     }
 
     @Test
@@ -91,38 +91,38 @@ class MapTilRsVedtakWrapperTest {
             )
 
         resultat.shouldNotBeNull()
-        resultat.id shouldBeEqualTo "test-id-123"
-        resultat.lest shouldBeEqualTo false
-        resultat.orgnavn shouldBeEqualTo vedtakFattet.organisasjonsnummer
-        resultat.andreArbeidsgivere shouldBeEqualTo grunnlagPerArbeidsgiver
-        resultat.opprettetTimestamp shouldBeEqualTo utbetalingDbRecord.opprettet
+        resultat.id shouldBe "test-id-123"
+        resultat.lest shouldBe false
+        resultat.orgnavn shouldBe vedtakFattet.organisasjonsnummer
+        resultat.andreArbeidsgivere shouldBe grunnlagPerArbeidsgiver
+        resultat.opprettetTimestamp shouldBe utbetalingDbRecord.opprettet
 
         with(resultat.vedtak) {
-            organisasjonsnummer shouldBeEqualTo "123456789"
-            yrkesaktivitetstype shouldBeEqualTo "ARBEIDSTAKER"
-            fom shouldBeEqualTo LocalDate.of(2024, 1, 1)
-            tom shouldBeEqualTo LocalDate.of(2024, 1, 31)
-            sykepengegrunnlag shouldBeEqualTo 600000.0
-            inntekt shouldBeEqualTo 50000.0
-            grunnlagForSykepengegrunnlag shouldBeEqualTo 600000.0
-            grunnlagForSykepengegrunnlagPerArbeidsgiver shouldBeEqualTo grunnlagPerArbeidsgiver
-            begrensning shouldBeEqualTo "ER_6G_BEGRENSET"
-            vedtakFattetTidspunkt shouldBeEqualTo LocalDate.of(2024, 2, 1)
+            organisasjonsnummer shouldBe "123456789"
+            yrkesaktivitetstype shouldBe "ARBEIDSTAKER"
+            fom shouldBe LocalDate.of(2024, 1, 1)
+            tom shouldBe LocalDate.of(2024, 1, 31)
+            sykepengegrunnlag shouldBe 600000.0
+            inntekt shouldBe 50000.0
+            grunnlagForSykepengegrunnlag shouldBe 600000.0
+            grunnlagForSykepengegrunnlagPerArbeidsgiver shouldBe grunnlagPerArbeidsgiver
+            begrensning shouldBe "ER_6G_BEGRENSET"
+            vedtakFattetTidspunkt shouldBe LocalDate.of(2024, 2, 1)
             saksbehandler.shouldNotBeNull().let {
-                it.navn shouldBeEqualTo "Saksbehandler"
-                it.ident shouldBeEqualTo "ident-saksbehandler"
+                it.navn shouldBe "Saksbehandler"
+                it.ident shouldBe "ident-saksbehandler"
             }
             beslutter.shouldNotBeNull().let {
-                it.navn shouldBeEqualTo "Beslutter"
-                it.ident shouldBeEqualTo "ident-beslutter"
+                it.navn shouldBe "Beslutter"
+                it.ident shouldBe "ident-beslutter"
             }
             forsikringsvurdering.shouldNotBeNull().let {
-                it.forsikringsvurderingId shouldBeEqualTo "forsikringsvurdering-123"
-                it.individuellForsikringNavn shouldBeEqualTo "Individuell Forsikring AS"
-                it.kollektivForsikringNavn shouldBeEqualTo "Kollektiv Forsikring AS"
+                it.forsikringsvurderingId shouldBe "forsikringsvurdering-123"
+                it.individuellForsikringNavn shouldBe "Individuell Forsikring AS"
+                it.kollektivForsikringNavn shouldBe "Kollektiv Forsikring AS"
                 it.dekning.shouldNotBeNull().let { dekning ->
-                    dekning.grad shouldBeEqualTo 80
-                    dekning.fraDag shouldBeEqualTo 1
+                    dekning.grad shouldBe 80
+                    dekning.fraDag shouldBe 1
                 }
             }
         }
@@ -143,8 +143,8 @@ class MapTilRsVedtakWrapperTest {
                 annulleringer = annulleringer,
             )
 
-        resultat.lest shouldBeEqualTo true
-        resultat.lestDato shouldBeEqualTo lestTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toOffsetDateTime()
+        resultat.lest shouldBe true
+        resultat.lestDato shouldBe lestTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toOffsetDateTime()
     }
 
     @Test
@@ -199,12 +199,12 @@ class MapTilRsVedtakWrapperTest {
         resultat.shouldNotBeNull()
         val utbetalingsdager = resultat.vedtak.utbetaling.utbetalingsdager
         utbetalingsdager.shouldNotBeNull()
-        utbetalingsdager.size shouldBeEqualTo 2
+        utbetalingsdager.size shouldBe 2
 
         // Gamle utbetalinger skal ha null for de nye feltene
-        utbetalingsdager[0].beløpTilArbeidsgiver shouldBeEqualTo null
-        utbetalingsdager[0].beløpTilSykmeldt shouldBeEqualTo null
-        utbetalingsdager[0].sykdomsgrad shouldBeEqualTo null
+        utbetalingsdager[0].beløpTilArbeidsgiver shouldBe null
+        utbetalingsdager[0].beløpTilSykmeldt shouldBe null
+        utbetalingsdager[0].sykdomsgrad shouldBe null
     }
 
     @Test
@@ -265,15 +265,15 @@ class MapTilRsVedtakWrapperTest {
         resultat.shouldNotBeNull()
         val utbetalingsdager = resultat.vedtak.utbetaling.utbetalingsdager
         utbetalingsdager.shouldNotBeNull()
-        utbetalingsdager.size shouldBeEqualTo 2
+        utbetalingsdager.size shouldBe 2
 
-        utbetalingsdager[0].beløpTilArbeidsgiver shouldBeEqualTo 1000
-        utbetalingsdager[0].beløpTilSykmeldt shouldBeEqualTo 500
-        utbetalingsdager[0].sykdomsgrad shouldBeEqualTo 100
+        utbetalingsdager[0].beløpTilArbeidsgiver shouldBe 1000
+        utbetalingsdager[0].beløpTilSykmeldt shouldBe 500
+        utbetalingsdager[0].sykdomsgrad shouldBe 100
 
-        utbetalingsdager[1].beløpTilArbeidsgiver shouldBeEqualTo 800
-        utbetalingsdager[1].beløpTilSykmeldt shouldBeEqualTo 200
-        utbetalingsdager[1].sykdomsgrad shouldBeEqualTo 75
+        utbetalingsdager[1].beløpTilArbeidsgiver shouldBe 800
+        utbetalingsdager[1].beløpTilSykmeldt shouldBe 200
+        utbetalingsdager[1].sykdomsgrad shouldBe 75
     }
 
     private fun lagVedtakFattetForEksternDto(

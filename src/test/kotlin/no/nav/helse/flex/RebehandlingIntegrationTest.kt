@@ -1,5 +1,10 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.VedtakFattetForEksternDto
 import no.nav.helse.flex.domene.tilUtbetalingUtbetalt
 import no.nav.helse.flex.domene.tilVedtakFattetForEksternDto
@@ -7,7 +12,6 @@ import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
-import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -88,8 +92,8 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
         hentetVedtak.vedtak
             .tilVedtakFattetForEksternDto()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak.utbetalingId)
+            .shouldBe(fnr)
+        hentetVedtak.utbetalingId.shouldBe(vedtak.utbetalingId)
     }
 
     @Test
@@ -119,9 +123,9 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
         dbUtbetaling.utbetaling
             .tilUtbetalingUtbetalt()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
+            .shouldBe(fnr)
+        dbUtbetaling.utbetalingId.shouldBe(utbetaling.utbetalingId)
+        dbUtbetaling.utbetalingType.shouldBe("UTBETALING")
     }
 
     @Test
@@ -131,7 +135,7 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
         vedtak.shouldHaveSize(1)
         vedtak
             .first()
-            .vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
+            .vedtak.utbetaling.utbetalingType shouldBe "UTBETALING"
     }
 
     @Test
@@ -170,7 +174,7 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
         }
 
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).sortedBy { it.opprettet }.last()
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("REVURDERING")
+        dbUtbetaling.utbetalingType.shouldBe("REVURDERING")
     }
 
     @Test
@@ -178,10 +182,10 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
     fun `finner vedtakene, en er revurdering, det andre er revurdert `() {
         val vedtak = hentVedtakMedTokenXToken(fnr).sortedBy { it.opprettetTimestamp }
         vedtak.shouldHaveSize(2)
-        vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
-        vedtak[0].revurdert.`should be true`()
-        vedtak[1].vedtak.utbetaling.utbetalingType `should be equal to` "REVURDERING"
-        vedtak[1].revurdert.`should be false`()
+        vedtak[0].vedtak.utbetaling.utbetalingType shouldBe "UTBETALING"
+        vedtak[0].revurdert.shouldBeTrue()
+        vedtak[1].vedtak.utbetaling.utbetalingType shouldBe "REVURDERING"
+        vedtak[1].revurdert.shouldBeFalse()
     }
 
     @Test
@@ -220,7 +224,7 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
         }
 
         val dbUtbetaling = utbetalingRepository.findUtbetalingDbRecordsByFnr(fnr).sortedBy { it.opprettet }.last()
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("REVURDERING")
+        dbUtbetaling.utbetalingType.shouldBe("REVURDERING")
     }
 
     @Test
@@ -228,11 +232,11 @@ class RebehandlingIntegrationTest : FellesTestOppsett() {
     fun `finner vedtakene, to er revurdering, den ene revurderinga er selv blirrrevurdert `() {
         val vedtak = hentVedtakMedTokenXToken(fnr).sortedBy { it.opprettetTimestamp }
         vedtak.shouldHaveSize(3)
-        vedtak[0].vedtak.utbetaling.utbetalingType `should be equal to` "UTBETALING"
-        vedtak[0].revurdert.`should be true`()
-        vedtak[1].vedtak.utbetaling.utbetalingType `should be equal to` "REVURDERING"
-        vedtak[1].revurdert.`should be true`()
-        vedtak[2].vedtak.utbetaling.utbetalingType `should be equal to` "REVURDERING"
-        vedtak[2].revurdert.`should be false`()
+        vedtak[0].vedtak.utbetaling.utbetalingType shouldBe "UTBETALING"
+        vedtak[0].revurdert.shouldBeTrue()
+        vedtak[1].vedtak.utbetaling.utbetalingType shouldBe "REVURDERING"
+        vedtak[1].revurdert.shouldBeTrue()
+        vedtak[2].vedtak.utbetaling.utbetalingType shouldBe "REVURDERING"
+        vedtak[2].revurdert.shouldBeFalse()
     }
 }

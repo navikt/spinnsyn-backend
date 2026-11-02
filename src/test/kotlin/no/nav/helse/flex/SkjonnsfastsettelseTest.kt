@@ -1,15 +1,15 @@
 package no.nav.helse.flex
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.*
 import no.nav.helse.flex.kafka.UTBETALING_TOPIC
 import no.nav.helse.flex.kafka.VEDTAK_TOPIC
 import no.nav.helse.flex.testdata.lagArbeidsgiverOppdrag
 import no.nav.helse.flex.testdata.lagUtbetaling
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.shouldBeEmpty
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -114,8 +114,8 @@ class SkjonnsfastsettelseTest : FellesTestOppsett() {
         hentetVedtak.vedtak
             .tilVedtakFattetForEksternDto()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        hentetVedtak.utbetalingId.shouldBeEqualTo(vedtak.utbetalingId)
+            .shouldBe(fnr)
+        hentetVedtak.utbetalingId.shouldBe(vedtak.utbetalingId)
     }
 
     @Test
@@ -139,9 +139,9 @@ class SkjonnsfastsettelseTest : FellesTestOppsett() {
         dbUtbetaling.utbetaling
             .tilUtbetalingUtbetalt()
             .fødselsnummer
-            .shouldBeEqualTo(fnr)
-        dbUtbetaling.utbetalingId.shouldBeEqualTo(utbetaling.utbetalingId)
-        dbUtbetaling.utbetalingType.shouldBeEqualTo("UTBETALING")
+            .shouldBe(fnr)
+        dbUtbetaling.utbetalingId.shouldBe(utbetaling.utbetalingId)
+        dbUtbetaling.utbetalingType.shouldBe("UTBETALING")
     }
 
     @Test
@@ -149,23 +149,23 @@ class SkjonnsfastsettelseTest : FellesTestOppsett() {
     fun `finner vedtaket i apiet`() {
         val vedtak = hentVedtakMedTokenXToken(fnr)
         vedtak.shouldHaveSize(1)
-        vedtak[0].lest.`should be false`()
+        vedtak[0].lest.shouldBeFalse()
         vedtak[0]
             .vedtak.begrunnelser!!
             .first()
-            .begrunnelse shouldBeEqualTo "Begrunnelse fra saksbehandler"
+            .begrunnelse shouldBe "Begrunnelse fra saksbehandler"
         vedtak[0]
             .vedtak.begrunnelser!!
             .first()
-            .type shouldBeEqualTo "SkjønnsfastsattSykepengegrunnlagFritekst"
+            .type shouldBe "SkjønnsfastsattSykepengegrunnlagFritekst"
 
         val etterSkjønn = vedtak[0].vedtak.sykepengegrunnlagsfakta!!.tilEtterSkjønn()
-        etterSkjønn.avviksprosent shouldBeEqualTo 27.0
-        etterSkjønn.skjønnsfastsatt shouldBeEqualTo 12343.00
+        etterSkjønn.avviksprosent shouldBe 27.0
+        etterSkjønn.skjønnsfastsatt shouldBe 12343.00
         etterSkjønn.arbeidsgivere.shouldBeEmpty()
-        etterSkjønn.innrapportertÅrsinntekt shouldBeEqualTo 900.0
-        etterSkjønn.omregnetÅrsinntekt shouldBeEqualTo 123123.02
-        etterSkjønn.`6G` shouldBeEqualTo 668862.0
+        etterSkjønn.innrapportertÅrsinntekt shouldBe 900.0
+        etterSkjønn.omregnetÅrsinntekt shouldBe 123123.02
+        etterSkjønn.`6G` shouldBe 668862.0
         etterSkjønn.tags.shouldBeEmpty()
     }
 }
