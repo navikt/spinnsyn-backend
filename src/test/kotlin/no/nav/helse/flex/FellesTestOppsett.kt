@@ -193,8 +193,7 @@ abstract class FellesTestOppsett {
     companion object {
         init {
 
-            KafkaContainer(DockerImageName.parse("apache/kafka-native:4.3.1")).also {
-                it.withEnv("JAVA_TOOL_OPTIONS", "-Duser.home=/home/appuser -Duser.name=appuser")
+            KafkaContainer(DockerImageName.parse("apache/kafka-native:4.4.0")).also {
                 it.start()
                 System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
             }
