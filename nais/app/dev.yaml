@@ -1,10 +1,10 @@
 db_tier: db-f1-micro
 db_highAvailability: false
 db_pointInTimeRecovery: false
-db_type: POSTGRES_14
+db_type: POSTGRES_18
 kafkaPool: nav-dev
-replicas_min: 2
-replicas_max: 2
+replicas_min: 1
+replicas_max: 1
 cpu: 50m
 memory: 800Mi
 external-host:
