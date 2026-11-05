@@ -3,8 +3,8 @@ db_highAvailability: false
 db_pointInTimeRecovery: false
 db_type: POSTGRES_14
 kafkaPool: nav-dev
-replicas_min: 2
-replicas_max: 2
+replicas_min: 0
+replicas_max: 0
 cpu: 50m
 memory: 800Mi
 external-host:
