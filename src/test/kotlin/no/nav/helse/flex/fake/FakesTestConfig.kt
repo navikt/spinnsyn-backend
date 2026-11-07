@@ -14,4 +14,7 @@ class FakesTestConfig {
     fun texasClient(
         @Value("\${FLEX_GROUP_ID}") flexGruppe: String,
     ): TexasClient = TexasClientFake(flexGruppe)
+
+    @Bean
+    fun populasjonstilgangskontroll(): PopulasjonstilgangskontrollFake = PopulasjonstilgangskontrollFake()
 }
