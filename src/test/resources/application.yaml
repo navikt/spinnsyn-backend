@@ -17,9 +17,10 @@ aiven-kafka:
   auto-offset-reset: earliest
   security-protocol: PLAINTEXT
 
-AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:flex:spinnsyn-frontend-arkivering\",\"clientId\":\"spinnsyn-frontend-arkivering-client-id\"},{\"name\":\"dev-gcp:flex:spinnsyn-frontend-interne\",\"clientId\":\"spinnsyn-frontend-interne-client-id\"}]"
+AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:flex:spinnsyn-frontend-arkivering\",\"clientId\":\"spinnsyn-frontend-arkivering-client-id\"},{\"name\":\"dev-gcp:flex:spinnsyn-frontend-interne\",\"clientId\":\"spinnsyn-frontend-interne-client-id\"},{\"name\":\"dev-gcp:flex:spinnsyn-frontend-saksbehandler\",\"clientId\":\"spinnsyn-frontend-saksbehandler-client-id\"}]"
 NAIS_CLUSTER_NAME: test
 FLEX_GROUP_ID: flex-gruppe
+SPEIL_BRUKERE_GROUP_ID: speil-brukere-gruppe
 
 no.nav.security.jwt:
   issuer:

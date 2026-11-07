@@ -72,6 +72,8 @@ spec:
       rules:
         - application: istilgangskontroll
           namespace: teamsykefravr
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
         - application: logging
           namespace: nais-system
       external:
@@ -82,6 +84,7 @@ spec:
       rules:
         - application: spinnsyn-frontend-arkivering
         - application: spinnsyn-frontend-interne
+        - application: spinnsyn-frontend-saksbehandler
         - application: spinnsyn-frontend
         - application: flex-internal-frontend
           permissions:
@@ -93,8 +96,11 @@ spec:
       enabled: true
       allowAllUsers: true
       claims:
+        extra:
+          - "NAVident"
         groups:
           - id: "{{flex_group_id}}"
+          - id: "{{speil_brukere_group_id}}"
   env:
   {{#each env}}
      - name: {{@key}}

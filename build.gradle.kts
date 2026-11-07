@@ -27,6 +27,7 @@ val tokenSupportVersion = "6.0.12"
 val sykepengesoknadKafkaVersion = "2026.10.29-06.32-9ce6afeb"
 val kotestVersion = "6.2.6"
 val mockWebServerVersion = "5.5.1"
+val tbdLibsVersion = "20261029.1843"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -45,6 +46,7 @@ dependencies {
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
+    implementation("com.github.navikt.tbd-libs:populasjonstilgangskontroll-provider-tilgangsmaskinen:$tbdLibsVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
