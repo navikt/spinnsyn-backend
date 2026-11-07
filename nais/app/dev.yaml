@@ -10,6 +10,7 @@ memory: 800Mi
 external-host:
   - pdl-api.dev-fss-pub.nais.io
 flex_group_id: "34094735-b8f7-4bef-9136-47de2307541a" # 0000-GA-TEMA_SYK
+speil_brukere_group_id: "cda797bb-ac3b-4440-b661-2cd5eb3edba0" # speil-brukere
 env:
   PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
   PDL_API_AAD_CLIENT_ID: dev-fss.pdl.pdl-api
@@ -20,3 +21,4 @@ env:
   DITT_SYKEFRAVAER_CLIENT_ID: dev-gcp:flex:ditt-sykefravaer
   AIVEN_KAFKA_AUTO_OFFSET_RESET: latest
   FLEX_GROUP_ID: "34094735-b8f7-4bef-9136-47de2307541a" # 0000-GA-TEMA_SYK
+  SPEIL_BRUKERE_GROUP_ID: "cda797bb-ac3b-4440-b661-2cd5eb3edba0" # speil-brukere

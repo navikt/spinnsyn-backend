@@ -10,6 +10,7 @@ memory: 1500Mi
 external-host:
   - pdl-api.prod-fss-pub.nais.io
 flex_group_id: "5206a646-a99e-4cd5-90e4-758cf7948cc8"
+speil_brukere_group_id: "611669fa-de5c-4dc2-a0e8-6041a019992a" # speil-brukere
 db_flags:
   cloudsql.enable_pgaudit: "on"
   pgaudit.log: 'write,ddl,role'
@@ -23,3 +24,4 @@ env:
   SPINNSYN_FRONTEND_CLIENT_ID: prod-gcp:flex:spinnsyn-frontend
   DITT_SYKEFRAVAER_CLIENT_ID: prod-gcp:flex:ditt-sykefravaer
   FLEX_GROUP_ID: "5206a646-a99e-4cd5-90e4-758cf7948cc8"
+  SPEIL_BRUKERE_GROUP_ID: "611669fa-de5c-4dc2-a0e8-6041a019992a" # speil-brukere
