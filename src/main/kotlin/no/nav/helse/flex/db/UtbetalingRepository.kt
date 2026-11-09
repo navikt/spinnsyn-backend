@@ -23,6 +23,8 @@ interface UtbetalingRepository : CrudRepository<UtbetalingDbRecord, String> {
 
     fun existsByUtbetalingId(utbetalingId: String): Boolean
 
+    fun findByUtbetalingId(utbetalingId: String): UtbetalingDbRecord?
+
     @Query(
         """
         SELECT id, utbetaling_id, antall_vedtak, fnr
