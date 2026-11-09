@@ -150,7 +150,25 @@ class VedtakSaksbehandlerControllerTest : FellesTestOppsett() {
     }
 
     @Test
-    fun `saksbehandler uten speil-brukere-gruppen får 403 uten kall til Tilgangsmaskinen`() {
+    fun `saksbehandler med Speil lesetilgang får vedtaket etter sjekk i Tilgangsmaskinen`() {
+        mockMvc
+            .perform(hentVedtak(utbetalingId, skapSaksbehandlerJwt(grupper = listOf("speil-lesetilgang-gruppe"))))
+            .andExpect(status().isOk)
+
+        tilgangsmaskin.kjerneoppslag shouldContainExactly listOf(fnr)
+    }
+
+    @Test
+    fun `saksbehandler med Speil lesetilgang får 403 når Tilgangsmaskinen avslår`() {
+        tilgangsmaskin.resultat = { TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.FortroligAdresse) }
+
+        mockMvc
+            .perform(hentVedtak(utbetalingId, skapSaksbehandlerJwt(grupper = listOf("speil-lesetilgang-gruppe"))))
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `saksbehandler uten Speil-gruppe får 403 uten kall til Tilgangsmaskinen`() {
         mockMvc
             .perform(hentVedtak(utbetalingId, skapSaksbehandlerJwt(grupper = listOf("annen-gruppe"))))
             .andExpect(status().isForbidden)

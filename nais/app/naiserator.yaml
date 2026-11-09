@@ -101,6 +101,7 @@ spec:
         groups:
           - id: "{{flex_group_id}}"
           - id: "{{speil_brukere_group_id}}"
+          - id: "{{speil_lesetilgang_group_id}}"
   env:
   {{#each env}}
      - name: {{@key}}

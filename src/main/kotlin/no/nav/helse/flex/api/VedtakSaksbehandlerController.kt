@@ -42,9 +42,12 @@ class VedtakSaksbehandlerController(
     private val vedtakService: BrukerVedtak,
     private val tilgangskontroll: PopulasjonstilgangskontrollProvider,
     private val auditLogProducer: AuditLogProducer,
-    @param:Value("\${SPEIL_BRUKERE_GROUP_ID}") private val speilBrukereGruppe: String,
+    @Value("\${SPEIL_BRUKERE_GROUP_ID}") speilBrukereGruppe: String,
+    @Value("\${SPEIL_LESETILGANG_GROUP_ID}") speilLesetilgangGruppe: String,
 ) {
     private val log = logger()
+
+    private val speilGrupper = setOf(speilBrukereGruppe, speilLesetilgangGruppe)
 
     @GetMapping("/vedtak/{utbetalingId}", produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
@@ -71,8 +74,8 @@ class VedtakSaksbehandlerController(
     }
 
     private fun validerSaksbehandler(claims: JwtTokenClaims): String {
-        if (!claims.erMedlemAv(speilBrukereGruppe)) {
-            throw IngenTilgangException("Saksbehandler er ikke medlem av speil-brukere")
+        if (!claims.erMedlemAvEnAv(speilGrupper)) {
+            throw IngenTilgangException("Saksbehandler er ikke medlem av speil-brukere eller Speil lesetilgang")
         }
         return claims.getStringClaim("NAVident") ?: throw UautorisertException("Fant ikke NAVident i token")
     }
@@ -166,7 +169,8 @@ class VedtakSaksbehandlerController(
             ?: throw UautorisertException("Fant ikke azure-token")
 }
 
-private fun JwtTokenClaims.erMedlemAv(gruppe: String): Boolean = (get("groups") as? List<*>)?.contains(gruppe) == true
+private fun JwtTokenClaims.erMedlemAvEnAv(grupper: Set<String>): Boolean =
+    (get("groups") as? List<*>)?.any { it is String && it in grupper } == true
 
 data class HentVedtakForSaksbehandlerResponse(
     val vedtak: List<RSVedtakWrapper>,
