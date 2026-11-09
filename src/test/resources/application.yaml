@@ -21,6 +21,7 @@ AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:flex:spinnsyn-frontend-arki
 NAIS_CLUSTER_NAME: test
 FLEX_GROUP_ID: flex-gruppe
 SPEIL_BRUKERE_GROUP_ID: speil-brukere-gruppe
+SPEIL_LESETILGANG_GROUP_ID: speil-lesetilgang-gruppe
 
 no.nav.security.jwt:
   issuer:
