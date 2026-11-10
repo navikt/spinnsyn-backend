@@ -102,6 +102,9 @@ spec:
           - id: "{{flex_group_id}}"
           - id: "{{speil_brukere_group_id}}"
           - id: "{{speil_lesetilgang_group_id}}"
+          {{#if tbd_group_id}}
+          - id: "{{tbd_group_id}}"
+          {{/if}}
   env:
   {{#each env}}
      - name: {{@key}}

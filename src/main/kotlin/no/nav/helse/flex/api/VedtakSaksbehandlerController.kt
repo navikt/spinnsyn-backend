@@ -44,10 +44,14 @@ class VedtakSaksbehandlerController(
     private val auditLogProducer: AuditLogProducer,
     @Value("\${SPEIL_BRUKERE_GROUP_ID}") speilBrukereGruppe: String,
     @Value("\${SPEIL_LESETILGANG_GROUP_ID}") speilLesetilgangGruppe: String,
+    @Value("\${TBD_GROUP_ID:}") tbdGruppe: String,
 ) {
     private val log = logger()
 
-    private val speilGrupper = setOf(speilBrukereGruppe, speilLesetilgangGruppe)
+    private val speilGrupper =
+        setOf(speilBrukereGruppe, speilLesetilgangGruppe, tbdGruppe)
+            .filter { it.isNotBlank() }
+            .toSet()
 
     @GetMapping("/vedtak/{utbetalingId}", produces = [APPLICATION_JSON_VALUE])
     @ResponseBody
@@ -75,7 +79,7 @@ class VedtakSaksbehandlerController(
 
     private fun validerSaksbehandler(claims: JwtTokenClaims): String {
         if (!claims.erMedlemAvEnAv(speilGrupper)) {
-            throw IngenTilgangException("Saksbehandler er ikke medlem av speil-brukere eller Speil lesetilgang")
+            throw IngenTilgangException("Saksbehandler er ikke medlem av en Speil-gruppe")
         }
         return claims.getStringClaim("NAVident") ?: throw UautorisertException("Fant ikke NAVident i token")
     }
