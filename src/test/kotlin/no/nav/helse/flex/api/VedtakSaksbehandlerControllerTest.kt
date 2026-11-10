@@ -168,6 +168,24 @@ class VedtakSaksbehandlerControllerTest : FellesTestOppsett() {
     }
 
     @Test
+    fun `medlem av tbd får vedtaket etter sjekk i Tilgangsmaskinen`() {
+        mockMvc
+            .perform(hentVedtak(utbetalingId, skapSaksbehandlerJwt(grupper = listOf("tbd-gruppe"))))
+            .andExpect(status().isOk)
+
+        tilgangsmaskin.kjerneoppslag shouldContainExactly listOf(fnr)
+    }
+
+    @Test
+    fun `medlem av tbd  får 403 når Tilgangsmaskinen avslår`() {
+        tilgangsmaskin.resultat = { TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.FortroligAdresse) }
+
+        mockMvc
+            .perform(hentVedtak(utbetalingId, skapSaksbehandlerJwt(grupper = listOf("tbd-gruppe"))))
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
     fun `saksbehandler uten Speil-gruppe får 403 uten kall til Tilgangsmaskinen`() {
         mockMvc
             .perform(hentVedtak(utbetalingId, skapSaksbehandlerJwt(grupper = listOf("annen-gruppe"))))

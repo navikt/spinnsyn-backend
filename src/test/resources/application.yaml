@@ -22,6 +22,7 @@ NAIS_CLUSTER_NAME: test
 FLEX_GROUP_ID: flex-gruppe
 SPEIL_BRUKERE_GROUP_ID: speil-brukere-gruppe
 SPEIL_LESETILGANG_GROUP_ID: speil-lesetilgang-gruppe
+TBD_GROUP_ID: tbd-gruppe
 
 no.nav.security.jwt:
   issuer:
