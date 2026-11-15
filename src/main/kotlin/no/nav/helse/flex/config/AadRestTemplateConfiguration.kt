@@ -19,19 +19,6 @@ class AadRestTemplateConfiguration {
     val log = logger()
 
     @Bean
-    fun istilgangskontrollRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
-        clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate =
-        downstreamRestTemplate(
-            registrationName = "onbehalfof-istilgangskontroll",
-            restTemplateBuilder = restTemplateBuilder,
-            clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
-        )
-
-    @Bean
     fun pdlRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,

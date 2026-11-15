@@ -70,8 +70,6 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: istilgangskontroll
-          namespace: teamsykefravr
         - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
         - application: logging
@@ -83,7 +81,6 @@ spec:
     inbound:
       rules:
         - application: spinnsyn-frontend-arkivering
-        - application: spinnsyn-frontend-interne
         - application: spinnsyn-frontend-saksbehandler
         - application: spinnsyn-frontend
         - application: flex-internal-frontend

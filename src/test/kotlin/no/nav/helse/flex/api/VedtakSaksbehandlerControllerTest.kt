@@ -209,27 +209,13 @@ class VedtakSaksbehandlerControllerTest : FellesTestOppsett() {
     }
 
     @Test
-    fun `spinnsyn-frontend-interne kan ikke bruke saksbehandler-endepunktet`() {
-        val token = skapSaksbehandlerJwt(subject = "spinnsyn-frontend-interne-client-id")
+    fun `spinnsyn-frontend-arkivering kan ikke bruke saksbehandler-endepunktet`() {
+        val token = skapSaksbehandlerJwt(subject = "spinnsyn-frontend-arkivering-client-id")
 
         val body =
             mockMvc
                 .perform(hentVedtak(utbetalingId, token))
                 .andExpect(status().isForbidden)
-                .andReturn()
-                .response.contentAsString
-        body shouldContain "UKJENT_CLIENT"
-    }
-
-    @Test
-    fun `spinnsyn-frontend-saksbehandler kan ikke bruke veileder-endepunktet`() {
-        val body =
-            mockMvc
-                .perform(
-                    get("/api/v4/veileder/vedtak")
-                        .header("Authorization", "Bearer ${skapSaksbehandlerJwt()}")
-                        .header("sykmeldt-fnr", fnr),
-                ).andExpect(status().isForbidden)
                 .andReturn()
                 .response.contentAsString
         body shouldContain "UKJENT_CLIENT"

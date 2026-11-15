@@ -170,34 +170,6 @@ class NyeTopicIntegrationTest : FellesTestOppsett() {
 
     @Test
     @Order(5)
-    fun `veileder med OBO-tilgang kan lese brukervedtaket`() {
-        val veilederToken = skapAzureJwt()
-        mockIstilgangskontroll(true, fnr)
-
-        val vedtak = hentVedtakSomVeilederOboV4(fnr, veilederToken)
-
-        vedtak shouldHaveSize 1
-        vedtak.first().lest shouldBe false
-        istilgangskontrollMockRestServiceServer?.verify()
-        istilgangskontrollMockRestServiceServer?.reset()
-    }
-
-    @Test
-    @Order(5)
-    fun `veileder fra spinnsyn-frontend-interne med OBO-tilgang kan lese brukervedtaket`() {
-        val veilederToken = skapAzureJwt(subject = "spinnsyn-frontend-interne-client-id")
-        mockIstilgangskontroll(true, fnr)
-
-        val vedtak = hentVedtakSomVeilederOboV4(fnr, veilederToken)
-
-        vedtak shouldHaveSize 1
-        vedtak.first().lest shouldBe false
-        istilgangskontrollMockRestServiceServer?.verify()
-        istilgangskontrollMockRestServiceServer?.reset()
-    }
-
-    @Test
-    @Order(5)
     fun `spinnsyn-frontend-arkivering kan hente brukervedtaket`() {
         val token = skapAzureJwt(subject = "spinnsyn-frontend-arkivering-client-id")
 

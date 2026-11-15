@@ -17,7 +17,7 @@ aiven-kafka:
   auto-offset-reset: earliest
   security-protocol: PLAINTEXT
 
-AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:flex:spinnsyn-frontend-arkivering\",\"clientId\":\"spinnsyn-frontend-arkivering-client-id\"},{\"name\":\"dev-gcp:flex:spinnsyn-frontend-interne\",\"clientId\":\"spinnsyn-frontend-interne-client-id\"},{\"name\":\"dev-gcp:flex:spinnsyn-frontend-saksbehandler\",\"clientId\":\"spinnsyn-frontend-saksbehandler-client-id\"}]"
+AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:flex:spinnsyn-frontend-arkivering\",\"clientId\":\"spinnsyn-frontend-arkivering-client-id\"},{\"name\":\"dev-gcp:flex:spinnsyn-frontend-saksbehandler\",\"clientId\":\"spinnsyn-frontend-saksbehandler-client-id\"}]"
 NAIS_CLUSTER_NAME: test
 FLEX_GROUP_ID: flex-gruppe
 SPEIL_BRUKERE_GROUP_ID: speil-brukere-gruppe
@@ -42,14 +42,6 @@ no.nav.security.jwt:
           client-id: client-id
           client-secret: secretzz
           client-auth-method: client_secret_basic
-      onbehalfof-istilgangskontroll:
-        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: istilgangskontroll-client
-        authentication:
-          client-id: client-id
-          client-secret: secretzz
-          client-auth-method: client_secret_basic
 
 management:
   endpoint.prometheus.enabled: true
@@ -57,7 +49,6 @@ management:
     base-path: /internal
     exposure.include: prometheus
 
-istilgangskontroll.url: http://istilgangskontroll
 nais.cluster: test
 KAFKA_TRUSTSTORE_PATH: /
 KAFKA_CREDSTORE_PASSWORD: /

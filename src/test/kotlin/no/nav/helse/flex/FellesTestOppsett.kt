@@ -1,6 +1,5 @@
 package no.nav.helse.flex
 
-import jakarta.annotation.PostConstruct
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.db.AnnulleringDAO
 import no.nav.helse.flex.db.UtbetalingRepository
@@ -27,12 +26,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.web.client.RestTemplate
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
@@ -75,9 +72,6 @@ abstract class FellesTestOppsett {
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
     @Autowired
-    lateinit var istilgangskontrollRestTemplate: RestTemplate
-
-    @Autowired
     lateinit var sendVedtakStatus: SendVedtakStatus
 
     @Autowired
@@ -85,16 +79,6 @@ abstract class FellesTestOppsett {
 
     @Autowired
     lateinit var kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
-
-    var istilgangskontrollMockRestServiceServer: MockRestServiceServer? = null
-
-    @PostConstruct
-    fun setupRestServiceServers() {
-        if (istilgangskontrollMockRestServiceServer == null) {
-            istilgangskontrollMockRestServiceServer =
-                MockRestServiceServer.createServer(istilgangskontrollRestTemplate)
-        }
-    }
 
     fun hentVedtakMedTokenXToken(fnr: String): List<RSVedtakWrapper> {
         settUtbetalingKlarTilVisning()
@@ -126,26 +110,6 @@ abstract class FellesTestOppsett {
                 .response.status
 
         return responseCode.toString()
-    }
-
-    fun hentVedtakSomVeilederOboV4(
-        fnr: String,
-        token: String,
-    ): List<RSVedtakWrapper> {
-        settUtbetalingKlarTilVisning()
-
-        val json =
-            mockMvc
-                .perform(
-                    get("/api/v4/veileder/vedtak")
-                        .header("Authorization", "Bearer $token")
-                        .header("sykmeldt-fnr", fnr)
-                        .contentType(MediaType.APPLICATION_JSON),
-                ).andExpect(status().isOk)
-                .andReturn()
-                .response.contentAsString
-
-        return objectMapper.readValue(json)
     }
 
     fun hentVedtakSomSpinnsynFrontendArkivering(
