@@ -14,7 +14,7 @@ fun FellesTestOppsett.buildAzureClaimSet(
         claims = claims,
     )
 
-fun FellesTestOppsett.skapAzureJwt(subject: String = "spinnsyn-frontend-interne-client-id") = buildAzureClaimSet(subject = subject)
+fun FellesTestOppsett.skapAzureJwt(subject: String) = buildAzureClaimSet(subject = subject)
 
 fun FellesTestOppsett.skapSaksbehandlerJwt(
     subject: String = "spinnsyn-frontend-saksbehandler-client-id",

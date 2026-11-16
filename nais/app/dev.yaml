@@ -16,8 +16,6 @@ env:
   PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
   PDL_API_AAD_CLIENT_ID: dev-fss.pdl.pdl-api
   SPRING_PROFILES_ACTIVE: default, testdata
-  ISTILGANGSKONTROLL_URL: http://istilgangskontroll.teamsykefravr
-  ISTILGANGSKONTROLL_AAD_CLIENT_ID: dev-gcp.teamsykefravr.istilgangskontroll
   SPINNSYN_FRONTEND_CLIENT_ID: dev-gcp:flex:spinnsyn-frontend
   DITT_SYKEFRAVAER_CLIENT_ID: dev-gcp:flex:ditt-sykefravaer
   AIVEN_KAFKA_AUTO_OFFSET_RESET: latest
