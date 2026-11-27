@@ -23,7 +23,7 @@ repositories {
 
 val testContainersVersion = "2.0.5"
 val logstashLogbackEncoderVersion = "9.0"
-val tokenSupportVersion = "6.0.12"
+val tokenSupportVersion = "7.1.0"
 val sykepengesoknadKafkaVersion = "2026.10.29-06.32-9ce6afeb"
 val kotestVersion = "6.2.7"
 val mockWebServerVersion = "5.5.1"
